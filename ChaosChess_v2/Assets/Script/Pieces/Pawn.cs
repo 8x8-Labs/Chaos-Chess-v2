@@ -3,17 +3,35 @@ using UnityEngine;
 
 public class Pawn : Piece
 {
-    public override List<Vector3Int> GetLegalMoves(BoardManager board)
+    [SerializeField] private List<Vector2Int> AttackOffsets;
+    [SerializeField] private Vector2Int FirstMoveOffset;
+
+    public override void UpdateCanMovePos(BoardManager board)
     {
-        List<Vector3Int> moves = new List<Vector3Int>();
+        CanMovePos = new List<Vector3Int>();
 
-        int dir = Color == PieceColor.White ? 1 : -1;
+        Vector3Int target = new Vector3Int(Pos.x, Pos.y + 1, 0);
+        if (board.IsEmpty(target))
+            CanMovePos.Add(target);
 
-        Vector3Int forward = BoardPos + new Vector3Int(0, dir);
-        
-        if (board.IsEmpty(forward))
-            moves.Add(forward);
+        if (Pos.y == 1)
+        {
+            target = new Vector3Int(Pos.x + FirstMoveOffset.x, Pos.y + FirstMoveOffset.y, 0);
+            if (board.IsEmpty(target))
+                CanMovePos.Add(target);
+        }
 
-        return moves;
+        foreach (Vector2Int AttackOffset in AttackOffsets)
+        {
+            target = new Vector3Int(Pos.x + AttackOffset.x, Pos.y + AttackOffset.y, 0);
+            if (board.IsInside(target) && !board.IsEmpty(target))
+            {
+                Piece piece = board.GetPiece(target);
+                if (piece.Color != Color)
+                {
+                    CanMovePos.Add(target);
+                }
+            }
+        }
     }
 }

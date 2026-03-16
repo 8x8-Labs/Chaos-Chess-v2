@@ -5,14 +5,10 @@ public class InputManager : MonoBehaviour
 {
     [SerializeField] private Tilemap ChessBoardTileMap;
 
-    private BoardManager boardManager;
-    private BoardUI boardUI;
     private GamaManager gamaManager;
 
     void Start()
     {
-        boardManager = GetComponent<BoardManager>();
-        boardUI = GetComponent<BoardUI>();
         gamaManager = GetComponent<GamaManager>();
     }
 
@@ -21,20 +17,9 @@ public class InputManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector3Int mouseCellPos = ChessBoardTileMap.WorldToCell(mouseWorldPos);
-            Debug.Log(mouseCellPos);
-            Piece piece = boardManager.GetPiece(mouseCellPos);
+            Vector3Int mouseGridPos = ChessBoardTileMap.WorldToCell(mouseWorldPos);
 
-            if (piece != null)
-            {
-                gamaManager.SelectPiece(piece);
-                boardUI.DrawSelectTile(mouseCellPos);
-            }
-            else
-            {
-                gamaManager.MoveSelected(mouseCellPos, boardManager);
-                boardUI.DeleteSelectTile();
-            }
+            gamaManager.SelectGrid(mouseGridPos);
         }
     }
 }

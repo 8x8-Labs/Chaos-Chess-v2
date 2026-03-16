@@ -7,6 +7,7 @@ public class BoardUI : MonoBehaviour
     [SerializeField] private TileBase SelectTile;
 
     private Vector3Int prvMouseCellPos;
+
     public void DrawSelectTile(Vector3Int pos)
     {
         DeleteSelectTile();
@@ -15,6 +16,7 @@ public class BoardUI : MonoBehaviour
 
         UIChessBoard.SetTile(pos, SelectTile);
     }
+    
     public void DeleteSelectTile()
     {
         UIChessBoard.SetTile(prvMouseCellPos, null); // 전에 선택한 좌표에 선택 ui 지우기

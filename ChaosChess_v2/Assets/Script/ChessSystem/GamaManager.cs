@@ -4,31 +4,45 @@ public class GamaManager : MonoBehaviour
 {
     private PieceColor turn = PieceColor.White;
 
+    private BoardManager boardManager;
+    private BoardUI boardUI;
+
     private Piece selectedPiece;
 
-    public void SelectPiece(Piece piece)
-    {
-        if (piece.Color != turn)
-            return;
 
+    void Start()
+    {
+        boardManager = GetComponent<BoardManager>();
+        boardUI = GetComponent<BoardUI>();
+    }
+
+    public void SelectGrid(Vector3Int pos)
+    {
+        Piece piece = boardManager.GetPiece(pos);
+
+        if (piece != null && piece.Color == turn)
+        {
+            SelectPiece(piece);
+            boardUI.DrawSelectTile(pos);
+        }
+        else
+        {
+            MoveSelected(pos, boardManager);
+            boardUI.DeleteSelectTile();
+        }
+    }
+
+    private void SelectPiece(Piece piece)
+    {
         selectedPiece = piece;
     }
 
-    public void MoveSelected(Vector3Int target, BoardManager boardManager)
+    private void MoveSelected(Vector3Int target, BoardManager boardManager)
     {
         if (selectedPiece == null)
             return;
 
         boardManager.MovePiece(selectedPiece, target);
-
-        EndTurn();
-    }
-
-    void EndTurn()
-    {
-        if (turn == PieceColor.White)
-            turn = PieceColor.Black;
-        else
-            turn = PieceColor.White;
+        boardManager.UpdatePiecesCanMovePos();
     }
 }

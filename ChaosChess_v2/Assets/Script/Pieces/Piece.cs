@@ -7,10 +7,14 @@ public enum PieceColor
     Black
 }
 
-public abstract class Piece : MonoBehaviour
+public class Piece : MonoBehaviour
 {
+    [SerializeField] protected List<Vector2Int> CanMoveOffsets;
+
     [SerializeField] private PieceColor color;
-    [SerializeField] private Vector3Int boardPos;
+    [SerializeField] private Vector3Int pos;
+
+    protected List<Vector3Int> CanMovePos;
 
     public PieceColor Color
     {
@@ -18,11 +22,45 @@ public abstract class Piece : MonoBehaviour
         set { color = value; }
     }
 
-    public Vector3Int BoardPos
+    public Vector3Int Pos
     {
-        get { return boardPos; }
-        set { boardPos = value; }
+        get { return pos; }
+        set { pos = value; }
     }
 
-    public abstract List<Vector3Int> GetLegalMoves(BoardManager board);
+    public virtual bool CanMoveTo(BoardManager board, Vector3Int target)
+    {
+        foreach (Vector3Int pos in CanMovePos)
+        {
+            if (target == pos)
+            {
+                Debug.Log("된다");
+                return true;
+            }
+        }
+        Debug.Log("안된다");
+        return false;
+    }
+
+    public virtual void UpdateCanMovePos(BoardManager board)
+    {
+        CanMovePos = new List<Vector3Int>();
+
+        foreach (Vector2Int CanMoveOffset in CanMoveOffsets)
+        {
+            Vector3Int target = pos;
+            while (true)
+            {
+                target = new Vector3Int(target.x + CanMoveOffset.x, target.y + CanMoveOffset.y, 0);
+                if (board.IsEmpty(target))
+                {
+                    CanMovePos.Add(target);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+    }
 }
