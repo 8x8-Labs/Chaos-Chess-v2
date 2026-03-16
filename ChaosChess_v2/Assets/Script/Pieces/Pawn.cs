@@ -39,10 +39,15 @@ public class Pawn : Piece
     public override void UpdateCanMovePos(BoardManager board)
     {
         CanMovePos = new List<Vector3Int>();
-
-        Vector3Int target = new Vector3Int(Pos.x, Pos.y + 1, 0);
-        if (board.IsEmpty(target))
-            CanMovePos.Add(target);
+        Vector3Int target;
+        foreach (Vector2Int CanMoveOffset in CanMoveOffsets)
+        {
+            target = new Vector3Int(Pos.x, Pos.y + CanMoveOffset.y, 0);
+            if (board.IsEmpty(target))
+            {
+                CanMovePos.Add(target);
+            }
+        }
 
         if (Pos.y == StartPosY)
         {
