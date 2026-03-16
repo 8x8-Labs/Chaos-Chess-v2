@@ -9,6 +9,10 @@ public enum PieceColor
 
 public class Piece : MonoBehaviour
 {
+    [SerializeField] protected Sprite WhitePiece;
+    [SerializeField] protected Sprite BlackPiece;
+    private SpriteRenderer spriteRenderer;
+
     [SerializeField] protected List<Vector2Int> CanMoveOffsets;
 
     [SerializeField] private PieceColor color;
@@ -26,6 +30,16 @@ public class Piece : MonoBehaviour
     {
         get { return pos; }
         set { pos = value; }
+    }
+
+    void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (Color == PieceColor.White)
+            spriteRenderer.sprite = WhitePiece;
+        else
+            spriteRenderer.sprite = BlackPiece;
+
     }
 
     public virtual bool CanMoveTo(BoardManager board, Vector3Int target)
