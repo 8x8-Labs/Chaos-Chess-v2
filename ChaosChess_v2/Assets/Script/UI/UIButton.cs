@@ -10,10 +10,10 @@ public class UIButton : Button
     [SerializeField] private AudioClip hoverSound;
 
     [SerializeField] private ButtonCanvas disableCanvas;        // 비활성화 할(보이지 않게 할 캔버스) 오브젝트
-    [SerializeField] private  ButtonCanvas enableCanvas;        // 활성화 할(보이게 할 캔버스) 오브젝트
+    [SerializeField] private ButtonCanvas enableCanvas;        // 활성화 할(보이게 할 캔버스) 오브젝트
 
-   [SerializeField] private ButtonPanel disablePanel;          // 비활성화 할(보이지 않게 할 캔버스) 오브젝트
-   [SerializeField] private ButtonPanel enablePanel;           // 활성화 할(보이게 할 캔버스) 오브젝트
+    [SerializeField] private ButtonPanel disablePanel;          // 비활성화 할(보이지 않게 할 캔버스) 오브젝트
+    [SerializeField] private ButtonPanel enablePanel;           // 활성화 할(보이게 할 캔버스) 오브젝트
 
     [SerializeField] private ButtonType buttonType;
 
@@ -69,7 +69,7 @@ public class UIButton : Button
     {
         disableCanvas.FadeIn();
         yield return new WaitForSeconds(0.2f);
-        enableCanvas.EnableCanvas();
+        enableCanvas.EnableParent();
     }
 
     private IEnumerator changePanelCoroutine()

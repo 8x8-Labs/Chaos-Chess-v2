@@ -2,16 +2,15 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ButtonCanvas : MonoBehaviour
+public class ButtonCanvas : ButtonParent
 {
     public bool MainCanvas
     {
         get
         {
-            return isMainCanva;
+            return isMainParent;
         }
     }
-    [SerializeField] private bool isMainCanva = false;
     [SerializeField] private float fadeDuration = 0.2f;
     [SerializeField] private Button firstSelectButton;
 
@@ -24,24 +23,17 @@ public class ButtonCanvas : MonoBehaviour
         canvas = GetComponent<Canvas>();
     }
 
-    private void Start()
-    {
-        if (isMainCanva) EnableCanvas();
-        else DisableCanvas();
-    }
-
 
     // 캔버스를 활성화시키고 효과 및 첫 선택 버튼을 설정
-    public void EnableCanvas()
+    public override void EnableParent()
     {
-        firstSelectButton.Select();
         canvas.enabled = true;
         canvasGroup.alpha = 0f;
         FadeOut();
     }
 
     // 캔버스를 비활성화 시키고 알파를 0으로 바꿈
-    public void DisableCanvas()
+    public override void DisableParent()
     {
         canvas.enabled = false;
         canvasGroup.alpha = 0f;
