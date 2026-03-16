@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GamaManager : MonoBehaviour
 {
-    private PieceColor turn = PieceColor.White;
+    private PieceColor turn;
 
     private BoardManager boardManager;
     private BoardUI boardUI;
@@ -12,6 +12,8 @@ public class GamaManager : MonoBehaviour
 
     void Start()
     {
+        turn = PieceColor.White;
+
         boardManager = GetComponent<BoardManager>();
         boardUI = GetComponent<BoardUI>();
     }
@@ -44,5 +46,15 @@ public class GamaManager : MonoBehaviour
 
         boardManager.MovePiece(selectedPiece, target);
         boardManager.UpdatePiecesCanMovePos();
+
+        NextTurn();
+    }
+
+    private void NextTurn()
+    {
+        if (turn == PieceColor.White)
+            turn = PieceColor.Black;
+        else
+            turn = PieceColor.White;
     }
 }

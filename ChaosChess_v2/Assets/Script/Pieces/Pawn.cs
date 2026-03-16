@@ -6,6 +6,36 @@ public class Pawn : Piece
     [SerializeField] private List<Vector2Int> AttackOffsets;
     [SerializeField] private Vector2Int FirstMoveOffset;
 
+    private int StartPosY;
+    void Start()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (Color == PieceColor.White)
+        {
+            StartPosY = 1;
+
+            spriteRenderer.sprite = WhitePiece;
+        }
+        else
+        {
+            StartPosY = 6;
+
+            spriteRenderer.sprite = BlackPiece;
+
+            FirstMoveOffset *= -1;
+            for (int i = 0; i < AttackOffsets.Count; i++)
+            {
+                AttackOffsets[i] *= -1;
+            }
+
+            for (int i = 0; i < CanMoveOffsets.Count; i++)
+            {
+                CanMoveOffsets[i] *= -1;
+            }
+        }
+
+    }
+
     public override void UpdateCanMovePos(BoardManager board)
     {
         CanMovePos = new List<Vector3Int>();
@@ -14,7 +44,7 @@ public class Pawn : Piece
         if (board.IsEmpty(target))
             CanMovePos.Add(target);
 
-        if (Pos.y == 1)
+        if (Pos.y == StartPosY)
         {
             target = new Vector3Int(Pos.x + FirstMoveOffset.x, Pos.y + FirstMoveOffset.y, 0);
             if (board.IsEmpty(target))

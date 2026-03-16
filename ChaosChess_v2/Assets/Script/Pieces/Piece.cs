@@ -11,7 +11,7 @@ public class Piece : MonoBehaviour
 {
     [SerializeField] protected Sprite WhitePiece;
     [SerializeField] protected Sprite BlackPiece;
-    private SpriteRenderer spriteRenderer;
+    protected SpriteRenderer spriteRenderer;
 
     [SerializeField] protected List<Vector2Int> CanMoveOffsets;
 
@@ -39,6 +39,8 @@ public class Piece : MonoBehaviour
             spriteRenderer.sprite = WhitePiece;
         else
             spriteRenderer.sprite = BlackPiece;
+
+
 
     }
 
