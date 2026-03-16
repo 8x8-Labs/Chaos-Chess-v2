@@ -47,10 +47,10 @@ public class BoardManager : MonoBehaviour
         return board[pos.x, pos.y];
     }
 
-    public void MovePiece(Piece piece, Vector3Int target) // 기물의 위치를 target으로 이동시킨다
+    public bool MovePiece(Piece piece, Vector3Int target) // 기물의 위치를 target으로 이동시킨다
     {
         if (!piece.CanMoveTo(this, target)) // target으로 이동 가능한가
-            return;
+            return false;
 
         board[piece.Pos.x, piece.Pos.y] = null;
 
@@ -59,6 +59,8 @@ public class BoardManager : MonoBehaviour
         piece.transform.position = GridPosToWorldPos(target);
 
         board[target.x, target.y] = piece;
+
+        return true;
     }
 
     public Vector3 GridPosToWorldPos(Vector3Int GridPos)

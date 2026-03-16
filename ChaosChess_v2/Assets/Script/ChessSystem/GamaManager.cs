@@ -21,7 +21,7 @@ public class GamaManager : MonoBehaviour
     public void SelectGrid(Vector3Int pos)
     {
         Piece piece = boardManager.GetPiece(pos);
-
+        Debug.Log(turn);
         if (piece != null && piece.Color == turn)
         {
             SelectPiece(piece);
@@ -44,14 +44,16 @@ public class GamaManager : MonoBehaviour
         if (selectedPiece == null)
             return;
 
-        boardManager.MovePiece(selectedPiece, target);
-        boardManager.UpdatePiecesCanMovePos();
-
-        NextTurn();
+        if (boardManager.MovePiece(selectedPiece, target))
+        {
+            NextTurn();
+        }
     }
 
     private void NextTurn()
     {
+        boardManager.UpdatePiecesCanMovePos();
+
         if (turn == PieceColor.White)
             turn = PieceColor.Black;
         else
