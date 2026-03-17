@@ -1,0 +1,4 @@
+
+public class Rook : Piece
+{
+}
