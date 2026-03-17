@@ -39,9 +39,6 @@ public class Piece : MonoBehaviour
             spriteRenderer.sprite = WhitePiece;
         else
             spriteRenderer.sprite = BlackPiece;
-
-
-
     }
 
     public virtual bool CanMoveTo(BoardManager board, Vector3Int target)

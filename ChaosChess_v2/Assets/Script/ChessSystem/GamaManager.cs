@@ -46,6 +46,7 @@ public class GamaManager : MonoBehaviour
 
         if (boardManager.MovePiece(selectedPiece, target))
         {
+            selectedPiece = null;
             NextTurn();
         }
     }

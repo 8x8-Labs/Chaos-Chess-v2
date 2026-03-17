@@ -1,18 +1,33 @@
+using System.Collections.Generic;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class BoardManager : MonoBehaviour
 {
-    [SerializeField] private Piece[] Pieces;
+    [SerializeField] private List<Piece> Pieces;
     private Piece[,] board = new Piece[8, 8];
 
     void Start()
     {
+        Debug.Log(Pieces);
+        GameObject[] objects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+
+        foreach (GameObject obj in objects)
+        {
+            if (obj.layer == LayerMask.NameToLayer("Piece"))
+            {
+                Piece piece = obj.GetComponent<Piece>();
+                Pieces.Add(piece);
+            }
+        }
+
         foreach (Piece piece in Pieces)
         {
             AddPiece(piece, piece.Pos);
             piece.transform.position = GridPosToWorldPos(piece.Pos);
         }
         UpdatePiecesCanMovePos();
+        Debug.Log(Pieces);
     }
 
     public void UpdatePiecesCanMovePos()
@@ -54,11 +69,21 @@ public class BoardManager : MonoBehaviour
 
         board[piece.Pos.x, piece.Pos.y] = null;
 
+        if (!IsEmpty(target))
+        {
+            Piece targetPiece = GetPiece(target);
+
+            Pieces.Remove(targetPiece);
+            Destroy(targetPiece.gameObject);
+        }
+
+
         piece.Pos = target;
 
         piece.transform.position = GridPosToWorldPos(target);
 
         board[target.x, target.y] = piece;
+
 
         return true;
     }
