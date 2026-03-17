@@ -66,10 +66,10 @@ public class FairyStockfishBridge : MonoBehaviour
         // nativeLibraryDir에 자동 추출됨
         return Application.persistentDataPath
                .Replace("/files", "/lib")  // 일반적인 경로 패턴
-               + "/libfairystockfish.so";
+               + "/libChessAI.so";
         // 또는: AndroidJNI를 통해 applicationInfo.nativeLibraryDir 직접 획득
 #else
-        return Application.streamingAssetsPath + "/fairy-stockfish";
+        return Application.streamingAssetsPath + "/fairy-stockfish_x86-64";
 #endif
     }
 
