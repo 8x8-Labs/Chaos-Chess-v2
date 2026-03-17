@@ -65,9 +65,21 @@ public class Piece : MonoBehaviour
             while (true)
             {
                 target = new Vector3Int(target.x + CanMoveOffset.x, target.y + CanMoveOffset.y, 0);
-                if (board.IsEmpty(target))
+                if (board.IsInside(target))
                 {
-                    CanMovePos.Add(target);
+                    if (board.IsEmpty(target))
+                    {
+                        CanMovePos.Add(target);
+                    }
+                    else
+                    {
+                        Piece piece = board.GetPiece(target);
+                        if (piece.Color != Color)
+                        {
+                            CanMovePos.Add(target);
+                        }
+                        break;
+                    }
                 }
                 else
                 {
