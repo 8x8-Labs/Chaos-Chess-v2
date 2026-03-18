@@ -1,108 +1,92 @@
-using System.Collections.Generic;
 using UnityEngine;
-
 
 public class ChessGameManager : MonoBehaviour
 {
-    [SerializeField] private FairyStockfishBridge engine;
+    private const string START_FEN =
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-
-    private List<string> _moveHistory = new List<string>();
-    private bool _isWhiteTurn = true;
-
+    private string _currentFen = START_FEN;
+    private string _moveHistory = "";
+    public bool isPlayerTurn = true;
 
     void Start()
     {
-        engine.OnReady += HandleEngineReady;
-        engine.OnBestMove += HandleBestMove;
-        engine.OnInfo += HandleInfo;
-        engine.OnError += HandleError;
+        NewGame();
     }
 
-
-    private void HandleEngineReady()
+    public void NewGame(string variant = "chess")
     {
-        Debug.Log("[Chess] 엔진 준비 완료");
-        // 커스텀 변형 설정
-        engine.SetVariant("archchess");
-        // 탐색 스레드 수 설정
-        engine.SetOption("Threads", "2");
-        // 해시 테이블 크기 (MB)
-        engine.SetOption("Hash", "64");
+        _currentFen = START_FEN;
+        _moveHistory = "";
+        isPlayerTurn = true;
+        FairyStockfishBridge.Instance.InitEngine(variant);
+        FairyStockfishBridge.Instance.SetPosition(_currentFen);
+        Debug.Log("[Game] 새 게임 시작");
     }
 
-
-    // 플레이어가 수를 뒀을 때 호출
-    public void OnPlayerMove(string uciMove)
+    public void PlayerMove(string uciMove)
     {
-        _moveHistory.Add(uciMove);
-        ApplyMoveToBoard(uciMove);
-        _isWhiteTurn = !_isWhiteTurn;
+        if (!isPlayerTurn) return;
 
+        string[] legalMoves = FairyStockfishBridge.Instance.GetLegalMoves();
+        bool isLegal = System.Array.IndexOf(legalMoves, uciMove) >= 0;
 
-        // AI 차례에 수 요청
-        engine.RequestBestMoveFromMoves(
-            _moveHistory.ToArray(),
-            msec: 1500
-        );
-    }
-
-
-    private void HandleBestMove(string move)
-    {
-        if (move == "(none)") { Debug.Log("게임 종료"); return; }
-
-
-        _moveHistory.Add(move);
-        ApplyMoveToBoard(move);
-        _isWhiteTurn = !_isWhiteTurn;
-        Debug.Log($"[AI] 최선수: {move}");
-    }
-
-
-    private void ApplyMoveToBoard(string uciMove)
-    {
-        // 드롭 수: "P@f7" → 기물타입@칸
-        if (uciMove.Contains("@"))
+        if (!isLegal)
         {
-            char pieceChar = uciMove[0];
-            string square = uciMove.Substring(2, 2);
-            DropPiece(pieceChar, square);
+            Debug.LogWarning("[Game] 불법적인 수: " + uciMove);
             return;
         }
 
+        ApplyMove(uciMove);
+        isPlayerTurn = false;
 
-        // 일반 수: "e2e4" 또는 프로모션 "a7a8q"
-        string from = uciMove.Substring(0, 2);
-        string to = uciMove.Substring(2, 2);
-        char? promo = uciMove.Length > 4 ? uciMove[4] : (char?)null;
-        MovePiece(from, to, promo);
+        int result = FairyStockfishBridge.Instance.GetGameResult();
+        if (result != 1)
+        {
+            OnGameEnd(result);
+            return;
+        }
+
+        // AI 수 요청
+        RequestAIMove();
     }
 
-
-    private void MovePiece(string from, string to, char? promotion)
+    public void RequestAIMove()
     {
-        // TODO: 보드 UI 업데이트
-        Debug.Log($"이동: {from} → {to}" + (promotion.HasValue ? $" 프로모션: {promotion}" : ""));
+        Debug.Log("[Game] AI 생각 중...");
+        FairyStockfishBridge.Instance.GetBestMoveAsync(
+            depth: 12,
+            moveTimeMs: 2000,
+            callback: (move) =>
+            {
+                Debug.Log("[Game] AI 수: " + move);
+                ApplyMove(move);
+                isPlayerTurn = true;
+
+                // UI 업데이트
+                ChessTestUI ui = FindFirstObjectByType<ChessTestUI>();
+                if (ui != null)
+                {
+                    ui.OnAIMoveCompleted(move);  // ← AI 수 UI에 표시
+                }
+
+                int result = FairyStockfishBridge.Instance.GetGameResult();
+                if (result != 1) OnGameEnd(result);
+            }
+        );
     }
 
-
-    private void DropPiece(char piece, string square)
+    private void ApplyMove(string uciMove)
     {
-        // TODO: 기물 드롭 UI 처리
-        Debug.Log($"드롭: {piece} → {square}");
+        if (_moveHistory.Length > 0) _moveHistory += " ";
+        _moveHistory += uciMove;
+        FairyStockfishBridge.Instance.SetPosition(_currentFen, _moveHistory);
+        Debug.Log("[Game] 무브 적용: " + uciMove);
     }
 
-
-    private void HandleInfo(string info)
+    private void OnGameEnd(int result)
     {
-        // info depth 15 score cp 42 pv e2e4 e7e5 ...
-        // 분석 정보 파싱 (UI에 표시할 경우)
-    }
-
-
-    private void HandleError(string error)
-    {
-        Debug.LogError($"[Fairy] 오류: {error}");
+        string msg = result == -1 ? "체크메이트!" : "스테일메이트!";
+        Debug.Log("[Game] 게임 종료: " + msg);
     }
 }

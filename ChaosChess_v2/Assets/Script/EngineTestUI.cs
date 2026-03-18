@@ -1,79 +1,128 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
-public class EngineTestUI : MonoBehaviour
+public class ChessTestUI : MonoBehaviour
 {
-    [Header("Bridge 연결")]
-    [SerializeField] private FairyStockfishBridge engine;
-
     [Header("UI 연결")]
-    [SerializeField] private InputField fenInput;      // FEN 입력창
-    [SerializeField] private Text resultText;    // 결과 출력
-    [SerializeField] private Button requestButton; // 요청 버튼
+    public Text statusText;
+    public Text moveHistoryText;
+    public Text legalMovesText;
+    public InputField moveInputField;
+    public Button submitMoveBtn;
+    public Button newGameBtn;
+    public Button aiMoveBtn;
+    public Button getLegalMovesBtn;
+    public ScrollRect moveHistoryScroll;
 
-    // 테스트용 기본 FEN (체스 초기 포지션)
-    private const string DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    private ChessGameManager _gameManager;
+    private List<string> _moveLog = new List<string>();
 
     void Start()
     {
-        engine.OnBestMove += HandleBestMove;
-        engine.OnInfo += HandleInfo;
-        engine.OnReady += HandleReady;
-
-        requestButton.onClick.AddListener(OnRequestClicked);
-
-        // 기본값 채우기
-        if (fenInput != null)
-            fenInput.text = DEFAULT_FEN;
-
-        resultText.text = "엔진 초기화 중...";
-    }
-
-    private void HandleReady()
-    {
-        resultText.text = "✅ 엔진 준비 완료\nFEN을 입력하고 버튼을 눌러주세요.";
-        requestButton.interactable = true;
-    }
-
-    private void OnRequestClicked()
-    {
-        string fen = fenInput != null && fenInput.text.Trim() != ""
-            ? fenInput.text.Trim()
-            : DEFAULT_FEN;
-
-        resultText.text = $"🔍 분석 중...\nFEN: {fen}";
-        requestButton.interactable = false;
-
-        engine.RequestBestMoveByTime(fen, msec: 1500);
-    }
-
-    private void HandleBestMove(string move)
-    {
-        resultText.text = $"✅ 최선수: {move}\n\nFEN: {fenInput?.text}";
-        requestButton.interactable = true;
-
-        Debug.Log($"[Test] bestmove = {move}");
-    }
-
-    private void HandleInfo(string info)
-    {
-        // depth, score, pv 파싱해서 표시
-        if (info.Contains("depth") && info.Contains("score"))
+        _gameManager = FindFirstObjectByType<ChessGameManager>();
+        if (_gameManager == null)
         {
-            string depth = ExtractValue(info, "depth");
-            string score = ExtractValue(info, "score cp");
-            string pv = ExtractValue(info, "pv");
+            var go = new GameObject("ChessGameManager");
+            _gameManager = go.AddComponent<ChessGameManager>();
+        }
 
-            if (depth != null)
-                Debug.Log($"[Info] depth={depth} score={score} pv={pv}");
+        // 버튼 이벤트 연결
+        submitMoveBtn?.onClick.AddListener(OnSubmitMove);
+        newGameBtn?.onClick.AddListener(OnNewGame);
+        aiMoveBtn?.onClick.AddListener(OnRequestAIMove);
+        getLegalMovesBtn?.onClick.AddListener(OnGetLegalMoves);
+
+        UpdateStatus("게임 시작! 흰색 차례");
+    }
+
+    // ── 플레이어 수 입력 ───────────────────────────────
+    void OnSubmitMove()
+    {
+        if (moveInputField == null) return;
+        string move = moveInputField.text.Trim().ToLower();
+        if (string.IsNullOrEmpty(move)) return;
+
+        if (!_gameManager.isPlayerTurn)
+        {
+            UpdateStatus("AI 생각 중입니다. 잠시 기다려주세요.");
+            return;
+        }
+
+        AddMoveLog("플레이어: " + move);
+        _gameManager.PlayerMove(move);
+        moveInputField.text = "";
+        UpdateStatus("AI 생각 중...");
+    }
+
+    // ── AI 수 요청 ────────────────────────────────────
+    void OnRequestAIMove()
+    {
+        if (_gameManager.isPlayerTurn)
+        {
+            UpdateStatus("플레이어 차례입니다.");
+            return;
+        }
+
+        UpdateStatus("AI 생각 중...");
+        _gameManager.RequestAIMove();
+    }
+
+    // ── 새 게임 ───────────────────────────────────────
+    void OnNewGame()
+    {
+        _moveLog.Clear();
+        UpdateMoveHistory("");
+        UpdateLegalMoves("");
+        _gameManager.NewGame();
+        UpdateStatus("새 게임 시작! 흰색 차례");
+    }
+
+    // ── 합법적인 수 목록 ──────────────────────────────
+    void OnGetLegalMoves()
+    {
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        string result = string.Join(", ", moves);
+        UpdateLegalMoves(result);
+        UpdateStatus("합법적인 수: " + moves.Length + "개");
+    }
+
+    // ── UI 업데이트 헬퍼 ──────────────────────────────
+    private void AddMoveLog(string entry)
+    {
+        _moveLog.Add(entry);
+        if (_moveLog.Count > 20) _moveLog.RemoveAt(0);
+        UpdateMoveHistory(string.Join("\n", _moveLog));
+    }
+
+    public void UpdateStatus(string msg)
+    {
+        if (statusText != null) statusText.text = msg;
+        Debug.Log("[UI] " + msg);
+    }
+
+    public void UpdateMoveHistory(string history)
+    {
+        if (moveHistoryText != null)
+        {
+            moveHistoryText.text = history;
+            if (moveHistoryScroll != null)
+            {
+                Canvas.ForceUpdateCanvases();
+                moveHistoryScroll.verticalNormalizedPosition = 0f; // 맨 아래로
+            }
         }
     }
 
-    private string ExtractValue(string info, string key)
+    public void UpdateLegalMoves(string moves)
     {
-        int idx = info.IndexOf(key);
-        if (idx < 0) return null;
-        string[] parts = info.Substring(idx + key.Length).Trim().Split(' ');
-        return parts.Length > 0 ? parts[0] : null;
+        if (legalMovesText != null) legalMovesText.text = moves;
+    }
+
+    // AI가 수를 두면 UI 업데이트 (ChessGameManager에서 호출)
+    public void OnAIMoveCompleted(string move)
+    {
+        AddMoveLog("AI: " + move);
+        UpdateStatus("플레이어 차례 (흰색)");
     }
 }
