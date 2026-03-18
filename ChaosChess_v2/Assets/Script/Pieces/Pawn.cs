@@ -9,10 +9,11 @@ public class Pawn : Piece
 
     private int StartPosY;
 
-    void Start()
+    public override void Init(Vector3Int pos, PieceColor color)
     {
+        Color = color;
+        Pos = pos;
 
-        spriteRenderer = GetComponent<SpriteRenderer>();
         if (Color == PieceColor.White)
         {
             StartPosY = 1;
@@ -36,7 +37,6 @@ public class Pawn : Piece
                 CanMoveOffsets[i] *= -1;
             }
         }
-
     }
 
     public override void UpdateCanMovePos(BoardManager board)
@@ -51,7 +51,7 @@ public class Pawn : Piece
                 CanMovePos.Add(target);
             }
         }
-
+        Debug.Log(Pos.y + " " + StartPosY);
         if (Pos.y == StartPosY)
         {
             target = new Vector3Int(Pos.x + FirstMoveOffset.x, Pos.y + FirstMoveOffset.y, 0);

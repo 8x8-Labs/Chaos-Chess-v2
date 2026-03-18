@@ -32,9 +32,17 @@ public class Piece : MonoBehaviour
         get { return pos; }
         set { pos = value; }
     }
-    void Start()
+
+    void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    public virtual void Init(Vector3Int pos, PieceColor color)
+    {
+        Color = color;
+        Pos = pos;
+
         if (Color == PieceColor.White)
             spriteRenderer.sprite = WhitePiece;
         else

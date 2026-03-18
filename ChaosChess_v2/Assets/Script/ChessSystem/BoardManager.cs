@@ -1,32 +1,91 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
+
+[System.Serializable]
+public class FENPrefabPair
+{
+    public char FENChar;
+    public Piece prefab;
+}
 
 public class BoardManager : MonoBehaviour
 {
     [SerializeField] private string FEN;
-    [SerializeField] private List<Piece> Pieces;
+    private List<Piece> Pieces;
     private Piece[,] board = new Piece[8, 8];
+
+    [SerializeField] private List<FENPrefabPair> FENMapList;
+    private Dictionary<char, Piece> FENMap;
+
+    void Awake()
+    {
+        FENMap = new Dictionary<char, Piece>();
+
+        foreach (var pair in FENMapList)
+        {
+            FENMap[pair.FENChar] = pair.prefab;
+        }
+    }
 
     void Start()
     {
-        GameObject[] objects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+        LoadFEN();
+        UpdatePiecesCanMovePos();
+    }
 
-        foreach (GameObject obj in objects)
+    private void LoadFEN()
+    {
+        Pieces.Clear();
+        board = new Piece[8, 8];
+
+        int x = 0;
+        int y = 7;
+
+        foreach (char c in FEN)
         {
-            if (obj.layer == LayerMask.NameToLayer("Piece"))
+            // 줄 바꿈
+            if (c == '/')
             {
-                Piece piece = obj.GetComponent<Piece>();
+                y--;
+                x = 0;
+                continue;
+            }
+
+            // 숫자 = 빈칸
+            if (char.IsDigit(c))
+            {
+                x += c - '0';
+                continue;
+            }
+
+            // 색 판단
+            bool isWhite = char.IsUpper(c);
+
+            // 종류 판단
+            char lower = char.ToLower(c);
+
+            // 프리팹 찾기
+            if (FENMap.TryGetValue(lower, out Piece prefab))
+            {
+                Vector3Int pos = new Vector3Int(x, y, 0);
+
+                // 생성
+                Piece piece = Instantiate(prefab, transform);
+
+                // 상태 설정
+                piece.Init(pos, isWhite ? PieceColor.White : PieceColor.Black);
+
+                // 보드 등록
+                AddPiece(piece, pos);
+
+                // 위치 반영 (Transform 이동 등)
+                piece.Move(pos);
+
                 Pieces.Add(piece);
             }
-        }
 
-        foreach (Piece piece in Pieces)
-        {
-            AddPiece(piece, piece.Pos);
-            piece.Move(piece.Pos);
+            x++;
         }
-        UpdatePiecesCanMovePos();
     }
 
     public void UpdatePiecesCanMovePos()
