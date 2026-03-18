@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,7 +32,6 @@ public class Piece : MonoBehaviour
         get { return pos; }
         set { pos = value; }
     }
-
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -47,11 +47,9 @@ public class Piece : MonoBehaviour
         {
             if (target == pos)
             {
-                Debug.Log("된다");
                 return true;
             }
         }
-        Debug.Log("안된다");
         return false;
     }
 
@@ -87,5 +85,19 @@ public class Piece : MonoBehaviour
                 }
             }
         }
+    }
+
+    public virtual void Move(Vector3Int target)
+    {
+        Pos = target;
+
+        transform.position = GridPosToWorldPos(target);
+    }
+
+    public virtual String GetFen() { return ""; }
+
+    public Vector3 GridPosToWorldPos(Vector3Int GridPos)
+    {
+        return new Vector3((GridPos.x - 3.5f) * 0.65f, (GridPos.y - 3.5f) * 0.65f, 0);
     }
 }

@@ -1,15 +1,15 @@
 using System.Collections.Generic;
-using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class BoardManager : MonoBehaviour
 {
+    [SerializeField] private string FEN;
     [SerializeField] private List<Piece> Pieces;
     private Piece[,] board = new Piece[8, 8];
 
     void Start()
     {
-        Debug.Log(Pieces);
         GameObject[] objects = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 
         foreach (GameObject obj in objects)
@@ -24,10 +24,9 @@ public class BoardManager : MonoBehaviour
         foreach (Piece piece in Pieces)
         {
             AddPiece(piece, piece.Pos);
-            piece.transform.position = GridPosToWorldPos(piece.Pos);
+            piece.Move(piece.Pos);
         }
         UpdatePiecesCanMovePos();
-        Debug.Log(Pieces);
     }
 
     public void UpdatePiecesCanMovePos()
@@ -71,25 +70,62 @@ public class BoardManager : MonoBehaviour
 
         if (!IsEmpty(target))
         {
-            Piece targetPiece = GetPiece(target);
-
-            Pieces.Remove(targetPiece);
-            Destroy(targetPiece.gameObject);
+            DestroyPiece(target);
         }
-
-
-        piece.Pos = target;
-
-        piece.transform.position = GridPosToWorldPos(target);
 
         board[target.x, target.y] = piece;
 
+        piece.Move(target);
 
         return true;
     }
 
-    public Vector3 GridPosToWorldPos(Vector3Int GridPos)
+    public void DestroyPiece(Vector3Int target)
     {
-        return new Vector3((GridPos.x - 3.5f) * 0.65f, (GridPos.y - 3.5f) * 0.65f, 0);
+        Piece targetPiece = GetPiece(target);
+
+        Pieces.Remove(targetPiece);
+        Destroy(targetPiece.gameObject);
     }
+
+    public void UpdateFEN()
+    {
+        FEN = "";
+        for (int i = 7; i > -1; i--)
+        {
+            string line = "";
+            int emptyCnt = 0;
+            Vector3Int target;
+            for (int j = 0; j < 8; j++)
+            {
+                target = new Vector3Int(j, i, 0);
+                if (!IsEmpty(target))
+                {
+                    if (emptyCnt > 0)
+                    {
+                        line += emptyCnt;
+                        emptyCnt = 0;
+                    }
+
+                    Piece piece = GetPiece(target);
+                    line += piece.GetFen();
+                }
+                else
+                    emptyCnt++;
+            }
+            if (emptyCnt != 0)
+                line += emptyCnt;
+
+            FEN += line;
+
+            if (i != 0)
+                FEN += "/";
+        }
+    }
+
+    public string GetFEN()
+    {
+        return FEN;
+    }
+
 }

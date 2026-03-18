@@ -4,11 +4,14 @@ using UnityEngine;
 public class Pawn : Piece
 {
     [SerializeField] private List<Vector2Int> AttackOffsets;
+    [SerializeField] private List<Vector2Int> EnPassantCheckOffsets;
     [SerializeField] private Vector2Int FirstMoveOffset;
 
     private int StartPosY;
+
     void Start()
     {
+
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (Color == PieceColor.White)
         {
@@ -69,4 +72,13 @@ public class Pawn : Piece
             }
         }
     }
+
+    public override string GetFen()
+    {
+        if (Color == PieceColor.White)
+            return "P";
+        else
+            return "p";
+    }
+
 }
