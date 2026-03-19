@@ -81,7 +81,7 @@ public class ChessTestUI : MonoBehaviour
     // ── 합법적인 수 목록 ──────────────────────────────
     void OnGetLegalMoves()
     {
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        string[] moves = _gameManager.GetMoveableSquares(moveInputField.text);
         string result = string.Join(", ", moves);
         UpdateLegalMoves(result);
         UpdateStatus("합법적인 수: " + moves.Length + "개");

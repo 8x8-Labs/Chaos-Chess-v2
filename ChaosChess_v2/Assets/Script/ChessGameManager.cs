@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ChessGameManager : MonoBehaviour
 {
@@ -8,6 +10,12 @@ public class ChessGameManager : MonoBehaviour
     private string _currentFen = START_FEN;
     private string _moveHistory = "";
     public bool isPlayerTurn = true;
+
+    [Header("행동 이벤트")]
+    public UnityEvent OnGameStarted;
+    public UnityEvent OnPlayerMoveEnded;
+    public UnityEvent OnAIMoveEnded;
+    public UnityEvent<int> OnGameEnded;
 
     void Start()
     {
@@ -22,6 +30,7 @@ public class ChessGameManager : MonoBehaviour
         FairyStockfishBridge.Instance.InitEngine(variant);
         FairyStockfishBridge.Instance.SetPosition(_currentFen);
         Debug.Log("[Game] 새 게임 시작");
+        OnGameStarted?.Invoke();
     }
 
     public void PlayerMove(string uciMove)
@@ -46,14 +55,36 @@ public class ChessGameManager : MonoBehaviour
             OnGameEnd(result);
             return;
         }
+    
+        // 수 종료 시 이벤트 호출
+        OnPlayerMoveEnded?.Invoke(); 
 
         // AI 수 요청
         RequestAIMove();
     }
 
+    // 선택한 칸에서 이동 가능한 경우의 수를 string 배열 형태로 반환합니다.
+    public string[] GetMoveableSquares(string fromSquare)
+    {
+        string[] moves = FairyStockfishBridge.Instance
+            .GetLegalMovesFromSquare(fromSquare);
+
+        List<string> destinations = new List<string>();
+        foreach (string move in moves)
+        {
+            if (move.Length >= 4)
+                destinations.Add(move.Substring(2, 2));
+        }
+
+        return destinations.ToArray();
+    }
+
     public void RequestAIMove()
     {
         Debug.Log("[Game] AI 생각 중...");
+
+        FairyStockfishBridge.Instance.SetPosition(_currentFen, _moveHistory);
+
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,
             moveTimeMs: 2000,
@@ -88,5 +119,6 @@ public class ChessGameManager : MonoBehaviour
     {
         string msg = result == -1 ? "체크메이트!" : "스테일메이트!";
         Debug.Log("[Game] 게임 종료: " + msg);
+        OnGameEnded?.Invoke(result);
     }
 }

@@ -1869,7 +1869,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2075914923}
   - component: {fileID: 2075914924}
-  - component: {fileID: 2075914925}
   - component: {fileID: 2075914926}
   m_Layer: 0
   m_Name: FairyEngine
@@ -1905,18 +1904,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58b4fb4d3ecf4de42986a62562f01bf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2075914925
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2075914922}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ad54f70766ab4f4ea9275f391bcf377, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2075914926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1930,6 +1917,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isPlayerTurn: 1
+  OnGameStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayerMoveEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnAIMoveEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGameEnded:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
