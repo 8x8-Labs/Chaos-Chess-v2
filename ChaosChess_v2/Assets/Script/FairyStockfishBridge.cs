@@ -1,15 +1,12 @@
+using UnityEngine;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-using UnityEngine;
-using static UnityEditor.Rendering.CameraUI;
+using System.Collections.Generic;
 
 public class FairyStockfishBridge : MonoBehaviour
 {
-    private readonly object _engineLock = new object();
     private static FairyStockfishBridge _instance;
     public static FairyStockfishBridge Instance
     {
@@ -137,10 +134,7 @@ public class FairyStockfishBridge : MonoBehaviour
 
         Thread thread = new Thread(() =>
         {
-            lock (_engineLock)
-            {
-                SendCommand(command);
-            }
+            SendCommand(command);
             string bestMove = WaitForBestMove();
             _isThinking = false;
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
@@ -161,51 +155,36 @@ public class FairyStockfishBridge : MonoBehaviour
         return string.IsNullOrEmpty(movesStr)
             ? new string[0] : movesStr.Split(' ');
 #else
-        return GetLegalMovesInternalAsync().GetAwaiter().GetResult();
-#endif
-    }
+        // 엔진 준비 확인 후 포지션 재설정
+        SendCommand("isready");
+        WaitForOutput("readyok", 3000);
+        RestorePosition();
 
-    // ── 합법적인 수 내부 구현 (PC 전용) ─────────────────
-#if !UNITY_ANDROID || UNITY_EDITOR
-    private async Task<string[]> GetLegalMovesInternalAsync()
-    {
-        var result = await Task.Run(() =>
+        // perft 실행
+        SendCommand("go perft 1");
+        string output = WaitForOutput("Nodes searched", 8000);
+
+        UnityEngine.Debug.Log("[Fairy] perft output:\n" + output);
+
+        // 포지션 복구
+        RestorePosition();
+
+        var moves = new List<string>();
+        foreach (string line in output.Split('\n'))
         {
-            string output;
-
-            lock (_engineLock)
+            string trimmed = line.Trim();
+            if (trimmed.Contains(": ") && !trimmed.StartsWith("Nodes"))
             {
-                SendCommand("isready");
-                WaitForOutput("readyok", 3000);
-                RestorePosition();
-
-                SendCommand("go perft 1");
-                output = WaitForOutput("Nodes searched", 8000);
-
-                RestorePosition();
+                string move = trimmed.Split(':')[0].Trim();
+                if (!string.IsNullOrEmpty(move) && move.Length >= 4)
+                    moves.Add(move);
             }
+        }
 
-            var moves = new List<string>();
-            foreach (string line in output.Split('\n'))
-            {
-                string trimmed = line.Trim();
-                if (trimmed.Contains(": ") && !trimmed.StartsWith("Nodes"))
-                {
-                    string move = trimmed.Split(':')[0].Trim();
-                    if (!string.IsNullOrEmpty(move) && move.Length >= 4)
-                        moves.Add(move);
-                }
-            }
-
-            return (moves: moves.ToArray(), output: output);
-        });
-
-        UnityEngine.Debug.Log("[Fairy] perft output:\n" + result.output);
-        UnityEngine.Debug.Log("[Fairy] 합법적인 수: " + result.moves.Length + "개");
-
-        return result.moves;
-    }
+        UnityEngine.Debug.Log("[Fairy] 합법적인 수: " + moves.Count + "개");
+        return moves.ToArray();
 #endif
+    }
 
     // ── 특정 칸에서 이동 가능한 수 반환 ─────────────────
     public string[] GetLegalMovesFromSquare(string square)
