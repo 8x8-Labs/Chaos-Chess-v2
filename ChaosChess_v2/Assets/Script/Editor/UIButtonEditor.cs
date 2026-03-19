@@ -14,6 +14,12 @@ public class UIButtonEditor : ButtonEditor
     SerializedProperty enableObjectProp;
     SerializedProperty disablePanelProp;
     SerializedProperty enablePanelProp;
+    SerializedProperty startAnimationProp;
+    SerializedProperty endAnimationProp;
+    SerializedProperty uIAnimationProp;
+
+    //[SerializeField] private bool isStartAnimation = false;
+    //[SerializeField] private bool isEndAnimation = false;
 
     protected override void OnEnable()
     {
@@ -26,6 +32,9 @@ public class UIButtonEditor : ButtonEditor
         disablePanelProp = serializedObject.FindProperty("disablePanel");
         enablePanelProp = serializedObject.FindProperty("enablePanel");
         typeProp = serializedObject.FindProperty("buttonType");
+        startAnimationProp = serializedObject.FindProperty("isStartAnimation");
+        endAnimationProp = serializedObject.FindProperty("isEndAnimation");
+        uIAnimationProp = serializedObject.FindProperty("uIAnimationObject");
     }
 
     public override void OnInspectorGUI()
@@ -42,6 +51,12 @@ public class UIButtonEditor : ButtonEditor
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Button Logic", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(typeProp);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Animation Manage", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(uIAnimationProp);
+        EditorGUILayout.PropertyField(startAnimationProp);
+        EditorGUILayout.PropertyField(endAnimationProp);
 
         serializedObject.ApplyModifiedProperties();
 

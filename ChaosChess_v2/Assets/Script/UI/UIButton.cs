@@ -3,9 +3,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
+using DG.Tweening;
 
 public class UIButton : Button
 {
+    public IUIAnimation UIAnimation => uIAnimationObject as IUIAnimation;
+
     [SerializeField] private AudioClip clickSound;
     [SerializeField] private AudioClip hoverSound;
 
@@ -16,6 +19,13 @@ public class UIButton : Button
     [SerializeField] private ButtonPanel enablePanel;           // 활성화 할(보이게 할 캔버스) 오브젝트
 
     [SerializeField] private ButtonType buttonType;
+
+    private IUIAnimation uIAnimation;
+
+    [SerializeField] private MonoBehaviour uIAnimationObject; // 인스펙터에 노출
+    [SerializeField] private bool isStartAnimation = false;
+    [SerializeField] private bool isEndAnimation = false;
+
 
     protected override void Start()
     {
