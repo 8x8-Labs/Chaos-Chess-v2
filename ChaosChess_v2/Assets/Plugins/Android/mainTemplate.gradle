@@ -37,7 +37,6 @@ android {
     }
 
     dependencies {
-        implementation fileTree(dir: 'libs', include: ['*.jar'])
         implementation(name: 'fairystockfish-release', ext: 'aar')  // ← 추가
         **DEPS**
     }

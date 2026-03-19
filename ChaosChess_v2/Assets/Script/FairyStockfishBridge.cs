@@ -13,7 +13,7 @@ public class FairyStockfishBridge : MonoBehaviour
         get
         {
             if (_instance == null)
-                _instance = FindObjectOfType<FairyStockfishBridge>();
+                _instance = FindFirstObjectByType<FairyStockfishBridge>();
             return _instance;
         }
     }
@@ -23,7 +23,7 @@ public class FairyStockfishBridge : MonoBehaviour
 #else
     private Process _process;
     private StreamWriter _input;
-    private bool _isThinking = false;
+    private volatile bool _isThinking = false;
     private string _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     private string _currentMoves = "";
 

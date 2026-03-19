@@ -94,6 +94,8 @@ public class ChessGameManager : MonoBehaviour
                 ApplyMove(move);
                 isPlayerTurn = true;
 
+                OnAIMoveEnded?.Invoke();
+
                 // UI 업데이트
                 ChessTestUI ui = FindFirstObjectByType<ChessTestUI>();
                 if (ui != null)
