@@ -11,14 +11,18 @@ public class FENPrefabPair
 public class BoardManager : MonoBehaviour
 {
     [SerializeField] private string FEN;
-    private List<Piece> Pieces;
+    private List<Piece> Pieces = new List<Piece>();
     private Piece[,] board = new Piece[8, 8];
 
     [SerializeField] private List<FENPrefabPair> FENMapList;
     private Dictionary<char, Piece> FENMap;
 
+    private GamaManager gamaManager;
+
     void Awake()
     {
+        gamaManager = GetComponent<GamaManager>();
+
         FENMap = new Dictionary<char, Piece>();
 
         foreach (var pair in FENMapList)
@@ -41,7 +45,9 @@ public class BoardManager : MonoBehaviour
         int x = 0;
         int y = 7;
 
-        foreach (char c in FEN)
+        string[] SliceFEN = FEN.Split(' ');
+
+        foreach (char c in SliceFEN[0])
         {
             // 줄 바꿈
             if (c == '/')
@@ -86,6 +92,12 @@ public class BoardManager : MonoBehaviour
 
             x++;
         }
+
+        if (SliceFEN[1][0] != gamaManager.NowTurn)
+        {
+            gamaManager.NextTurn();
+        }
+
     }
 
     public void UpdatePiecesCanMovePos()
@@ -180,6 +192,11 @@ public class BoardManager : MonoBehaviour
             if (i != 0)
                 FEN += "/";
         }
+        FEN += " ";
+        if (gamaManager.NowTurn == 'w')
+            FEN += 'w';
+        else
+            FEN += 'b';
     }
 
     public string GetFEN()

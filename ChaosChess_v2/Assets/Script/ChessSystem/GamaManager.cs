@@ -4,6 +4,17 @@ public class GamaManager : MonoBehaviour
 {
     private PieceColor turn;
 
+    public char NowTurn
+    {
+        get
+        {
+            if (turn == PieceColor.White)
+                return 'w';
+            else
+                return 'b';
+        }
+    }
+
     private BoardManager boardManager;
     private BoardUI boardUI;
 
@@ -49,17 +60,16 @@ public class GamaManager : MonoBehaviour
             NextTurn();
         }
     }
-
-    private void NextTurn()
+    public void NextTurn()
     {
         boardManager.UpdatePiecesCanMovePos();
-
-        boardManager.UpdateFEN(); // 디버깅
-        Debug.Log(boardManager.GetFEN());
 
         if (turn == PieceColor.White)
             turn = PieceColor.Black;
         else
             turn = PieceColor.White;
+
+        boardManager.UpdateFEN(); // 디버깅
+        Debug.Log(boardManager.GetFEN());
     }
 }

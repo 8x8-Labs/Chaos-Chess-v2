@@ -1338,8 +1338,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac18b6f187956544a39dae33ac45dcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
-  Pieces: []
+  FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w
   FENMapList:
   - FENChar: 112
     prefab: {fileID: 4250557358645613848, guid: 284f131cb8f24b946a2208b0313947c3, type: 3}
