@@ -6,8 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/AITest.unity
+    guid: 413fe04e0ab7340479933a5489b9bd5c
+  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
   m_configObjects:
+    com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: 003ad4f002fa24e4e8e1a9bfb8141718, type: 2}
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 07fb4e160397254449f94a4ace30012d, type: 2}
+    com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 2ca5d85d5b102944f8ad8ab395e24faa, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
