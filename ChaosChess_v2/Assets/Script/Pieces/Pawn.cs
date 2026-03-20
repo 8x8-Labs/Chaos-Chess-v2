@@ -51,7 +51,6 @@ public class Pawn : Piece
                 CanMovePos.Add(target);
             }
         }
-        Debug.Log(Pos.y + " " + StartPosY);
         if (Pos.y == StartPosY)
         {
             target = new Vector3Int(Pos.x + FirstMoveOffset.x, Pos.y + FirstMoveOffset.y, 0);

@@ -197,6 +197,8 @@ public class BoardManager : MonoBehaviour
             FEN += 'w';
         else
             FEN += 'b';
+
+        FEN += " KQkq - 0 1";
     }
 
     public string GetFEN()

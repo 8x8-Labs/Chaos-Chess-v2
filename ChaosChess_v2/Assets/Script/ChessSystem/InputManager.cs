@@ -7,7 +7,7 @@ public class InputManager : MonoBehaviour
 
     private GamaManager gamaManager;
 
-    void Start()
+    void Awake()
     {
         gamaManager = GetComponent<GamaManager>();
     }
