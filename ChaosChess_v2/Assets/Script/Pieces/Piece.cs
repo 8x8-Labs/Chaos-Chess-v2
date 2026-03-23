@@ -14,8 +14,6 @@ public class Piece : MonoBehaviour
     [SerializeField] protected Sprite BlackPiece;
     protected SpriteRenderer spriteRenderer;
 
-    [SerializeField] protected List<Vector2Int> CanMoveOffsets;
-
     [SerializeField] private PieceColor color;
     [SerializeField] private Vector3Int pos;
 
@@ -61,38 +59,14 @@ public class Piece : MonoBehaviour
         return false;
     }
 
-    public virtual void UpdateCanMovePos(BoardManager board)
+    public void ResetCanMovePos()
     {
         CanMovePos = new List<Vector3Int>();
+    }
 
-        foreach (Vector2Int CanMoveOffset in CanMoveOffsets)
-        {
-            Vector3Int target = pos;
-            while (true)
-            {
-                target = new Vector3Int(target.x + CanMoveOffset.x, target.y + CanMoveOffset.y, 0);
-                if (board.IsInside(target))
-                {
-                    if (board.IsEmpty(target))
-                    {
-                        CanMovePos.Add(target);
-                    }
-                    else
-                    {
-                        Piece piece = board.GetPiece(target);
-                        if (piece.Color != Color)
-                        {
-                            CanMovePos.Add(target);
-                        }
-                        break;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
+    public void AddCanMovePos(Vector3Int pos)
+    {
+        CanMovePos.Add(pos);
     }
 
     public virtual void Move(Vector3Int target)
@@ -102,7 +76,7 @@ public class Piece : MonoBehaviour
         transform.position = GridPosToWorldPos(target);
     }
 
-    public virtual String GetFen() { return ""; }
+    public virtual string GetFen() { return ""; }
 
     public Vector3 GridPosToWorldPos(Vector3Int GridPos)
     {

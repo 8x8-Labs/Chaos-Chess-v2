@@ -226,7 +226,7 @@ public class FairyStockfishBridge : MonoBehaviour
                     {
                         _outputQueue.Enqueue(line);
                     }
-                    UnityEngine.Debug.Log("[UCI ←] " + line);
+                    //                    UnityEngine.Debug.Log("[UCI ←] " + line);
                 }
             }
         });
@@ -239,7 +239,7 @@ public class FairyStockfishBridge : MonoBehaviour
         if (_process == null || _process.HasExited) return;
         _input.WriteLine(command);
         _input.Flush();
-        UnityEngine.Debug.Log("[UCI →] " + command);
+//        UnityEngine.Debug.Log("[UCI →] " + command);
     }
 
     private string WaitForOutput(string keyword, int timeoutMs = 5000)
@@ -253,7 +253,7 @@ public class FairyStockfishBridge : MonoBehaviour
                 while (_outputQueue.Count > 0)
                 {
                     string line = _outputQueue.Dequeue();
-                    UnityEngine.Debug.Log("[UCI ←] " + line);  // ← 메인 스레드에서 출력
+                    // UnityEngine.Debug.Log("[UCI ←] " + line);  // ← 메인 스레드에서 출력
                     result += line + "\n";
                     if (line.Contains(keyword))
                         return result;

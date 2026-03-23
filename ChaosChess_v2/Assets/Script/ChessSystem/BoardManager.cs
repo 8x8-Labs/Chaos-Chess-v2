@@ -97,14 +97,36 @@ public class BoardManager : MonoBehaviour
         {
             gamaManager.NextTurn();
         }
-
+        FairyStockfishBridge.Instance.SetPosition(FEN);
     }
 
     public void UpdatePiecesCanMovePos()
     {
         foreach (Piece piece in Pieces)
         {
-            piece.UpdateCanMovePos(this);
+            piece.ResetCanMovePos();
+        }
+
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+
+        Vector3Int from = new Vector3Int(-1, -1, -1);
+        Vector3Int to = new Vector3Int(-1, -1, -1);
+        Piece fromPiece = null;
+
+        foreach (string move in moves)
+        {
+            Debug.Log(from + " " + UCIToGrid(move.Substring(0, 2)) + " " + fromPiece);
+            if (UCIToGrid(move.Substring(0, 2)) != from)
+            {
+                from = UCIToGrid(move.Substring(0, 2));
+                Debug.Log(GetPiece(from));
+                fromPiece = GetPiece(from);
+
+            }
+            to = UCIToGrid(move.Substring(2));
+            Debug.Log(fromPiece);
+
+            fromPiece.AddCanMovePos(to);
         }
     }
 
@@ -132,6 +154,20 @@ public class BoardManager : MonoBehaviour
         return board[pos.x, pos.y];
     }
 
+    // uci로 받은 이동을 적용한다
+    public void ApplyUCIMove(string uciMove)
+    {
+        // "e2e4" → from(4,1), to(4,3) 변환
+        Vector3Int from = UCIToGrid(uciMove.Substring(0, 2));
+        Vector3Int to = UCIToGrid(uciMove.Substring(2, 2));
+
+        Piece piece = GetPiece(from);
+        if (piece != null)
+            MovePiece(piece, to);
+
+        gamaManager.NextTurn();
+    }
+
     public bool MovePiece(Piece piece, Vector3Int target) // 기물의 위치를 target으로 이동시킨다
     {
         if (!piece.CanMoveTo(this, target)) // target으로 이동 가능한가
@@ -157,6 +193,19 @@ public class BoardManager : MonoBehaviour
 
         Pieces.Remove(targetPiece);
         Destroy(targetPiece.gameObject);
+    }
+
+    public Vector3Int UCIToGrid(string sq)
+    {
+        int x = sq[0] - 'a'; // 'a'~'h' → 0~7
+        int y = sq[1] - '1'; // '1'~'8' → 0~7
+        return new Vector3Int(x, y, 0);
+    }
+
+    public string GridTOUCI(Vector3Int pos)
+    {
+        string sq = ((char)(pos.x + 'a')).ToString() + ((char)(pos.y + '1')).ToString();
+        return sq;
     }
 
     public void UpdateFEN()
@@ -205,5 +254,4 @@ public class BoardManager : MonoBehaviour
     {
         return FEN;
     }
-
 }
