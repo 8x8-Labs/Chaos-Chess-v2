@@ -39,7 +39,7 @@ public class FairyStockfishBridge : MonoBehaviour
     }
 
     // ── 초기화 ──────────────────────────────────────────
-    public void InitEngine(string variant = "chess")
+    public void InitEngine(string variant = "chaos_base")
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
         try

@@ -22,7 +22,7 @@ public class ChessGameManager : MonoBehaviour
         NewGame();
     }
 
-    public void NewGame(string variant = "chess")
+    public void NewGame(string variant = "chaos_base")
     {
         _currentFen = START_FEN;
         _moveHistory = "";
