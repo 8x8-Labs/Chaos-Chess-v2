@@ -2,14 +2,100 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class FENPrefabPair
+class FENPrefabPair
 {
     public char FENChar;
     public Piece prefab;
 }
 
+
 public class BoardManager : MonoBehaviour
 {
+    private class Castling
+    {
+        private bool WhiteKingSide = true;
+        private bool WhiteQueenSide = true;
+        private bool BlackKingSide = true;
+        private bool BlackQueenSide = true;
+
+        public string GetFEN()
+        {
+            string result = "";
+
+            if (WhiteKingSide) result += "K";
+            if (WhiteQueenSide) result += "Q";
+            if (BlackKingSide) result += "k";
+            if (BlackQueenSide) result += "q";
+
+            return result == "" ? "-" : result;
+        }
+
+        public void SetFen(string fenCastling)
+        {
+            WhiteKingSide = false;
+            WhiteQueenSide = false;
+            BlackKingSide = false;
+            BlackQueenSide = false;
+
+            if (fenCastling == "-") return;
+
+            foreach (char c in fenCastling)
+            {
+                switch (c)
+                {
+                    case 'K': WhiteKingSide = true; break;
+                    case 'Q': WhiteQueenSide = true; break;
+                    case 'k': BlackKingSide = true; break;
+                    case 'q': BlackQueenSide = true; break;
+                }
+            }
+        }
+
+        public void OnKingMove(PieceColor color)
+        {
+            if (color == PieceColor.White)
+            {
+                WhiteKingSide = false;
+                WhiteQueenSide = false;
+            }
+            else
+            {
+                BlackKingSide = false;
+                BlackQueenSide = false;
+            }
+        }
+
+        public void OnRookMove(PieceColor color, Vector3Int from)
+        {
+            if (color == PieceColor.White)
+            {
+                if (from.x == 0) WhiteQueenSide = false; // a1
+                if (from.x == 7) WhiteKingSide = false;  // h1
+            }
+            else
+            {
+                if (from.x == 0) BlackQueenSide = false; // a8
+                if (from.x == 7) BlackKingSide = false;  // h8
+            }
+        }
+
+        public void OnRookDie(PieceColor color, Vector3Int pos)
+        {
+            // 잡힌 쪽 기준
+            if (color == PieceColor.White)
+            {
+                if (pos.x == 0) WhiteQueenSide = false;
+                if (pos.x == 7) WhiteKingSide = false;
+            }
+            else
+            {
+                if (pos.x == 0) BlackQueenSide = false;
+                if (pos.x == 7) BlackKingSide = false;
+            }
+        }
+    }
+
+    private Castling castling = new Castling();
     private Vector3Int enPassantPos = new Vector3Int(-1, -1, -1);
 
     [SerializeField] private string FEN;
@@ -102,7 +188,7 @@ public class BoardManager : MonoBehaviour
             gamaManager.NextTurn();
         }
 
-        // SliceFEN[2][0] 캐슬링 가능 여부
+        castling.SetFen(SliceFEN[2]);
 
         if (SliceFEN[3] != "-")
             enPassantPos = UCIToGrid(SliceFEN[3]);
@@ -125,16 +211,12 @@ public class BoardManager : MonoBehaviour
 
         foreach (string move in moves)
         {
-            Debug.Log(from + " " + UCIToGrid(move.Substring(0, 2)) + " " + fromPiece);
             if (UCIToGrid(move.Substring(0, 2)) != from)
             {
                 from = UCIToGrid(move.Substring(0, 2));
-                Debug.Log(GetPiece(from));
                 fromPiece = GetPiece(from);
-
             }
             to = UCIToGrid(move.Substring(2));
-            Debug.Log(fromPiece);
 
             fromPiece.AddCanMovePos(to);
         }
@@ -191,15 +273,37 @@ public class BoardManager : MonoBehaviour
         if (piece is Pawn && target == prevEP)
         {
             int dir = (piece.Color == PieceColor.White) ? -1 : 1;
-            Vector3Int capturedPos = new Vector3Int(target.x, target.y + dir, 0);
-            Debug.Log(capturedPos);
-            DestroyPiece(capturedPos);
+            Vector3Int diePos = new Vector3Int(target.x, target.y + dir, 0);
+            DestroyPiece(diePos);
+        }
+
+        if (piece is King)
+        {
+            castling.OnKingMove(piece.Color);
+            if (Mathf.Abs(piece.Pos.x - target.x) == 2)
+            {
+                int dir = (piece.Pos.x < target.x) ? 1 : -1;
+                Vector3Int rookFrom = new Vector3Int(target.x + dir, target.y, 0);
+                Vector3Int rookTo = new Vector3Int(target.x - dir, target.y, 0);
+                Piece rook = GetPiece(rookFrom);
+                MovePiece(rook, rookTo);
+            }
+        }
+
+        if (piece is Rook)
+        {
+            castling.OnRookMove(piece.Color, from);
         }
 
         board[from.x, from.y] = null;
 
         if (!IsEmpty(target))
         {
+            Piece targetPiece = GetPiece(target);
+            if (targetPiece is Rook)
+            {
+                castling.OnRookDie(targetPiece.Color, target);
+            }
             DestroyPiece(target);
         }
 
@@ -278,7 +382,11 @@ public class BoardManager : MonoBehaviour
         string ep = enPassantPos == new Vector3Int(-1, -1, -1) ? "-" : GridTOUCI(enPassantPos);
 
         FEN += " ";
-        FEN += "KQkq ";
+
+        FEN += castling.GetFEN();
+
+        FEN += " ";
+
         FEN += ep + " 0 1";
     }
 
