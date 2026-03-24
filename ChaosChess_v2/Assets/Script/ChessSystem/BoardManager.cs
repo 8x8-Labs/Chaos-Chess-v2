@@ -10,6 +10,8 @@ public class FENPrefabPair
 
 public class BoardManager : MonoBehaviour
 {
+    private Vector3Int enPassantPos = new Vector3Int(-1, -1, -1);
+
     [SerializeField] private string FEN;
     private List<Piece> Pieces = new List<Piece>();
     private Piece[,] board = new Piece[8, 8];
@@ -21,6 +23,8 @@ public class BoardManager : MonoBehaviour
 
     void Awake()
     {
+        enPassantPos = new Vector3Int(-1, -1, -1);
+
         gamaManager = GetComponent<GamaManager>();
 
         FENMap = new Dictionary<char, Piece>();
@@ -97,6 +101,12 @@ public class BoardManager : MonoBehaviour
         {
             gamaManager.NextTurn();
         }
+
+        // SliceFEN[2][0] 캐슬링 가능 여부
+
+        if (SliceFEN[3] != "-")
+            enPassantPos = UCIToGrid(SliceFEN[3]);
+
         FairyStockfishBridge.Instance.SetPosition(FEN);
     }
 
@@ -168,12 +178,25 @@ public class BoardManager : MonoBehaviour
         gamaManager.NextTurn();
     }
 
-    public bool MovePiece(Piece piece, Vector3Int target) // 기물의 위치를 target으로 이동시킨다
+    public bool MovePiece(Piece piece, Vector3Int target)
     {
-        if (!piece.CanMoveTo(this, target)) // target으로 이동 가능한가
+        if (!piece.CanMoveTo(this, target))
             return false;
 
-        board[piece.Pos.x, piece.Pos.y] = null;
+        Vector3Int from = piece.Pos;
+
+        Vector3Int prevEP = enPassantPos;
+        enPassantPos = new Vector3Int(-1, -1, -1);
+
+        if (piece is Pawn && target == prevEP)
+        {
+            int dir = (piece.Color == PieceColor.White) ? -1 : 1;
+            Vector3Int capturedPos = new Vector3Int(target.x, target.y + dir, 0);
+            Debug.Log(capturedPos);
+            DestroyPiece(capturedPos);
+        }
+
+        board[from.x, from.y] = null;
 
         if (!IsEmpty(target))
         {
@@ -181,8 +204,13 @@ public class BoardManager : MonoBehaviour
         }
 
         board[target.x, target.y] = piece;
-
         piece.Move(target);
+
+        if (piece is Pawn && Mathf.Abs(from.y - target.y) == 2)
+        {
+            int middleY = (from.y + target.y) / 2;
+            enPassantPos = new Vector3Int(from.x, middleY, 0);
+        }
 
         return true;
     }
@@ -247,7 +275,11 @@ public class BoardManager : MonoBehaviour
         else
             FEN += 'b';
 
-        FEN += " KQkq - 0 1";
+        string ep = enPassantPos == new Vector3Int(-1, -1, -1) ? "-" : GridTOUCI(enPassantPos);
+
+        FEN += " ";
+        FEN += "KQkq ";
+        FEN += ep + " 0 1";
     }
 
     public string GetFEN()
