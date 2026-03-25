@@ -249,6 +249,7 @@ public class BoardManager : MonoBehaviour
     // uci로 받은 이동을 적용한다
     public void ApplyUCIMove(string uciMove)
     {
+        Debug.Log(uciMove);
         // "e2e4" → from(4,1), to(4,3) 변환
         Vector3Int from = UCIToGrid(uciMove.Substring(0, 2));
         Vector3Int to = UCIToGrid(uciMove.Substring(2, 2));
@@ -283,7 +284,13 @@ public class BoardManager : MonoBehaviour
             if (Mathf.Abs(piece.Pos.x - target.x) == 2)
             {
                 int dir = (piece.Pos.x < target.x) ? 1 : -1;
-                Vector3Int rookFrom = new Vector3Int(target.x + dir, target.y, 0);
+                Vector3Int rookFrom = Vector3Int.zero;
+
+                if (piece.Pos.x < target.x)
+                    rookFrom = new Vector3Int(target.x + dir, target.y, 0);
+                else
+                    rookFrom = new Vector3Int(target.x + dir * 2, target.y, 0);
+
                 Vector3Int rookTo = new Vector3Int(target.x - dir, target.y, 0);
                 Piece rook = GetPiece(rookFrom);
                 MovePiece(rook, rookTo);
