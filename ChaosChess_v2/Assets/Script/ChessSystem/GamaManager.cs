@@ -33,6 +33,8 @@ public class GamaManager : MonoBehaviour
 
     void Start()
     {
+        FairyStockfishBridge.Instance.InitEngine("chess");
+
         turn = PieceColor.White;
 
         boardManager = GetComponent<BoardManager>();
@@ -41,7 +43,11 @@ public class GamaManager : MonoBehaviour
 
         boardManager.OnPromotionRequired += HandlePromotion;
 
-        FairyStockfishBridge.Instance.InitEngine("chess");
+        boardManager.LoadFEN();
+
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        EvaluateGameState(moves);
+        boardManager.UpdatePiecesCanMovePos(moves);
     }
 
     public void SelectGrid(Vector3Int pos)
@@ -96,7 +102,9 @@ public class GamaManager : MonoBehaviour
         string fen = boardManager.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
 
-        boardManager.UpdatePiecesCanMovePos();
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        EvaluateGameState(moves);
+        boardManager.UpdatePiecesCanMovePos(moves);
     }
 
     // MoveSelected 안에서 플레이어 수 적용 후:
@@ -132,6 +140,55 @@ public class GamaManager : MonoBehaviour
             }
         );
     }
+    private void EvaluateGameState(string[] moves)
+    {
+        bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
 
+        if (moves.Length == 0)
+        {
+            if (isCheck)
+                OnCheckmate();
+            else
+                OnStalemate();
+        }
+        else if (isCheck)
+        {
+            OnCheck();
+        }
+    }
+    private void OnCheck()
+    {
+        Debug.Log("체크");
+    }
 
+    private void OnCheckmate()
+    {
+        if (NowTurn == 'w')
+        {
+            Debug.Log("체크메이트");
+            Debug.Log("흑 승");
+        }
+        else
+        {
+            Debug.Log("체크메이트");
+            Debug.Log("흑 승");
+        }
+        ExitGame();
+    }
+
+    private void OnStalemate()
+    {
+        Debug.Log("스테일메이트");
+        ExitGame();
+    }
+
+    // (임시) 게임 종료 메서드
+    private void ExitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 }

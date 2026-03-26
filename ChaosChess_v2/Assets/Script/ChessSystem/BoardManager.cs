@@ -125,13 +125,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        LoadFEN();
-        UpdatePiecesCanMovePos();
-    }
-
-    private void LoadFEN()
+    public void LoadFEN()
     {
         Pieces.Clear();
         board = new Piece[8, 8];
@@ -200,17 +194,11 @@ public class BoardManager : MonoBehaviour
         FairyStockfishBridge.Instance.SetPosition(FEN);
     }
 
-    public void UpdatePiecesCanMovePos()
+    public void UpdatePiecesCanMovePos(string[] moves)
     {
         foreach (Piece piece in Pieces)
         {
             piece.ResetCanMovePos();
-        }
-
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        if (FairyStockfishBridge.Instance.IsInCheck())
-        {
-            Debug.Log("체크");
         }
 
         Vector3Int from = new Vector3Int(-1, -1, -1);
@@ -224,7 +212,7 @@ public class BoardManager : MonoBehaviour
                 from = UCIToGrid(move.Substring(0, 2));
                 fromPiece = GetPiece(from);
             }
-            to = UCIToGrid(move.Substring(2));
+            to = UCIToGrid(move.Substring(2, 2));
 
             fromPiece.AddCanMovePos(to);
         }
