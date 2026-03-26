@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -207,6 +208,10 @@ public class BoardManager : MonoBehaviour
         }
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        if (FairyStockfishBridge.Instance.IsInCheck())
+        {
+            Debug.Log("체크");
+        }
 
         Vector3Int from = new Vector3Int(-1, -1, -1);
         Vector3Int to = new Vector3Int(-1, -1, -1);
@@ -252,7 +257,6 @@ public class BoardManager : MonoBehaviour
     // uci로 받은 이동을 적용한다
     public void ApplyUCIMove(string uciMove)
     {
-        Debug.Log(uciMove);
         // "e2e4" → from(4,1), to(4,3) 변환
         Vector3Int from = UCIToGrid(uciMove.Substring(0, 2));
         Vector3Int to = UCIToGrid(uciMove.Substring(2, 2));

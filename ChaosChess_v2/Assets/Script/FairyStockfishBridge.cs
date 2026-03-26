@@ -199,6 +199,46 @@ public class FairyStockfishBridge : MonoBehaviour
         return filtered.ToArray();
     }
 
+    // ── 체크 확인 ─────────────────
+    public bool IsInCheck()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+    // Android: Java 쪽 엔진 API 호출
+    if (_fairyInstance == null) return false;
+    return _fairyInstance.Call<bool>("isInCheck");
+
+#else
+        // PC: UCI "d" 명령으로 체크 상태 파싱
+
+        // 엔진 준비
+        SendCommand("isready");
+        WaitForOutput("readyok", 3000);
+
+        // 현재 포지션 복구
+        RestorePosition();
+
+        // 디버그 정보 요청 (Checkers 포함)
+        SendCommand("d");
+
+        string output = WaitForOutput("Checkers:", 3000);
+
+        // 포지션 다시 복구
+        RestorePosition();
+
+        // "Checkers:" 라인 파싱
+        foreach (string line in output.Split('\n'))
+        {
+            if (line.StartsWith("Checkers:"))
+            {
+                string data = line.Substring("Checkers:".Length).Trim();
+                return !string.IsNullOrEmpty(data);
+            }
+        }
+
+        return false;
+#endif
+    }
+
     // ── 게임 결과 확인 ───────────────────────────────────
     public int GetGameResult()
     {
