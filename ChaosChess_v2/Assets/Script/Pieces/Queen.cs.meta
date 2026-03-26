@@ -4,8 +4,8 @@ MonoImporter:
   externalObjects: {}
   serializedVersion: 2
   defaultReferences:
-  - WhitePiece: {fileID: 2724963404071155675, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
-  - BlackPiece: {fileID: 1556011984, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  - WhitePiece: {fileID: -9169930197961752557, guid: 8dcb45a6b056db244a6c26fe4b4e2b35, type: 3}
+  - BlackPiece: {fileID: 7806412027950611141, guid: 5f25fdb5d76eaca4fa37a78c023eea99, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

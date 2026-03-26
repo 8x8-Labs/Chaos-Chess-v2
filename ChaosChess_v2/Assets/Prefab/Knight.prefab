@@ -100,16 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff23cae2439f524418be2599c3b0954d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WhitePiece: {fileID: 3659358165985340574, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
-  BlackPiece: {fileID: 1721821308, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
-  CanMoveOffsets:
-  - {x: 1, y: 2}
-  - {x: -1, y: 2}
-  - {x: 2, y: 1}
-  - {x: 2, y: -1}
-  - {x: -2, y: 1}
-  - {x: -2, y: -1}
-  - {x: 1, y: -2}
-  - {x: -1, y: -2}
+  WhitePiece: {fileID: -8901816766031237649, guid: 56fe1966f9222a54f9291e44520dc191, type: 3}
+  BlackPiece: {fileID: 3411159010764925268, guid: d502be879aea2e846a94adcfe2c5397d, type: 3}
   color: 0
   pos: {x: 1, y: 0, z: 0}

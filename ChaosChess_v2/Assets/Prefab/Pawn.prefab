@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65ccf1d61a3d55b4987cd2d0830dda8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WhitePiece: {fileID: -5619150752979459227, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
-  BlackPiece: {fileID: -1211513934, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  WhitePiece: {fileID: 5926072834292907760, guid: c333cb3bf862bbe4ab30fa08a8ed703d, type: 3}
+  BlackPiece: {fileID: -7109577741644954303, guid: b966041e47628e94dbbdae5d7b90a042, type: 3}
   color: 0
   pos: {x: 0, y: 0, z: 0}
