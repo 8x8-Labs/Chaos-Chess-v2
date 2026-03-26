@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
@@ -7,7 +8,6 @@ class FENPrefabPair
     public char FENChar;
     public Piece prefab;
 }
-
 
 public class BoardManager : MonoBehaviour
 {
@@ -94,6 +94,9 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
+
+
+    public System.Action<Piece, Vector3Int> OnPromotionRequired;
 
     private Castling castling = new Castling();
     private Vector3Int enPassantPos = new Vector3Int(-1, -1, -1);
@@ -254,14 +257,19 @@ public class BoardManager : MonoBehaviour
         Vector3Int from = UCIToGrid(uciMove.Substring(0, 2));
         Vector3Int to = UCIToGrid(uciMove.Substring(2, 2));
 
+        char promotion = '\0';
+
+        if (uciMove.Length == 5)
+            promotion = uciMove[4];
+
         Piece piece = GetPiece(from);
         if (piece != null)
-            MovePiece(piece, to);
+            MovePiece(piece, to, promotion);
 
         gamaManager.NextTurn();
     }
 
-    public bool MovePiece(Piece piece, Vector3Int target)
+    public bool MovePiece(Piece piece, Vector3Int target, char promotion = '\0')
     {
         if (!piece.CanMoveTo(this, target))
             return false;
@@ -271,6 +279,7 @@ public class BoardManager : MonoBehaviour
         Vector3Int prevEP = enPassantPos;
         enPassantPos = new Vector3Int(-1, -1, -1);
 
+        // 앙파상
         if (piece is Pawn && target == prevEP)
         {
             int dir = (piece.Color == PieceColor.White) ? -1 : 1;
@@ -278,6 +287,7 @@ public class BoardManager : MonoBehaviour
             DestroyPiece(diePos);
         }
 
+        // 캐슬링
         if (piece is King)
         {
             castling.OnKingMove(piece.Color);
@@ -296,7 +306,6 @@ public class BoardManager : MonoBehaviour
                 MovePiece(rook, rookTo);
             }
         }
-
         if (piece is Rook)
         {
             castling.OnRookMove(piece.Color, from);
@@ -323,7 +332,49 @@ public class BoardManager : MonoBehaviour
             enPassantPos = new Vector3Int(from.x, middleY, 0);
         }
 
+        if (piece is Pawn)
+        {
+            if (piece.Pos.y == (piece.Color == PieceColor.White ? 7 : 0))
+            {
+                HandlePromotion(piece, target, promotion);
+            }
+        }
+
         return true;
+    }
+    private void HandlePromotion(Piece pawn, Vector3Int pos, char promotion)
+    {
+        PieceColor color = pawn.Color;
+
+        // AI 프로모션 (UCI)
+        if (promotion != '\0')
+        {
+            CreatePromotionPiece(pos, color, promotion);
+        }
+        else
+        {
+            // 플레이어 → 이벤트 던짐
+            OnPromotionRequired?.Invoke(pawn, pos);
+        }
+    }
+
+    public void CreatePromotionPiece(Vector3Int pos, PieceColor color, char type)
+    {
+        // 폰 제거
+        DestroyPiece(pos);
+
+        char key = char.ToLower(type);
+
+        if (FENMap.TryGetValue(key, out Piece prefab))
+        {
+            Piece newPiece = Instantiate(prefab, transform);
+
+            newPiece.Init(pos, color);
+            AddPiece(newPiece, pos);
+            newPiece.Move(pos);
+
+            Pieces.Add(newPiece);
+        }
     }
 
     public void DestroyPiece(Vector3Int target)

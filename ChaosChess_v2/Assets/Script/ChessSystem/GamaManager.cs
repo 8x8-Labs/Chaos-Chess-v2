@@ -2,8 +2,16 @@ using UnityEngine;
 
 public class GamaManager : MonoBehaviour
 {
-    public bool isPlayerTurn = true;
+    private bool isPlayerTurn = true;
+    public bool IsPlayerTurn => isPlayerTurn;
     private PieceColor turn;
+
+    private bool isWaitingPromotion = false;
+    public bool IsWaitingPromotion
+    {
+        get { return isWaitingPromotion; }
+        set { isWaitingPromotion = value; }
+    }
 
     public char NowTurn
     {
@@ -16,6 +24,7 @@ public class GamaManager : MonoBehaviour
         }
     }
 
+    private UIManager uiManager;
     private BoardManager boardManager;
     private BoardUI boardUI;
 
@@ -28,6 +37,9 @@ public class GamaManager : MonoBehaviour
 
         boardManager = GetComponent<BoardManager>();
         boardUI = GetComponent<BoardUI>();
+        uiManager = FindFirstObjectByType<UIManager>();
+
+        boardManager.OnPromotionRequired += HandlePromotion;
 
         FairyStockfishBridge.Instance.InitEngine("chess");
     }
@@ -51,6 +63,23 @@ public class GamaManager : MonoBehaviour
         }
     }
 
+    private void HandlePromotion(Piece pawn, Vector3Int pos)
+    {
+        isWaitingPromotion = true;
+
+        uiManager.Show((type) =>
+        {
+            boardManager.CreatePromotionPiece(pos, pawn.Color, type);
+
+            isWaitingPromotion = false;
+
+            NextTurn();
+
+            isPlayerTurn = false;
+            RequestAIMove();
+        });
+    }
+
     private void SelectPiece(Piece piece)
     {
         selectedPiece = piece;
@@ -58,7 +87,6 @@ public class GamaManager : MonoBehaviour
 
     public void NextTurn()
     {
-        
         if (turn == PieceColor.White)
             turn = PieceColor.Black;
         else
@@ -79,9 +107,13 @@ public class GamaManager : MonoBehaviour
         if (boardManager.MovePiece(selectedPiece, target))
         {
             selectedPiece = null;
+
+            // 프로모션이면 여기서 멈춤
+            if (isWaitingPromotion)
+                return;
+
             NextTurn();
 
-            // AI에게 수 요청
             isPlayerTurn = false;
             RequestAIMove();
         }

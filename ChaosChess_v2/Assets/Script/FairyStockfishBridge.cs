@@ -164,7 +164,7 @@ public class FairyStockfishBridge : MonoBehaviour
         SendCommand("go perft 1");
         string output = WaitForOutput("Nodes searched", 8000);
 
-        UnityEngine.Debug.Log("[Fairy] perft output:\n" + output);
+        //        UnityEngine.Debug.Log("[Fairy] perft output:\n" + output);
 
         // 포지션 복구
         RestorePosition();
@@ -239,7 +239,7 @@ public class FairyStockfishBridge : MonoBehaviour
         if (_process == null || _process.HasExited) return;
         _input.WriteLine(command);
         _input.Flush();
-//        UnityEngine.Debug.Log("[UCI →] " + command);
+        //        UnityEngine.Debug.Log("[UCI →] " + command);
     }
 
     private string WaitForOutput(string keyword, int timeoutMs = 5000)

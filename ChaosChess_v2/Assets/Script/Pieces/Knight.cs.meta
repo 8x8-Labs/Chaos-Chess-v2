@@ -1,2 +1,13 @@
 fileFormatVersion: 2
 guid: ff23cae2439f524418be2599c3b0954d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - WhitePiece: {fileID: 3659358165985340574, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  - BlackPiece: {fileID: 1721821308, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

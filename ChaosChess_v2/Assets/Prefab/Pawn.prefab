@@ -102,11 +102,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WhitePiece: {fileID: -5619150752979459227, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
   BlackPiece: {fileID: -1211513934, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
-  CanMoveOffsets:
-  - {x: 0, y: 1}
   color: 0
   pos: {x: 0, y: 0, z: 0}
-  AttackOffsets:
-  - {x: 1, y: 1}
-  - {x: -1, y: 1}
-  FirstMoveOffset: {x: 0, y: 2}

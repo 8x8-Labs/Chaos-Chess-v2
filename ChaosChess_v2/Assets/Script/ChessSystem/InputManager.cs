@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Tilemaps;
 
 public class InputManager : MonoBehaviour
@@ -14,6 +15,8 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
+        if (gamaManager.IsWaitingPromotion)
+            return;
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -21,5 +24,6 @@ public class InputManager : MonoBehaviour
 
             gamaManager.SelectGrid(mouseGridPos);
         }
+
     }
 }
