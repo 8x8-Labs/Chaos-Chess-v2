@@ -94,10 +94,13 @@ public class GamaManager : MonoBehaviour
     public void NextTurn()
     {
         if (turn == PieceColor.White)
+        {
             turn = PieceColor.Black;
+        }
         else
+        {
             turn = PieceColor.White;
-
+        }
         boardManager.UpdateFEN(); // 디버깅
         string fen = boardManager.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
@@ -142,14 +145,20 @@ public class GamaManager : MonoBehaviour
     }
     private void EvaluateGameState(string[] moves)
     {
+        Debug.Log(boardManager.GetHalfmoveClock());
+        if (boardManager.GetHalfmoveClock() >= 150)
+        {
+            OnDraw();
+        }
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
+
 
         if (moves.Length == 0)
         {
             if (isCheck)
                 OnCheckmate();
             else
-                OnStalemate();
+                OnDraw();
         }
         else if (isCheck)
         {
@@ -176,9 +185,9 @@ public class GamaManager : MonoBehaviour
         ExitGame();
     }
 
-    private void OnStalemate()
+    private void OnDraw()
     {
-        Debug.Log("스테일메이트");
+        Debug.Log("무승부");
         ExitGame();
     }
 

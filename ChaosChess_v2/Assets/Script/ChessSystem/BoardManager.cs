@@ -461,4 +461,9 @@ public class BoardManager : MonoBehaviour
     {
         return FEN;
     }
+
+    public int GetHalfmoveClock()
+    {
+        return halfmoveClock;
+    }
 }
