@@ -96,6 +96,8 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    private int halfmoveClock = 0;
+    private int fullmoveNumber = 1;
 
     public System.Action<Piece, Vector3Int> OnPromotionRequired;
 
@@ -190,6 +192,9 @@ public class BoardManager : MonoBehaviour
 
         if (SliceFEN[3] != "-")
             enPassantPos = UCIToGrid(SliceFEN[3]);
+
+        halfmoveClock = int.Parse(SliceFEN[4]);
+        fullmoveNumber = int.Parse(SliceFEN[5]);
 
         FairyStockfishBridge.Instance.SetPosition(FEN);
     }
@@ -305,8 +310,11 @@ public class BoardManager : MonoBehaviour
 
         board[from.x, from.y] = null;
 
+        bool isCapture = false;
         if (!IsEmpty(target))
         {
+            isCapture = true;
+
             Piece targetPiece = GetPiece(target);
             if (targetPiece is Rook)
             {
@@ -317,6 +325,15 @@ public class BoardManager : MonoBehaviour
 
         board[target.x, target.y] = piece;
         piece.Move(target);
+
+        if (piece is Pawn || isCapture)
+            halfmoveClock = 0;
+        else
+            halfmoveClock++;
+
+        // fullmove number (흑이 두면 증가)
+        if (piece.Color == PieceColor.Black)
+            fullmoveNumber++;
 
         if (piece is Pawn && Mathf.Abs(from.y - target.y) == 2)
         {
@@ -437,7 +454,7 @@ public class BoardManager : MonoBehaviour
 
         FEN += " ";
 
-        FEN += ep + " 0 1";
+        FEN += " " + halfmoveClock + " " + fullmoveNumber;
     }
 
     public string GetFEN()
