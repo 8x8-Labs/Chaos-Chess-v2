@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
     public void SelectGrid(Vector3Int pos)
     {
         if (!isPlayerTurn) return;
-        if (pos.x < 0 || pos.x > 7 || pos.y < 0 || pos.y > 7) return;
+        if (!boardManager.IsInside(pos)) return;
 
         Piece piece = boardManager.GetPiece(pos);
 
