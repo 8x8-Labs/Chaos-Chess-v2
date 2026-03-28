@@ -178,7 +178,8 @@ public class BoardManager : MonoBehaviour
                 AddPiece(piece, pos);
 
                 // 위치 반영 (Transform 이동 등)
-                piece.Move(pos);
+                Vector3 WorldPos = GridPosToWorldPos(pos);
+                piece.Move(pos, WorldPos);
 
                 Pieces.Add(piece);
             }
@@ -327,7 +328,8 @@ public class BoardManager : MonoBehaviour
         }
 
         board[target.x, target.y] = piece;
-        piece.Move(target);
+        Vector3 WorldPos = GridPosToWorldPos(target);
+        piece.Move(target, WorldPos);
 
         if (piece is Pawn || isCapture)
             halfmoveClock = 0;
@@ -383,7 +385,9 @@ public class BoardManager : MonoBehaviour
 
             newPiece.Init(pos, color);
             AddPiece(newPiece, pos);
-            newPiece.Move(pos);
+
+            Vector3 WorldPos = GridPosToWorldPos(pos);
+            newPiece.Move(pos, WorldPos);
 
             Pieces.Add(newPiece);
         }
