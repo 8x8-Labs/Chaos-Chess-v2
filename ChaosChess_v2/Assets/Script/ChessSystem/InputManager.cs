@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Tilemaps;
 
 public class InputManager : MonoBehaviour

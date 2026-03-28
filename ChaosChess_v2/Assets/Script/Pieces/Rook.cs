@@ -1,4 +1,3 @@
-
 public class Rook : Piece
 {
     public override string GetFen()

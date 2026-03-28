@@ -1,6 +1,4 @@
-using System.Data.Common;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class UIManager : MonoBehaviour
 {
