@@ -145,7 +145,6 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateGameState(string[] moves)
     {
-        Debug.Log(boardManager.GetHalfmoveClock());
         if (boardManager.GetHalfmoveClock() >= 150)
         {
             OnDraw();
