@@ -440,21 +440,23 @@ public class BoardManager : MonoBehaviour
             if (i != 0)
                 FEN += "/";
         }
+
         FEN += " ";
+
         if (gameManager.NowTurn == 'w')
             FEN += 'w';
         else
             FEN += 'b';
 
+
+        FEN += " ";
+
+        FEN += castling.GetFEN() + " ";
+        
         string ep = enPassantPos == new Vector3Int(-1, -1, -1) ? "-" : GridTOUCI(enPassantPos);
+        FEN += ep + " ";
 
-        FEN += " ";
-
-        FEN += castling.GetFEN();
-
-        FEN += " ";
-
-        FEN += " " + halfmoveClock + " " + fullmoveNumber;
+        FEN += halfmoveClock + " " + fullmoveNumber;
     }
 
     public string GetFEN()
