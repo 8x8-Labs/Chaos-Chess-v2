@@ -419,7 +419,7 @@ public class BoardManager : MonoBehaviour
         return new Vector3
         (
             (GridPos.x - BoardCenterOffset.x) * CellSize.x,
-            (GridPos.y - BoardCenterOffset.x) * 0.65f,
+            (GridPos.y - BoardCenterOffset.y) * CellSize.y,
             0
         );
     }
