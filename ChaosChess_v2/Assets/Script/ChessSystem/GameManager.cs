@@ -180,7 +180,7 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.Log("체크메이트");
-            Debug.Log("흑 승");
+            Debug.Log("백 승");
         }
         ExitGame();
     }
