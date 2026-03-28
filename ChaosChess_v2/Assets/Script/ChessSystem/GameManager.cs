@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GamaManager : MonoBehaviour
+public class GameManager : MonoBehaviour
 {
     private bool isPlayerTurn = true;
     public bool IsPlayerTurn => isPlayerTurn;

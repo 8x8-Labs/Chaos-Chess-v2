@@ -111,13 +111,13 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private List<FENPrefabPair> FENMapList;
     private Dictionary<char, Piece> FENMap;
 
-    private GamaManager gamaManager;
+    private GameManager gameManager;
 
     void Awake()
     {
         enPassantPos = new Vector3Int(-1, -1, -1);
 
-        gamaManager = GetComponent<GamaManager>();
+        gameManager = GetComponent<GameManager>();
 
         FENMap = new Dictionary<char, Piece>();
 
@@ -183,9 +183,9 @@ public class BoardManager : MonoBehaviour
             x++;
         }
 
-        if (SliceFEN[1][0] != gamaManager.NowTurn)
+        if (SliceFEN[1][0] != gameManager.NowTurn)
         {
-            gamaManager.NextTurn();
+            gameManager.NextTurn();
         }
 
         castling.SetFen(SliceFEN[2]);
@@ -263,7 +263,7 @@ public class BoardManager : MonoBehaviour
         if (piece != null)
             MovePiece(piece, to, promotion);
 
-        gamaManager.NextTurn();
+        gameManager.NextTurn();
     }
 
     public bool MovePiece(Piece piece, Vector3Int target, char promotion = '\0')
@@ -441,7 +441,7 @@ public class BoardManager : MonoBehaviour
                 FEN += "/";
         }
         FEN += " ";
-        if (gamaManager.NowTurn == 'w')
+        if (gameManager.NowTurn == 'w')
             FEN += 'w';
         else
             FEN += 'b';

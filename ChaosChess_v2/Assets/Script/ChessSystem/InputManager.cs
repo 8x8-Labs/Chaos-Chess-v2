@@ -6,23 +6,23 @@ public class InputManager : MonoBehaviour
 {
     [SerializeField] private Tilemap ChessBoardTileMap;
 
-    private GamaManager gamaManager;
+    private GameManager gameManager;
 
     void Awake()
     {
-        gamaManager = GetComponent<GamaManager>();
+        gameManager = GetComponent<GameManager>();
     }
 
     void Update()
     {
-        if (gamaManager.IsWaitingPromotion)
+        if (gameManager.IsWaitingPromotion)
             return;
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int mouseGridPos = ChessBoardTileMap.WorldToCell(mouseWorldPos);
 
-            gamaManager.SelectGrid(mouseGridPos);
+            gameManager.SelectGrid(mouseGridPos);
         }
 
     }
