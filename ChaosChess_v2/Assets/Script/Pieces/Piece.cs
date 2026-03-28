@@ -10,6 +10,9 @@ public enum PieceColor
 
 public class Piece : MonoBehaviour
 {
+    [SerializeField] private GameObject GMObject;
+    [SerializeField] private BoardManager boardManager;
+
     [SerializeField] protected Sprite WhitePiece;
     [SerializeField] protected Sprite BlackPiece;
     protected SpriteRenderer spriteRenderer;
@@ -33,6 +36,7 @@ public class Piece : MonoBehaviour
 
     void Awake()
     {
+        boardManager = GetComponent<BoardManager>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
@@ -73,13 +77,8 @@ public class Piece : MonoBehaviour
     {
         Pos = target;
 
-        transform.position = GridPosToWorldPos(target);
+        transform.position = boardManager.GridPosToWorldPos(target);
     }
 
     public virtual string GetFen() { return ""; }
-
-    public Vector3 GridPosToWorldPos(Vector3Int GridPos)
-    {
-        return new Vector3((GridPos.x - 3.5f) * 0.65f, (GridPos.y - 3.5f) * 0.65f, 0);
-    }
 }

@@ -111,6 +111,9 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private List<FENPrefabPair> FENMapList;
     private Dictionary<char, Piece> FENMap;
 
+    private Vector2 BoardCenterOffset = new Vector2(3.5f, 3.5f);
+    private Vector2 CellSize = new Vector2(0.65f, 0.65f);
+
     private GameManager gameManager;
 
     void Awake()
@@ -407,6 +410,16 @@ public class BoardManager : MonoBehaviour
         return sq;
     }
 
+    public Vector3 GridPosToWorldPos(Vector3Int GridPos)
+    {
+        return new Vector3
+        (
+            (GridPos.x - BoardCenterOffset.x) * CellSize.x,
+            (GridPos.y - BoardCenterOffset.x) * 0.65f,
+            0
+        );
+    }
+
     public void UpdateFEN()
     {
         FEN = "";
@@ -452,7 +465,7 @@ public class BoardManager : MonoBehaviour
         FEN += " ";
 
         FEN += castling.GetFEN() + " ";
-        
+
         string ep = enPassantPos == new Vector3Int(-1, -1, -1) ? "-" : GridTOUCI(enPassantPos);
         FEN += ep + " ";
 
