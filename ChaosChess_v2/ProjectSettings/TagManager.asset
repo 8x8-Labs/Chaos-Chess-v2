@@ -8,10 +8,10 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - board
   - Water
   - UI
-  - 
+  - Piece
   - 
   - 
   - 
@@ -38,11 +38,11 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Board
+    uniqueID: 837405885
+    locked: 0
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: UI
-    uniqueID: 3083137763
     locked: 0
   m_RenderingLayers:
   - Default
