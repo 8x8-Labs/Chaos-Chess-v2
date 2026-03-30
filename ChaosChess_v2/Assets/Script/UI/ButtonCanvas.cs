@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,15 +13,18 @@ public class ButtonCanvas : ButtonParent
         }
     }
     [SerializeField] private float fadeDuration = 0.2f;
-    [SerializeField] private Button firstSelectButton;
+    [SerializeField] private float uiAnimDelay = 0.2f;
+    [SerializeField] private List<BasicUIAnimation> animationButtons;
 
     private CanvasGroup canvasGroup;
+    private ScrollRect scrollRect;
     private Canvas canvas;
 
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         canvas = GetComponent<Canvas>();
+        scrollRect = GetComponentInChildren<ScrollRect>();
     }
 
 
@@ -28,6 +32,11 @@ public class ButtonCanvas : ButtonParent
     public override void EnableParent()
     {
         canvas.enabled = true;
+        if(scrollRect != null)
+        {
+            scrollRect.verticalNormalizedPosition = 1;
+            scrollRect.horizontalNormalizedPosition = 1;
+        }
         canvasGroup.alpha = 0f;
         FadeOut();
     }
@@ -42,6 +51,10 @@ public class ButtonCanvas : ButtonParent
     public void FadeOut()
     {
         canvasGroup.DOFade(1f, fadeDuration);
+        for(int i = 0; i < animationButtons.Count; i++)
+        {
+            animationButtons[i].StartAnimation(i * uiAnimDelay);
+        }
     }
     public void FadeIn()
     {

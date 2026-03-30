@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +23,7 @@ public class BasicUIAnimation : MonoBehaviour, IUIAnimation
 
     private Image image;
 
-    private void Start()
+    private void Awake()
     {
         image = GetComponent<Image>();
     }
@@ -32,9 +33,10 @@ public class BasicUIAnimation : MonoBehaviour, IUIAnimation
         image.rectTransform.DOMoveX(0f, duration).SetEase(endAnimEase);
     }
 
-    public void StartAnimation()
+    public void StartAnimation(float delay)
     {
-        image.rectTransform.anchoredPosition = new Vector2(-500f, 0f);
-        image.rectTransform.DOMoveX(0f, duration).SetEase(startAnimEase);
+        image.DOKill(true);
+        image.rectTransform.anchoredPosition = new Vector2(2000f, 0f);
+        image.rectTransform.DOMoveX(0f, duration).SetEase(startAnimEase).SetDelay(delay);
     }
 }
