@@ -4,7 +4,6 @@ using UnityEngine.Tilemaps;
 
 public class TileSelector : Selector<Vector3Int>
 {
-    [SerializeField] private CardDataSO TestSO;
     [SerializeField] private Tilemap tilemap;
 
     private bool executable => isExecute();
@@ -50,6 +49,8 @@ public class TileSelector : Selector<Vector3Int>
         
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
+
+    [ContextMenu("Execute")]
     public override void ExecuteSkill()
     {
         if (!executable) return;

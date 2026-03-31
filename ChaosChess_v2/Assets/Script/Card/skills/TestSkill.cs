@@ -12,12 +12,14 @@ public class TestSkill : CardData, IPieceCard
 
     public void LoadPieceSelector()
     {
+        if(selector == null) selector = FindFirstObjectByType<PieceSelector>();
+
         selector.EnableSelector(this);
     }
 
     public void Execute(CardEffectArgs args = null)
     {
-        Debug.Log("카드 실행!");
+        Debug.Log($"카드 실행! : {DataSO.name}");
         List<Piece> pieces = args.Targets;
     }
 }
