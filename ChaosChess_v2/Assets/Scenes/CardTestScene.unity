@@ -2844,6 +2844,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f85221a7900618468e3ee16e5f36ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsGameInput: 1
 --- !u!114 &1629911494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3277,6 +3278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94eb88f2472d69647b09fda0d3acfd75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  boardManager: {fileID: 1629911495}
   tilemap: {fileID: 1170031624}
   tileDrawer: {fileID: 1803301550}
 --- !u!114 &1803301550

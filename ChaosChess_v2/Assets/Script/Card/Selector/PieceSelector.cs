@@ -42,6 +42,8 @@ public class PieceSelector : Selector<Piece>
 
     public override void SelectTarget(Piece Target)
     {
+        if (!selectState) return;
+
         Debug.Log("기물 클릭됨!");
         if (selectedTargets.Contains(Target))
         {
@@ -82,6 +84,7 @@ public class PieceSelector : Selector<Piece>
         skillCard = cardData.GetComponent<IPieceCard>();
         selectedTargets.Clear();
         selectorCanvas.enabled = true;
+        selectState = true;
     }
 
     protected override void DisableSelector()
@@ -90,5 +93,6 @@ public class PieceSelector : Selector<Piece>
         cardData = null;
         skillCard = null;
         selectorCanvas.enabled = false;
+        selectState = false;
     }
 }

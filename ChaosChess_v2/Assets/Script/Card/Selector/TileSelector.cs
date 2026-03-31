@@ -5,6 +5,7 @@ using UnityEngine.Tilemaps;
 
 public class TileSelector : Selector<Vector3Int>
 {
+    [SerializeField] private BoardManager boardManager;
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private UITileDrawer tileDrawer;
 
@@ -30,6 +31,7 @@ public class TileSelector : Selector<Vector3Int>
 
     void Update()
     {
+        if (!selectState) return;
         // 1. 마우스 클릭 또는 휴대폰 터치 감지
         if (Input.GetMouseButtonDown(0))
         {
@@ -37,7 +39,7 @@ public class TileSelector : Selector<Vector3Int>
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int mouseGridPos = tilemap.WorldToCell(mousePos);
 
-            if(mouseGridPos != null)
+            if(mouseGridPos != null && boardManager.GetPiece(mouseGridPos) == null)
             {
                 SelectTarget(mouseGridPos);
             }
@@ -89,7 +91,10 @@ public class TileSelector : Selector<Vector3Int>
         cardData = data;
         skillCard = cardData.GetComponent<ITileCard>();
         selectedTargets.Clear();
+
+        GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
+        selectState = true;
     }
 
     protected override void DisableSelector()
@@ -97,6 +102,9 @@ public class TileSelector : Selector<Vector3Int>
         cardData = null;
         skillCard = null;
         selectedTargets.Clear();
+
+        GameManager.Instance.IsGameInput = true;
         selectorCanvas.enabled = false;
+        selectState = false;
     }
 }
