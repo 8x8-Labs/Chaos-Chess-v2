@@ -17,8 +17,8 @@ MonoBehaviour:
   CardDescription: "\uD3F0 \uAE30\uBB3C\uC774 \uC804\uBC29\uC73C\uB85C 2\uCE78 \uC804\uC9C4\uD560
     \uC218 \uC788\uAC8C \uB41C\uB2E4.\n"
   Type: 0
-  PieceType: 0
-  RequiredPieceCount: 0
+  PieceType: -1
+  RequiredPieceCount: 2
   TileCount: 0
   MaintainTurn: -1
   HasLimit: 0

@@ -1,27 +1,44 @@
 using UnityEngine.EventSystems;
 using UnityEngine;
 
-public class PieceSelector : Selector<Piece>, IPointerDownHandler, IPointerUpHandler
+public class PieceSelector : Selector<Piece>
 {
+    [SerializeField] private CardDataSO TestSO;
+
+    private void Start()
+    {
+        cardSO = TestSO;
+    }
     public override void DeselectFirstTarget()
     {
         selectedTargets.Dequeue();
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    void Update()
     {
-        Piece p = null;
-        if(eventData.pointerEnter.TryGetComponent<Piece>(out p)) 
-            SelectTarget(p);
-    }
+        // 1. 마우스 클릭 또는 휴대폰 터치 감지
+        if (Input.GetMouseButtonDown(0))
+        {
+            // 2. 화면 좌표를 월드(게임) 좌표로 변환
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
 
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        throw new System.NotImplementedException();
+            // 3. 해당 위치에 2D 콜라이더가 있는지 확인
+            RaycastHit2D hit = Physics2D.Raycast(mousePos2D, Vector2.zero);
+
+            if (hit.collider != null)
+            {
+                if (hit.collider.TryGetComponent<Piece>(out Piece p))
+                {
+                    SelectTarget(p);
+                }
+            }
+        }
     }
 
     public override void SelectTarget(Piece Target)
     {
+        Debug.Log("기물 클릭됨!");
         if (selectedTargets.Count >= cardSO.RequiredPieceCount)
         {
             DeselectFirstTarget();
@@ -31,10 +48,10 @@ public class PieceSelector : Selector<Piece>, IPointerDownHandler, IPointerUpHan
             Debug.Log("이미 선택된 기물입니다!");
             return;
         }
-        else
-        {
-            selectedTargets.Enqueue(Target);
-        }
+
+
+        selectedTargets.Enqueue(Target);
+        Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
 
     public override void SetCardSO(CardDataSO cardSO) => this.cardSO = cardSO;
