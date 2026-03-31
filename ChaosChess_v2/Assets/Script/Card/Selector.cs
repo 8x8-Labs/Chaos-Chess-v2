@@ -1,10 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Selector : MonoBehaviour
+public abstract class Selector<T> : MonoBehaviour
 {
-    public CardDataSO cardSO;
-
+    protected CardDataSO cardSO;
     protected bool isExecute = false;
 
-    public abstract void OnTargetSelect();
+    protected Queue<T> selectedTargets;
+
+    public abstract void SelectTarget(T target);
+    public abstract void DeselectFirstTarget();
+    public abstract void SetCardSO(CardDataSO cardSO);
 }
