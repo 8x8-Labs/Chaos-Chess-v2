@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PieceSelector : Selector<Piece>
 {
+
     private bool executable => isExecute();
     private IPieceCard skillCard;
 
@@ -20,22 +21,19 @@ public class PieceSelector : Selector<Piece>
 
     void Update()
     {
+        if (!selectState) return;
         // 1. 마우스 클릭 또는 휴대폰 터치 감지
         if (Input.GetMouseButtonDown(0))
         {
             // 2. 화면 좌표를 월드(게임) 좌표로 변환
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
+            Vector3Int mouseGridPos = tilemap.WorldToCell(mousePos);
 
-            // 3. 해당 위치에 2D 콜라이더가 있는지 확인
-            RaycastHit2D hit = Physics2D.Raycast(mousePos2D, Vector2.zero);
+            Piece p = boardManager.GetPiece(mouseGridPos);
 
-            if (hit.collider != null)
+            if (p != null)
             {
-                if (hit.collider.TryGetComponent<Piece>(out Piece p))
-                {
-                    SelectTarget(p);
-                }
+                SelectTarget(p);
             }
         }
     }

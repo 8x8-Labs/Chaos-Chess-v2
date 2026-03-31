@@ -1,12 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class TileSelector : Selector<Vector3Int>
 {
-    [SerializeField] private BoardManager boardManager;
-    [SerializeField] private Tilemap tilemap;
     [SerializeField] private UITileDrawer tileDrawer;
 
     private bool executable => isExecute();

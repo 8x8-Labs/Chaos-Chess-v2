@@ -112,6 +112,8 @@ public class BoardManager : MonoBehaviour
     private Vector2 BoardCenterOffset = new Vector2(3.5f, 3.5f);
     private Vector2 CellSize = new Vector2(0.65f, 0.65f);
 
+    [SerializeField] private Transform pieceSpawnTransform;
+
     void Awake()
     {
         enPassantPos = new Vector3Int(-1, -1, -1);
@@ -163,7 +165,7 @@ public class BoardManager : MonoBehaviour
                 Vector3Int pos = new Vector3Int(x, y, 0);
 
                 // 생성
-                Piece piece = Instantiate(prefab, transform);
+                Piece piece = Instantiate(prefab, pieceSpawnTransform);
 
                 // 상태 설정
                 piece.Init(pos, isWhite ? PieceColor.White : PieceColor.Black);
@@ -375,7 +377,7 @@ public class BoardManager : MonoBehaviour
 
         if (FENMap.TryGetValue(key, out Piece prefab))
         {
-            Piece newPiece = Instantiate(prefab, transform);
+            Piece newPiece = Instantiate(prefab, pieceSpawnTransform);
 
             newPiece.Init(pos, color);
             AddPiece(newPiece, pos);

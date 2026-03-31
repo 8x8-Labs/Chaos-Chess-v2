@@ -1,8 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public abstract class Selector<T> : MonoBehaviour
 {
+    [SerializeField] protected Tilemap tilemap;
+    [SerializeField] protected BoardManager boardManager;
+
     protected CardData cardData;
     protected Canvas selectorCanvas;
     protected Queue<T> selectedTargets = new Queue<T>();

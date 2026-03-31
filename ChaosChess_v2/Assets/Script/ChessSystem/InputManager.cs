@@ -17,6 +17,5 @@ public class InputManager : MonoBehaviour
 
             GameManager.Instance.SelectGrid(mouseGridPos);
         }
-
     }
 }
