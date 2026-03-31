@@ -112,13 +112,9 @@ public class BoardManager : MonoBehaviour
     private Vector2 BoardCenterOffset = new Vector2(3.5f, 3.5f);
     private Vector2 CellSize = new Vector2(0.65f, 0.65f);
 
-    private GameManager gameManager;
-
     void Awake()
     {
         enPassantPos = new Vector3Int(-1, -1, -1);
-
-        gameManager = GetComponent<GameManager>();
 
         FENMap = new Dictionary<char, Piece>();
 
@@ -185,9 +181,9 @@ public class BoardManager : MonoBehaviour
             x++;
         }
 
-        if (SliceFEN[1][0] != gameManager.NowTurn)
+        if (SliceFEN[1][0] != GameManager.Instance.NowTurn)
         {
-            gameManager.NextTurn();
+            GameManager.Instance.NextTurn();
         }
 
         castling.SetFen(SliceFEN[2]);
@@ -265,7 +261,7 @@ public class BoardManager : MonoBehaviour
         if (piece != null)
             MovePiece(piece, to, promotion);
 
-        gameManager.NextTurn();
+        GameManager.Instance.NextTurn();
     }
 
     public bool MovePiece(Piece piece, Vector3Int target, char promotion = '\0')
@@ -458,7 +454,7 @@ public class BoardManager : MonoBehaviour
 
         FEN += " ";
 
-        if (gameManager.NowTurn == 'w')
+        if (GameManager.Instance.NowTurn == 'w')
             FEN += 'w';
         else
             FEN += 'b';

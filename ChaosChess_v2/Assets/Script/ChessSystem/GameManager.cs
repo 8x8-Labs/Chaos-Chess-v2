@@ -2,16 +2,19 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
     private bool isPlayerTurn = true;
     public bool IsPlayerTurn => isPlayerTurn;
     private PieceColor turn;
 
-    private bool isWaitingPromotion = false;
-    public bool IsWaitingPromotion
-    {
-        get { return isWaitingPromotion; }
-        set { isWaitingPromotion = value; }
-    }
+    //private bool isWaitingPromotion = false;
+    //public bool IsWaitingPromotion
+    //{
+    //    get { return isWaitingPromotion; }
+    //    set { isWaitingPromotion = value; }
+    //}
+
+    public bool IsGameInput = true;
 
     public char NowTurn
     {
@@ -30,6 +33,18 @@ public class GameManager : MonoBehaviour
 
     private Piece selectedPiece;
 
+    private void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     void Start()
     {
@@ -71,13 +86,13 @@ public class GameManager : MonoBehaviour
 
     private void HandlePromotion(Piece pawn, Vector3Int pos)
     {
-        isWaitingPromotion = true;
+        IsGameInput = false;
 
         uiManager.Show((type) =>
         {
             boardManager.CreatePromotionPiece(pos, pawn.Color, type);
 
-            isWaitingPromotion = false;
+            IsGameInput = true;
 
             NextTurn();
 
@@ -120,7 +135,7 @@ public class GameManager : MonoBehaviour
             selectedPiece = null;
 
             // 프로모션이면 여기서 멈춤
-            if (isWaitingPromotion)
+            if (!IsGameInput)
                 return;
 
             NextTurn();
