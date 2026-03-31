@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
-public class PieceSelector : Selector<Piece>
+public class TileSelector : Selector<Vector3Int>
 {
     [SerializeField] private CardDataSO TestSO;
+    [SerializeField] private Tilemap tilemap;
 
     private void Start()
     {
@@ -20,31 +22,25 @@ public class PieceSelector : Selector<Piece>
         {
             // 2. 화면 좌표를 월드(게임) 좌표로 변환
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 mousePos2D = new Vector2(mousePos.x, mousePos.y);
+            Vector3Int mouseGridPos = tilemap.WorldToCell(mousePos);
 
-            // 3. 해당 위치에 2D 콜라이더가 있는지 확인
-            RaycastHit2D hit = Physics2D.Raycast(mousePos2D, Vector2.zero);
-
-            if (hit.collider != null)
+            if(mouseGridPos != null)
             {
-                if (hit.collider.TryGetComponent<Piece>(out Piece p))
-                {
-                    SelectTarget(p);
-                }
+                SelectTarget(mouseGridPos);
             }
         }
     }
 
-    public override void SelectTarget(Piece Target)
+    public override void SelectTarget(Vector3Int Target)
     {
-        Debug.Log("기물 클릭됨!");
-        if (selectedTargets.Count >= cardSO.RequiredPieceCount)
+        Debug.Log("타일 클릭됨!");
+        if (selectedTargets.Count >= cardSO.TileCount)
         {
             DeselectFirstTarget();
         }
         else if (selectedTargets.Contains(Target))
         {
-            Debug.Log("이미 선택된 기물입니다!");
+            Debug.Log("이미 선택된 타일입니다!");
             return;
         }
 
