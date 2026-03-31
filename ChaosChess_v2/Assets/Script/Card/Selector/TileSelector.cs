@@ -6,10 +6,8 @@ public class TileSelector : Selector<Vector3Int>
     [SerializeField] private CardDataSO TestSO;
     [SerializeField] private Tilemap tilemap;
 
-    private void Start()
-    {
-        cardSO = TestSO;
-    }
+    private bool executable => isExecute();
+
     public override void DeselectFirstTarget()
     {
         selectedTargets.Dequeue();
@@ -34,7 +32,7 @@ public class TileSelector : Selector<Vector3Int>
     public override void SelectTarget(Vector3Int Target)
     {
         Debug.Log("타일 클릭됨!");
-        if (selectedTargets.Count >= cardSO.TileCount)
+        if (selectedTargets.Count >= cardData.DataSO.TileCount)
         {
             DeselectFirstTarget();
         }
@@ -46,8 +44,17 @@ public class TileSelector : Selector<Vector3Int>
 
 
         selectedTargets.Enqueue(Target);
+        
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
+    public override void ExecuteSkill()
+    {
+        if (!executable) return;
+        cardData.Execute();
+    }
 
-    public override void SetCardSO(CardDataSO cardSO) => this.cardSO = cardSO;
+    protected override bool isExecute()
+    {
+        return selectedTargets.Count == cardData.DataSO.TileCount;
+    }
 }

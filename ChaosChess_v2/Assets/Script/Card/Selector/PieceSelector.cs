@@ -3,11 +3,7 @@ using UnityEngine;
 public class PieceSelector : Selector<Piece>
 {
     [SerializeField] private CardDataSO TestSO;
-
-    private void Start()
-    {
-        cardSO = TestSO;
-    }
+    private bool executable => isExecute();
     public override void DeselectFirstTarget()
     {
         selectedTargets.Dequeue();
@@ -38,7 +34,7 @@ public class PieceSelector : Selector<Piece>
     public override void SelectTarget(Piece Target)
     {
         Debug.Log("기물 클릭됨!");
-        if (selectedTargets.Count >= cardSO.RequiredPieceCount)
+        if (selectedTargets.Count >= cardData.DataSO.RequiredPieceCount)
         {
             DeselectFirstTarget();
         }
@@ -53,5 +49,15 @@ public class PieceSelector : Selector<Piece>
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
 
-    public override void SetCardSO(CardDataSO cardSO) => this.cardSO = cardSO;
+    protected override bool isExecute()
+    {
+        return selectedTargets.Count == cardData.DataSO.RequiredPieceCount;
+    }
+
+    public override void ExecuteSkill()
+    {
+        if (!executable) return;
+
+        cardData.Execute();
+    }
 }
