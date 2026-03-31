@@ -10,5 +10,5 @@ public class CardEffectArgs
 {
     public List<Piece> Targets;             // 선택된 기물들
     public List<Vector3Int> TargetPos;      // 선택된 좌표
-    public int LimitTurn;                   // 가변 수치 등
+    public int LimitTurn;                   // 적용 턴 수치
 }

@@ -47,5 +47,8 @@ TagManager:
   - name: UI
     uniqueID: 3950507971
     locked: 0
+  - name: SelectTarget
+    uniqueID: 719027393
+    locked: 0
   m_RenderingLayers:
   - Default

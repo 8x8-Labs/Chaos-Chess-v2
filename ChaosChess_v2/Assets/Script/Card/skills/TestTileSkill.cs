@@ -12,7 +12,7 @@ public class TestTileSkill : CardData, ITileCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        Debug.Log($"카드 실행! : {DataSO.name}");
+        Debug.Log($"카드 실행! : {DataSO.CardName}");
         List<Vector3Int> pieces = args.TargetPos;
     }
 

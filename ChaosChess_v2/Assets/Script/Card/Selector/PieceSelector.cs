@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -9,6 +10,12 @@ public class PieceSelector : Selector<Piece>
     public override void DeselectFirstTarget()
     {
         selectedTargets.Dequeue();
+    }
+    public override void DeselectTarget(Piece Target)
+    {
+        selectedTargets = new Queue<Piece>(selectedTargets.Where(p => p != Target));
+
+        Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
     }
 
     void Update()
@@ -36,14 +43,14 @@ public class PieceSelector : Selector<Piece>
     public override void SelectTarget(Piece Target)
     {
         Debug.Log("기물 클릭됨!");
+        if (selectedTargets.Contains(Target))
+        {
+            DeselectTarget(Target);
+            return;
+        }
         if (selectedTargets.Count >= cardData.DataSO.RequiredPieceCount)
         {
             DeselectFirstTarget();
-        }
-        else if (selectedTargets.Contains(Target))
-        {
-            Debug.Log("이미 선택된 기물입니다!");
-            return;
         }
 
         selectedTargets.Enqueue(Target);

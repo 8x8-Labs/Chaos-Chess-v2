@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -5,6 +6,7 @@ using UnityEngine.Tilemaps;
 public class TileSelector : Selector<Vector3Int>
 {
     [SerializeField] private Tilemap tilemap;
+    [SerializeField] private UITileDrawer tileDrawer;
 
     private bool executable => isExecute();
     private ITileCard skillCard;
@@ -12,7 +14,18 @@ public class TileSelector : Selector<Vector3Int>
 
     public override void DeselectFirstTarget()
     {
-        selectedTargets.Dequeue();
+        Vector3Int old = selectedTargets.Dequeue();
+        tileDrawer.EraseSelectTile(old);
+
+        Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
+    }
+
+    public override void DeselectTarget(Vector3Int Target)
+    {
+        selectedTargets = new Queue<Vector3Int>(selectedTargets.Where(p => p != Target));
+        tileDrawer.EraseSelectTile(Target);
+
+        Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
     }
 
     void Update()
@@ -34,18 +47,19 @@ public class TileSelector : Selector<Vector3Int>
     public override void SelectTarget(Vector3Int Target)
     {
         Debug.Log("타일 클릭됨!");
+        if (selectedTargets.Contains(Target))
+        {
+            DeselectTarget(Target);
+            return;
+        }
+
         if (selectedTargets.Count >= cardData.DataSO.TileCount)
         {
             DeselectFirstTarget();
         }
-        else if (selectedTargets.Contains(Target))
-        {
-            Debug.Log("이미 선택된 타일입니다!");
-            return;
-        }
-
 
         selectedTargets.Enqueue(Target);
+        tileDrawer.DrawSelectTile(Target);
         
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
