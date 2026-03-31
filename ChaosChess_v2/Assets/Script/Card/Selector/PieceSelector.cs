@@ -1,9 +1,11 @@
+using System.Linq;
 using UnityEngine;
 
 public class PieceSelector : Selector<Piece>
 {
-    [SerializeField] private CardDataSO TestSO;
     private bool executable => isExecute();
+    private IPieceCard skillCard;
+
     public override void DeselectFirstTarget()
     {
         selectedTargets.Dequeue();
@@ -44,7 +46,6 @@ public class PieceSelector : Selector<Piece>
             return;
         }
 
-
         selectedTargets.Enqueue(Target);
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
@@ -58,6 +59,29 @@ public class PieceSelector : Selector<Piece>
     {
         if (!executable) return;
 
-        cardData.Execute();
+        CardEffectArgs args = new CardEffectArgs
+        {
+            Targets = selectedTargets.ToList()
+        };
+
+        skillCard.Execute(args);
+
+        DisableSelector();
+    }
+
+    public override void EnableSelector(CardData data)
+    {
+        cardData = data;
+        skillCard = cardData.GetComponent<IPieceCard>();
+        selectedTargets.Clear();
+        selectorCanvas.enabled = true;
+    }
+
+    protected override void DisableSelector()
+    {
+        selectedTargets.Clear();
+        cardData = null;
+        skillCard = null;
+        selectorCanvas.enabled = false;
     }
 }

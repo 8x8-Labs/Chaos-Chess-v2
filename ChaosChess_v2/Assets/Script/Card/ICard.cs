@@ -1,4 +1,4 @@
 public interface ICard
 {
-    void Execute();
+    void Execute(CardEffectArgs args = null);
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -7,6 +8,8 @@ public class TileSelector : Selector<Vector3Int>
     [SerializeField] private Tilemap tilemap;
 
     private bool executable => isExecute();
+    private ITileCard skillCard;
+
 
     public override void DeselectFirstTarget()
     {
@@ -50,11 +53,35 @@ public class TileSelector : Selector<Vector3Int>
     public override void ExecuteSkill()
     {
         if (!executable) return;
-        cardData.Execute();
+
+        CardEffectArgs args = new CardEffectArgs
+        {
+            TargetPos = selectedTargets.ToList()
+        };
+
+
+        skillCard.Execute(args);
+        DisableSelector();
     }
 
     protected override bool isExecute()
     {
         return selectedTargets.Count == cardData.DataSO.TileCount;
+    }
+
+    public override void EnableSelector(CardData data)
+    {
+        cardData = data;
+        skillCard = cardData.GetComponent<ITileCard>();
+        selectedTargets.Clear();
+        selectorCanvas.enabled = true;
+    }
+
+    protected override void DisableSelector()
+    {
+        cardData = null;
+        skillCard = null;
+        selectedTargets.Clear();
+        selectorCanvas.enabled = false;
     }
 }
