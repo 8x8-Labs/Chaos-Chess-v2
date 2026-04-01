@@ -40,7 +40,7 @@ public class TileSelector : Selector<Vector3Int>
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int mouseGridPos = tilemap.WorldToCell(mousePos);
 
-            if(mouseGridPos != null && boardManager.GetPiece(mouseGridPos) == null)
+            if(boardManager.GetPiece(mouseGridPos) == null)
             {
                 SelectTarget(mouseGridPos);
             }
