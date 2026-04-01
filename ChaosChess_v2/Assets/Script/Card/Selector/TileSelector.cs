@@ -75,7 +75,7 @@ public class TileSelector : Selector<Vector3Int>
         CardEffectArgs args = new CardEffectArgs
         {
             TargetPos = selectedTargets.ToList(),
-            LimitTurn = cardData.DataSO.LimitTurn
+            LimitTurn = cardData.DataSO.MaintainTurn
         };
 
         skillCard.Execute(args);
