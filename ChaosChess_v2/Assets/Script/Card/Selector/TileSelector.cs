@@ -37,7 +37,7 @@ public class TileSelector : Selector<Vector3Int>
         if (Input.GetMouseButtonDown(0))
         {
             // 2. 화면 좌표를 월드(게임) 좌표로 변환
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mousePos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int mouseGridPos = tilemap.WorldToCell(mousePos);
 
             if(boardManager.GetPiece(mouseGridPos) == null)

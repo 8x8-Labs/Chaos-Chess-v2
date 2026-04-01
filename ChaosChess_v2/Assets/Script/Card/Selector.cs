@@ -9,6 +9,7 @@ public abstract class Selector<T> : MonoBehaviour
 
     protected CardData cardData;
     protected Canvas selectorCanvas;
+    protected Camera mainCamera;
     protected Queue<T> selectedTargets = new Queue<T>();
     protected bool selectState = false;
 
@@ -16,6 +17,8 @@ public abstract class Selector<T> : MonoBehaviour
     {
         selectorCanvas = GetComponent<Canvas>();
         selectorCanvas.enabled = false;
+
+        mainCamera = Camera.main;
     }
 
     public abstract void EnableSelector(CardData data);
