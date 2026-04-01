@@ -14,6 +14,7 @@ public class Piece : MonoBehaviour
     protected SpriteRenderer spriteRenderer;
 
     [SerializeField] private PieceColor color;
+    [SerializeField] private Material outlineMaterial;
     [SerializeField] private Vector3Int pos;
 
     protected List<Vector3Int> CanMovePos;
@@ -33,6 +34,7 @@ public class Piece : MonoBehaviour
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.material = Instantiate(outlineMaterial);
     }
 
     public virtual void Init(Vector3Int pos, PieceColor color)
@@ -73,6 +75,16 @@ public class Piece : MonoBehaviour
         Pos = target;
 
         transform.position = WorldPos;
+    }
+
+    public void OnSelected()
+    {
+        spriteRenderer.sortingLayerName = "SelectTarget";
+    }
+
+    public void OnDeselect()
+    {
+        spriteRenderer.sortingLayerName = "Default";
     }
 
     public virtual string GetFen() { return ""; }

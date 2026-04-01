@@ -28,8 +28,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1.8582339, y: -1.3603939, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -77,7 +77,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -5391753709267269744, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  m_Sprite: {fileID: 5151226657483612591, guid: 0c5954b4f1a42324c9ae6078af7c7391, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcb81c807fc625f499f0c006d4533ff9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WhitePiece: {fileID: 1544024994693715532, guid: 5eba20d9b96f29e4592750feaa00608e, type: 3}
-  BlackPiece: {fileID: -7123925553723861133, guid: 8231c138f7898b24ba40d0a380c1932b, type: 3}
+  WhitePiece: {fileID: -7334779398576879013, guid: 2c3d4943bf5992a42a32e8460ada962d, type: 3}
+  BlackPiece: {fileID: 5151226657483612591, guid: 0c5954b4f1a42324c9ae6078af7c7391, type: 3}
   color: 0
   pos: {x: 2, y: 0, z: 0}

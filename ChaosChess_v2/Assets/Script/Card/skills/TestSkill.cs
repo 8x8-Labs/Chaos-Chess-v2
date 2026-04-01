@@ -10,6 +10,7 @@ public class TestSkill : CardData, IPieceCard
         selector = FindFirstObjectByType<PieceSelector>();
     }
 
+    [ContextMenu("Start")]
     public void LoadPieceSelector()
     {
         if(selector == null) selector = FindFirstObjectByType<PieceSelector>();

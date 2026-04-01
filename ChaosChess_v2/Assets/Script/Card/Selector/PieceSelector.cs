@@ -1,20 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
+using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class PieceSelector : Selector<Piece>
 {
-
+    [SerializeField] private UIPieceDrawer pieceDrawer;
     private bool executable => isExecute();
     private IPieceCard skillCard;
 
     public override void DeselectFirstTarget()
     {
-        selectedTargets.Dequeue();
+        Piece p = selectedTargets.Dequeue();
+        pieceDrawer.EraseSelectPiece(p);
     }
     public override void DeselectTarget(Piece Target)
     {
         selectedTargets = new Queue<Piece>(selectedTargets.Where(p => p != Target));
+        pieceDrawer.EraseSelectPiece(Target);
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
     }
@@ -54,6 +57,7 @@ public class PieceSelector : Selector<Piece>
         }
 
         selectedTargets.Enqueue(Target);
+        pieceDrawer.DrawSelectPiece(Target);
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
 
@@ -81,6 +85,8 @@ public class PieceSelector : Selector<Piece>
         cardData = data;
         skillCard = cardData.GetComponent<IPieceCard>();
         selectedTargets.Clear();
+
+        GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
         selectState = true;
     }
@@ -90,6 +96,8 @@ public class PieceSelector : Selector<Piece>
         selectedTargets.Clear();
         cardData = null;
         skillCard = null;
+
+        GameManager.Instance.IsGameInput = true;
         selectorCanvas.enabled = false;
         selectState = false;
     }
