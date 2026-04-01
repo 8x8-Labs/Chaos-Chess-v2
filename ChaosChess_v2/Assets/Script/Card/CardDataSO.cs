@@ -15,6 +15,8 @@ public class CardDataSO : ScriptableObject
     [Space(30)]
     [Header("기물 타입 설정")]
     public PieceType PieceType;
+    [Range(-1, 10)]
+    public int PieceLimitTurn;
     public int RequiredPieceCount;
     
     // 타일 타입에 필요한 설정

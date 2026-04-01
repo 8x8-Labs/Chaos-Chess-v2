@@ -12,6 +12,7 @@ public class CardDataSOEditor : Editor
 
     // 기물 타입
     SerializedProperty pieceType;
+    SerializedProperty pieceLimitTurn;
     SerializedProperty requiredPieceCount;
 
     // 타일 타입
@@ -43,6 +44,7 @@ public class CardDataSOEditor : Editor
         cardType = serializedObject.FindProperty("Type");
 
         pieceType = serializedObject.FindProperty("PieceType");
+        pieceLimitTurn = serializedObject.FindProperty("PieceLimitTurn");
         requiredPieceCount = serializedObject.FindProperty("RequiredPieceCount");
 
         tileCount = serializedObject.FindProperty("TileCount");
@@ -137,6 +139,11 @@ public class CardDataSOEditor : Editor
         HelpBox("기물 카드: 특정 기물을 배치하거나 조합하는 카드입니다.", MessageType.None);
         EditorGUILayout.Space(2);
         EditorGUILayout.PropertyField(pieceType, new GUIContent("기물 종류"));
+        EditorGUILayout.PropertyField(pieceLimitTurn, new GUIContent("효과 유지 턴"));
+        if (pieceLimitTurn.intValue == -1)
+        {
+            EditorGUILayout.HelpBox("-1 : 턴 제한 없이 계속 유지됩니다.", MessageType.Warning);
+        }
         EditorGUILayout.PropertyField(requiredPieceCount, new GUIContent("필요 기물 수"));
     }
 

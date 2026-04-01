@@ -17,6 +17,7 @@ MonoBehaviour:
   CardDescription: "\u3141\u3134\u3147\u313B\u3134\u3147\u3139"
   Type: 0
   PieceType: 3
+  PieceLimitTurn: 2
   RequiredPieceCount: 2
   TileCount: 0
   MaintainTurn: 0

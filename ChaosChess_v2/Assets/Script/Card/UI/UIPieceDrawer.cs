@@ -1,7 +1,4 @@
-using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
 public class UIPieceDrawer : MonoBehaviour
 {

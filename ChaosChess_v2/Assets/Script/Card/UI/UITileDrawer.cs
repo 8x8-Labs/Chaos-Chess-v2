@@ -25,16 +25,6 @@ public class UITileDrawer : MonoBehaviour
     public void EraseSelectTile(Vector3Int pos)
     {
         UIChessBoard.SetTileFlags(pos, TileFlags.None);
-
-        //DOTween.To(() => 1f, val =>
-        //{
-        //    Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(val, val, 1));
-        //    UIChessBoard.SetTransformMatrix(pos, matrix);
-        //}, 0f, 0.1f)
-        //.SetEase(Ease.InBack)
-        //.OnComplete(() =>
-        //{
         UIChessBoard.SetTile(pos, null); // 애니메이션 끝난 후 타일 제거
-        //});
     }
 }

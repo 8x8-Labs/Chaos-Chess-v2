@@ -7,13 +7,6 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => isPlayerTurn;
     private PieceColor turn;
 
-    //private bool isWaitingPromotion = false;
-    //public bool IsWaitingPromotion
-    //{
-    //    get { return isWaitingPromotion; }
-    //    set { isWaitingPromotion = value; }
-    //}
-
     public bool IsGameInput = true;
 
     public char NowTurn

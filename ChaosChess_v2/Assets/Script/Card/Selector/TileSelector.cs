@@ -8,8 +8,6 @@ public class TileSelector : Selector<Vector3Int>
 
     private bool executable => isExecute();
     private ITileCard skillCard;
-
-
     public override void DeselectFirstTarget()
     {
         Vector3Int old = selectedTargets.Dequeue();
@@ -25,7 +23,13 @@ public class TileSelector : Selector<Vector3Int>
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
     }
-
+    public override void DeselectAllTarget()
+    {
+        foreach (var target in selectedTargets)
+        {
+            tileDrawer.EraseSelectTile(target);
+        }
+    }
     void Update()
     {
         if (!selectState) return;
@@ -70,9 +74,9 @@ public class TileSelector : Selector<Vector3Int>
 
         CardEffectArgs args = new CardEffectArgs
         {
-            TargetPos = selectedTargets.ToList()
+            TargetPos = selectedTargets.ToList(),
+            LimitTurn = cardData.DataSO.LimitTurn
         };
-
 
         skillCard.Execute(args);
         DisableSelector();

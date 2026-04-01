@@ -20,6 +20,13 @@ public class PieceSelector : Selector<Piece>
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
     }
+    public override void DeselectAllTarget()
+    {
+        foreach(var target in selectedTargets)
+        {
+            target.OnDeselect();
+        }
+    }
 
     void Update()
     {
@@ -74,7 +81,8 @@ public class PieceSelector : Selector<Piece>
 
         CardEffectArgs args = new CardEffectArgs
         {
-            Targets = selectedTargets.ToList()
+            Targets = selectedTargets.ToList(),
+            LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
 
         skillCard.Execute(args);

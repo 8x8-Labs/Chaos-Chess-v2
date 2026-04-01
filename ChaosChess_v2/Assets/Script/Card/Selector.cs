@@ -24,6 +24,7 @@ public abstract class Selector<T> : MonoBehaviour
     public abstract void SelectTarget(T target);
     public abstract void DeselectTarget(T target);
     public abstract void DeselectFirstTarget();
+    public abstract void DeselectAllTarget();
     public abstract void ExecuteSkill();
     protected virtual bool isExecute() { return false; }
 }
