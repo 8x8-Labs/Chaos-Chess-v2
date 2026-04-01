@@ -1,20 +1,14 @@
-using UnityEngine;
 using DG.Tweening;
+using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class BoardUI : MonoBehaviour
+public class UITileDrawer : MonoBehaviour
 {
     [SerializeField] private Tilemap UIChessBoard;
     [SerializeField] private TileBase SelectTile;
 
-    private Vector3Int prvMouseCellPos;
-
     public void DrawSelectTile(Vector3Int pos)
     {
-        DeleteSelectTile();
-
-        prvMouseCellPos = pos;
-
         UIChessBoard.SetTile(pos, SelectTile);
         UIChessBoard.SetTileFlags(pos, TileFlags.None);
 
@@ -25,11 +19,12 @@ public class BoardUI : MonoBehaviour
         {
             Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(val, val, 1));
             UIChessBoard.SetTransformMatrix(pos, matrix);
-        }, 1f, 0.15f).SetEase(Ease.OutBack); // 살짝 튕기는 효과
+        }, 1f, 0.15f).SetEase(Ease.OutBack);
     }
-    
-    public void DeleteSelectTile()
+
+    public void EraseSelectTile(Vector3Int pos)
     {
-        UIChessBoard.SetTile(prvMouseCellPos, null); // 전에 선택한 좌표에 선택 ui 지우기
+        UIChessBoard.SetTileFlags(pos, TileFlags.None);
+        UIChessBoard.SetTile(pos, null); // 애니메이션 끝난 후 타일 제거
     }
 }

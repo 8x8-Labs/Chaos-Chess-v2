@@ -11,9 +11,11 @@ public class Piece : MonoBehaviour
 {
     [SerializeField] protected Sprite WhitePiece;
     [SerializeField] protected Sprite BlackPiece;
+    [SerializeField] protected PieceType type;
     protected SpriteRenderer spriteRenderer;
 
     [SerializeField] private PieceColor color;
+    [SerializeField] private Material outlineMaterial;
     [SerializeField] private Vector3Int pos;
 
     protected List<Vector3Int> CanMovePos;
@@ -30,9 +32,15 @@ public class Piece : MonoBehaviour
         set { pos = value; }
     }
 
+    public PieceType Type
+    {
+        get { return type; }
+    }
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.material = Instantiate(outlineMaterial);
     }
 
     public virtual void Init(Vector3Int pos, PieceColor color)
@@ -73,6 +81,18 @@ public class Piece : MonoBehaviour
         Pos = target;
 
         transform.position = WorldPos;
+    }
+
+    public void OnSelected()
+    {
+        spriteRenderer.sortingLayerName = "SelectTarget";
+        spriteRenderer.material.SetFloat("_OutlineThick", 1f);
+    }
+
+    public void OnDeselect()
+    {
+        spriteRenderer.sortingLayerName = "Default";
+        spriteRenderer.material.SetFloat("_OutlineThick", 0f);
     }
 
     public virtual string GetFen() { return ""; }
