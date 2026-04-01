@@ -10,7 +10,7 @@ public abstract class Selector<T> : MonoBehaviour
     protected CardData cardData;
     protected Canvas selectorCanvas;
     protected Camera mainCamera;
-    protected Queue<T> selectedTargets = new Queue<T>();
+    protected List<T> selectedTargets = new List<T>();
     protected bool selectState = false;
 
     protected virtual void Awake()

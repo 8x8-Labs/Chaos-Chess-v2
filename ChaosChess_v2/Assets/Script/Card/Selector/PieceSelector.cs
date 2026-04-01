@@ -10,12 +10,13 @@ public class PieceSelector : Selector<Piece>
 
     public override void DeselectFirstTarget()
     {
-        Piece p = selectedTargets.Dequeue();
+        Piece p = selectedTargets[0];
         pieceDrawer.EraseSelectPiece(p);
+        selectedTargets.RemoveAt(0);
     }
     public override void DeselectTarget(Piece Target)
     {
-        selectedTargets = new Queue<Piece>(selectedTargets.Where(p => p != Target));
+        selectedTargets.Remove(Target);
         pieceDrawer.EraseSelectPiece(Target);
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
@@ -65,7 +66,7 @@ public class PieceSelector : Selector<Piece>
             DeselectFirstTarget();
         }
 
-        selectedTargets.Enqueue(Target);
+        selectedTargets.Add(Target);
         pieceDrawer.DrawSelectPiece(Target);
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }

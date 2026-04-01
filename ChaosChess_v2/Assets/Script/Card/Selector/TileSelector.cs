@@ -10,15 +10,16 @@ public class TileSelector : Selector<Vector3Int>
     private ITileCard skillCard;
     public override void DeselectFirstTarget()
     {
-        Vector3Int old = selectedTargets.Dequeue();
+        Vector3Int old = selectedTargets[0];
         tileDrawer.EraseSelectTile(old);
+        selectedTargets.RemoveAt(0);
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
     }
 
     public override void DeselectTarget(Vector3Int Target)
     {
-        selectedTargets = new Queue<Vector3Int>(selectedTargets.Where(p => p != Target));
+        selectedTargets.Remove(Target);
         tileDrawer.EraseSelectTile(Target);
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
@@ -61,7 +62,7 @@ public class TileSelector : Selector<Vector3Int>
             DeselectFirstTarget();
         }
 
-        selectedTargets.Enqueue(Target);
+        selectedTargets.Add(Target);
         tileDrawer.DrawSelectTile(Target);
         
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
