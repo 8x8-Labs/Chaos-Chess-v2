@@ -102,5 +102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WhitePiece: {fileID: 399476101167354970, guid: 2c3d4943bf5992a42a32e8460ada962d, type: 3}
   BlackPiece: {fileID: 5904125487068711704, guid: 0c5954b4f1a42324c9ae6078af7c7391, type: 3}
+  type: 2
   color: 0
+  outlineMaterial: {fileID: 2100000, guid: 5f98fe7e34c6e494aac571d357daabee, type: 2}
   pos: {x: 1, y: 0, z: 0}

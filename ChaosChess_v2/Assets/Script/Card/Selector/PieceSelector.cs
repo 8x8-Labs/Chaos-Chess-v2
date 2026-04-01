@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class PieceSelector : Selector<Piece>
@@ -36,7 +35,10 @@ public class PieceSelector : Selector<Piece>
 
             if (p != null)
             {
-                SelectTarget(p);
+                if((p.Type & cardData.DataSO.PieceType) != 0)
+                {
+                    SelectTarget(p);
+                }
             }
         }
     }

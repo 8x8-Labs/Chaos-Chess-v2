@@ -16,7 +16,7 @@ MonoBehaviour:
   CardImage: {fileID: -1131124703, guid: 8005fd67b092a404785cc915b51a0a17, type: 3}
   CardDescription: "\u3141\u3134\u3147\u313B\u3134\u3147\u3139"
   Type: 0
-  PieceType: -1
+  PieceType: 2
   RequiredPieceCount: 2
   TileCount: 0
   MaintainTurn: 0
