@@ -3,7 +3,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
-using DG.Tweening;
 
 public class UIButton : Button
 {
@@ -25,6 +24,8 @@ public class UIButton : Button
     [SerializeField] private MonoBehaviour uIAnimationObject; // 인스펙터에 노출
     [SerializeField] private bool isStartAnimation = false;
     [SerializeField] private bool isEndAnimation = false;
+
+    [SerializeField] private string nextSceneName;
 
 
     protected override void Start()
@@ -69,6 +70,9 @@ public class UIButton : Button
             case ButtonType.GoMain:
                 enableCanvas = FindObjectsOfType<ButtonCanvas>().Where(canvas => canvas.MainCanvas == true).First();
                 changeCanvas(); break;
+            case ButtonType.GoScene:
+                Debug.Log("씬 이동");
+                break;
         }
     }
 
@@ -97,6 +101,7 @@ public enum ButtonType
     ChangePanel,    // 현재 패널을 끄고 다른 패널을 엶 (UI 이동)
     OpenPopup,      // 현재 창은 두고 위에 팝업을 띄움
     ClosePopup,     // 현재 팝업을 닫음
+    GoScene,        // 다른 씬으로 이동
     Submit,         // 데이터 확인, 아이템 구매 등 서버/데이터 연동
     GameStart,      // 씬 전환 (Scene Load)
     GoMain,
