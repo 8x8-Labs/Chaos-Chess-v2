@@ -239,6 +239,91 @@ public class FairyStockfishBridge : MonoBehaviour
 #endif
     }
 
+    // ── 기물 부족 무승부 확인 ────────────────────────────
+    public bool IsInsufficientMaterial()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if (_fairyInstance == null) return false;
+        return _fairyInstance.Call<bool>("isInsufficientMaterial");
+#else
+        // PC: 현재 FEN에서 기물을 파싱해 기물 부족 판별
+        // 기물 부족 조건 (표준 체스 기준):
+        //   K vs K
+        //   K+B vs K  /  K+N vs K
+        //   K+B vs K+B (같은 색 비숍)
+        string piecePart = _currentFen.Split(' ')[0];
+
+        int whiteBishops = 0, whiteKnights = 0, whiteOther = 0;
+        int blackBishops = 0, blackKnights = 0, blackOther = 0;
+
+        // 비숍 색상 판별용 (파일+랭크 합의 홀짝)
+        int lastWhiteBishopColor = -1, lastBlackBishopColor = -1;
+        bool bishopColorMismatch = false;
+
+        int file = 0, rank = 7;
+        foreach (char c in piecePart)
+        {
+            if (c == '/')  { rank--; file = 0; continue; }
+            if (char.IsDigit(c)) { file += c - '0'; continue; }
+
+            char lower = char.ToLower(c);
+            bool isWhite = char.IsUpper(c);
+            int squareColor = (file + rank) % 2;
+
+            switch (lower)
+            {
+                case 'k': break; // 킹은 항상 존재
+                case 'b':
+                    if (isWhite)
+                    {
+                        if (lastWhiteBishopColor == -1) lastWhiteBishopColor = squareColor;
+                        else if (lastWhiteBishopColor != squareColor) bishopColorMismatch = true;
+                        whiteBishops++;
+                    }
+                    else
+                    {
+                        if (lastBlackBishopColor == -1) lastBlackBishopColor = squareColor;
+                        else if (lastBlackBishopColor != squareColor) bishopColorMismatch = true;
+                        blackBishops++;
+                    }
+                    break;
+                case 'n':
+                    if (isWhite) whiteKnights++; else blackKnights++;
+                    break;
+                default:
+                    if (lower != 'k')
+                    {
+                        if (isWhite) whiteOther++; else blackOther++;
+                    }
+                    break;
+            }
+            file++;
+        }
+
+        // 폰/루크/퀸 등 전력 기물이 있으면 무승부 아님
+        if (whiteOther > 0 || blackOther > 0) return false;
+
+        int whitePieces = whiteBishops + whiteKnights;
+        int blackPieces = blackBishops + blackKnights;
+
+        // K vs K
+        if (whitePieces == 0 && blackPieces == 0) return true;
+
+        // K+B vs K  /  K+N vs K
+        if (whitePieces == 0 && blackPieces == 1) return true;
+        if (blackPieces == 0 && whitePieces == 1) return true;
+
+        // K+B vs K+B (비숍이 각각 1개씩, 같은 색 칸)
+        if (whiteBishops == 1 && whiteKnights == 0 &&
+            blackBishops == 1 && blackKnights == 0 &&
+            !bishopColorMismatch &&
+            lastWhiteBishopColor == lastBlackBishopColor)
+            return true;
+
+        return false;
+#endif
+    }
+
     // ── 게임 결과 확인 ───────────────────────────────────
     public int GetGameResult()
     {
