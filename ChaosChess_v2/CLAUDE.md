@@ -71,9 +71,31 @@ Player clicks tile
   → RequestAIMove() async → ApplyUCIMove() → NextTurn()
 ```
 
+### UI System
+
+**`Assets/Script/UI/`** — Reusable menu/screen navigation framework:
+
+- `ButtonParent` — Base class. Sets `isMainParent` flag; auto-calls `EnableParent()` or `DisableParent()` on Start.
+- `ButtonCanvas` — Full-screen canvas unit. Fades in/out via `CanvasGroup`. On enable, fires staggered `BasicUIAnimation` slide-ins on registered buttons. Use `MainCanvas = true` for the default visible canvas.
+- `ButtonPanel` — Lightweight overlay (popup). Fades via `CanvasGroup.DOFade`; blocks raycasts when visible.
+- `UIButton` — Extends Unity's `Button`. Behaviour is driven by `ButtonType` enum (see below). Auto-resolves parent `ButtonCanvas` / `ButtonPanel` if fields are unset.
+- `BackgroundBG` — Adjusts a shader material's `_TileOffset` to maintain aspect-ratio-correct tiling on resize.
+
+**`ButtonType` enum** (defined in `UIButton.cs`):
+```
+None, ChangeCanvas, ChangePanel, OpenPopup, ClosePopup,
+GoScene, Submit, GameStart, GoMain, Quit
+```
+
+**`Assets/Script/UI/Animation/`** — `IUIAnimation` implementations:
+- `BasicUIAnimation` — Slides an `Image` in from x=2000 with configurable DOTween ease + `UnityEvent` hooks.
+- Scene-specific variants: `ModeUIAnim`, `StartGameUIAnim`, `StartGuideUIAnim`, `StartPracticeUIAnim`.
+
+**`Assets/Script/Editor/UIButtonEditor.cs`** — Custom inspector for `UIButton`. Extends `ButtonEditor`; shows context-sensitive fields per `ButtonType` (e.g. canvas refs for `ChangeCanvas`, scene name for `GoScene`).
+
 ## Key Conventions
 
-- **Singleton pattern** used for `GameManager` (and likely `BoardManager`)
+- **Singleton pattern** used for `GameManager` and `FairyStockfishBridge`; `BoardManager` is not a singleton — access it via `GameManager`
 - **ScriptableObjects** are used for card configuration — prefer `CardDataSO` over hardcoded values
 - **FEN strings** are the canonical board state representation; `BoardManager` generates and consumes them
 - **UCI notation** is the interface between `BoardManager` and `FairyStockfishBridge`

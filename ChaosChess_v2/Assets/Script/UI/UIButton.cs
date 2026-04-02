@@ -34,6 +34,10 @@ public class UIButton : Button
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
         }
+        if(buttonType == ButtonType.ClosePopup && disablePanel == null)
+        {
+            disablePanel = GetComponentInParent<ButtonPanel>();
+        }
     }
 
 
@@ -73,6 +77,10 @@ public class UIButton : Button
             case ButtonType.GoScene:
                 Debug.Log("씬 이동");
                 break;
+            case ButtonType.ClosePopup:
+                disablePanel.DisablePanel(); break;
+            case ButtonType.OpenPopup:
+                enablePanel.EnablePanel(); break;
         }
     }
 
