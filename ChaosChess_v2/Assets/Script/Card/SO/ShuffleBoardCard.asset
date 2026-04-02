@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: ShuffleBoardCard
+  m_EditorClassIdentifier: 
+  CardName: "\uB3CC\uB824\uB3CC\uB824\uB3CC\uB9BC\uD310"
+  CardImage: {fileID: 0}
+  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C(\uD0B9, \uD038 \uC81C\uC678)\uC758
+    \uC704\uCE58\uB97C \uC804\uBD80 \uC11E\uC2B5\uB2C8\uB2E4."
+  Type: 2
+  PieceType: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 0
+  TileCount: 0
+  MaintainTurn: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0

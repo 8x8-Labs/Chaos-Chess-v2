@@ -403,6 +403,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1309221203}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &311963230
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 311963231}
+  - component: {fileID: 311963232}
+  m_Layer: 0
+  m_Name: CardExample
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &311963231
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 311963230}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &311963232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 311963230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d241663bc749a84a90e8db48651bd86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DataSO: {fileID: 11400000, guid: 777ed7b777ae7b84e99da23ff3d647df, type: 2}
 --- !u!1 &450757002
 GameObject:
   m_ObjectHideFlags: 0
@@ -2290,6 +2335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f85221a7900618468e3ee16e5f36ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsGameInput: 1
 --- !u!114 &1629911494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2330,6 +2376,7 @@ MonoBehaviour:
     prefab: {fileID: 3620608217031176671, guid: 2bb4299a5f55b6847bb7ede5ef9fab9a, type: 3}
   - FENChar: 107
     prefab: {fileID: 1202172009290867449, guid: 7ebb3b088f781bb4cb6a4bc8cf4ed450, type: 3}
+  pieceSpawnTransform: {fileID: 0}
 --- !u!114 &1629911496
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2697,3 +2744,4 @@ SceneRoots:
   - {fileID: 1597619759}
   - {fileID: 450757006}
   - {fileID: 817329984}
+  - {fileID: 311963231}
