@@ -514,6 +514,7 @@ public class BoardManager : MonoBehaviour
         board[target.x, target.y] = piece;
         Vector3 worldPos = GridPosToWorldPos(target);
         piece.Move(target, worldPos);
+        GameManager.Instance.UpdatePiece();
     }
 
     /// <summary>

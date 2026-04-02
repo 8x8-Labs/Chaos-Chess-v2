@@ -14,6 +14,7 @@ public class ChaoticKnightCard : CardData, IPieceCard
         selector = FindFirstObjectByType<PieceSelector>();
     }
 
+    [ContextMenu("Execute")]
     public void LoadPieceSelector()
     {
         if (selector == null) selector = FindFirstObjectByType<PieceSelector>();
@@ -24,6 +25,17 @@ public class ChaoticKnightCard : CardData, IPieceCard
     {
         List<Piece> pieces = args.Targets;
         // TODO: 선택된 나이트에게 이번 턴 5x5 범위 내 이동 가능한 칸으로 이동 허용 처리
+
+        foreach(Piece knight in pieces)
+        {
+            List<Vector3Int> movableCells = GetMovableCellsIn5x5(knight);
+
+            if (movableCells.Count == 0) continue;
+
+            Vector3Int destination = movableCells[Random.Range(0, movableCells.Count)];
+            Debug.Log(destination.ToString());
+            BoardManager.Instance.ForceTeleport(knight, destination);
+        }
     }
 
     private List<Vector3Int> GetMovableCellsIn5x5(Piece knight)
@@ -40,8 +52,7 @@ public class ChaoticKnightCard : CardData, IPieceCard
                 Vector3Int candidate = new Vector3Int(origin.x + x, origin.y + y, origin.z);
 
                 // 보드 범위 체크 및 이동 가능 여부 확인
-                if (BoardManager.Instance.IsValidCell(candidate) &&
-                    !BoardManager.Instance.IsOccupiedByAlly(candidate, knight))
+                if (BoardManager.Instance.IsValidCell(candidate) && !IsOccupied(candidate))
                 {
                     result.Add(candidate);
                 }
@@ -49,5 +60,11 @@ public class ChaoticKnightCard : CardData, IPieceCard
         }
 
         return result;
+    }
+
+    private bool IsOccupied(Vector3Int candidate)
+    {
+        Piece p = BoardManager.Instance.GetPiece(candidate);
+        return p != null;
     }
 }
