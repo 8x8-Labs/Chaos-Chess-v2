@@ -20,6 +20,8 @@ public class Piece : MonoBehaviour
 
     protected List<Vector3Int> CanMovePos;
 
+    private MaterialPropertyBlock mpb;
+
     public PieceColor Color
     {
         get { return color; }
@@ -41,6 +43,7 @@ public class Piece : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.material = Instantiate(outlineMaterial);
+        mpb = new MaterialPropertyBlock();
     }
 
     public virtual void Init(Vector3Int pos, PieceColor color)
@@ -86,13 +89,17 @@ public class Piece : MonoBehaviour
     public void OnSelected()
     {
         spriteRenderer.sortingLayerName = "SelectTarget";
-        spriteRenderer.material.SetFloat("_OutlineThick", 1f);
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat("_OutlineThick", 1f);
+        spriteRenderer.SetPropertyBlock(mpb);
     }
 
     public void OnDeselect()
     {
         spriteRenderer.sortingLayerName = "Default";
-        spriteRenderer.material.SetFloat("_OutlineThick", 0f);
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat("_OutlineThick", 0f);
+        spriteRenderer.SetPropertyBlock(mpb);
     }
 
     public virtual string GetFen() { return ""; }
