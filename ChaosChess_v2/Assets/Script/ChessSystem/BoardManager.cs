@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 [System.Serializable]
@@ -10,6 +11,7 @@ class FENPrefabPair
 
 public class BoardManager : MonoBehaviour
 {
+    public static BoardManager Instance;
     private class Castling
     {
         private bool WhiteKingSide = true;
@@ -116,6 +118,11 @@ public class BoardManager : MonoBehaviour
 
     void Awake()
     {
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+
         enPassantPos = new Vector3Int(-1, -1, -1);
 
         FENMap = new Dictionary<char, Piece>();
@@ -238,6 +245,18 @@ public class BoardManager : MonoBehaviour
         if (!IsInside(pos)) return false;
 
         return board[pos.x, pos.y] == null;
+    }
+
+    public bool IsValidCell(Vector3Int pos)
+    {
+        return IsInside(pos);
+    }
+
+    public bool IsOccupiedByAlly(Vector3Int pos, Piece referencePiece)
+    {
+        if (!IsInside(pos)) return false;
+        Piece occupant = GetPiece(pos);
+        return occupant != null && occupant.Color == referencePiece.Color;
     }
 
     public Piece GetPiece(Vector3Int pos) // 선택한 좌표에 기물을 가져온다
@@ -480,5 +499,69 @@ public class BoardManager : MonoBehaviour
     public int GetHalfmoveClock()
     {
         return halfmoveClock;
+    }
+
+    /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>
+    public List<Piece> GetAllPieces()
+    {
+        return new List<Piece>(Pieces);
+    }
+
+    /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
+    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0')
+    {
+        Vector3Int from = piece.Pos;
+
+        board[from.x, from.y] = null;
+
+        // 이동하는 위치에 기물이 있으면 먹음
+        if (!IsEmpty(target))
+        {
+            Piece targetPiece = GetPiece(target);
+            if (targetPiece is Rook)
+            {
+                castling.OnRookDie(targetPiece.Color, target);
+            }
+            DestroyPiece(target);
+        }
+
+        board[target.x, target.y] = piece;
+        Vector3 WorldPos = GridPosToWorldPos(target);
+        piece.Move(target, WorldPos);
+
+        // 프로모션
+        if (piece is Pawn)
+        {
+            if (piece.Pos.y == (piece.Color == PieceColor.White ? 7 : 0))
+            {
+                HandlePromotion(piece, target, promotion);
+            }
+        }
+
+        UpdateFEN(); // fen 업데이트
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
+
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
+    }
+
+    /// <summary>
+    /// 여러 기물을 동시에 재배치합니다.
+    /// Phase 1에서 기존 칸을 모두 비운 뒤 Phase 2에서 새 칸에 배치하므로
+    /// 서로의 자리를 교환할 때 충돌이 발생하지 않습니다.
+    /// </summary>
+    public void BatchReassign(List<Piece> pieces, List<Vector3Int> newPositions)
+    {
+        for (int i = 0; i < pieces.Count; i++)
+            board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
+
+        for (int i = 0; i < pieces.Count; i++)
+        {
+            Vector3Int target = newPositions[i];
+            board[target.x, target.y] = pieces[i];
+            Vector3 worldPos = GridPosToWorldPos(target);
+            pieces[i].Move(target, worldPos);
+        }
     }
 }

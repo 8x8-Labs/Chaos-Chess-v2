@@ -76,6 +76,7 @@ public class PieceSelector : Selector<Piece>
         return selectedTargets.Count == cardData.DataSO.RequiredPieceCount;
     }
 
+    [ContextMenu("Execute")]
     public override void ExecuteSkill()
     {
         if (!executable) return;
@@ -104,9 +105,11 @@ public class PieceSelector : Selector<Piece>
 
     protected override void DisableSelector()
     {
-        selectedTargets.Clear();
         cardData = null;
         skillCard = null;
+        foreach(Piece p in selectedTargets) p.OnDeselect();
+
+        selectedTargets.Clear();
 
         GameManager.Instance.IsGameInput = true;
         selectorCanvas.enabled = false;
