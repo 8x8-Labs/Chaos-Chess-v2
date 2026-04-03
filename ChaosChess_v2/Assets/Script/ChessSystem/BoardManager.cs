@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 [System.Serializable]
@@ -514,7 +515,13 @@ public class BoardManager : MonoBehaviour
         board[target.x, target.y] = piece;
         Vector3 worldPos = GridPosToWorldPos(target);
         piece.Move(target, worldPos);
-        GameManager.Instance.UpdatePiece();
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     /// <summary>
