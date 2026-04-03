@@ -3,17 +3,25 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    private bool isPlayerTurn = true;
-    public bool IsPlayerTurn => isPlayerTurn;
-    private PieceColor turn;
+    private int curTurn = 1;
+    public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
-
+    public PieceColor turnColor
+    {
+        get
+        {
+            if (curTurn % 2 == 1)
+                return PieceColor.White;
+            else
+                return PieceColor.Black;
+        }
+    }
     public char NowTurn
     {
         get
         {
-            if (turn == PieceColor.White)
+            if (curTurn % 2 == 1)
                 return 'w';
             else
                 return 'b';
@@ -42,7 +50,7 @@ public class GameManager : MonoBehaviour
     {
         FairyStockfishBridge.Instance.InitEngine("chess");
 
-        turn = PieceColor.White;
+        curTurn = 1;
 
         boardUI = GetComponent<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
@@ -58,12 +66,12 @@ public class GameManager : MonoBehaviour
 
     public void SelectGrid(Vector3Int pos)
     {
-        if (!isPlayerTurn) return;
+        if (!IsPlayerTurn) return;
         if (!BoardManager.Instance.IsInside(pos)) return;
 
         Piece piece = BoardManager.Instance.GetPiece(pos);
 
-        if (piece != null && piece.Color == turn)
+        if (piece != null && piece.Color == turnColor)
         {
             SelectPiece(piece);
             boardUI.DrawSelectTile(pos);
@@ -87,7 +95,6 @@ public class GameManager : MonoBehaviour
 
             NextTurn();
 
-            isPlayerTurn = false;
             RequestAIMove();
         });
     }
@@ -99,14 +106,7 @@ public class GameManager : MonoBehaviour
 
     public void NextTurn()
     {
-        if (turn == PieceColor.White)
-        {
-            turn = PieceColor.Black;
-        }
-        else
-        {
-            turn = PieceColor.White;
-        }
+        curTurn += 1;
         BoardManager.Instance.UpdateFEN(); // 디버깅
         string fen = BoardManager.Instance.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
@@ -131,7 +131,6 @@ public class GameManager : MonoBehaviour
 
             NextTurn();
 
-            isPlayerTurn = false;
             RequestAIMove();
         }
     }
@@ -145,7 +144,6 @@ public class GameManager : MonoBehaviour
             {
                 // UCI 수 (예: "e2e4") → Vector3Int 변환 후 BoardManager에 적용
                 BoardManager.Instance.ApplyUCIMove(uciMove);
-                isPlayerTurn = true;
             }
         );
     }
