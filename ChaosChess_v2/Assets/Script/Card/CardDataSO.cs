@@ -18,7 +18,7 @@ public class CardDataSO : ScriptableObject
     /// <summary>
     /// 기물 타입에서의 대상 색깔
     /// </summary>
-    public PieceColor TargetColor;
+    public PieceColor PieceTargetColor;
     [Range(-1, 10)]
     public int PieceLimitTurn;
     public int RequiredPieceCount;
@@ -40,7 +40,7 @@ public class CardDataSO : ScriptableObject
     /// <summary>
     /// 전역 타입에서의 대상 색깔
     /// </summary>
-    public PieceColor _TargetColor;
+    public PieceColor GlobalTargetColor;
     public bool HasLimit;
     public int LimitTurn;
 

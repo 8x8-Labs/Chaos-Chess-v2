@@ -47,7 +47,7 @@ public class CardDataSOEditor : Editor
         cardType = serializedObject.FindProperty("Type");
 
         pieceType = serializedObject.FindProperty("PieceType");
-        targetColorPiece = serializedObject.FindProperty("TargetColor");
+        targetColorPiece = serializedObject.FindProperty("PieceTargetColor");
         pieceLimitTurn = serializedObject.FindProperty("PieceLimitTurn");
         requiredPieceCount = serializedObject.FindProperty("RequiredPieceCount");
 
@@ -55,7 +55,7 @@ public class CardDataSOEditor : Editor
         maintainTurn = serializedObject.FindProperty("MaintainTurn");
 
         needTargetColor = serializedObject.FindProperty("NeedTargetColor");
-        targetColor = serializedObject.FindProperty("_TargetColor");
+        targetColor = serializedObject.FindProperty("GlobalTargetColor");
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
 
