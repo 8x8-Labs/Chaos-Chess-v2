@@ -41,9 +41,12 @@ public class PieceSelector : Selector<Piece>
 
             Piece p = boardManager.GetPiece(mouseGridPos);
 
+            // 널 체크
             if (p != null)
             {
-                if((p.Type & cardData.DataSO.PieceType) != 0)
+                // 기물 타입과 색상 체크
+                if((p.Type & cardData.DataSO.PieceType) != 0 &&
+                    p.Color == cardData.DataSO.TargetColor)
                 {
                     SelectTarget(p);
                 }

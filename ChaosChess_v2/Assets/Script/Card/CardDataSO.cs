@@ -15,6 +15,10 @@ public class CardDataSO : ScriptableObject
     [Space(30)]
     [Header("기물 타입 설정")]
     public PieceType PieceType;
+    /// <summary>
+    /// 기물 타입에서의 대상 색깔
+    /// </summary>
+    public PieceColor PieceTargetColor;
     [Range(-1, 10)]
     public int PieceLimitTurn;
     public int RequiredPieceCount;
@@ -32,6 +36,11 @@ public class CardDataSO : ScriptableObject
     [Space(30)]
     [Header("전역 타입 설정")]
     //전역 타입에 필요한 설정
+    public bool NeedTargetColor;
+    /// <summary>
+    /// 전역 타입에서의 대상 색깔
+    /// </summary>
+    public PieceColor GlobalTargetColor;
     public bool HasLimit;
     public int LimitTurn;
 

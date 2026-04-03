@@ -12,6 +12,7 @@ public class CardDataSOEditor : Editor
 
     // 기물 타입
     SerializedProperty pieceType;
+    SerializedProperty targetColorPiece;
     SerializedProperty pieceLimitTurn;
     SerializedProperty requiredPieceCount;
 
@@ -20,6 +21,8 @@ public class CardDataSOEditor : Editor
     SerializedProperty maintainTurn;
 
     // 전역 타입
+    SerializedProperty needTargetColor;
+    SerializedProperty targetColor;
     SerializedProperty hasLimit;
     SerializedProperty limitTurn;
 
@@ -44,12 +47,15 @@ public class CardDataSOEditor : Editor
         cardType = serializedObject.FindProperty("Type");
 
         pieceType = serializedObject.FindProperty("PieceType");
+        targetColorPiece = serializedObject.FindProperty("PieceTargetColor");
         pieceLimitTurn = serializedObject.FindProperty("PieceLimitTurn");
         requiredPieceCount = serializedObject.FindProperty("RequiredPieceCount");
 
         tileCount = serializedObject.FindProperty("TileCount");
         maintainTurn = serializedObject.FindProperty("MaintainTurn");
 
+        needTargetColor = serializedObject.FindProperty("NeedTargetColor");
+        targetColor = serializedObject.FindProperty("GlobalTargetColor");
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
 
@@ -139,6 +145,7 @@ public class CardDataSOEditor : Editor
         HelpBox("기물 카드: 특정 기물을 배치하거나 조합하는 카드입니다.", MessageType.None);
         EditorGUILayout.Space(2);
         EditorGUILayout.PropertyField(pieceType, new GUIContent("기물 종류"));
+        EditorGUILayout.PropertyField(targetColorPiece, new GUIContent("대상 색상"));
         EditorGUILayout.PropertyField(pieceLimitTurn, new GUIContent("효과 유지 턴"));
         if (pieceLimitTurn.intValue == -1)
         {
@@ -164,6 +171,15 @@ public class CardDataSOEditor : Editor
     {
         HelpBox("전역 카드: 게임 전체에 영향을 주는 카드입니다.", MessageType.None);
         EditorGUILayout.Space(2);
+        EditorGUILayout.PropertyField(needTargetColor, new GUIContent("대상 색상 필요"));
+        if (needTargetColor.boolValue)
+        {
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(targetColor, new GUIContent("대상 색상"));
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.Space(4);
         EditorGUILayout.PropertyField(hasLimit, new GUIContent("턴 제한 여부"));
 
         if (hasLimit.boolValue)
