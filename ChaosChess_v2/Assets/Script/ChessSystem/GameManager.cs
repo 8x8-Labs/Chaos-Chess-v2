@@ -3,8 +3,9 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    private int curTurn = 1;
-    public bool IsPlayerTurn => (curTurn % 2 == 0);
+    private bool isPlayerTurn = true;
+    public bool IsPlayerTurn => isPlayerTurn;
+    private PieceColor turn;
 
     public bool IsGameInput = true;
 
@@ -12,32 +13,21 @@ public class GameManager : MonoBehaviour
     {
         get
         {
-            if (curTurn % 2 == 0)
+            if (turn == PieceColor.White)
                 return 'w';
             else
                 return 'b';
         }
     }
-    public PieceColor turnColor
-    {
-        get
-        {
-            if (curTurn % 2 == 0)
-                return PieceColor.White;
-            else
-                return PieceColor.Black;
-        }
-    }
 
     private UIManager uiManager;
-    private BoardManager boardManager;
     private BoardUI boardUI;
 
     private Piece selectedPiece;
 
     private void Awake()
     {
-        if (Instance == null)
+        if(Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
@@ -52,36 +42,35 @@ public class GameManager : MonoBehaviour
     {
         FairyStockfishBridge.Instance.InitEngine("chess");
 
-        curTurn = 1;
+        turn = PieceColor.White;
 
-        boardManager = GetComponent<BoardManager>();
         boardUI = GetComponent<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
 
-        boardManager.OnPromotionRequired += HandlePromotion;
+        BoardManager.Instance.OnPromotionRequired += HandlePromotion;
 
-        boardManager.LoadFEN();
+        BoardManager.Instance.LoadFEN();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
-        boardManager.UpdatePiecesCanMovePos(moves);
+        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
 
     public void SelectGrid(Vector3Int pos)
     {
-        if (!IsPlayerTurn) return;
-        if (!boardManager.IsInside(pos)) return;
+        if (!isPlayerTurn) return;
+        if (!BoardManager.Instance.IsInside(pos)) return;
 
-        Piece piece = boardManager.GetPiece(pos);
+        Piece piece = BoardManager.Instance.GetPiece(pos);
 
-        if (piece != null && piece.Color == turnColor)
+        if (piece != null && piece.Color == turn)
         {
             SelectPiece(piece);
             boardUI.DrawSelectTile(pos);
         }
         else
         {
-            MoveSelected(pos, boardManager);
+            MoveSelected(pos);
             boardUI.DeleteSelectTile();
         }
     }
@@ -92,12 +81,13 @@ public class GameManager : MonoBehaviour
 
         uiManager.Show((type) =>
         {
-            boardManager.CreatePromotionPiece(pos, pawn.Color, type);
+            BoardManager.Instance.CreatePromotionPiece(pos, pawn.Color, type);
 
             IsGameInput = true;
 
             NextTurn();
 
+            isPlayerTurn = false;
             RequestAIMove();
         });
     }
@@ -109,22 +99,29 @@ public class GameManager : MonoBehaviour
 
     public void NextTurn()
     {
-        curTurn += 1;
-        boardManager.UpdateFEN(); // 디버깅
-        string fen = boardManager.GetFEN();
+        if (turn == PieceColor.White)
+        {
+            turn = PieceColor.Black;
+        }
+        else
+        {
+            turn = PieceColor.White;
+        }
+        BoardManager.Instance.UpdateFEN(); // 디버깅
+        string fen = BoardManager.Instance.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
-        boardManager.UpdatePiecesCanMovePos(moves);
+        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
 
     // MoveSelected 안에서 플레이어 수 적용 후:
-    private void MoveSelected(Vector3Int target, BoardManager boardManager)
+    private void MoveSelected(Vector3Int target)
     {
         if (selectedPiece == null) return;
 
-        if (boardManager.MovePiece(selectedPiece, target))
+        if (BoardManager.Instance.MovePiece(selectedPiece, target))
         {
             selectedPiece = null;
 
@@ -134,6 +131,7 @@ public class GameManager : MonoBehaviour
 
             NextTurn();
 
+            isPlayerTurn = false;
             RequestAIMove();
         }
     }
@@ -146,13 +144,14 @@ public class GameManager : MonoBehaviour
             callback: (uciMove) =>
             {
                 // UCI 수 (예: "e2e4") → Vector3Int 변환 후 BoardManager에 적용
-                boardManager.ApplyUCIMove(uciMove);
+                BoardManager.Instance.ApplyUCIMove(uciMove);
+                isPlayerTurn = true;
             }
         );
     }
     private void EvaluateGameState(string[] moves)
     {
-        if (boardManager.GetHalfmoveClock() >= 150)
+        if (BoardManager.Instance.GetHalfmoveClock() >= 150)
         {
             OnDraw();
         }
