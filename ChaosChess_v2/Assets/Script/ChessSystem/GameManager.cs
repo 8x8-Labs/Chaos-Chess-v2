@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -7,6 +9,7 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
+    private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
     public PieceColor turnColor
     {
         get
@@ -111,11 +114,29 @@ public class GameManager : MonoBehaviour
         string fen = BoardManager.Instance.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
 
+        ReturnAction();
+
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
+    public void AppendAction(int x,Action act)
+    {
+        recievedActions.Add((curTurn+x*2, act));
+    }
+    public void ReturnAction()
+    {
+        for (int i = recievedActions.Count - 1; i >= 0; i--)
+        {
+            var item = recievedActions[i];
 
+            if (item.turn == curTurn)
+            {
+                item.action.Invoke();
+                recievedActions.RemoveAt(i);
+            }
+        }
+    }
     // MoveSelected 안에서 플레이어 수 적용 후:
     private void MoveSelected(Vector3Int target)
     {
