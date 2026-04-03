@@ -16,14 +16,18 @@ public class DimensionDisturbanceCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> targets = args.Targets;
+        if (args?.Targets == null) return;
 
-        foreach (Piece target in targets)
+        List<Vector3Int> emptyCells = GetMovableCells();
+
+        foreach (Piece target in args.Targets)
         {
-            List<Vector3Int> emptyCells = GetMovableCells();
-            if (emptyCells.Count == 0) continue;
+            if (emptyCells.Count == 0) break;
 
-            Vector3Int destination = emptyCells[Random.Range(0, emptyCells.Count)];
+            int randomIndex = Random.Range(0, emptyCells.Count);
+            Vector3Int destination = emptyCells[randomIndex];
+            emptyCells.RemoveAt(randomIndex);
+
             BoardManager.Instance.ForceTeleport(target, destination);
         }
     }
