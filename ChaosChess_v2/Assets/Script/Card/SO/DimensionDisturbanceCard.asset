@@ -17,10 +17,13 @@ MonoBehaviour:
   CardDescription: "\uCC28\uC6D0\uAD50\uB780"
   Type: 0
   PieceType: 15
+  TargetColor: 1
   PieceLimitTurn: -1
   RequiredPieceCount: 2
   TileCount: 0
   MaintainTurn: 0
+  NeedTargetColor: 0
+  _TargetColor: 0
   HasLimit: 0
   LimitTurn: 0
   NeedAdditionalDescription: 0
