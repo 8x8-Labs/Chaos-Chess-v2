@@ -508,20 +508,42 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
-    public void ForceTeleport(Piece piece, Vector3Int target)
+    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0')
     {
         Vector3Int from = piece.Pos;
-        board[from.x, from.y] = null;
-        board[target.x, target.y] = piece;
-        Vector3 worldPos = GridPosToWorldPos(target);
-        piece.Move(target, worldPos);
 
-        UpdateFEN();
+        board[from.x, from.y] = null;
+
+        // 이동하는 위치에 기물이 있으면 먹음
+        if (!IsEmpty(target))
+        {
+            Piece targetPiece = GetPiece(target);
+            if (targetPiece is Rook)
+            {
+                castling.OnRookDie(targetPiece.Color, target);
+            }
+            DestroyPiece(target);
+        }
+
+        board[target.x, target.y] = piece;
+        Vector3 WorldPos = GridPosToWorldPos(target);
+        piece.Move(target, WorldPos);
+
+        // 프로모션
+        if (piece is Pawn)
+        {
+            if (piece.Pos.y == (piece.Color == PieceColor.White ? 7 : 0))
+            {
+                HandlePromotion(piece, target, promotion);
+            }
+        }
+
+        UpdateFEN(); // fen 업데이트
         string fen = GetFEN();
-        FairyStockfishBridge.Instance.SetPosition(fen);
+        FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        UpdatePiecesCanMovePos(moves);
+        UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
     }
 
     /// <summary>
