@@ -508,16 +508,18 @@ public class BoardManager : MonoBehaviour
         return new List<Piece>(Pieces);
     }
 
-    public Piece GetPiece(Piece piece, PieceColor pieceColor)
+    /// <summary>보드 위 특정 기물을 전부 반환합니다.</summary>
+    public List<Piece> GetPiece(Piece piece, PieceColor pieceColor)
     {
+        List<Piece> targetPieces = new List<Piece>();
         for (int i = 0; i < Pieces.Count; i++)
         {
             if (Pieces[i] is Piece && Pieces[i].Color == pieceColor)
             {
-                return Pieces[i];
+                targetPieces.Add(Pieces[i]);
             }
         }
-        return null;
+        return targetPieces;
     }
 
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
