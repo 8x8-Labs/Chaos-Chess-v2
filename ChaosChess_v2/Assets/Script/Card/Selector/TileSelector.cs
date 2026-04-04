@@ -42,12 +42,13 @@ public class TileSelector : Selector<Vector3Int>
             Vector3 mousePos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int mouseGridPos = tilemap.WorldToCell(mousePos);
 
-            if(boardManager.GetPiece(mouseGridPos) == null)
+            // 입력 위치가 체스 판 범위 내부인지 확인
+            if (mouseGridPos.x < 0 || mouseGridPos.x >= 8 || 
+                mouseGridPos.y < 0 || mouseGridPos.y >= 8) return;
+
+            if (boardManager.GetPiece(mouseGridPos) == null)
             {
-                // 입력 위치가 체스 판 범위 내부인지 확인
-                if(mouseGridPos.x < 8 && mouseGridPos.y < 8 &&
-                    mouseGridPos.x >= 0 && mouseGridPos.y >= 0)
-                    SelectTarget(mouseGridPos);
+                SelectTarget(mouseGridPos);
             }
         }
     }
