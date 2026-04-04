@@ -9,7 +9,7 @@ public class ConcentrationCard : CardData, IPieceCard
 {
     private PieceSelector selector;
     Vector3Int pos;
-    Piece wallPrefab;
+    public Piece wallPrefab;
     PieceColor used;
 
     private void Awake()
