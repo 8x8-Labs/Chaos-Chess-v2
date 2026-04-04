@@ -114,6 +114,10 @@ public class BoardManager : MonoBehaviour
     private Vector2 CellSize = new Vector2(0.65f, 0.65f);
 
     [SerializeField] private Transform pieceSpawnTransform;
+    public Transform PieceSpawnTransform
+    {
+        get { return pieceSpawnTransform; }
+    }
 
     void Awake()
     {
@@ -420,6 +424,7 @@ public class BoardManager : MonoBehaviour
     {
         DestroyPiece(target);
         AddPiece(piece, target);
+        Pieces.Add(piece);
     }
 
     public Vector3Int UCIToGrid(string sq)

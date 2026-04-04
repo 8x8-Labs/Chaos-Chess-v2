@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 122377169368013032}
   - component: {fileID: 8869586277597595303}
-  - component: {fileID: -2230652960325091209}
+  - component: {fileID: -2056599370867421132}
   m_Layer: 6
   m_Name: Amazon
   m_TagString: Untagged
@@ -88,7 +88,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-2230652960325091209
+--- !u!114 &-2056599370867421132
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -97,12 +97,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2975136311740762822}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 876501ccb0d60d54593926e7b87e1788, type: 3}
+  m_Script: {fileID: 11500000, guid: 59d020660b5a53b4c86a0448f1ca7240, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WhitePiece: {fileID: -2499782443411086787, guid: 2c3d4943bf5992a42a32e8460ada962d, type: 3}
-  BlackPiece: {fileID: -9069220641133504602, guid: 0c5954b4f1a42324c9ae6078af7c7391, type: 3}
-  type: 64
+  WhitePiece: {fileID: -5619150752979459227, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  BlackPiece: {fileID: -1211513934, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  type: 128
   color: 0
-  outlineMaterial: {fileID: 2100000, guid: 5f98fe7e34c6e494aac571d357daabee, type: 2}
+  outlineMaterial: {fileID: 0}
   pos: {x: 0, y: 0, z: 0}

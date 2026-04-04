@@ -9,6 +9,8 @@ public class ConcentrationCard : CardData, IPieceCard
 {
     private PieceSelector selector;
     Vector3Int pos;
+    Piece wallPrefab;
+    PieceColor used;
 
     private void Awake()
     {
@@ -27,8 +29,9 @@ public class ConcentrationCard : CardData, IPieceCard
         foreach(Piece piece in pieces)
         {
             pos = piece.Pos;
-            Wall wall = new Wall();
-            wall.Init(pos, PieceColor.White,piece.WhitePieceSprite,piece.BlackPieceSprite);
+            Piece wall = Instantiate(wallPrefab, BoardManager.Instance.PieceSpawnTransform);
+            used = piece.Color;
+            wall.Init(pos, used, piece.WhitePieceSprite, piece.BlackPieceSprite);
             BoardManager.Instance.ChangePiece(pos, wall);
             GameManager.Instance.AppendAction(DataSO.LimitTurn,Change);
         }
@@ -38,7 +41,7 @@ public class ConcentrationCard : CardData, IPieceCard
     private void Change()
     {
         Amazon amazon = new Amazon();
-        amazon.Init(pos, PieceColor.White);
+        amazon.Init(pos, used);
         BoardManager.Instance.ChangePiece(pos,amazon);
     }
 }
