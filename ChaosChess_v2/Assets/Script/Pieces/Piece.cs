@@ -40,6 +40,15 @@ public class Piece : MonoBehaviour
         get { return type; }
     }
 
+    public Sprite WhitePieceSprite
+    {
+        get { return WhitePiece; }
+    }
+    public Sprite BlackPieceSprite
+    {
+        get { return BlackPiece; }
+    }
+
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();

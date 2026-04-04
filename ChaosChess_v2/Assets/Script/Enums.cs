@@ -9,7 +9,9 @@ public enum PieceType
     Bishop= 4,
     Rook= 8,
     King = 16,
-    Queen = 32
+    Queen = 32,
+    Wall = 64,
+    Amazon = 128
 }
 
 /// <summary>

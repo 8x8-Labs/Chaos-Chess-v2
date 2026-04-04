@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class Wall : Piece
 {
     public override string GetFen()
