@@ -47,17 +47,20 @@ public class Piece : MonoBehaviour
         mpb = new MaterialPropertyBlock();
     }
 
-    public virtual void Init(Vector3Int pos, PieceColor color)
+    public virtual void Init(Vector3Int pos, PieceColor color, Sprite white, Sprite black)
     {
         Color = color;
         Pos = pos;
 
         if (Color == PieceColor.White)
-            spriteRenderer.sprite = WhitePiece;
+            spriteRenderer.sprite = white;
         else
-            spriteRenderer.sprite = BlackPiece;
+            spriteRenderer.sprite = black;
     }
-
+    public virtual void Init(Vector3Int pos, PieceColor color)
+    {
+        Init(pos, color, WhitePiece, BlackPiece);
+    }
     public virtual bool CanMoveTo(BoardManager board, Vector3Int target)
     {
         foreach (Vector3Int pos in CanMovePos)
