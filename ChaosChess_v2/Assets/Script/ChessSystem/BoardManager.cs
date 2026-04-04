@@ -412,12 +412,15 @@ public class BoardManager : MonoBehaviour
     {
         Piece targetPiece = GetPiece(target);
 
+        board[target.x, target.y] = null;
         Pieces.Remove(targetPiece);
         Destroy(targetPiece.gameObject);
     }
-    
+
     public void DestroyPiece(Piece piece)
     {
+        if (piece == null) return;
+        board[piece.Pos.x, piece.Pos.y] = null;
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
     }
