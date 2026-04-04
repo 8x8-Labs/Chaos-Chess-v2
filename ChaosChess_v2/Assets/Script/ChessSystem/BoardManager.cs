@@ -509,14 +509,14 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>보드 위 특정 기물을 전부 반환합니다.</summary>
-    public List<Piece> GetPiece(Piece piece, PieceColor pieceColor)
+    public List<T> GetPiece<T>(PieceColor pieceColor) where T : Piece
     {
-        List<Piece> targetPieces = new List<Piece>();
+        List<T> targetPieces = new List<T>();
         for (int i = 0; i < Pieces.Count; i++)
         {
-            if (Pieces[i] is Piece && Pieces[i].Color == pieceColor)
+            if (Pieces[i] is T && Pieces[i].Color == pieceColor)
             {
-                targetPieces.Add(Pieces[i]);
+                targetPieces.Add((T)Pieces[i]);
             }
         }
         return targetPieces;

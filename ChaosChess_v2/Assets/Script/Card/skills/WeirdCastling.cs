@@ -26,18 +26,12 @@ public class WeirdCastling : CardData, IPieceCard
     {
         Debug.Log($"카드 실행! : {DataSO.CardName}");
         Piece targetPiece = args.Targets[0];
-        Piece king = BoardManager.Instance.GetPiece(new King(), DataSO.PieceTargetColor)[0];
+        Piece king = BoardManager.Instance.GetPiece<King>(DataSO.PieceTargetColor)[0];
 
         List<Piece> pieces = new List<Piece> { king, targetPiece };
         List<Vector3Int> newPositions = new List<Vector3Int> { targetPiece.Pos, king.Pos };
         BoardManager.Instance.BatchReassign(pieces, newPositions);
 
-        BoardManager.Instance.UpdateFEN(); // fen 업데이트
-        string fen = BoardManager.Instance.GetFEN();
-        FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
-
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        BoardManager.Instance.UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
         GameManager.Instance.NextTurn();
         GameManager.Instance.RequestAIMove();
     }
