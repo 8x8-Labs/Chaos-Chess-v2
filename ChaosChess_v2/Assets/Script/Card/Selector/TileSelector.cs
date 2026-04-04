@@ -43,7 +43,7 @@ public class TileSelector : Selector<Vector3Int>
             Vector3Int mouseGridPos = tilemap.WorldToCell(mousePos);
 
             // 입력 위치가 체스 판 범위 내부인지 확인
-            if (mouseGridPos.x < 0 || mouseGridPos.x >= 8 || 
+            if (mouseGridPos.x < 0 || mouseGridPos.x >= 8 ||
                 mouseGridPos.y < 0 || mouseGridPos.y >= 8) return;
 
             if (boardManager.GetPiece(mouseGridPos) == null)
@@ -75,7 +75,7 @@ public class TileSelector : Selector<Vector3Int>
         selectedTargets.Add(Target);
         tileDrawer.DrawSelectTile(Target);
         selectorUI.UpdateButtonState(executable);
-        
+
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
 

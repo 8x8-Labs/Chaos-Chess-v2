@@ -415,6 +415,12 @@ public class BoardManager : MonoBehaviour
         Pieces.Remove(targetPiece);
         Destroy(targetPiece.gameObject);
     }
+    
+    public void DestroyPiece(Piece piece)
+    {
+        Pieces.Remove(piece);
+        Destroy(piece.gameObject);
+    }
 
     public Vector3Int UCIToGrid(string sq)
     {
