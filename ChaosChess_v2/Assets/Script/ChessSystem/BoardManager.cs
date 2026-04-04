@@ -186,6 +186,7 @@ public class BoardManager : MonoBehaviour
                 Pieces.Add(piece);
             }
 
+            CheckCastlingRights();
             x++;
         }
 
@@ -440,7 +441,9 @@ public class BoardManager : MonoBehaviour
 
     public void UpdateFEN()
     {
+        CheckCastlingRights();
         FEN = "";
+
         for (int i = 7; i > -1; i--)
         {
             string line = "";
@@ -488,6 +491,42 @@ public class BoardManager : MonoBehaviour
         FEN += ep + " ";
 
         FEN += halfmoveClock + " " + fullmoveNumber;
+    }
+
+    /// <summary>원래 킹, 룩 위치에 기물이 없거나 다른 기물이 있으면 그 방향 캐슬링이 불가능하게 만듭니다 </summary>
+    private void CheckCastlingRights()
+    {
+        // 백킹
+        Piece whiteKing = GetPiece(UCIToGrid("e1"));
+        if (!(whiteKing is King) || whiteKing.Color != PieceColor.White)
+        {
+            castling.OnKingMove(PieceColor.White);
+        }
+
+        // 흑킹
+        Piece blackKing = GetPiece(UCIToGrid("e8")); // e8
+        if (!(blackKing is King) || blackKing.Color != PieceColor.Black)
+        {
+            castling.OnKingMove(PieceColor.Black);
+        }
+
+        //백룩
+        Piece rook1 = GetPiece(UCIToGrid("a1"));
+        if (!(rook1 is Rook) || rook1.Color != PieceColor.White)
+            castling.OnRookMove(PieceColor.White, UCIToGrid("a1"));
+
+        Piece rook2 = GetPiece(UCIToGrid("h1"));
+        if (!(rook2 is Rook) || rook2.Color != PieceColor.White)
+            castling.OnRookMove(PieceColor.White, UCIToGrid("h1"));
+
+        //흑룩
+        Piece rook3 = GetPiece(UCIToGrid("a8"));
+        if (!(rook3 is Rook) || rook3.Color != PieceColor.Black)
+            castling.OnRookMove(PieceColor.Black, UCIToGrid("a8"));
+
+        Piece rook4 = GetPiece(UCIToGrid("h8"));
+        if (!(rook4 is Rook) || rook4.Color != PieceColor.Black)
+            castling.OnRookMove(PieceColor.Black, UCIToGrid("h8"));
     }
 
     public string GetFEN()
@@ -541,6 +580,10 @@ public class BoardManager : MonoBehaviour
         if (piece is King)
         {
             castling.OnKingMove(piece.Color);
+        }
+        if (piece is Rook)
+        {
+            castling.OnRookMove(piece.Color, piece.Pos);
         }
 
         board[target.x, target.y] = piece;
