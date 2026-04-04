@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
 
 [System.Serializable]
@@ -507,6 +506,20 @@ public class BoardManager : MonoBehaviour
         return new List<Piece>(Pieces);
     }
 
+    /// <summary>보드 위 특정 기물을 전부 반환합니다.</summary>
+    public List<T> GetPiece<T>(PieceColor pieceColor) where T : Piece
+    {
+        List<T> targetPieces = new List<T>();
+        for (int i = 0; i < Pieces.Count; i++)
+        {
+            if (Pieces[i] is T && Pieces[i].Color == pieceColor)
+            {
+                targetPieces.Add((T)Pieces[i]);
+            }
+        }
+        return targetPieces;
+    }
+
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
     public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0')
     {
@@ -523,6 +536,11 @@ public class BoardManager : MonoBehaviour
                 castling.OnRookDie(targetPiece.Color, target);
             }
             DestroyPiece(target);
+        }
+
+        if (piece is King)
+        {
+            castling.OnKingMove(piece.Color);
         }
 
         board[target.x, target.y] = piece;
@@ -554,8 +572,14 @@ public class BoardManager : MonoBehaviour
     public void BatchReassign(List<Piece> pieces, List<Vector3Int> newPositions)
     {
         for (int i = 0; i < pieces.Count; i++)
-            board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
+        {
+            if (pieces[i] is King)
+                castling.OnKingMove(pieces[i].Color);
+            if (pieces[i] is Rook)
+                castling.OnRookMove(pieces[i].Color, pieces[i].Pos);
 
+            board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
+        }
         for (int i = 0; i < pieces.Count; i++)
         {
             Vector3Int target = newPositions[i];

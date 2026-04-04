@@ -46,7 +46,7 @@ public class PieceSelector : Selector<Piece>
             {
                 // 기물 타입과 색상 체크
                 if((p.Type & cardData.DataSO.PieceType) != 0 &&
-                    p.Color == cardData.DataSO.TargetColor)
+                    p.Color == cardData.DataSO.PieceTargetColor)
                 {
                     SelectTarget(p);
                 }
@@ -89,7 +89,7 @@ public class PieceSelector : Selector<Piece>
             Targets = selectedTargets.ToList(),
             LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
-
+        
         skillCard.Execute(args);
 
         DisableSelector();
