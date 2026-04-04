@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(UIButton))]
 public class SelectorUI : MonoBehaviour
 {
     private UIButton executeButton;
