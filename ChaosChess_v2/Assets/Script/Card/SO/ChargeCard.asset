@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: ChargeCard
+  m_EditorClassIdentifier: 
+  CardName: "\uB3CC\uACA9"
+  CardImage: {fileID: 0}
+  CardDescription: "\uC790\uC2E0\uC758 \uC774\uB3D9 \uBC29\uD5A5\uC73C\uB85C \uC804\uC9C4\uD560
+    \uC218 \uC788\uB294 \uBAA8\uB4E0 \uD3F0\uC774 \uD55C \uCE78 \uC804\uC9C4\uD569\uB2C8\uB2E4."
+  Type: 2
+  PieceType: 0
+  PieceTargetColor: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 0
+  TileCount: 0
+  MaintainTurn: 0
+  NeedTargetColor: 1
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0
