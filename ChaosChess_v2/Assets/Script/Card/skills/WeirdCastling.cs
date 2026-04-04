@@ -28,16 +28,6 @@ public class WeirdCastling : CardData, IPieceCard
         Piece targetPiece = args.Targets[0];
         Piece king = BoardManager.Instance.GetPiece(new King(), DataSO.PieceTargetColor);
 
-        List<Piece> allPieces = BoardManager.Instance.GetAllPieces();
-        foreach (Piece piece in allPieces)
-        {
-            if (piece is King && piece.Color == DataSO.PieceTargetColor)
-            {
-                king = piece;
-                break;
-            }
-        }
-        Vector3Int kingPos = king.Pos;
         List<Piece> pieces = new List<Piece> { king, targetPiece };
         List<Vector3Int> newPositions = new List<Vector3Int> { targetPiece.Pos, king.Pos };
         BoardManager.Instance.BatchReassign(pieces, newPositions);
