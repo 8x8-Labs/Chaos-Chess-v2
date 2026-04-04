@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -5,8 +6,9 @@ using UnityEngine;
 public class PieceSelector : Selector<Piece>
 {
     [SerializeField] private UIPieceDrawer pieceDrawer;
-    private bool executable => isExecute();
+    [SerializeField] private SelectorUI selectorUI;
     private IPieceCard skillCard;
+    private bool executable => isExecute();
 
     public override void DeselectFirstTarget()
     {
@@ -20,6 +22,7 @@ public class PieceSelector : Selector<Piece>
         pieceDrawer.EraseSelectPiece(Target);
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
+        selectorUI.UpdateButtonState(executable);
     }
     public override void DeselectAllTarget()
     {
@@ -72,6 +75,7 @@ public class PieceSelector : Selector<Piece>
         selectedTargets.Add(Target);
         pieceDrawer.DrawSelectPiece(Target);
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
+        selectorUI.UpdateButtonState(executable);
     }
 
     protected override bool isExecute()
@@ -79,7 +83,6 @@ public class PieceSelector : Selector<Piece>
         return selectedTargets.Count == cardData.DataSO.RequiredPieceCount;
     }
 
-    [ContextMenu("Execute")]
     public override void ExecuteSkill()
     {
         if (!executable) return;
@@ -99,6 +102,7 @@ public class PieceSelector : Selector<Piece>
     {
         cardData = data;
         skillCard = cardData.GetComponent<IPieceCard>();
+        selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
         GameManager.Instance.IsGameInput = false;
@@ -110,6 +114,7 @@ public class PieceSelector : Selector<Piece>
     {
         cardData = null;
         skillCard = null;
+        selectorUI.DisableButtonState();
         foreach(Piece p in selectedTargets) p.OnDeselect();
 
         selectedTargets.Clear();
