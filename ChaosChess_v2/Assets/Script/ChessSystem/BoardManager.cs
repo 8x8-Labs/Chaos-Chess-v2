@@ -574,8 +574,14 @@ public class BoardManager : MonoBehaviour
     public void BatchReassign(List<Piece> pieces, List<Vector3Int> newPositions)
     {
         for (int i = 0; i < pieces.Count; i++)
-            board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
+        {
+            if (pieces[i] is King)
+                castling.OnKingMove(pieces[i].Color);
+            if (pieces[i] is Rook)
+                castling.OnRookMove(pieces[i].Color, pieces[i].Pos);
 
+            board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
+        }
         for (int i = 0; i < pieces.Count; i++)
         {
             Vector3Int target = newPositions[i];

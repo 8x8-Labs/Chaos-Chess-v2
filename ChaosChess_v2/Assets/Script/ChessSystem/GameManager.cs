@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
@@ -120,10 +120,12 @@ public class GameManager : MonoBehaviour
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
-    public void AppendAction(int x,Action act)
+
+    public void AppendAction(int x, Action act)
     {
-        recievedActions.Add((curTurn+x*2, act));
+        recievedActions.Add((curTurn + x * 2, act));
     }
+
     public void ReturnAction()
     {
         for (int i = recievedActions.Count - 1; i >= 0; i--)
