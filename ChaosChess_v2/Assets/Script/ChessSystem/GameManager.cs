@@ -156,7 +156,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void RequestAIMove()
+    public void RequestAIMove()
     {
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,

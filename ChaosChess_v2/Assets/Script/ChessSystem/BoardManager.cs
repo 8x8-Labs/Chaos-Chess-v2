@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
@@ -507,6 +508,18 @@ public class BoardManager : MonoBehaviour
         return new List<Piece>(Pieces);
     }
 
+    public Piece GetPiece(Piece piece, PieceColor pieceColor)
+    {
+        for (int i = 0; i < Pieces.Count; i++)
+        {
+            if (Pieces[i] is Piece && Pieces[i].Color == pieceColor)
+            {
+                return Pieces[i];
+            }
+        }
+        return null;
+    }
+
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
     public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0')
     {
@@ -523,6 +536,11 @@ public class BoardManager : MonoBehaviour
                 castling.OnRookDie(targetPiece.Color, target);
             }
             DestroyPiece(target);
+        }
+
+        if (piece is King)
+        {
+            castling.OnKingMove(piece.Color);
         }
 
         board[target.x, target.y] = piece;
