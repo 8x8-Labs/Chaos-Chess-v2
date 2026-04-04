@@ -61,7 +61,6 @@ public class PieceSelector : Selector<Piece>
     {
         if (!selectState) return;
 
-        Debug.Log("기물 클릭됨!");
         if (selectedTargets.Contains(Target))
         {
             DeselectTarget(Target);

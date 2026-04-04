@@ -54,7 +54,6 @@ public class TileSelector : Selector<Vector3Int>
 
     public override void SelectTarget(Vector3Int Target)
     {
-        Debug.Log("타일 클릭됨!");
         if (selectedTargets.Contains(Target))
         {
             DeselectTarget(Target);
@@ -73,7 +72,6 @@ public class TileSelector : Selector<Vector3Int>
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
     }
 
-    [ContextMenu("Execute")]
     public override void ExecuteSkill()
     {
         if (!executable) return;
