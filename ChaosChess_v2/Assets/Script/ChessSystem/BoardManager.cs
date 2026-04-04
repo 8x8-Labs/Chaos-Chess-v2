@@ -416,6 +416,12 @@ public class BoardManager : MonoBehaviour
         Destroy(targetPiece.gameObject);
     }
 
+    public void ChangePiece(Vector3Int target, Piece piece)
+    {
+        DestroyPiece(target);
+        AddPiece(piece, target);
+    }
+
     public Vector3Int UCIToGrid(string sq)
     {
         int x = sq[0] - 'a'; // 'a'~'h' → 0~7
