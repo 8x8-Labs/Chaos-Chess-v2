@@ -378,7 +378,7 @@ public class BoardManager : MonoBehaviour
         // AI 프로모션 (UCI)
         if (promotion != '\0')
         {
-            CreatePromotionPiece(pos, color, promotion);
+            ChangePiece(pos, color, promotion);
         }
         else
         {
@@ -387,9 +387,9 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void CreatePromotionPiece(Vector3Int pos, PieceColor color, char type)
+    /// pos에 있는 기물에 새로운 기물을 추가합니다
+    public void ChangePiece(Vector3Int pos, PieceColor color, char type)
     {
-        // 폰 제거
         DestroyPiece(pos);
 
         char key = char.ToLower(type);
