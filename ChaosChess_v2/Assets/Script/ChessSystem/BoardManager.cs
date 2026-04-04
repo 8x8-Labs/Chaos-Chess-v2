@@ -560,7 +560,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
-    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0')
+    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0', bool useTurn = false)
     {
         Vector3Int from = piece.Pos;
 
@@ -599,12 +599,19 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        UpdateFEN(); // fen 업데이트
-        string fen = GetFEN();
-        FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
+        if (useTurn)
+        {
+            GameManager.Instance.NextTurn();
+        }
+        else
+        {
+            UpdateFEN(); // fen 업데이트
+            string fen = GetFEN();
+            FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
 
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
+            string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+            UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
+        }
     }
 
     /// <summary>
