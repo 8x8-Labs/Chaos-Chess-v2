@@ -413,8 +413,7 @@ public class BoardManager : MonoBehaviour
         Piece targetPiece = GetPiece(target);
 
         board[target.x, target.y] = null;
-        Pieces.Remove(targetPiece);
-        Destroy(targetPiece.gameObject);
+        DestroyPiece(targetPiece);
     }
 
     public void DestroyPiece(Piece piece)
@@ -423,6 +422,12 @@ public class BoardManager : MonoBehaviour
         board[piece.Pos.x, piece.Pos.y] = null;
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     public Vector3Int UCIToGrid(string sq)
