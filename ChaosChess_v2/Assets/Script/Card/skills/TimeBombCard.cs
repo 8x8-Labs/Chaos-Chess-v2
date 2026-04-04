@@ -57,5 +57,11 @@ public class TimeBombCard : CardData, ITileCard
                 BoardManager.Instance.DestroyPiece(piece);
             }
         }
+        
+        BoardManager.Instance.UpdateFEN();
+        string fen = BoardManager.Instance.GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
 }
