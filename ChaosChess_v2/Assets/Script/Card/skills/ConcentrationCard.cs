@@ -8,6 +8,7 @@ using UnityEngine;
 public class ConcentrationCard : CardData, IPieceCard
 {
     private PieceSelector selector;
+    Vector3Int pos;
 
     private void Awake()
     {
@@ -23,7 +24,21 @@ public class ConcentrationCard : CardData, IPieceCard
     public void Execute(CardEffectArgs args = null)
     {
         List<Piece> pieces = args.Targets;
+        foreach(Piece piece in pieces)
+        {
+            pos = piece.Pos;
+            Wall wall = new Wall();
+            wall.Init(pos, PieceColor.White,piece.WhitePieceSprite,piece.BlackPieceSprite);
+            BoardManager.Instance.ChangePiece(pos, wall);
+            GameManager.Instance.AppendAction(DataSO.LimitTurn,Change);
+        }
         // TODO: 선택된 기물을 DataSO.PieceLimitTurn 동안 상호작용 불가 상태로 설정
         //       이후 아마존(커스텀 기물)으로 승격 처리
+    }
+    private void Change()
+    {
+        Amazon amazon = new Amazon();
+        amazon.Init(pos, PieceColor.White);
+        BoardManager.Instance.ChangePiece(pos,amazon);
     }
 }
