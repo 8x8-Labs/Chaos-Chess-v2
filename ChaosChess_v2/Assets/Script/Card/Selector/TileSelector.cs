@@ -48,6 +48,12 @@ public class TileSelector : Selector<Vector3Int>
 
             if (boardManager.GetPiece(mouseGridPos) == null)
             {
+                CardDataSO so = cardData.DataSO;
+                if (so.RestrictTiles)
+                {
+                    int idx = mouseGridPos.y * 8 + mouseGridPos.x;
+                    if (so.BlockedTiles[idx]) return;
+                }
                 SelectTarget(mouseGridPos);
             }
         }
