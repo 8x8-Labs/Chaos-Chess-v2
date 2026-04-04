@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Globalization;
-using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
