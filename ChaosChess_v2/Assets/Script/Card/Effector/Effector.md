@@ -218,7 +218,7 @@ public void Execute(CardEffectArgs args)
 
 ```csharp
 // GameManager.NextTurn() 등에서 활성화된 Effector들을 순회하며 호출
-effector.OnTurnChagned();
+effector.OnTurnChanged();
 ```
 
 ---
