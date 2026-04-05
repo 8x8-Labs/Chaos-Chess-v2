@@ -2,7 +2,7 @@
 
 public interface IEffect
 {
-    void OnTurnChagned();
+    void OnTurnChanged();
 }
 
 public interface IPieceEffect : IEffect

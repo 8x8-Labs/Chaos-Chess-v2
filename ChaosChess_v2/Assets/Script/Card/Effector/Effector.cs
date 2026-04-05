@@ -19,7 +19,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과를 대상에서 제거합니다. 서브클래스에서 훅/버프를 해제합니다.</summary>
     public abstract void Revert();
 
-    public virtual void OnTurnChagned()
+    public virtual void OnTurnChanged()
     {
         if (IsPermanent) return;
 
