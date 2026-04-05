@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
   m_Name: TimeBomb
   m_EditorClassIdentifier: 
-  CardName: "\uAE30\uD55C\uD3ED\uD0C4"
+  CardName: "\uC2DC\uD55C\uD3ED\uD0C4"
   CardImage: {fileID: 0}
   CardDescription: "3\uD134 \uD6C4\uC5D0 \uC774 \uCE78\uACFC \uC0C1\uD558\uC88C\uC6B0
     4\uCE78\uC5D0 \uC788\uB294 \uAE30\uBB3C\uC740 \uC8FD\uC2B5\uB2C8\uB2E4."
