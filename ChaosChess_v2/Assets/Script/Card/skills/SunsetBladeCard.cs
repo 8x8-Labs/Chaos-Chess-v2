@@ -21,7 +21,6 @@ public class SunsetBladeCard : CardData, IPieceCard
         selector.EnableSelector(this);
     }
 
-    [ContextMenu("Execute")]
     public void Execute(CardEffectArgs args = null)
     {
         var effector = CreatePieceEffector<SunsetBladeEffector>(args.Targets[0]);
@@ -56,7 +55,10 @@ public class SunsetBladeEffector : PieceEffector
     {
         List<Piece> pieces = new List<Piece>();
         foreach (var dir in new[] { Vector3Int.left, Vector3Int.right })
-            pieces.Add(BoardManager.Instance.GetPiece(target.Pos + dir));
+        {
+            var p = BoardManager.Instance.GetPiece(target.Pos + dir);
+            if(p != null) pieces.Add(p);
+        }
         BoardManager.Instance.DestroyPiece(pieces);
     }
 }
