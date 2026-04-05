@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,33 +21,43 @@ public class SunsetBladeCard : CardData, IPieceCard
         selector.EnableSelector(this);
     }
 
-    [ContextMenu("Execute")]
     public void Execute(CardEffectArgs args = null)
     {
-        Piece piece = args.Targets[0];
+        var effector = CreatePieceEffector<SunsetBladeEffector>(args.Targets[0]);
+        effector.Apply();
+    }
+}
 
-        Action<Vector3Int> effect = null;
+/// <summary>노을빛 검 효과 - 잡을 때 좌우 기물도 함께 제거 (1회 한정)</summary>
+public class SunsetBladeEffector : PieceEffector
+{
+    private Action<Vector3Int> captureCallback;
 
-        effect = (pos) =>
+    public override void Apply()
+    {
+        captureCallback = (_) =>
         {
-            OnCaptureEffect(pos);
-            piece.RemoveOnCaptureEffect(effect);
+            OnPieceCapture();
+            Revert();
         };
-
-        piece.AddOnCaptureEffect(effect);
+        target.AddOnCaptureEffect(captureCallback);
     }
 
-    private void OnCaptureEffect(Vector3Int pos)
+    public override void Revert()
     {
-        Vector3Int[] dirs = new Vector3Int[]
-        {
-        Vector3Int.left,
-        Vector3Int.right
-        };
+        if (captureCallback == null) return;
+        target.RemoveOnCaptureEffect(captureCallback);
+        captureCallback = null;
+        Destroy(this);
+    }
+
+    public override void OnPieceCapture()
+    {
         List<Piece> pieces = new List<Piece>();
-        foreach (Vector3Int dir in dirs)
+        foreach (var dir in new[] { Vector3Int.left, Vector3Int.right })
         {
-            pieces.Add(BoardManager.Instance.GetPiece(pos + dir));
+            var p = BoardManager.Instance.GetPiece(target.Pos + dir);
+            if(p != null) pieces.Add(p);
         }
         BoardManager.Instance.DestroyPiece(pieces);
     }
