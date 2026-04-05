@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -43,12 +44,11 @@ public class SunsetBladeCard : CardData, IPieceCard
         Vector3Int.left,
         Vector3Int.right
         };
-
+        List<Piece> pieces = new List<Piece>();
         foreach (Vector3Int dir in dirs)
         {
-            Debug.Log(pos + dir);
-            BoardManager.Instance.DestroyPiece(pos + dir);
+            pieces.Add(BoardManager.Instance.GetPiece(pos + dir));
         }
-        ;
+        BoardManager.Instance.DestroyPiece(pieces);
     }
 }

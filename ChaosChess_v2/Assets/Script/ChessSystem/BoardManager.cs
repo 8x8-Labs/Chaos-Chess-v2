@@ -432,6 +432,25 @@ public class BoardManager : MonoBehaviour
         UpdatePiecesCanMovePos(moves);
     }
 
+    public void DestroyPiece(List<Piece> pieces)
+    {
+        if (pieces == null) return;
+        
+        foreach (Piece piece in pieces)
+        {
+            board[piece.Pos.x, piece.Pos.y] = null;
+            Pieces.Remove(piece);
+            Destroy(piece.gameObject);
+
+        }
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
+    }
+
     public Vector3Int UCIToGrid(string sq)
     {
         int x = sq[0] - 'a'; // 'a'~'h' → 0~7
