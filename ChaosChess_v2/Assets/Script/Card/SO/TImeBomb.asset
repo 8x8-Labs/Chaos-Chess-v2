@@ -10,18 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
-  m_Name: TImeBomb
+  m_Name: TimeBomb
   m_EditorClassIdentifier: 
-  CardName: 
+  CardName: "\uC2DC\uD55C\uD3ED\uD0C4"
   CardImage: {fileID: 0}
-  CardDescription: 
-  Type: 0
+  CardDescription: "3\uD134 \uD6C4\uC5D0 \uC774 \uCE78\uACFC \uC0C1\uD558\uC88C\uC6B0
+    4\uCE78\uC5D0 \uC788\uB294 \uAE30\uBB3C\uC740 \uC8FD\uC2B5\uB2C8\uB2E4."
+  Type: 1
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
   RequiredPieceCount: 0
-  TileCount: 0
-  MaintainTurn: 0
+  TileCount: 1
+  MaintainTurn: 3
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
