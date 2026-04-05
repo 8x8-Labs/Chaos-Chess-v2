@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,9 +21,34 @@ public class SunsetBladeCard : CardData, IPieceCard
         selector.EnableSelector(this);
     }
 
+    [ContextMenu("Execute")]
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> pieces = args.Targets;
-        // TODO: 선택된 폰에게 다음 기물 포획 시 인접한 기물 2개 추가 포획 효과 부여 (1회 한정)
+        Piece piece = args.Targets[0];
+
+        Action<Vector3Int> effect = null;
+
+        effect = (pos) =>
+        {
+            OnCaptureEffect(pos);
+            piece.RemoveOnCaptureEffect(effect);
+        };
+
+        piece.AddOnCaptureEffect(effect);
+    }
+
+    private void OnCaptureEffect(Vector3Int pos)
+    {
+        Vector3Int[] dirs = new Vector3Int[]
+        {
+        Vector3Int.left,
+        Vector3Int.right
+        };
+        List<Piece> pieces = new List<Piece>();
+        foreach (Vector3Int dir in dirs)
+        {
+            pieces.Add(BoardManager.Instance.GetPiece(pos + dir));
+        }
+        BoardManager.Instance.DestroyPiece(pieces);
     }
 }
