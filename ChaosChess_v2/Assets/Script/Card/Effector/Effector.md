@@ -25,7 +25,7 @@ Effector (abstract)
 | `IsPermanent` | 영구 효과 여부 (`remainingTurns < 0`) |
 | `Apply()` | **abstract** — 효과 등록 (훅/버프 부착) |
 | `Revert()` | **abstract** — 효과 해제 (훅/버프 제거 + `Destroy(this)`) |
-| `OnTurnChagned()` | 매 턴 호출 → 카운트 감소, 만료 시 `Revert()` 자동 호출 |
+| `OnTurnChanged()` | 매 턴 호출 → 카운트 감소, 만료 시 `Revert()` 자동 호출 |
 
 > `Revert()`는 만료 또는 수동 해제 시 모두 호출됩니다. 반드시 등록한 모든 콜백을 해제하고 `Destroy(this)`를 호출하세요.
 
@@ -218,7 +218,7 @@ public void Execute(CardEffectArgs args)
 
 ```csharp
 // GameManager.NextTurn() 등에서 활성화된 Effector들을 순회하며 호출
-effector.OnTurnChagned();
+effector.OnTurnChanged();
 ```
 
 ---
