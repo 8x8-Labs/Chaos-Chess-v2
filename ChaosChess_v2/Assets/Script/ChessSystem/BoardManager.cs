@@ -435,13 +435,14 @@ public class BoardManager : MonoBehaviour
     public void DestroyPiece(List<Piece> pieces)
     {
         if (pieces == null) return;
-        
+
         foreach (Piece piece in pieces)
         {
+            if (piece == null) continue;
+
             board[piece.Pos.x, piece.Pos.y] = null;
             Pieces.Remove(piece);
             Destroy(piece.gameObject);
-
         }
 
         UpdateFEN();
