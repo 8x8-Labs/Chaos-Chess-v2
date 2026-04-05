@@ -346,6 +346,9 @@ public class BoardManager : MonoBehaviour
         Vector3 WorldPos = GridPosToWorldPos(target);
         piece.Move(target, WorldPos);
 
+        if (isCapture)
+            piece.TriggerOnCapture();
+
         if (piece is Pawn || isCapture)
             halfmoveClock = 0;
         else
@@ -411,14 +414,13 @@ public class BoardManager : MonoBehaviour
     public void DestroyPiece(Vector3Int target)
     {
         Piece targetPiece = GetPiece(target);
-
-        board[target.x, target.y] = null;
         DestroyPiece(targetPiece);
     }
 
     public void DestroyPiece(Piece piece)
     {
         if (piece == null) return;
+
         board[piece.Pos.x, piece.Pos.y] = null;
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
