@@ -15,6 +15,7 @@
 
     public void Execute(CardEffectArgs args = null)
     {
+        if (args.Targets == null || args.Targets.Count == 0) return; 
         Piece p = args.Targets[0];
 
         BoardManager.Instance.ChangePiece(p.Pos, PieceColor.Black, 'p');
