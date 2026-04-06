@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -126,6 +126,20 @@ public class Piece : MonoBehaviour
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat(OutlineThickId, 0f);
         spriteRenderer.SetPropertyBlock(mpb);
+    }
+
+    public char TypeToChar()
+    {
+        return type switch
+        {
+            PieceType.Pawn   => 'p',
+            PieceType.Knight => 'n',
+            PieceType.Bishop => 'b',
+            PieceType.Rook   => 'r',
+            PieceType.Queen  => 'q',
+            PieceType.King   => 'k',
+            _                => '?'
+        };
     }
 
     public virtual string GetFen() { return ""; }

@@ -17,6 +17,7 @@ public class UIButtonEditor : ButtonEditor
     SerializedProperty startAnimationProp;
     SerializedProperty endAnimationProp;
     SerializedProperty uIAnimationProp;
+    SerializedProperty nextSceneNameProp;
 
     //[SerializeField] private bool isStartAnimation = false;
     //[SerializeField] private bool isEndAnimation = false;
@@ -35,6 +36,7 @@ public class UIButtonEditor : ButtonEditor
         startAnimationProp = serializedObject.FindProperty("isStartAnimation");
         endAnimationProp = serializedObject.FindProperty("isEndAnimation");
         uIAnimationProp = serializedObject.FindProperty("uIAnimationObject");
+        nextSceneNameProp = serializedObject.FindProperty("nextSceneName");
     }
 
     public override void OnInspectorGUI()
@@ -79,11 +81,18 @@ public class UIButtonEditor : ButtonEditor
                 break;
 
             case ButtonType.OpenPopup:
-                EditorGUILayout.PropertyField(enableObjectProp, new GUIContent("Popup to Open"));
+                EditorGUILayout.HelpBox("현재 창은 유지하고 팝업 패널을 엽니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(enablePanelProp, new GUIContent("Popup to Open"));
                 break;
 
             case ButtonType.ClosePopup:
-                EditorGUILayout.PropertyField(disableObjectProp, new GUIContent("Popup to Close"));
+                EditorGUILayout.HelpBox("현재 팝업 패널을 닫습니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(disablePanelProp, new GUIContent("Popup to Close"));
+                break;
+
+            case ButtonType.GoScene:
+                EditorGUILayout.HelpBox("지정한 씬으로 이동합니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(nextSceneNameProp, new GUIContent("Next Scene Name"));
                 break;
 
             case ButtonType.Submit:

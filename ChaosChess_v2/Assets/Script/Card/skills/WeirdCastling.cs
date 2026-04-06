@@ -26,7 +26,7 @@ public class WeirdCastling : CardData, IPieceCard
     {
         Debug.Log($"카드 실행! : {DataSO.CardName}");
         Piece targetPiece = args.Targets[0];
-        Piece king = BoardManager.Instance.GetPiece<King>(DataSO.PieceTargetColor)[0];
+        Piece king = BoardManager.Instance.GetPiece<King>(GameManager.Instance.PlayerColor)[0];
 
         List<Piece> pieces = new List<Piece> { king, targetPiece };
         List<Vector3Int> newPositions = new List<Vector3Int> { targetPiece.Pos, king.Pos };

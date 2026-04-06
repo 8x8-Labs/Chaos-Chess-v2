@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -67,7 +67,7 @@ public class TileSelector : Selector<Vector3Int>
             return;
         }
 
-        if (selectedTargets.Count >= cardData.DataSO.TileCount)
+        if (selectedTargets.Count > 0 && selectedTargets.Count >= cardData.DataSO.TileCount)
         {
             DeselectFirstTarget();
         }
@@ -109,6 +109,8 @@ public class TileSelector : Selector<Vector3Int>
         GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
         selectState = true;
+
+        gameSelectTilemap.ClearAllTiles();
     }
 
     protected override void DisableSelector()

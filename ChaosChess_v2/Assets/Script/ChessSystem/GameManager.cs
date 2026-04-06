@@ -1,10 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+
+    public PieceColor PlayerColor = PieceColor.White;
+    public PieceColor EnemyColor = PieceColor.Black;
+
     private int curTurn = 1;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 

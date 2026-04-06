@@ -3336,7 +3336,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9cc2e5015fe2048b92607aa98cc663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardType: 0
+  cardType: 1
 --- !u!114 &1507320768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3346,10 +3346,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 046db97c53b407748b17d3170ca1f81b, type: 3}
+  m_Script: {fileID: 11500000, guid: 9feeaaf8cada94e43a3ddadb6d39c1ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: b510f4e8e0cfe3147ae5499aa7565125, type: 2}
+  DataSO: {fileID: 11400000, guid: 02518657e754bfa4fb4ea302ae47c86b, type: 2}
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
@@ -3623,6 +3623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilemap: {fileID: 1170031624}
+  gameSelectTilemap: {fileID: 81987907}
   boardManager: {fileID: 1629911495}
   pieceDrawer: {fileID: 1571836338}
   selectorUI: {fileID: 1567853228}
@@ -3743,6 +3744,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f85221a7900618468e3ee16e5f36ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerColor: 0
+  EnemyColor: 1
   IsGameInput: 1
 --- !u!114 &1629911494
 MonoBehaviour:
@@ -4187,6 +4190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilemap: {fileID: 1170031624}
+  gameSelectTilemap: {fileID: 81987907}
   boardManager: {fileID: 1629911495}
   tileDrawer: {fileID: 1803301550}
   selectorUI: {fileID: 475878339}
