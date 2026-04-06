@@ -113,6 +113,9 @@ public class BoardManager : MonoBehaviour
     private Vector2 BoardCenterOffset = new Vector2(3.5f, 3.5f);
     private Vector2 CellSize = new Vector2(0.65f, 0.65f);
 
+    private Dictionary<Vector3Int, List<TileEffector>> tileEffectors
+        = new Dictionary<Vector3Int, List<TileEffector>>();
+
     [SerializeField] private Transform pieceSpawnTransform;
 
     void Awake()
@@ -327,6 +330,7 @@ public class BoardManager : MonoBehaviour
             castling.OnRookMove(piece.Color, from);
         }
 
+        TriggerTileExit(from, piece);
         board[from.x, from.y] = null;
 
         bool isCapture = false;
@@ -372,6 +376,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
+        TriggerTileEnter(target, piece);
         return true;
     }
     private void HandlePromotion(Piece pawn, Vector3Int pos, char promotion)
@@ -581,6 +586,36 @@ public class BoardManager : MonoBehaviour
         return halfmoveClock;
     }
 
+    public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
+    {
+        if(!tileEffectors.TryGetValue(pos, out var list))
+        {
+            list = new List<TileEffector>();
+            tileEffectors[pos] = list;
+        }
+        list.Add(effector);
+    }
+
+    public void UnregisterTileEffector(Vector3Int pos, TileEffector effector)
+    {
+        if (tileEffectors.TryGetValue(pos, out var list))
+            list.Remove(effector);
+    }
+
+    private void TriggerTileEnter(Vector3Int pos, Piece piece)
+    {
+        if (!tileEffectors.TryGetValue(pos, out var list)) return;
+        foreach (var effector in new List<TileEffector>(list))
+            effector.OnPieceEnter(piece);
+    }
+
+    private void TriggerTileExit(Vector3Int pos, Piece piece)
+    {
+        if (!tileEffectors.TryGetValue(pos, out var list)) return;
+        foreach (var effector in new List<TileEffector>(list))
+            effector.OnPieceExit(piece);
+    }
+
     /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>
     public List<Piece> GetAllPieces()
     {
@@ -606,6 +641,7 @@ public class BoardManager : MonoBehaviour
     {
         Vector3Int from = piece.Pos;
 
+        TriggerTileExit(from, piece);
         board[from.x, from.y] = null;
 
         // 이동하는 위치에 기물이 있으면 먹음
@@ -670,6 +706,7 @@ public class BoardManager : MonoBehaviour
             if (pieces[i] is Rook)
                 castling.OnRookMove(pieces[i].Color, pieces[i].Pos);
 
+            TriggerTileExit(pieces[i].Pos, pieces[i]);
             board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
         }
         for (int i = 0; i < pieces.Count; i++)

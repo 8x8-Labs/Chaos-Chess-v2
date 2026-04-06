@@ -10,6 +10,7 @@ public class CardDataSO : ScriptableObject
     public string CardDescription;
 
     public CardType Type;
+    public Tier CardTier;
 
     // 기물 타입에 필요한 설정
     [Space(30)]
