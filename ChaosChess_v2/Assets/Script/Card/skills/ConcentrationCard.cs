@@ -19,7 +19,8 @@ class ConcentrationEffector : PieceEffector
 
     public override void Revert()
     {
-        BoardManager.Instance.ChangePiece(piece.Pos,piece.Color,'s');
+        if(piece)
+            BoardManager.Instance.ChangePiece(piece.Pos,piece.Color,'s');
         Destroy(this);
     }
 }
