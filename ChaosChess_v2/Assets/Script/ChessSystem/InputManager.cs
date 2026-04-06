@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class InputManager : MonoBehaviour
@@ -15,6 +15,7 @@ public class InputManager : MonoBehaviour
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int mouseGridPos = ChessBoardTileMap.WorldToCell(mouseWorldPos);
 
+            Debug.Log(mouseGridPos);
             GameManager.Instance.SelectGrid(mouseGridPos);
         }
     }

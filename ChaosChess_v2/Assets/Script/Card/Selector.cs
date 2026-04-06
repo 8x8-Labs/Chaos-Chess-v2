@@ -1,10 +1,11 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public abstract class Selector<T> : MonoBehaviour
 {
     [SerializeField] protected Tilemap tilemap;
+    [SerializeField] protected Tilemap gameSelectTilemap;
     [SerializeField] protected BoardManager boardManager;
 
     protected CardData cardData;

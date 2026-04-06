@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 [Flags]
 public enum PieceType
@@ -34,4 +34,13 @@ public enum CardType
     Piece,
     Tile,
     Global
+}
+
+public enum Tier
+{
+    Common,
+    Uncommon,
+    Unique,
+    Rare,
+    Legendary
 }
