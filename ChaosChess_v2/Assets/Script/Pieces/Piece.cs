@@ -66,6 +66,8 @@ public class Piece : MonoBehaviour
                     ? value.ToUpper()
                     : value.ToLower();
                 _fenOverride = v;
+
+
             }
         }
     }
@@ -187,6 +189,10 @@ public class Piece : MonoBehaviour
             PieceType.Rook   => 'r',
             PieceType.Queen  => 'q',
             PieceType.King   => 'k',
+            PieceType.Amazon => 's',
+            PieceType.Chancellor => 'y',
+            PieceType.KnightRider => 'z',
+            PieceType.Wall => 'a',
             _                => '?'
         };
     }
