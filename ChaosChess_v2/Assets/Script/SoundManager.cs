@@ -49,6 +49,9 @@ public class SoundManager : MonoBehaviour
         {
             SFXSoundVolume(1);
         }
+
+        MuteBGM(GetBGMMute());
+        MuteSFX(GetSFXMute());
     }
 
     // ── BGM 재생 제어 ──────────────────────────────────────
@@ -172,6 +175,23 @@ public class SoundManager : MonoBehaviour
     }
 
     // ── 볼륨 설정 / 조회 ──────────────────────────────────
+
+    public void MuteBGM(bool mute)
+    {
+        bgmSource.mute = mute;
+        PlayerPrefs.SetInt("BGMMute", mute ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public void MuteSFX(bool mute)
+    {
+        audioMixer.SetFloat("SFXSound", mute ? -80f : Mathf.Log10(Mathf.Max(GetSFXVolume(), 0.0001f)) * 20);
+        PlayerPrefs.SetInt("SFXMute", mute ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public bool GetBGMMute() => PlayerPrefs.GetInt("BGMMute", 0) == 1;
+    public bool GetSFXMute() => PlayerPrefs.GetInt("SFXMute", 0) == 1;
 
     public void BGSoundVolume(float val)
     {
