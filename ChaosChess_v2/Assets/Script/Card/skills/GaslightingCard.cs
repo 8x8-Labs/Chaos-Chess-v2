@@ -12,6 +12,7 @@ public class GaslightingCard : CardData, ICard
     public void Execute(CardEffectArgs args = null)
     {
         Piece p = GetRandomPiece();
+        if (p == null) return;
 
         BoardManager.Instance.ChangePiece(
             pos: p.Pos,
