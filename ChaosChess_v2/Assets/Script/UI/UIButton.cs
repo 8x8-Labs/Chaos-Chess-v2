@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
@@ -72,7 +72,9 @@ public class UIButton : Button
             case ButtonType.ChangePanel:
                 changePanel(); break;
             case ButtonType.GoMain:
-                enableCanvas = FindObjectsOfType<ButtonCanvas>().Where(canvas => canvas.MainCanvas == true).First();
+                enableCanvas = FindObjectsOfType<ButtonCanvas>()
+                    .Where(canvas => canvas.MainCanvas == true)
+                    .FirstOrDefault();
                 changeCanvas(); break;
             case ButtonType.GoScene:
                 Debug.Log("씬 이동");
