@@ -3347,10 +3347,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
+<<<<<<< fix/selector-exception
   m_Script: {fileID: 11500000, guid: 9feeaaf8cada94e43a3ddadb6d39c1ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DataSO: {fileID: 11400000, guid: 02518657e754bfa4fb4ea302ae47c86b, type: 2}
+=======
+  m_Script: {fileID: 11500000, guid: f5d1d9c0b5499fd41a4e3ee272de0f09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DataSO: {fileID: 11400000, guid: 6fca24fa0258de940b9072351d124aac, type: 2}
+>>>>>>> develop
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
