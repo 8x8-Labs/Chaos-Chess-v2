@@ -587,9 +587,12 @@ public class BoardManager : MonoBehaviour
 
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
     {
-        if (!tileEffectors.ContainsKey(pos))
-            tileEffectors[pos] = new List<TileEffector>();
-        tileEffectors[pos].Add(effector);
+        if(!tileEffectors.TryGetValue(pos, out var list))
+        {
+            list = new List<TileEffector>();
+            tileEffectors[pos] = list;
+        }
+        list.Add(effector);
     }
 
     public void UnregisterTileEffector(Vector3Int pos, TileEffector effector)
