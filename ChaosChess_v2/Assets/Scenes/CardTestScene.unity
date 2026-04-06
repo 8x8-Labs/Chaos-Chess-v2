@@ -3346,17 +3346,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-<<<<<<< Updated upstream
-  m_Script: {fileID: 11500000, guid: d7536fc307aa8cb468296e283351b65d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: 8cc817f0f26ce4e409127c47788c395e, type: 2}
-=======
   m_Script: {fileID: 11500000, guid: 739650ca8f0c2a64a80953eb3f87902a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   DataSO: {fileID: 11400000, guid: 799ad59e9e702e0469c294981499a194, type: 2}
->>>>>>> Stashed changes
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
@@ -3751,6 +3744,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f85221a7900618468e3ee16e5f36ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerColor: 0
+  EnemyColor: 1
   IsGameInput: 1
 --- !u!114 &1629911494
 MonoBehaviour:
