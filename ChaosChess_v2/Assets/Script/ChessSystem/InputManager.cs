@@ -15,7 +15,6 @@ public class InputManager : MonoBehaviour
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int mouseGridPos = ChessBoardTileMap.WorldToCell(mouseWorldPos);
 
-            Debug.Log(mouseGridPos);
             GameManager.Instance.SelectGrid(mouseGridPos);
         }
     }

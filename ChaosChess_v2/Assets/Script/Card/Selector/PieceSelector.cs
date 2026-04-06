@@ -61,6 +61,12 @@ public class PieceSelector : Selector<Piece>
     {
         if (!selectState) return;
 
+        if(Target.TryGetComponent<PieceEffector>(out var effector))
+        {
+            Target.NotSelect();
+            return;
+        }
+
         if (selectedTargets.Contains(Target))
         {
             DeselectTarget(Target);
