@@ -78,9 +78,14 @@ public class FairyStockfishBridge : MonoBehaviour
 
             // 비동기 출력 읽기 시작
             StartReadingOutput();
-
             SendCommand("uci");
-            SendCommand("setoption name UCI_Variant value " + variant);
+
+            string variantFile = Path.Combine(Application.streamingAssetsPath, "variants.ini");
+            SendCommand("setoption name VariantPath value " + variantFile);
+
+            // 여기 중요
+            SendCommand("setoption name UCI_Variant value chaoschess");
+
             SendCommand("isready");
             WaitForOutput("readyok");
 
@@ -263,7 +268,7 @@ public class FairyStockfishBridge : MonoBehaviour
         int file = 0, rank = 7;
         foreach (char c in piecePart)
         {
-            if (c == '/')  { rank--; file = 0; continue; }
+            if (c == '/') { rank--; file = 0; continue; }
             if (char.IsDigit(c)) { file += c - '0'; continue; }
 
             char lower = char.ToLower(c);
