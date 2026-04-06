@@ -28,7 +28,8 @@ public class PortalSkill : CardData, ITileCard
         portalA.Dest = portalB;
         portalB.Dest = portalA;
 
-        int[] sharedUses = new int[] { 2 };
+        // 사용 가능 횟수 : 2
+        var sharedUses = new SharedCounter(2);
         portalA.SharedUses = sharedUses;
         portalB.SharedUses = sharedUses;
 
@@ -44,7 +45,7 @@ public class PortalSkill : CardData, ITileCard
 public class PortalEffect : TileEffector
 {
     public PortalEffect Dest;
-    public int[] SharedUses;
+    public SharedCounter SharedUses;
     public PieceColor CasterColor;
 
     public override void Apply()
@@ -61,14 +62,14 @@ public class PortalEffect : TileEffector
     public override void OnPieceEnter(Piece piece)
     {
         if (piece.Color != CasterColor) return;
-        if (SharedUses[0] <= 0) return;
+        if (SharedUses.Uses <= 0) return;
         if (Dest == null) return;
 
-        SharedUses[0]--;
+        SharedUses.Uses--;
 
         BoardManager.Instance.ForceTeleport(piece, Dest.tilePos);
 
-        if (SharedUses[0] <= 0)
+        if (SharedUses.Uses <= 0)
         {
             PortalEffect dest = Dest;
             Dest = null;
@@ -77,4 +78,10 @@ public class PortalEffect : TileEffector
             Revert();
         }
     }
+}
+
+public struct SharedCounter
+{
+    public int Uses;
+    public SharedCounter(int initalUses) { Uses = initalUses; }
 }
