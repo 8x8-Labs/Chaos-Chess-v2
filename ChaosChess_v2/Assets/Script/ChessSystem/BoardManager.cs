@@ -351,6 +351,9 @@ public class BoardManager : MonoBehaviour
         Vector3 WorldPos = GridPosToWorldPos(target);
         piece.Move(target, WorldPos);
 
+        if (isCapture)
+            piece.TriggerOnCapture();
+
         if (piece is Pawn || isCapture)
             halfmoveClock = 0;
         else
@@ -383,7 +386,7 @@ public class BoardManager : MonoBehaviour
         // AI 프로모션 (UCI)
         if (promotion != '\0')
         {
-            CreatePromotionPiece(pos, color, promotion);
+            ChangePiece(pos, color, promotion);
         }
         else
         {
@@ -392,9 +395,9 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void CreatePromotionPiece(Vector3Int pos, PieceColor color, char type)
+    /// pos에 있는 기물에 새로운 기물을 추가합니다
+    public void ChangePiece(Vector3Int pos, PieceColor color, char type)
     {
-        // 폰 제거
         DestroyPiece(pos);
 
         char key = char.ToLower(type);
@@ -416,9 +419,42 @@ public class BoardManager : MonoBehaviour
     public void DestroyPiece(Vector3Int target)
     {
         Piece targetPiece = GetPiece(target);
+        DestroyPiece(targetPiece);
+    }
 
-        Pieces.Remove(targetPiece);
-        Destroy(targetPiece.gameObject);
+    public void DestroyPiece(Piece piece)
+    {
+        if (piece == null) return;
+
+        board[piece.Pos.x, piece.Pos.y] = null;
+        Pieces.Remove(piece);
+        Destroy(piece.gameObject);
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
+    }
+
+    public void DestroyPiece(List<Piece> pieces)
+    {
+        if (pieces == null) return;
+
+        foreach (Piece piece in pieces)
+        {
+            if (piece == null) continue;
+
+            board[piece.Pos.x, piece.Pos.y] = null;
+            Pieces.Remove(piece);
+            Destroy(piece.gameObject);
+        }
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     public void ChangePiece(Vector3Int target, Piece piece)
@@ -576,7 +612,7 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
-    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0')
+    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0', bool useTurn = false)
     {
         Vector3Int from = piece.Pos;
 
@@ -615,12 +651,19 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        UpdateFEN(); // fen 업데이트
-        string fen = GetFEN();
-        FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
+        if (useTurn)
+        {
+            GameManager.Instance.NextTurn();
+        }
+        else
+        {
+            UpdateFEN(); // fen 업데이트
+            string fen = GetFEN();
+            FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
 
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
+            string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+            UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
+        }
     }
 
     /// <summary>

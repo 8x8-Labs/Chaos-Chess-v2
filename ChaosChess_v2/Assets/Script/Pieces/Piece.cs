@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,9 @@ public enum PieceColor
 
 public class Piece : MonoBehaviour
 {
+    // 무언갈 잡을때 효과 발동
+    private List<Action<Vector3Int>> onCaptureEffects = new();
+
     [SerializeField] protected Sprite WhitePiece;
     [SerializeField] protected Sprite BlackPiece;
     [SerializeField] protected PieceType type;
@@ -97,6 +101,27 @@ public class Piece : MonoBehaviour
         Pos = target;
 
         transform.position = WorldPos;
+    }
+
+    // 무언가를 잡았을때
+    public void TriggerOnCapture()
+    {
+        var copy = new List<Action<Vector3Int>>(onCaptureEffects);
+
+        foreach (var effect in copy)
+        {
+            effect?.Invoke(Pos);
+        }
+    }
+
+    public void AddOnCaptureEffect(Action<Vector3Int> effect)
+    {
+        onCaptureEffects.Add(effect);
+    }
+
+    public void RemoveOnCaptureEffect(Action<Vector3Int> effect)
+    {
+        onCaptureEffects.Remove(effect);
     }
 
     public void OnSelected()

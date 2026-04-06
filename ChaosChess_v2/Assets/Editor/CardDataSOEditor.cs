@@ -19,6 +19,8 @@ public class CardDataSOEditor : Editor
     // 타일 타입
     SerializedProperty tileCount;
     SerializedProperty maintainTurn;
+    SerializedProperty restrictTiles;
+    SerializedProperty blockedTiles;
 
     // 전역 타입
     SerializedProperty needTargetColor;
@@ -53,6 +55,8 @@ public class CardDataSOEditor : Editor
 
         tileCount = serializedObject.FindProperty("TileCount");
         maintainTurn = serializedObject.FindProperty("MaintainTurn");
+        restrictTiles = serializedObject.FindProperty("RestrictTiles");
+        blockedTiles = serializedObject.FindProperty("BlockedTiles");
 
         needTargetColor = serializedObject.FindProperty("NeedTargetColor");
         targetColor = serializedObject.FindProperty("GlobalTargetColor");
@@ -165,6 +169,54 @@ public class CardDataSOEditor : Editor
         {
             EditorGUILayout.HelpBox("-1 : 제한 없이 계속 유지됩니다.", MessageType.Warning);
         }
+
+        EditorGUILayout.Space(4);
+        EditorGUILayout.PropertyField(restrictTiles, new GUIContent("타일 제한 사용"));
+        if (restrictTiles.boolValue)
+        {
+            // 배열 크기가 64이 아닌 경우 자동 조정
+            if (blockedTiles.arraySize != 64)
+                blockedTiles.arraySize = 64;
+
+            EditorGUILayout.Space(2);
+            EditorGUILayout.LabelField("선택 불가 타일 설정 (체크 = 선택 불가)", EditorStyles.boldLabel);
+            EditorGUILayout.Space(2);
+            DrawTileGrid();
+        }
+    }
+
+    void DrawTileGrid()
+    {
+        float cellSize = 28f;
+        float labelWidth = 14f;
+
+        // y=7(8랭크)부터 y=0(1랭크) 순서로 위→아래 렌더링
+        for (int y = 7; y >= 0; y--)
+        {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField((y + 1).ToString(), GUILayout.Width(labelWidth));
+
+            for (int x = 0; x < 8; x++)
+            {
+                int idx = y * 8 + x;
+                SerializedProperty cell = blockedTiles.GetArrayElementAtIndex(idx);
+
+                Color prev = GUI.backgroundColor;
+                GUI.backgroundColor = cell.boolValue ? new Color(0.9f, 0.3f, 0.3f) : new Color(0.3f, 0.8f, 0.3f);
+                bool newVal = GUILayout.Toggle(cell.boolValue, "", GUILayout.Width(cellSize), GUILayout.Height(cellSize));
+                GUI.backgroundColor = prev;
+
+                cell.boolValue = newVal;
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        // 파일(열) 레이블
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.Space(labelWidth + 4);
+        foreach (string file in new[] { "a", "b", "c", "d", "e", "f", "g", "h" })
+            EditorGUILayout.LabelField(file, GUILayout.Width(cellSize));
+        EditorGUILayout.EndHorizontal();
     }
 
     void DrawGlobalFields()

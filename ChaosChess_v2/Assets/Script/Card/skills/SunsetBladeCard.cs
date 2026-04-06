@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,7 +23,42 @@ public class SunsetBladeCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> pieces = args.Targets;
-        // TODO: 선택된 폰에게 다음 기물 포획 시 인접한 기물 2개 추가 포획 효과 부여 (1회 한정)
+        var effector = CreatePieceEffector<SunsetBladeEffector>(args.Targets[0]);
+        effector.Apply();
+    }
+}
+
+/// <summary>노을빛 검 효과 - 잡을 때 좌우 기물도 함께 제거 (1회 한정)</summary>
+public class SunsetBladeEffector : PieceEffector
+{
+    private Action<Vector3Int> captureCallback;
+
+    public override void Apply()
+    {
+        captureCallback = (_) =>
+        {
+            OnPieceCapture();
+            Revert();
+        };
+        target.AddOnCaptureEffect(captureCallback);
+    }
+
+    public override void Revert()
+    {
+        if (captureCallback == null) return;
+        target.RemoveOnCaptureEffect(captureCallback);
+        captureCallback = null;
+        Destroy(this);
+    }
+
+    public override void OnPieceCapture()
+    {
+        List<Piece> pieces = new List<Piece>();
+        foreach (var dir in new[] { Vector3Int.left, Vector3Int.right })
+        {
+            var p = BoardManager.Instance.GetPiece(target.Pos + dir);
+            if(p != null) pieces.Add(p);
+        }
+        BoardManager.Instance.DestroyPiece(pieces);
     }
 }

@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviour
 
         uiManager.Show((type) =>
         {
-            BoardManager.Instance.CreatePromotionPiece(pos, pawn.Color, type);
+            BoardManager.Instance.ChangePiece(pos, pawn.Color, type);
 
             IsGameInput = true;
 
