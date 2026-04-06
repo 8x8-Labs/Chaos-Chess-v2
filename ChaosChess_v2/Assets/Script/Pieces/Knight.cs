@@ -1,10 +1,14 @@
-public class Knight : Piece
+﻿public class Knight : Piece
 {
     public override string GetFen()
     {
-        if (Color == PieceColor.White)
-            return "N";
+        if (FenOverride != null)
+            return FenOverride;
         else
-            return "n";
+        {
+            bool Upper = Color == PieceColor.White;
+            if (Upper) return "N";
+            else return "n";
+        }
     }
 }

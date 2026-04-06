@@ -135,6 +135,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>문자열 FEN의 값을 이용해서 Board와 Pieces를 초기화합니다</summary> 
     public void LoadFEN()
     {
         Pieces.Clear();
@@ -209,6 +210,7 @@ public class BoardManager : MonoBehaviour
         FairyStockfishBridge.Instance.SetPosition(FEN);
     }
 
+    /// <summary> 모든 기물들이 이동 가능한 위치를 업데이트 합니다 </summary>
     public void UpdatePiecesCanMovePos(string[] moves)
     {
         foreach (Piece piece in Pieces)
@@ -233,36 +235,35 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    private void AddPiece(Piece piece, Vector3Int pos) // board에 기물 추가하기
+    /// <summary> board에 기물을 추가합니다 </summary>
+    private void AddPiece(Piece piece, Vector3Int pos)
     {
         board[pos.x, pos.y] = piece;
     }
 
-    public bool IsInside(Vector3Int pos) // 선택한 좌표가 체스판 안에 있는가
+    /// <summary> 선택한 좌표가 체스판 안에 있는지 확인합니다 </summary>
+    public bool IsInside(Vector3Int pos)
     {
         return pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8;
     }
 
-    public bool IsEmpty(Vector3Int pos) // 선택한 좌표에 기물이 있는가
+    /// <summary> 선택한 좌표에 기물이 없는지 확인합니다 </summary>
+    public bool IsEmpty(Vector3Int pos)
     {
         if (!IsInside(pos)) return false;
 
         return board[pos.x, pos.y] == null;
     }
 
-    public bool IsValidCell(Vector3Int pos)
-    {
-        return IsInside(pos);
-    }
+    // public bool IsOccupiedByAlly(Vector3Int pos, Piece referencePiece)
+    // {
+    //     if (!IsInside(pos)) return false;
+    //     Piece occupant = GetPiece(pos);
+    //     return occupant != null && occupant.Color == referencePiece.Color;
+    // }
 
-    public bool IsOccupiedByAlly(Vector3Int pos, Piece referencePiece)
-    {
-        if (!IsInside(pos)) return false;
-        Piece occupant = GetPiece(pos);
-        return occupant != null && occupant.Color == referencePiece.Color;
-    }
-
-    public Piece GetPiece(Vector3Int pos) // 선택한 좌표에 기물을 가져온다
+    /// <summary> 선택한 좌표에 기물을 가져옵니다 </summary>
+    public Piece GetPiece(Vector3Int pos)
     {
         if (!IsInside(pos)) return null;
 
@@ -288,6 +289,11 @@ public class BoardManager : MonoBehaviour
         GameManager.Instance.NextTurn();
     }
 
+    /// <summary>
+    /// 기물을 이동시킵니다.
+    /// 만약 이동시키려는 위치가 이동이 불가능한 공간이라면 false를 반환합니다.
+    /// uci로 이동을 할때 프로모션을 하려면 promotion의 값을 넣어야합니다.
+    /// </summary>
     public bool MovePiece(Piece piece, Vector3Int target, char promotion = '\0')
     {
         if (!piece.CanMoveTo(this, target))
@@ -379,6 +385,8 @@ public class BoardManager : MonoBehaviour
         TriggerTileEnter(target, piece);
         return true;
     }
+
+
     private void HandlePromotion(Piece pawn, Vector3Int pos, char promotion)
     {
         PieceColor color = pawn.Color;
@@ -395,7 +403,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    /// pos에 있는 기물에 새로운 기물을 추가합니다
+    ///<summary> pos에 새로운 기물을 추가합니다 </summary> 
     public void ChangePiece(Vector3Int pos, PieceColor color, char type)
     {
         DestroyPiece(pos);
@@ -415,19 +423,17 @@ public class BoardManager : MonoBehaviour
             Pieces.Add(newPiece);
         }
 
-        UpdateFEN();
-        string fen = GetFEN();
-        FairyStockfishBridge.Instance.SetPosition(fen);
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        UpdatePiecesCanMovePos(moves);
+        RefreshMoves();
     }
 
+    ///<summary> target에 기물을 지웁니다 </summary> 
     public void DestroyPiece(Vector3Int target)
     {
         Piece targetPiece = GetPiece(target);
         DestroyPiece(targetPiece);
     }
 
+    ///<summary> 기물을 지웁니다 </summary> 
     public void DestroyPiece(Piece piece)
     {
         if (piece == null) return;
@@ -436,13 +442,10 @@ public class BoardManager : MonoBehaviour
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
 
-        UpdateFEN();
-        string fen = GetFEN();
-        FairyStockfishBridge.Instance.SetPosition(fen);
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        UpdatePiecesCanMovePos(moves);
+        RefreshMoves();
     }
 
+    ///<summary> 기물들을 지웁니다 </summary> 
     public void DestroyPiece(List<Piece> pieces)
     {
         if (pieces == null) return;
@@ -456,13 +459,10 @@ public class BoardManager : MonoBehaviour
             Destroy(piece.gameObject);
         }
 
-        UpdateFEN();
-        string fen = GetFEN();
-        FairyStockfishBridge.Instance.SetPosition(fen);
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        UpdatePiecesCanMovePos(moves);
+        RefreshMoves();
     }
 
+    ///<summary> UCI 좌표를 Vector3Int로 바꿉니다 </summary> 
     public Vector3Int UCIToGrid(string sq)
     {
         int x = sq[0] - 'a'; // 'a'~'h' → 0~7
@@ -470,12 +470,14 @@ public class BoardManager : MonoBehaviour
         return new Vector3Int(x, y, 0);
     }
 
+    ///<summary> Vector3Int 좌표를 UCI로 바꿉니다 </summary> 
     public string GridTOUCI(Vector3Int pos)
     {
         string sq = ((char)(pos.x + 'a')).ToString() + ((char)(pos.y + '1')).ToString();
         return sq;
     }
 
+    ///<summary> Vector3Int 좌표를 월드좌표로 바꿉니다 </summary> 
     public Vector3 GridPosToWorldPos(Vector3Int GridPos)
     {
         return new Vector3
@@ -486,6 +488,7 @@ public class BoardManager : MonoBehaviour
         );
     }
 
+    ///<summary> 현재 Board상태를 받아서 문자열 FEN을 수정합니다 </summary> 
     public void UpdateFEN()
     {
         CheckCastlingRights();
@@ -538,6 +541,15 @@ public class BoardManager : MonoBehaviour
         FEN += ep + " ";
 
         FEN += halfmoveClock + " " + fullmoveNumber;
+        FairyStockfishBridge.Instance.SetPosition(FEN);
+    }
+
+    /// <summary>FEN을 업데이트하고 기물들이 이동 가능한 위치를 초기화합니다 </summary>
+    public void RefreshMoves()
+    {
+        UpdateFEN();
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     /// <summary>원래 킹, 룩 위치에 기물이 없거나 다른 기물이 있으면 그 방향 캐슬링이 불가능하게 만듭니다 </summary>
@@ -576,6 +588,7 @@ public class BoardManager : MonoBehaviour
             castling.OnRookMove(PieceColor.Black, UCIToGrid("h8"));
     }
 
+    /// <summary>문자열 FEN을 받습니다. </summary>
     public string GetFEN()
     {
         return FEN;
@@ -588,7 +601,7 @@ public class BoardManager : MonoBehaviour
 
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
     {
-        if(!tileEffectors.TryGetValue(pos, out var list))
+        if (!tileEffectors.TryGetValue(pos, out var list))
         {
             list = new List<TileEffector>();
             tileEffectors[pos] = list;
@@ -683,12 +696,7 @@ public class BoardManager : MonoBehaviour
         }
         else
         {
-            UpdateFEN(); // fen 업데이트
-            string fen = GetFEN();
-            FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
-
-            string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-            UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
+            RefreshMoves();
         }
     }
 

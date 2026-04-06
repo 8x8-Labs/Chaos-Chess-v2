@@ -3337,7 +3337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9cc2e5015fe2048b92607aa98cc663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardType: 1
+  cardType: 0
 --- !u!114 &1507320768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3748,6 +3748,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerColor: 0
   EnemyColor: 1
+  BlackSprites:
+  - {fileID: -3998123364076545664, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 6086461264338391611, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -1285550529170834369, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 9097003820534461998, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 7305455733785292759, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 8588170755874669975, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -3018244367335226746, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 8280881136048196920, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -695501977606394889, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 2814865572437366622, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  WhiteSprites:
+  - {fileID: 6566083228530636619, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 8601286217340042903, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -7392653503756585687, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -2543634204946242240, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -6133072473577895887, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -8814276152573212690, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -4919676682383813925, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 5841647090300243477, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -2604665796007036816, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 2814865572437366622, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   IsGameInput: 1
 --- !u!114 &1629911494
 MonoBehaviour:

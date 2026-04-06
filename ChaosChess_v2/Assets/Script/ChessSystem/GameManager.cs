@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
     public PieceColor PlayerColor = PieceColor.White;
     public PieceColor EnemyColor = PieceColor.Black;
 
+    public List<Sprite> BlackSprites = new List<Sprite>();
+    public List<Sprite> WhiteSprites = new List<Sprite>();
+
     private int curTurn = 1;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
@@ -125,11 +128,19 @@ public class GameManager : MonoBehaviour
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
 
+    /// <summary>
+    /// 일정 턴 이후 작동하는 행동을 삽입합니다.
+    /// </summary>
+    /// <param name="x">대기 턴</param>
+    /// <param name="act">작동 액션</param>
     public void AppendAction(int x, Action act)
     {
         recievedActions.Add((curTurn + x * 2, act));
     }
 
+    /// <summary>
+    /// 액션 발동 후 리스트에서 제거하는 행동을 수행합니다.
+    /// </summary>
     public void ReturnAction()
     {
         for (int i = recievedActions.Count - 1; i >= 0; i--)

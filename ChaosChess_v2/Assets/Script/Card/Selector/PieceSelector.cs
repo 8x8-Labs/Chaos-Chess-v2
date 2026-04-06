@@ -61,6 +61,12 @@ public class PieceSelector : Selector<Piece>
     {
         if (!selectState) return;
 
+        if(Target.TryGetComponent<PieceEffector>(out var effector))
+        {
+            Target.NotSelect();
+            return;
+        }
+
         if (selectedTargets.Contains(Target))
         {
             DeselectTarget(Target);
@@ -103,6 +109,9 @@ public class PieceSelector : Selector<Piece>
         skillCard = cardData.GetComponent<IPieceCard>();
         selectorUI.DisableButtonState();
         selectedTargets.Clear();
+
+        // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
+        // 선택자를 비활성화하기
 
         GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
