@@ -32,6 +32,14 @@ public class CardDataSO : ScriptableObject
     /// </summary>
     [Range(-1, 75)]
     public int MaintainTurn;
+    /// <summary>
+    /// 활성화 시 BlockedTiles 배열 기준으로 선택 불가 타일을 지정합니다.
+    /// </summary>
+    public bool RestrictTiles;
+    /// <summary>
+    /// 8x8 = 64칸. true인 칸은 타일 선택 불가. 인덱스: y * 8 + x (y=0 하단, y=7 상단)
+    /// </summary>
+    public bool[] BlockedTiles = new bool[64];
 
     [Space(30)]
     [Header("전역 타입 설정")]
