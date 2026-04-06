@@ -409,6 +409,12 @@ public class BoardManager : MonoBehaviour
 
             Pieces.Add(newPiece);
         }
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     public void DestroyPiece(Vector3Int target)
