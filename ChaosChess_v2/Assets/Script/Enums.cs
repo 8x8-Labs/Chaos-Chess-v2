@@ -6,10 +6,14 @@ public enum PieceType
     None = 0,
     Pawn = 1,
     Knight = 2,
-    Bishop= 4,
-    Rook= 8,
+    Bishop = 4,
+    Rook = 8,
     King = 16,
-    Queen = 32
+    Queen = 32,
+    Wall = 64,
+    Amazon = 128,
+    Chancellor = 256,
+    KnightRider = 512
 }
 
 /// <summary>

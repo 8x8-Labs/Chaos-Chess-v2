@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour
 
         Piece piece = BoardManager.Instance.GetPiece(pos);
 
-        if (piece != null && piece.Color == turnColor)
+        if (piece != null && piece.Color == turnColor && !(piece is Wall))
         {
             SelectPiece(piece);
             boardUI.DrawSelectTile(pos);
@@ -148,10 +148,11 @@ public class GameManager : MonoBehaviour
     {
         if (selectedPiece == null) return;
 
-        if (BoardManager.Instance.MovePiece(selectedPiece, target))
-        {
-            selectedPiece = null;
+        Piece piece = selectedPiece;
+        selectedPiece = null;
 
+        if (BoardManager.Instance.MovePiece(piece, target))
+        {
             // 프로모션이면 여기서 멈춤
             if (!IsGameInput)
                 return;
