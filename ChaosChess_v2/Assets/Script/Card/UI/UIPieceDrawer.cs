@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class UIPieceDrawer : MonoBehaviour
 {
@@ -11,4 +11,9 @@ public class UIPieceDrawer : MonoBehaviour
     {
         p.OnDeselect();
     }
+
+    //public void NotSelectPiece(Piece p)
+    //{
+    //    p.NotSelect();
+    //}
 }

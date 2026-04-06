@@ -167,6 +167,14 @@ public class Piece : MonoBehaviour
     }
 
     /// <summary>
+    /// 선택자가 효과 적용을 못하도록 제한
+    /// </summary>
+    public void NotSelect()
+    {
+        Debug.Log("이 기물은 선택할 수 없습니다!");
+    }
+
+    /// <summary>
     /// 현재 지정된 타입을 Char 형식으로 반환합니다.
     /// </summary>
     /// <returns>PieceType이 FEN 코드로 반환됩니다.</returns>
