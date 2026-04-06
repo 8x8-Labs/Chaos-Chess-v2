@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ public class TileSelector : Selector<Vector3Int>
 {
     [SerializeField] private UITileDrawer tileDrawer;
     [SerializeField] private SelectorUI selectorUI;
+
+    private List<Vector3Int> effectPos;
     private bool executable => isExecute();
     private ITileCard skillCard;
     public override void DeselectFirstTarget()
@@ -54,6 +57,12 @@ public class TileSelector : Selector<Vector3Int>
                     int idx = mouseGridPos.y * 8 + mouseGridPos.x;
                     if (so.BlockedTiles[idx]) return;
                 }
+
+                if (effectPos.Contains(mouseGridPos))
+                {
+                    Debug.Log("효과가 적용된 칸은 선택할 수 없습니다!");
+                    return;
+                }
                 SelectTarget(mouseGridPos);
             }
         }
@@ -61,6 +70,8 @@ public class TileSelector : Selector<Vector3Int>
 
     public override void SelectTarget(Vector3Int Target)
     {
+        if (!selectState) return;
+
         if (selectedTargets.Contains(Target))
         {
             DeselectTarget(Target);
@@ -99,6 +110,11 @@ public class TileSelector : Selector<Vector3Int>
         return selectedTargets.Count == cardData.DataSO.TileCount;
     }
 
+    protected override bool isTargetExist()
+    {
+        return base.isTargetExist();
+    }
+
     public override void EnableSelector(CardData data)
     {
         cardData = data;
@@ -111,6 +127,10 @@ public class TileSelector : Selector<Vector3Int>
         selectState = true;
 
         gameSelectTilemap.ClearAllTiles();
+
+        effectPos = FindObjectsOfType<TileEffector>()
+            .Select(t => t.TilePos)
+            .ToList();
     }
 
     protected override void DisableSelector()

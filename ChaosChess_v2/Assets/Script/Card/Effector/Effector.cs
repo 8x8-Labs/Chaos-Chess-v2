@@ -48,6 +48,13 @@ public abstract class PieceEffector : Effector, IPieceEffect
 /// <summary>타일에 부착되는 효과의 기반 추상 클래스</summary>
 public abstract class TileEffector : Effector, ITileEffect
 {
+    public Vector3Int TilePos
+    {
+        get
+        {
+            return tilePos;
+        }
+    }
     protected Vector3Int tilePos;
 
     public void Init(Vector3Int pos, int duration = -1)
