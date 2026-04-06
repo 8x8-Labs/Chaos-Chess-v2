@@ -22,8 +22,30 @@ public class WindmillCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> pieces = args.Targets;
+        Piece piece = args.Targets[0];
+        var effector = CreatePieceEffector<WindmillEffector>(piece);
+        effector.change = piece.Type == PieceType.Rook ? "b" : "r";
+        effector.Apply();
+        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
         // pieces[0]: 룩 또는 비숍
         // TODO: 선택된 룩/비숍의 행마법을 DataSO.PieceLimitTurn(2)턴 동안 서로 교환 처리
     }
+}
+public class WindmillEffector : PieceEffector
+{
+    public string change;
+    public override void Apply()
+    {
+        Debug.Log(change);
+        target.FenOverride = change;
+        BoardManager.Instance.RefreshMoves();
+    }
+
+    public override void Revert()
+    {
+        target.FenOverride = null;
+        BoardManager.Instance. RefreshMoves();
+        Destroy(this);
+    }
+
 }
