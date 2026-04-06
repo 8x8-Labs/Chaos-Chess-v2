@@ -11,9 +11,4 @@ public class UIPieceDrawer : MonoBehaviour
     {
         p.OnDeselect();
     }
-
-    //public void NotSelectPiece(Piece p)
-    //{
-    //    p.NotSelect();
-    //}
 }
