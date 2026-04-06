@@ -113,6 +113,9 @@ public class BoardManager : MonoBehaviour
     private Vector2 BoardCenterOffset = new Vector2(3.5f, 3.5f);
     private Vector2 CellSize = new Vector2(0.65f, 0.65f);
 
+    private Dictionary<Vector3Int, List<TileEffector>> tileEffectors
+        = new Dictionary<Vector3Int, List<TileEffector>>();
+
     [SerializeField] private Transform pieceSpawnTransform;
 
     void Awake()
@@ -372,6 +375,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
+        TriggerTileEnter(target, piece);
         return true;
     }
     private void HandlePromotion(Piece pawn, Vector3Int pos, char promotion)
@@ -579,6 +583,26 @@ public class BoardManager : MonoBehaviour
     public int GetHalfmoveClock()
     {
         return halfmoveClock;
+    }
+
+    public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
+    {
+        if (!tileEffectors.ContainsKey(pos))
+            tileEffectors[pos] = new List<TileEffector>();
+        tileEffectors[pos].Add(effector);
+    }
+
+    public void UnregisterTileEffector(Vector3Int pos, TileEffector effector)
+    {
+        if (tileEffectors.TryGetValue(pos, out var list))
+            list.Remove(effector);
+    }
+
+    private void TriggerTileEnter(Vector3Int pos, Piece piece)
+    {
+        if (!tileEffectors.TryGetValue(pos, out var list)) return;
+        foreach (var effector in new List<TileEffector>(list))
+            effector.OnPieceEnter(piece);
     }
 
     /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>

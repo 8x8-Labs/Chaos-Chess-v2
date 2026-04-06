@@ -54,6 +54,7 @@ public class TileSelector : Selector<Vector3Int>
                     int idx = mouseGridPos.y * 8 + mouseGridPos.x;
                     if (so.BlockedTiles[idx]) return;
                 }
+                Debug.Log(mouseGridPos);
                 SelectTarget(mouseGridPos);
             }
         }
@@ -67,7 +68,7 @@ public class TileSelector : Selector<Vector3Int>
             return;
         }
 
-        if (selectedTargets.Count >= cardData.DataSO.TileCount)
+        if (selectedTargets.Count > 0 && selectedTargets.Count >= cardData.DataSO.TileCount)
         {
             DeselectFirstTarget();
         }
