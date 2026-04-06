@@ -11,7 +11,7 @@ public class ChargeCard : CardData, ICard
     {
         BoardManager bm = BoardManager.Instance;
 
-        PieceColor myColor = DataSO.GlobalTargetColor;
+        PieceColor myColor = GameManager.Instance.PlayerColor;
         int advanceDir = 1;
         int promotionRow = 7;
 

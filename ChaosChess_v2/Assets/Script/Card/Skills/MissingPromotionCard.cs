@@ -18,7 +18,7 @@
         if (args.Targets == null || args.Targets.Count == 0) return; 
         Piece p = args.Targets[0];
 
-        BoardManager.Instance.ChangePiece(p.Pos, PieceColor.Black, 'p');
+        BoardManager.Instance.ChangePiece(p.Pos, GameManager.Instance.EnemyColor, 'p');
     }
 
 }
