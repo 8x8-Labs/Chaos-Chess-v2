@@ -9,6 +9,7 @@ public class CardDataSOEditor : Editor
     SerializedProperty cardImage;
     SerializedProperty cardDescription;
     SerializedProperty cardType;
+    SerializedProperty cardTier;
 
     // 기물 타입
     SerializedProperty pieceType;
@@ -47,6 +48,7 @@ public class CardDataSOEditor : Editor
         cardImage = serializedObject.FindProperty("CardImage");
         cardDescription = serializedObject.FindProperty("CardDescription");
         cardType = serializedObject.FindProperty("Type");
+        cardTier = serializedObject.FindProperty("CardTier");
 
         pieceType = serializedObject.FindProperty("PieceType");
         targetColorPiece = serializedObject.FindProperty("PieceTargetColor");
@@ -84,6 +86,7 @@ public class CardDataSOEditor : Editor
                 EditorGUILayout.PropertyField(cardDescription, new GUIContent("카드 설명"));
                 EditorGUILayout.Space(4);
                 EditorGUILayout.PropertyField(cardType, new GUIContent("카드 타입"));
+                EditorGUILayout.PropertyField(cardTier, new GUIContent("카드 등급"));
             }
         }
 
