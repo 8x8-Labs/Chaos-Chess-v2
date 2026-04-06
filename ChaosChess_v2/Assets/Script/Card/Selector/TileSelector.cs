@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -8,7 +7,7 @@ public class TileSelector : Selector<Vector3Int>
     [SerializeField] private UITileDrawer tileDrawer;
     [SerializeField] private SelectorUI selectorUI;
 
-    private List<Vector3Int> effectPos;
+    private HashSet<Vector3Int> effectPos;
     private bool executable => isExecute();
     private ITileCard skillCard;
     public override void DeselectFirstTarget()
@@ -128,9 +127,8 @@ public class TileSelector : Selector<Vector3Int>
 
         gameSelectTilemap.ClearAllTiles();
 
-        effectPos = FindObjectsOfType<TileEffector>()
-            .Select(t => t.TilePos)
-            .ToList();
+        effectPos = new HashSet<Vector3Int>(FindObjectsOfType<TileEffector>()
+            .Select(t => t.TilePos));
     }
 
     protected override void DisableSelector()
