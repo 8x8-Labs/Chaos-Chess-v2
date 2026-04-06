@@ -15,7 +15,7 @@ public class TestCardUI : MonoBehaviour
         switch (cardType)
         {
             case CardType.Piece:
-                cardData.GetComponent<IPieceCard>().LoadPieceSelector(); break;
+                cardData.GetComponent<IPieceCard>().LoadPieceSelector(); break; 
             case CardType.Tile:
                 cardData.GetComponent<ITileCard>().LoadTileSelector(); break;
             default:

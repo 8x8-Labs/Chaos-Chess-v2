@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
+    [SerializeField]
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
     public PieceColor turnColor
     {

@@ -77,12 +77,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -5619150752979459227, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  m_Sprite: {fileID: 2724963404071155675, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.64, y: 0.64}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -100,9 +100,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59d020660b5a53b4c86a0448f1ca7240, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WhitePiece: {fileID: -5619150752979459227, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
-  BlackPiece: {fileID: -1211513934, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  WhitePiece: {fileID: 2724963404071155675, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
+  BlackPiece: {fileID: 1556011984, guid: 8cf66c3356f559c478ddd8ed86c06bdd, type: 3}
   type: 128
   color: 0
-  outlineMaterial: {fileID: 0}
+  outlineMaterial: {fileID: 2100000, guid: 5f98fe7e34c6e494aac571d357daabee, type: 2}
   pos: {x: 0, y: 0, z: 0}

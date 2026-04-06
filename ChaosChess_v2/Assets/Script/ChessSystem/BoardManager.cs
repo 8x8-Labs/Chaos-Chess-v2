@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 [System.Serializable]
 class FENPrefabPair
@@ -424,6 +425,10 @@ public class BoardManager : MonoBehaviour
     {
         DestroyPiece(target);
         AddPiece(piece, target);
+
+        Vector3 WorldPos = GridPosToWorldPos(target);
+        piece.Move(target, WorldPos);
+
         Pieces.Add(piece);
     }
 

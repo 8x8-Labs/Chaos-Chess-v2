@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class Amazon : Piece
 {
     public override string GetFen()
