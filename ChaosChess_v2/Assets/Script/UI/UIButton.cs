@@ -1,9 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
-using DG.Tweening;
 
 public class UIButton : Button
 {
@@ -26,12 +25,18 @@ public class UIButton : Button
     [SerializeField] private bool isStartAnimation = false;
     [SerializeField] private bool isEndAnimation = false;
 
+    [SerializeField] private string nextSceneName;
+
 
     protected override void Start()
     {
         if(buttonType != ButtonType.ChangeCanvas)
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
+        }
+        if(buttonType == ButtonType.ClosePopup && disablePanel == null)
+        {
+            disablePanel = GetComponentInParent<ButtonPanel>();
         }
     }
 
@@ -67,8 +72,17 @@ public class UIButton : Button
             case ButtonType.ChangePanel:
                 changePanel(); break;
             case ButtonType.GoMain:
-                enableCanvas = FindObjectsOfType<ButtonCanvas>().Where(canvas => canvas.MainCanvas == true).First();
+                enableCanvas = FindObjectsOfType<ButtonCanvas>()
+                    .Where(canvas => canvas.MainCanvas == true)
+                    .FirstOrDefault();
                 changeCanvas(); break;
+            case ButtonType.GoScene:
+                Debug.Log("씬 이동");
+                break;
+            case ButtonType.ClosePopup:
+                disablePanel.DisablePanel(); break;
+            case ButtonType.OpenPopup:
+                enablePanel.EnablePanel(); break;
         }
     }
 
@@ -97,6 +111,7 @@ public enum ButtonType
     ChangePanel,    // 현재 패널을 끄고 다른 패널을 엶 (UI 이동)
     OpenPopup,      // 현재 창은 두고 위에 팝업을 띄움
     ClosePopup,     // 현재 팝업을 닫음
+    GoScene,        // 다른 씬으로 이동
     Submit,         // 데이터 확인, 아이템 구매 등 서버/데이터 연동
     GameStart,      // 씬 전환 (Scene Load)
     GoMain,

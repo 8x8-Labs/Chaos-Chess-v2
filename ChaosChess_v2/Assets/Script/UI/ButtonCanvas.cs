@@ -37,6 +37,7 @@ public class ButtonCanvas : ButtonParent
             scrollRect.verticalNormalizedPosition = 1;
             scrollRect.horizontalNormalizedPosition = 1;
         }
+
         canvasGroup.alpha = 0f;
         FadeOut();
     }
