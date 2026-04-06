@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -103,6 +102,35 @@ public class PieceSelector : Selector<Piece>
         DisableSelector();
     }
 
+    protected override bool isTargetExist()
+    {
+        BoardManager bm = BoardManager.Instance;
+
+        // 1. 현재 기물 검사
+        List<Piece> pieces = bm.GetAllPieces()
+            .Where(p => (p.Type & cardData.DataSO.PieceType) != 0 &&
+                    p.Color == cardData.DataSO.PieceTargetColor)
+            .ToList();
+
+        if (pieces.Count == 0)
+        {
+            Debug.Log("기물이 존재하지 않습니다!");
+            return false; 
+        } 
+
+        // 2. 기물 중 효과 적용 중인지 검사
+        foreach(Piece piece in pieces)
+        {
+            if(!piece.TryGetComponent<PieceEffector>(out var value))
+            {
+                return true;
+            }
+        }
+
+        Debug.Log("기물에 효과가 모두 적용되었습니다!");
+        return false;
+    }
+
     public override void EnableSelector(CardData data)
     {
         cardData = data;
@@ -110,14 +138,16 @@ public class PieceSelector : Selector<Piece>
         selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
-        // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
-        // 선택자를 비활성화하기
 
         GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
         selectState = true;
 
         gameSelectTilemap.ClearAllTiles();
+
+        // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
+        // 선택자를 비활성화하기
+        if (!isTargetExist()) DisableSelector();
     }
 
     protected override void DisableSelector()

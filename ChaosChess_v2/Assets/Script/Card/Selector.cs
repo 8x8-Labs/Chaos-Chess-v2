@@ -31,4 +31,5 @@ public abstract class Selector<T> : MonoBehaviour
     public abstract void DeselectAllTarget();
     public abstract void ExecuteSkill();
     protected virtual bool isExecute() { return false; }
+    protected virtual bool isTargetExist() { return false; }
 }
