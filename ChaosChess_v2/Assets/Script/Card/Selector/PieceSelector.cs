@@ -110,6 +110,9 @@ public class PieceSelector : Selector<Piece>
         selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
+        // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
+        // 선택자를 비활성화하기
+
         GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
         selectState = true;
