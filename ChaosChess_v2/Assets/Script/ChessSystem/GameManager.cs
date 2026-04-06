@@ -74,7 +74,7 @@ public class GameManager : MonoBehaviour
 
         Piece piece = BoardManager.Instance.GetPiece(pos);
 
-        if (piece != null && piece.Color == turnColor)
+        if (piece != null && piece.Color == turnColor && !(piece is Wall))
         {
             SelectPiece(piece);
             boardUI.DrawSelectTile(pos);
@@ -156,6 +156,7 @@ public class GameManager : MonoBehaviour
 
             RequestAIMove();
         }
+        selectedPiece = null;
     }
 
     public void RequestAIMove()
