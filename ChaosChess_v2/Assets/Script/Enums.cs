@@ -13,7 +13,7 @@ public enum PieceType
     Wall = 64,
     Amazon = 128,
     Chancellor = 256,
-    Knightrider = 512
+    KnightRider = 512
 }
 
 /// <summary>
