@@ -27,7 +27,6 @@ public class GaslightingCard : CardData, ICard
             (DataSO.PieceType & p.Type) != 0).ToList();
 
         int rand = Random.Range(0, pieces.Count);
-        Debug.Log(rand);
         return pieces[rand];
     }
 }
