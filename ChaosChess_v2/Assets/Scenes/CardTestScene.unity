@@ -3770,7 +3770,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac18b6f187956544a39dae33ac45dcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FEN: rnbqkbnr/pppppppp/paaaaaaa/8/8/A7/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 '
   FENMapList:
   - FENChar: 112
     prefab: {fileID: 4250557358645613848, guid: 284f131cb8f24b946a2208b0313947c3, type: 3}
@@ -3786,6 +3786,12 @@ MonoBehaviour:
     prefab: {fileID: 1202172009290867449, guid: 7ebb3b088f781bb4cb6a4bc8cf4ed450, type: 3}
   - FENChar: 97
     prefab: {fileID: 3777871083222879716, guid: d55f5442ccb2737479ec220a1afffef2, type: 3}
+  - FENChar: 115
+    prefab: {fileID: 4201132830843171573, guid: 5b5b45217d8739347a73311d0d0036c0, type: 3}
+  - FENChar: 122
+    prefab: {fileID: 5521133018625922369, guid: 0c7322c2be9e4cf4d8d79164000202ce, type: 3}
+  - FENChar: 121
+    prefab: {fileID: 3581459985047736126, guid: e517e6721a17ad247898ff2c31b3d5fd, type: 3}
   pieceSpawnTransform: {fileID: 1282597349}
 --- !u!114 &1629911496
 MonoBehaviour:
