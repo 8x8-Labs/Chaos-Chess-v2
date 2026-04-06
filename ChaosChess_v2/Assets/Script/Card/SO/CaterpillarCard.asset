@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: CaterpillarCard
+  m_EditorClassIdentifier: 
+  CardName: "\uBB34\uD55C\uADA4\uB3C4"
+  CardImage: {fileID: 0}
+  CardDescription: "\uB098\uC774\uD2B8\uAC00 2\uD134 \uB3D9\uC548 \uB098\uC774\uD2B8\uB77C\uC774\uB354\uC758
+    \uD589\uB9C8\uBC95\uB300\uB85C \uC774\uB3D9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  Type: 0
+  CardTier: 2
+  PieceType: 2
+  PieceTargetColor: 0
+  PieceLimitTurn: 2
+  RequiredPieceCount: 1
+  TileCount: 0
+  MaintainTurn: 0
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0

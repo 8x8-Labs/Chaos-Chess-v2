@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditorInternal;
 using UnityEngine;
 
 public enum PieceColor
@@ -21,6 +22,7 @@ public class Piece : MonoBehaviour
     [SerializeField] private PieceColor color;
     [SerializeField] private Material outlineMaterial;
     [SerializeField] private Vector3Int pos;
+    private string _fenOverride;
 
     protected List<Vector3Int> CanMovePos;
 
@@ -43,6 +45,32 @@ public class Piece : MonoBehaviour
     {
         get { return type; }
     }
+    /// <summary>
+    /// 효과를 통해 변경된 기물의 FEN을 저장합니다.
+    /// </summary>
+    public string FenOverride
+    {
+        get
+        {
+            if (_fenOverride == null) return null;
+            return Color == PieceColor.White
+                ? _fenOverride.ToUpper()
+                : _fenOverride.ToLower();
+        }
+        set
+        {
+            if(value == null) _fenOverride = null;
+            else
+            {
+                string v =
+                    Color == PieceColor.White
+                    ? value.ToUpper()
+                    : value.ToLower();
+                _fenOverride = v;
+            }
+        }
+    }
+
 
     void Awake()
     {
@@ -91,7 +119,9 @@ public class Piece : MonoBehaviour
         transform.position = WorldPos;
     }
 
-    // 무언가를 잡았을때
+    /// <summary>
+    /// 기물을 잡았을 때 호출됩니다.
+    /// </summary>
     public void TriggerOnCapture()
     {
         var copy = new List<Action<Vector3Int>>(onCaptureEffects);
@@ -102,11 +132,19 @@ public class Piece : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 기물을 잡았을 때 발생하는 액션을 추가합니다.
+    /// </summary>
+    /// <param name="effect">발생할 효과</param>
     public void AddOnCaptureEffect(Action<Vector3Int> effect)
     {
         onCaptureEffects.Add(effect);
     }
 
+    /// <summary>
+    /// 기물을 잡았을 때 발생하는 액션을 제거합니다.
+    /// </summary>
+    /// <param name="effect">제거될 효과</param>
     public void RemoveOnCaptureEffect(Action<Vector3Int> effect)
     {
         onCaptureEffects.Remove(effect);
@@ -128,6 +166,10 @@ public class Piece : MonoBehaviour
         spriteRenderer.SetPropertyBlock(mpb);
     }
 
+    /// <summary>
+    /// 현재 지정된 타입을 Char 형식으로 반환합니다.
+    /// </summary>
+    /// <returns>PieceType이 FEN 코드로 반환됩니다.</returns>
     public char TypeToChar()
     {
         return type switch
