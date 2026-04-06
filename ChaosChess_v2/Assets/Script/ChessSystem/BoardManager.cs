@@ -330,6 +330,7 @@ public class BoardManager : MonoBehaviour
             castling.OnRookMove(piece.Color, from);
         }
 
+        TriggerTileExit(from, piece);
         board[from.x, from.y] = null;
 
         bool isCapture = false;
@@ -608,6 +609,13 @@ public class BoardManager : MonoBehaviour
             effector.OnPieceEnter(piece);
     }
 
+    private void TriggerTileExit(Vector3Int pos, Piece piece)
+    {
+        if (!tileEffectors.TryGetValue(pos, out var list)) return;
+        foreach (var effector in new List<TileEffector>(list))
+            effector.OnPieceExit(piece);
+    }
+
     /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>
     public List<Piece> GetAllPieces()
     {
@@ -633,6 +641,7 @@ public class BoardManager : MonoBehaviour
     {
         Vector3Int from = piece.Pos;
 
+        TriggerTileExit(from, piece);
         board[from.x, from.y] = null;
 
         // 이동하는 위치에 기물이 있으면 먹음
@@ -697,6 +706,7 @@ public class BoardManager : MonoBehaviour
             if (pieces[i] is Rook)
                 castling.OnRookMove(pieces[i].Color, pieces[i].Pos);
 
+            TriggerTileExit(pieces[i].Pos, pieces[i]);
             board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
         }
         for (int i = 0; i < pieces.Count; i++)
