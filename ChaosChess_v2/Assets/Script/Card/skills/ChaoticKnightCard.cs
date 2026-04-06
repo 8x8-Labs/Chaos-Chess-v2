@@ -26,7 +26,7 @@ public class ChaoticKnightCard : CardData, IPieceCard
         List<Piece> pieces = args.Targets;
         // TODO: 선택된 나이트에게 이번 턴 5x5 범위 내 이동 가능한 칸으로 이동 허용 처리
 
-        foreach(Piece knight in pieces)
+        foreach (Piece knight in pieces)
         {
             List<Vector3Int> movableCells = GetMovableCellsIn5x5(knight);
 
@@ -52,7 +52,7 @@ public class ChaoticKnightCard : CardData, IPieceCard
                 Vector3Int candidate = new Vector3Int(origin.x + x, origin.y + y, origin.z);
 
                 // 보드 범위 체크 및 이동 가능 여부 확인
-                if (BoardManager.Instance.IsValidCell(candidate) && !IsOccupied(candidate))
+                if (BoardManager.Instance.IsInside(candidate) && !IsOccupied(candidate))
                 {
                     result.Add(candidate);
                 }
