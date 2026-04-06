@@ -488,7 +488,7 @@ public class BoardManager : MonoBehaviour
         );
     }
 
-    ///<summary> 현재 Board상태를 방아서 문자열 FEN을 수정합니다 </summary> 
+    ///<summary> 현재 Board상태를 받아서 문자열 FEN을 수정합니다 </summary> 
     public void UpdateFEN()
     {
         CheckCastlingRights();
