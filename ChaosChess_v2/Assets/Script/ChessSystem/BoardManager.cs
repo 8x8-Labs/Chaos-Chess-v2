@@ -401,7 +401,7 @@ public class BoardManager : MonoBehaviour
         {
             Piece newPiece = Instantiate(prefab, pieceSpawnTransform);
 
-            newPiece.Init(pos, color);  
+            newPiece.Init(pos, color);
             AddPiece(newPiece, pos);
 
             Vector3 WorldPos = GridPosToWorldPos(pos);
@@ -409,6 +409,12 @@ public class BoardManager : MonoBehaviour
 
             Pieces.Add(newPiece);
         }
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     public void DestroyPiece(Vector3Int target)
