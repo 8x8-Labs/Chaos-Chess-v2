@@ -3623,6 +3623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilemap: {fileID: 1170031624}
+  gameSelectTilemap: {fileID: 81987907}
   boardManager: {fileID: 1629911495}
   pieceDrawer: {fileID: 1571836338}
   selectorUI: {fileID: 1567853228}
@@ -4179,6 +4180,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilemap: {fileID: 1170031624}
+  gameSelectTilemap: {fileID: 81987907}
   boardManager: {fileID: 1629911495}
   tileDrawer: {fileID: 1803301550}
   selectorUI: {fileID: 475878339}
