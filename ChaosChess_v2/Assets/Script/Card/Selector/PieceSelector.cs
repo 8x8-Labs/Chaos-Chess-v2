@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -107,6 +107,8 @@ public class PieceSelector : Selector<Piece>
         GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
         selectState = true;
+
+        gameSelectTilemap.ClearAllTiles();
     }
 
     protected override void DisableSelector()
