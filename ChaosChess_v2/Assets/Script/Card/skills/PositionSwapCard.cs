@@ -12,8 +12,8 @@ public class PositionSwapCard : CardData, ICard
     {
         BoardManager bm = BoardManager.Instance;
 
-        PieceColor myColor = GameManager.Instance.NowTurn == 'w' ? PieceColor.White : PieceColor.Black;
-        PieceColor oppColor = myColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+        PieceColor myColor = GameManager.Instance.PlayerColor;
+        PieceColor oppColor = GameManager.Instance.EnemyColor;
 
         List<Piece> myPieces = bm.GetAllPieces().FindAll(p => p.Color == myColor);
         List<Piece> oppPieces = bm.GetAllPieces().FindAll(p => p.Color == oppColor);

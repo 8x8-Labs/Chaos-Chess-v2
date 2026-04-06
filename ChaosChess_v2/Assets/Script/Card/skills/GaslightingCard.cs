@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -6,25 +7,26 @@ using UnityEngine;
 /// 나이트, 비숍, 폰에 적용됩니다.
 /// 랜덤한 상대 기물(킹, 퀸, 룩 제외)을 자신의 기물로 변환합니다.
 /// </summary>
-public class GaslightingCard : CardData, IPieceCard
+public class GaslightingCard : CardData, ICard
 {
-    private PieceSelector selector;
-
-    private void Awake()
-    {
-        selector = FindFirstObjectByType<PieceSelector>();
-    }
-
-    public void LoadPieceSelector()
-    {
-        if (selector == null) selector = FindFirstObjectByType<PieceSelector>();
-        selector.EnableSelector(this);
-    }
-
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> pieces = args.Targets;
-        // TODO: 선택된 아군 기물(나이트/비숍/폰) 기준으로
-        //       상대 기물 중 킹/퀸/룩 제외한 랜덤 기물 1개를 아군 기물로 변환 처리
+        Piece p = GetRandomPiece();
+        if (p == null) return;
+
+        BoardManager.Instance.ChangePiece(
+            pos: p.Pos,
+            color: GameManager.Instance.PlayerColor,
+            type: p.TypeToChar());
+    }
+
+    private Piece GetRandomPiece()
+    {
+        List<Piece> pieces = BoardManager.Instance.GetAllPieces()
+            .Where(p => p.Color == GameManager.Instance.EnemyColor &&
+            (DataSO.PieceType & p.Type) != 0).ToList();
+
+        int rand = Random.Range(0, pieces.Count);
+        return pieces[rand];
     }
 }
