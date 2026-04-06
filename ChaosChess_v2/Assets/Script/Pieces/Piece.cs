@@ -204,23 +204,23 @@ public class Piece : MonoBehaviour
     /// </summary>
     /// <param name="c">FEN 코드 문자</param>
     /// <returns>해당하는 PieceType</returns>
-    public PieceType CharToType(char c)
-    {
-        return char.ToLower(c) switch
-        {
-            'p' => PieceType.Pawn,
-            'n' => PieceType.Knight,
-            'b' => PieceType.Bishop,
-            'r' => PieceType.Rook,
-            'q' => PieceType.Queen,
-            'k' => PieceType.King,
-            's' => PieceType.Amazon,
-            'y' => PieceType.Chancellor,
-            'z' => PieceType.KnightRider,
-            'a' => PieceType.Wall,
-            _ => throw new ArgumentException($"알 수 없는 FEN 문자: {c}")
-        };
-    }
+    //public PieceType CharToType(char c)
+    //{
+    //    return char.ToLower(c) switch
+    //    {
+    //        'p' => PieceType.Pawn,
+    //        'n' => PieceType.Knight,
+    //        'b' => PieceType.Bishop,
+    //        'r' => PieceType.Rook,
+    //        'q' => PieceType.Queen,
+    //        'k' => PieceType.King,
+    //        's' => PieceType.Amazon,
+    //        'y' => PieceType.Chancellor,
+    //        'z' => PieceType.KnightRider,
+    //        'a' => PieceType.Wall,
+    //        _ => throw new ArgumentException($"알 수 없는 FEN 문자: {c}")
+    //    };
+    //}
 
     public int CharToIndex(char c)
     {
@@ -246,7 +246,8 @@ public class Piece : MonoBehaviour
     private void UpdateSprite()
     {
         GameManager gm = GameManager.Instance;
-        PieceColor color = gm.PlayerColor;
+
+        PieceColor color = Color;
         int index = CharToIndex(_fenOverride[0]);
 
         Sprite sprite = color == PieceColor.White ?
