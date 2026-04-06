@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
@@ -10,6 +10,7 @@ class FENPrefabPair
 
 public class BoardManager : MonoBehaviour
 {
+    public static BoardManager Instance;
     private class Castling
     {
         private bool WhiteKingSide = true;
@@ -112,10 +113,18 @@ public class BoardManager : MonoBehaviour
     private Vector2 BoardCenterOffset = new Vector2(3.5f, 3.5f);
     private Vector2 CellSize = new Vector2(0.65f, 0.65f);
 
+    private Dictionary<Vector3Int, List<TileEffector>> tileEffectors
+        = new Dictionary<Vector3Int, List<TileEffector>>();
+
     [SerializeField] private Transform pieceSpawnTransform;
 
     void Awake()
     {
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+
         enPassantPos = new Vector3Int(-1, -1, -1);
 
         FENMap = new Dictionary<char, Piece>();
@@ -180,6 +189,7 @@ public class BoardManager : MonoBehaviour
                 Pieces.Add(piece);
             }
 
+            CheckCastlingRights();
             x++;
         }
 
@@ -238,6 +248,18 @@ public class BoardManager : MonoBehaviour
         if (!IsInside(pos)) return false;
 
         return board[pos.x, pos.y] == null;
+    }
+
+    public bool IsValidCell(Vector3Int pos)
+    {
+        return IsInside(pos);
+    }
+
+    public bool IsOccupiedByAlly(Vector3Int pos, Piece referencePiece)
+    {
+        if (!IsInside(pos)) return false;
+        Piece occupant = GetPiece(pos);
+        return occupant != null && occupant.Color == referencePiece.Color;
     }
 
     public Piece GetPiece(Vector3Int pos) // 선택한 좌표에 기물을 가져온다
@@ -308,6 +330,7 @@ public class BoardManager : MonoBehaviour
             castling.OnRookMove(piece.Color, from);
         }
 
+        TriggerTileExit(from, piece);
         board[from.x, from.y] = null;
 
         bool isCapture = false;
@@ -326,6 +349,9 @@ public class BoardManager : MonoBehaviour
         board[target.x, target.y] = piece;
         Vector3 WorldPos = GridPosToWorldPos(target);
         piece.Move(target, WorldPos);
+
+        if (isCapture)
+            piece.TriggerOnCapture();
 
         if (piece is Pawn || isCapture)
             halfmoveClock = 0;
@@ -350,6 +376,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
+        TriggerTileEnter(target, piece);
         return true;
     }
     private void HandlePromotion(Piece pawn, Vector3Int pos, char promotion)
@@ -359,7 +386,7 @@ public class BoardManager : MonoBehaviour
         // AI 프로모션 (UCI)
         if (promotion != '\0')
         {
-            CreatePromotionPiece(pos, color, promotion);
+            ChangePiece(pos, color, promotion);
         }
         else
         {
@@ -368,9 +395,9 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void CreatePromotionPiece(Vector3Int pos, PieceColor color, char type)
+    /// pos에 있는 기물에 새로운 기물을 추가합니다
+    public void ChangePiece(Vector3Int pos, PieceColor color, char type)
     {
-        // 폰 제거
         DestroyPiece(pos);
 
         char key = char.ToLower(type);
@@ -387,14 +414,53 @@ public class BoardManager : MonoBehaviour
 
             Pieces.Add(newPiece);
         }
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     public void DestroyPiece(Vector3Int target)
     {
         Piece targetPiece = GetPiece(target);
+        DestroyPiece(targetPiece);
+    }
 
-        Pieces.Remove(targetPiece);
-        Destroy(targetPiece.gameObject);
+    public void DestroyPiece(Piece piece)
+    {
+        if (piece == null) return;
+
+        board[piece.Pos.x, piece.Pos.y] = null;
+        Pieces.Remove(piece);
+        Destroy(piece.gameObject);
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
+    }
+
+    public void DestroyPiece(List<Piece> pieces)
+    {
+        if (pieces == null) return;
+
+        foreach (Piece piece in pieces)
+        {
+            if (piece == null) continue;
+
+            board[piece.Pos.x, piece.Pos.y] = null;
+            Pieces.Remove(piece);
+            Destroy(piece.gameObject);
+        }
+
+        UpdateFEN();
+        string fen = GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        UpdatePiecesCanMovePos(moves);
     }
 
     public Vector3Int UCIToGrid(string sq)
@@ -422,7 +488,9 @@ public class BoardManager : MonoBehaviour
 
     public void UpdateFEN()
     {
+        CheckCastlingRights();
         FEN = "";
+
         for (int i = 7; i > -1; i--)
         {
             string line = "";
@@ -472,6 +540,42 @@ public class BoardManager : MonoBehaviour
         FEN += halfmoveClock + " " + fullmoveNumber;
     }
 
+    /// <summary>원래 킹, 룩 위치에 기물이 없거나 다른 기물이 있으면 그 방향 캐슬링이 불가능하게 만듭니다 </summary>
+    private void CheckCastlingRights()
+    {
+        // 백킹
+        Piece whiteKing = GetPiece(UCIToGrid("e1"));
+        if (!(whiteKing is King) || whiteKing.Color != PieceColor.White)
+        {
+            castling.OnKingMove(PieceColor.White);
+        }
+
+        // 흑킹
+        Piece blackKing = GetPiece(UCIToGrid("e8")); // e8
+        if (!(blackKing is King) || blackKing.Color != PieceColor.Black)
+        {
+            castling.OnKingMove(PieceColor.Black);
+        }
+
+        //백룩
+        Piece rook1 = GetPiece(UCIToGrid("a1"));
+        if (!(rook1 is Rook) || rook1.Color != PieceColor.White)
+            castling.OnRookMove(PieceColor.White, UCIToGrid("a1"));
+
+        Piece rook2 = GetPiece(UCIToGrid("h1"));
+        if (!(rook2 is Rook) || rook2.Color != PieceColor.White)
+            castling.OnRookMove(PieceColor.White, UCIToGrid("h1"));
+
+        //흑룩
+        Piece rook3 = GetPiece(UCIToGrid("a8"));
+        if (!(rook3 is Rook) || rook3.Color != PieceColor.Black)
+            castling.OnRookMove(PieceColor.Black, UCIToGrid("a8"));
+
+        Piece rook4 = GetPiece(UCIToGrid("h8"));
+        if (!(rook4 is Rook) || rook4.Color != PieceColor.Black)
+            castling.OnRookMove(PieceColor.Black, UCIToGrid("h8"));
+    }
+
     public string GetFEN()
     {
         return FEN;
@@ -480,5 +584,137 @@ public class BoardManager : MonoBehaviour
     public int GetHalfmoveClock()
     {
         return halfmoveClock;
+    }
+
+    public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
+    {
+        if(!tileEffectors.TryGetValue(pos, out var list))
+        {
+            list = new List<TileEffector>();
+            tileEffectors[pos] = list;
+        }
+        list.Add(effector);
+    }
+
+    public void UnregisterTileEffector(Vector3Int pos, TileEffector effector)
+    {
+        if (tileEffectors.TryGetValue(pos, out var list))
+            list.Remove(effector);
+    }
+
+    private void TriggerTileEnter(Vector3Int pos, Piece piece)
+    {
+        if (!tileEffectors.TryGetValue(pos, out var list)) return;
+        foreach (var effector in new List<TileEffector>(list))
+            effector.OnPieceEnter(piece);
+    }
+
+    private void TriggerTileExit(Vector3Int pos, Piece piece)
+    {
+        if (!tileEffectors.TryGetValue(pos, out var list)) return;
+        foreach (var effector in new List<TileEffector>(list))
+            effector.OnPieceExit(piece);
+    }
+
+    /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>
+    public List<Piece> GetAllPieces()
+    {
+        return new List<Piece>(Pieces);
+    }
+
+    /// <summary>보드 위 특정 기물을 전부 반환합니다.</summary>
+    public List<T> GetPiece<T>(PieceColor pieceColor) where T : Piece
+    {
+        List<T> targetPieces = new List<T>();
+        for (int i = 0; i < Pieces.Count; i++)
+        {
+            if (Pieces[i] is T && Pieces[i].Color == pieceColor)
+            {
+                targetPieces.Add((T)Pieces[i]);
+            }
+        }
+        return targetPieces;
+    }
+
+    /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
+    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0', bool useTurn = false)
+    {
+        Vector3Int from = piece.Pos;
+
+        TriggerTileExit(from, piece);
+        board[from.x, from.y] = null;
+
+        // 이동하는 위치에 기물이 있으면 먹음
+        if (!IsEmpty(target))
+        {
+            Piece targetPiece = GetPiece(target);
+            if (targetPiece is Rook)
+            {
+                castling.OnRookDie(targetPiece.Color, target);
+            }
+            DestroyPiece(target);
+        }
+
+        if (piece is King)
+        {
+            castling.OnKingMove(piece.Color);
+        }
+        if (piece is Rook)
+        {
+            castling.OnRookMove(piece.Color, piece.Pos);
+        }
+
+        board[target.x, target.y] = piece;
+        Vector3 WorldPos = GridPosToWorldPos(target);
+        piece.Move(target, WorldPos);
+
+        // 프로모션
+        if (piece is Pawn)
+        {
+            if (piece.Pos.y == (piece.Color == PieceColor.White ? 7 : 0))
+            {
+                HandlePromotion(piece, target, promotion);
+            }
+        }
+
+        if (useTurn)
+        {
+            GameManager.Instance.NextTurn();
+        }
+        else
+        {
+            UpdateFEN(); // fen 업데이트
+            string fen = GetFEN();
+            FairyStockfishBridge.Instance.SetPosition(fen); // 스톡피쉬에 반영
+
+            string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+            UpdatePiecesCanMovePos(moves); // 이동 가능한 위치 업데이트
+        }
+    }
+
+    /// <summary>
+    /// 여러 기물을 동시에 재배치합니다.
+    /// Phase 1에서 기존 칸을 모두 비운 뒤 Phase 2에서 새 칸에 배치하므로
+    /// 서로의 자리를 교환할 때 충돌이 발생하지 않습니다.
+    /// </summary>
+    public void BatchReassign(List<Piece> pieces, List<Vector3Int> newPositions)
+    {
+        for (int i = 0; i < pieces.Count; i++)
+        {
+            if (pieces[i] is King)
+                castling.OnKingMove(pieces[i].Color);
+            if (pieces[i] is Rook)
+                castling.OnRookMove(pieces[i].Color, pieces[i].Pos);
+
+            TriggerTileExit(pieces[i].Pos, pieces[i]);
+            board[pieces[i].Pos.x, pieces[i].Pos.y] = null;
+        }
+        for (int i = 0; i < pieces.Count; i++)
+        {
+            Vector3Int target = newPositions[i];
+            board[target.x, target.y] = pieces[i];
+            Vector3 worldPos = GridPosToWorldPos(target);
+            pieces[i].Move(target, worldPos);
+        }
     }
 }

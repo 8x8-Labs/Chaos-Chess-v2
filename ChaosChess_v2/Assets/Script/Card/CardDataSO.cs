@@ -10,11 +10,16 @@ public class CardDataSO : ScriptableObject
     public string CardDescription;
 
     public CardType Type;
+    public Tier CardTier;
 
     // 기물 타입에 필요한 설정
     [Space(30)]
     [Header("기물 타입 설정")]
     public PieceType PieceType;
+    /// <summary>
+    /// 기물 타입에서의 대상 색깔
+    /// </summary>
+    public PieceColor PieceTargetColor;
     [Range(-1, 10)]
     public int PieceLimitTurn;
     public int RequiredPieceCount;
@@ -28,10 +33,23 @@ public class CardDataSO : ScriptableObject
     /// </summary>
     [Range(-1, 75)]
     public int MaintainTurn;
+    /// <summary>
+    /// 활성화 시 BlockedTiles 배열 기준으로 선택 불가 타일을 지정합니다.
+    /// </summary>
+    public bool RestrictTiles;
+    /// <summary>
+    /// 8x8 = 64칸. true인 칸은 타일 선택 불가. 인덱스: y * 8 + x (y=0 하단, y=7 상단)
+    /// </summary>
+    public bool[] BlockedTiles = new bool[64];
 
     [Space(30)]
     [Header("전역 타입 설정")]
     //전역 타입에 필요한 설정
+    public bool NeedTargetColor;
+    /// <summary>
+    /// 전역 타입에서의 대상 색깔
+    /// </summary>
+    public PieceColor GlobalTargetColor;
     public bool HasLimit;
     public int LimitTurn;
 

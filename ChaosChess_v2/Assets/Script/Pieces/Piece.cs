@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,9 @@ public enum PieceColor
 
 public class Piece : MonoBehaviour
 {
+    // 무언갈 잡을때 효과 발동
+    private List<Action<Vector3Int>> onCaptureEffects = new();
+
     [SerializeField] protected Sprite WhitePiece;
     [SerializeField] protected Sprite BlackPiece;
     [SerializeField] protected PieceType type;
@@ -19,6 +23,9 @@ public class Piece : MonoBehaviour
     [SerializeField] private Vector3Int pos;
 
     protected List<Vector3Int> CanMovePos;
+
+    private MaterialPropertyBlock mpb;
+    private static readonly int OutlineThickId = Shader.PropertyToID("_OutlineThick");
 
     public PieceColor Color
     {
@@ -40,7 +47,8 @@ public class Piece : MonoBehaviour
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.material = Instantiate(outlineMaterial);
+        spriteRenderer.sharedMaterial = outlineMaterial;
+        mpb = new MaterialPropertyBlock();
     }
 
     public virtual void Init(Vector3Int pos, PieceColor color)
@@ -83,16 +91,55 @@ public class Piece : MonoBehaviour
         transform.position = WorldPos;
     }
 
+    // 무언가를 잡았을때
+    public void TriggerOnCapture()
+    {
+        var copy = new List<Action<Vector3Int>>(onCaptureEffects);
+
+        foreach (var effect in copy)
+        {
+            effect?.Invoke(Pos);
+        }
+    }
+
+    public void AddOnCaptureEffect(Action<Vector3Int> effect)
+    {
+        onCaptureEffects.Add(effect);
+    }
+
+    public void RemoveOnCaptureEffect(Action<Vector3Int> effect)
+    {
+        onCaptureEffects.Remove(effect);
+    }
+
     public void OnSelected()
     {
         spriteRenderer.sortingLayerName = "SelectTarget";
-        spriteRenderer.material.SetFloat("_OutlineThick", 1f);
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat(OutlineThickId, 1f);
+        spriteRenderer.SetPropertyBlock(mpb);
     }
 
     public void OnDeselect()
     {
         spriteRenderer.sortingLayerName = "Default";
-        spriteRenderer.material.SetFloat("_OutlineThick", 0f);
+        spriteRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat(OutlineThickId, 0f);
+        spriteRenderer.SetPropertyBlock(mpb);
+    }
+
+    public char TypeToChar()
+    {
+        return type switch
+        {
+            PieceType.Pawn   => 'p',
+            PieceType.Knight => 'n',
+            PieceType.Bishop => 'b',
+            PieceType.Rook   => 'r',
+            PieceType.Queen  => 'q',
+            PieceType.King   => 'k',
+            _                => '?'
+        };
     }
 
     public virtual string GetFen() { return ""; }

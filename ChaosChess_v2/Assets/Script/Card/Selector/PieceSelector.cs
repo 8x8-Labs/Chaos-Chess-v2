@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -5,8 +6,9 @@ using UnityEngine;
 public class PieceSelector : Selector<Piece>
 {
     [SerializeField] private UIPieceDrawer pieceDrawer;
-    private bool executable => isExecute();
+    [SerializeField] private SelectorUI selectorUI;
     private IPieceCard skillCard;
+    private bool executable => isExecute();
 
     public override void DeselectFirstTarget()
     {
@@ -20,6 +22,7 @@ public class PieceSelector : Selector<Piece>
         pieceDrawer.EraseSelectPiece(Target);
 
         Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
+        selectorUI.UpdateButtonState(executable);
     }
     public override void DeselectAllTarget()
     {
@@ -41,9 +44,12 @@ public class PieceSelector : Selector<Piece>
 
             Piece p = boardManager.GetPiece(mouseGridPos);
 
+            // 널 체크
             if (p != null)
             {
-                if((p.Type & cardData.DataSO.PieceType) != 0)
+                // 기물 타입과 색상 체크
+                if((p.Type & cardData.DataSO.PieceType) != 0 &&
+                    p.Color == cardData.DataSO.PieceTargetColor)
                 {
                     SelectTarget(p);
                 }
@@ -55,7 +61,6 @@ public class PieceSelector : Selector<Piece>
     {
         if (!selectState) return;
 
-        Debug.Log("기물 클릭됨!");
         if (selectedTargets.Contains(Target))
         {
             DeselectTarget(Target);
@@ -69,6 +74,7 @@ public class PieceSelector : Selector<Piece>
         selectedTargets.Add(Target);
         pieceDrawer.DrawSelectPiece(Target);
         Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
+        selectorUI.UpdateButtonState(executable);
     }
 
     protected override bool isExecute()
@@ -85,7 +91,7 @@ public class PieceSelector : Selector<Piece>
             Targets = selectedTargets.ToList(),
             LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
-
+        
         skillCard.Execute(args);
 
         DisableSelector();
@@ -95,21 +101,27 @@ public class PieceSelector : Selector<Piece>
     {
         cardData = data;
         skillCard = cardData.GetComponent<IPieceCard>();
+        selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
         GameManager.Instance.IsGameInput = false;
         selectorCanvas.enabled = true;
         selectState = true;
+
+        gameSelectTilemap.ClearAllTiles();
     }
 
     protected override void DisableSelector()
     {
-        selectedTargets.Clear();
-        cardData = null;
-        skillCard = null;
-
         GameManager.Instance.IsGameInput = true;
         selectorCanvas.enabled = false;
         selectState = false;
+
+        cardData = null;
+        skillCard = null;
+        foreach(Piece p in selectedTargets) p.OnDeselect();
+        selectedTargets.Clear();
+        selectorUI.DisableButtonState();
+
     }
 }
