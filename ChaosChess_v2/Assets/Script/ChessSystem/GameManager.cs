@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
     public PieceColor PlayerColor = PieceColor.White;
     public PieceColor EnemyColor = PieceColor.Black;
 
+    public List<Sprite> BlackSprites = new List<Sprite>();
+    public List<Sprite> WhiteSprites = new List<Sprite>();
+
     private int curTurn = 1;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
