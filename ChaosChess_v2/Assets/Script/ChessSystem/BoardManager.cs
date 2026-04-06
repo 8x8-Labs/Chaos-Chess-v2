@@ -401,7 +401,7 @@ public class BoardManager : MonoBehaviour
         {
             Piece newPiece = Instantiate(prefab, pieceSpawnTransform);
 
-            newPiece.Init(pos, color);
+            newPiece.Init(pos, color);  
             AddPiece(newPiece, pos);
 
             Vector3 WorldPos = GridPosToWorldPos(pos);
