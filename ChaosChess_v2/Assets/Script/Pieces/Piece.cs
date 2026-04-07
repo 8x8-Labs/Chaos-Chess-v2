@@ -23,11 +23,18 @@ public class Piece : MonoBehaviour
     [SerializeField] private Vector3Int pos;
     private string _fenOverride;
 
-    protected List<Vector3Int> CanMovePos;
+    protected List<Vector3Int> canMovePos;
 
     private MaterialPropertyBlock mpb;
     private static readonly int OutlineThickId = Shader.PropertyToID("_OutlineThick");
 
+    public List<Vector3Int> CanMovePos
+    {
+        get
+        {
+            return canMovePos;
+        }
+    }
     public PieceColor Color
     {
         get { return color; }
@@ -95,7 +102,7 @@ public class Piece : MonoBehaviour
 
     public virtual bool CanMoveTo(BoardManager board, Vector3Int target)
     {
-        foreach (Vector3Int pos in CanMovePos)
+        foreach (Vector3Int pos in canMovePos)
         {
             if (target == pos)
             {
@@ -107,12 +114,12 @@ public class Piece : MonoBehaviour
 
     public void ResetCanMovePos()
     {
-        CanMovePos = new List<Vector3Int>();
+       canMovePos = new List<Vector3Int>();
     }
 
     public void AddCanMovePos(Vector3Int pos)
     {
-        CanMovePos.Add(pos);
+        canMovePos.Add(pos);
     }
 
     public virtual void Move(Vector3Int target, Vector3 WorldPos)
