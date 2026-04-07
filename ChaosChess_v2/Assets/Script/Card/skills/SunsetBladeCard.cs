@@ -33,7 +33,7 @@ public class SunsetBladeEffector : PieceEffector
 {
     private Action<Vector3Int> captureCallback;
 
-    public override void Apply()
+    protected override void OnApply()
     {
         captureCallback = (_) =>
         {
@@ -43,7 +43,7 @@ public class SunsetBladeEffector : PieceEffector
         target.AddOnCaptureEffect(captureCallback);
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         if (captureCallback == null) return;
         target.RemoveOnCaptureEffect(captureCallback);

@@ -13,11 +13,25 @@ public abstract class Effector : MonoBehaviour, IEffect
         remainingTurns = turns;
     }
 
-    /// <summary>효과를 대상에 등록합니다. 서브클래스에서 훅/버프를 부착합니다.</summary>
-    public abstract void Apply();
+    /// <summary>효과를 대상에 등록합니다. 턴 이벤트를 구독하고 OnApply()를 호출합니다.</summary>
+    public void Apply()
+    {
+        GameManager.Instance.OnTurnChanged += OnTurnChanged;
+        OnApply();
+    }
 
-    /// <summary>효과를 대상에서 제거합니다. 서브클래스에서 훅/버프를 해제합니다.</summary>
-    public abstract void Revert();
+    /// <summary>효과를 대상에서 제거합니다. 턴 이벤트를 해제하고 OnRevert()를 호출합니다.</summary>
+    public void Revert()
+    {
+        GameManager.Instance.OnTurnChanged -= OnTurnChanged;
+        OnRevert();
+    }
+
+    /// <summary>서브클래스에서 훅/버프를 부착합니다.</summary>
+    protected abstract void OnApply();
+
+    /// <summary>서브클래스에서 훅/버프를 해제합니다.</summary>
+    protected abstract void OnRevert();
 
     public virtual void OnTurnChanged()
     {

@@ -13,21 +13,18 @@ public class CheckmateDeclarationCard : CardData, ICard
         CheckmateDeclarationEffect effect = 
             CreateGlobalEffector<CheckmateDeclarationEffect>();
 
-        effect.MaxTurn = DataSO.LimitTurn;
         effect.Apply();
     }
 }
 
 public class CheckmateDeclarationEffect : GlobalEffector
 {
-    public int MaxTurn;
-    private int currentStack = 0;
-    public override void Apply()
+    protected override void OnApply()
     {
         GameManager.Instance.OnPlayerTurnStarted += PlayerCheck;
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         GameManager.Instance.OnPlayerTurnStarted -= PlayerCheck;
         Destroy(gameObject);
@@ -40,13 +37,6 @@ public class CheckmateDeclarationEffect : GlobalEffector
 
     public void PlayerCheck()
     {
-        currentStack++;
-        if (currentStack > MaxTurn)
-        {
-            Revert();
-            return;
-        }
-
         bool check = FairyStockfishBridge.Instance.IsInCheck();
         if (check)
         {

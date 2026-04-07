@@ -23,11 +23,15 @@ Effector (abstract)
 |---|---|
 | `IsExpired` | 효과가 만료됐는지 여부 (`remainingTurns == 0`) |
 | `IsPermanent` | 영구 효과 여부 (`remainingTurns < 0`) |
-| `Apply()` | **abstract** — 효과 등록 (훅/버프 부착) |
-| `Revert()` | **abstract** — 효과 해제 (훅/버프 제거 + `Destroy(this)`) |
-| `OnTurnChanged()` | 매 턴 호출 → 카운트 감소, 만료 시 `Revert()` 자동 호출 |
+| `Apply()` | **sealed** — `GameManager.OnAnyTurnChanged`에 구독 후 `OnApply()` 호출 |
+| `Revert()` | **sealed** — `GameManager.OnAnyTurnChanged` 구독 해제 후 `OnRevert()` 호출 |
+| `OnApply()` | **abstract** — 서브클래스에서 훅/버프를 부착하는 실제 구현 |
+| `OnRevert()` | **abstract** — 서브클래스에서 훅/버프를 해제하는 실제 구현 (`Destroy(this)` 포함) |
+| `OnTurnChanged()` | 매 턴(`GameManager.NextTurn()`) 자동 호출 → 카운트 감소, 만료 시 `Revert()` 자동 호출 |
 
-> `Revert()`는 만료 또는 수동 해제 시 모두 호출됩니다. 반드시 등록한 모든 콜백을 해제하고 `Destroy(this)`를 호출하세요.
+> `Apply()` / `Revert()`는 sealed입니다. 서브클래스에서는 반드시 `OnApply()` / `OnRevert()`를 override하세요.
+
+> `Revert()`는 만료 또는 수동 해제 시 모두 호출됩니다. `OnRevert()`에서 등록한 모든 콜백을 해제하고 `Destroy(this)`를 호출하세요.
 
 ---
 
@@ -55,12 +59,12 @@ public void Init(Piece piece, int duration = -1)
 ```csharp
 public class BurnEffector : PieceEffector
 {
-    public override void Apply()
+    protected override void OnApply()
     {
         // 이동할 때마다 HP 감소 등의 로직을 훅으로 등록
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         // 등록한 훅 해제
         Destroy(this);
@@ -111,12 +115,12 @@ public void Init(Vector3Int pos, int duration = -1)
 ```csharp
 public class TrapEffector : TileEffector
 {
-    public override void Apply()
+    protected override void OnApply()
     {
         // 타일 진입 감지 등록
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         // 등록 해제
         Destroy(gameObject); // 호스트 GameObject까지 제거
@@ -177,9 +181,9 @@ protected bool IsWatching(Piece piece)
 // 백 폰 또는 비숍이 행동할 때 반응
 public class WatchEffector : GlobalEffector
 {
-    public override void Apply() { }
+    protected override void OnApply() { }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         Destroy(gameObject);
     }
@@ -214,12 +218,11 @@ public void Execute(CardEffectArgs args)
 
 ## 턴 관리
 
-`OnTurnChagned()`는 자동으로 호출되지 않습니다. 게임의 턴 전환 시점에 직접 호출해야 합니다.
+`OnTurnChanged()`는 `GameManager.NextTurn()` 호출 시 `OnAnyTurnChanged` 이벤트를 통해 **자동으로 호출**됩니다.  
+`Apply()` 시 자동으로 이벤트에 구독되고, `Revert()` 시 자동으로 해제되므로 서브클래스에서 별도로 처리할 필요가 없습니다.
 
-```csharp
-// GameManager.NextTurn() 등에서 활성화된 Effector들을 순회하며 호출
-effector.OnTurnChanged();
-```
+지속 턴이 있는 효과(`duration > 0`)는 매 턴마다 카운트가 감소하며, 0이 되는 순간 `Revert()`가 자동 호출됩니다.  
+영구 효과(`duration = -1`)는 `OnTurnChanged()`가 호출되더라도 카운트 감소 없이 무시됩니다.
 
 ---
 
@@ -238,13 +241,13 @@ public class SunsetBladeEffector : PieceEffector
 {
     private Action<Vector3Int> captureCallback;
 
-    public override void Apply()
+    protected override void OnApply()
     {
         captureCallback = (_) => { OnPieceCapture(); Revert(); };
         target.AddOnCaptureEffect(captureCallback);
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         if (captureCallback == null) return;
         target.RemoveOnCaptureEffect(captureCallback);
