@@ -282,6 +282,16 @@ public class BoardManager : MonoBehaviour
         if (uciMove.Length == 5)
             promotion = uciMove[4];
 
+        // AI가 무적 기물을 잡으려 할 때: 이동 취소 후 플레이어 턴 반환
+        Piece targetPiece = GetPiece(to);
+        if (targetPiece != null && targetPiece.IsInvincible)
+        {
+            Debug.Log($"[Invincible] {targetPiece.name} 무적 발동! AI 이동 취소, 플레이어 턴으로 전환");
+            targetPiece.ConsumeInvincibility();
+            GameManager.Instance.NextTurn();
+            return;
+        }
+
         Piece piece = GetPiece(from);
         if (piece != null)
             MovePiece(piece, to, promotion);

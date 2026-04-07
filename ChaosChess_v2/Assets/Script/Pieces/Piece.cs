@@ -13,6 +13,19 @@ public class Piece : MonoBehaviour
     // 무언갈 잡을때 효과 발동
     private List<Action<Vector3Int>> onCaptureEffects = new();
 
+    /// <summary>1회 죽음 무효화 플래그. AI가 이 기물을 잡으려 하면 취소됩니다.</summary>
+    public bool IsInvincible { get; private set; } = false;
+
+    public void SetInvincible()
+    {
+        IsInvincible = true;
+    }
+
+    public void ConsumeInvincibility()
+    {
+        IsInvincible = false;
+    }
+
     [SerializeField] protected Sprite WhitePiece;
     [SerializeField] protected Sprite BlackPiece;
     [SerializeField] protected PieceType type;

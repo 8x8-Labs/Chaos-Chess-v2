@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,7 +34,11 @@ public class ObeyOrderEffect : TileEffector
     public int ObeyCount = 0;
     private Piece enterPiece = null;
     public Piece EnterPiece => enterPiece;
-    private bool _commandFulfilled = false;
+
+    // WatchDisobedience 세대 카운터.
+    // FulfillCommand에서 증가 → 이전 WatchDisobedience 코루틴이 자신의 세대와 불일치를 감지해 종료.
+    private int _watchGeneration = 0;
+
     private readonly List<TileEffector> _childEffects = new List<TileEffector>();
 
     public override void Apply()
@@ -67,8 +71,7 @@ public class ObeyOrderEffect : TileEffector
     private IEnumerator PlaceDestEffect()
     {
         // 1단계: NextTurn에서 CanMovePos가 초기화(Count==0)될 때까지 대기
-        int phase1 = 60;
-        while (enterPiece != null && enterPiece.CanMovePos.Count > 0 && phase1-- > 0)
+        while (enterPiece != null && enterPiece.CanMovePos.Count > 0)
             yield return null;
 
         // 2단계: AI 이동 완료 후 플레이어 턴 CanMovePos가 갱신될 때까지 대기
@@ -79,7 +82,6 @@ public class ObeyOrderEffect : TileEffector
         if (enterPiece == null || enterPiece.CanMovePos.Count == 0) yield break;
 
         List<Vector3Int> moves = enterPiece.CanMovePos;
-        if (moves.Count == 0) yield break;
 
         // 랜덤 목적지 선택
         int destIdx = Random.Range(0, moves.Count);
@@ -94,12 +96,12 @@ public class ObeyOrderEffect : TileEffector
         destEffect.Apply();
         _childEffects.Add(destEffect);
 
-        // 불복종 감지 코루틴 시작
-        _commandFulfilled = false;
-        StartCoroutine(WatchDisobedience());
+        // 현재 세대 캡처 후 불복종 감시 코루틴 시작
+        int myGen = _watchGeneration;
+        StartCoroutine(WatchDisobedience(myGen));
     }
 
-    private IEnumerator WatchDisobedience()
+    private IEnumerator WatchDisobedience(int myGen)
     {
         // Phase 1: 기물이 이동할 때까지 무한 대기 (플레이어 응답 시간 제한 없음)
         while (enterPiece != null && enterPiece.CanMovePos.Count > 0)
@@ -110,8 +112,10 @@ public class ObeyOrderEffect : TileEffector
         while (enterPiece != null && enterPiece.CanMovePos.Count == 0 && phase2-- > 0)
             yield return null;
 
-        if (_commandFulfilled) yield break;  // 명령 복종 → 아무것도 안 함
-        if (enterPiece == null) yield break; // 기물 사라짐 (예: 잡힘)
+        // 이미 FulfillCommand가 호출되어 세대가 바뀌었으면 종료
+        if (myGen != _watchGeneration) yield break;
+
+        if (enterPiece == null) yield break; // 기물이 잡혔으면 종료
 
         // 명령 불복종 → 모든 효과 제거
         Debug.Log($"[ObeyOrder] {enterPiece.name} 이(가) 명령을 불복종했습니다. 효과 제거!");
@@ -122,13 +126,14 @@ public class ObeyOrderEffect : TileEffector
     {
         if (piece != enterPiece) return;
 
-        _commandFulfilled = true;
+        // 세대 증가 → 현재 실행 중인 WatchDisobedience 무효화
+        _watchGeneration++;
         ObeyCount++;
         CleanupChildEffects();
 
         if (ObeyCount >= 3)
         {
-            // TODO: 기물의 죽음을 1회 무효화하는 PieceEffector 적용
+            piece.SetInvincible();
             Debug.Log($"[ObeyOrder] {piece.name} 이(가) 명령을 3회 수행했습니다. 죽음 무효화 효과 발동!");
             enterPiece = null;
             Revert();
