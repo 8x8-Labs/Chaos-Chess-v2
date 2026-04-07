@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
     public event Action OnPlayerTurnStarted;
+    /// <summary>매 턴(플레이어·AI 모두) 종료 직후 발행됩니다. Effector 지속 턴 카운트다운에 사용됩니다.</summary>
+    public event Action OnTurnChanged;
     public PieceColor turnColor
     {
         get
@@ -131,7 +133,10 @@ public class GameManager : MonoBehaviour
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
 
         if (IsPlayerTurn)
+        {
+            OnTurnChanged?.Invoke();
             OnPlayerTurnStarted?.Invoke();
+        }
     }
 
     /// <summary>

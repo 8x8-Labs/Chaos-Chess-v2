@@ -48,12 +48,12 @@ public class PortalEffect : TileEffector
     public SharedCounter SharedUses;
     public PieceColor CasterColor;
 
-    public override void Apply()
+    protected override void OnApply()
     {
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);

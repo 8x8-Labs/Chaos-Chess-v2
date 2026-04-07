@@ -29,13 +29,13 @@ public class CaterpillarCard : CardData, IPieceCard
 
 public class CaterpillarEffector : PieceEffector
 {
-    public override void Apply()
+    protected override void OnApply()
     {
         target.FenOverride = "z";
         RefreshMoves();
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         target.FenOverride = null;
         RefreshMoves();

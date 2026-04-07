@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -39,12 +39,12 @@ public class ObeyOrderEffect : TileEffector
     private ObeyState _state = ObeyState.Idle;
     private readonly List<TileEffector> _childEffects = new List<TileEffector>();
 
-    public override void Apply()
+    protected override void OnApply()
     {
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         UnsubscribeFromTurnEvent();
         CleanupChildEffects();
@@ -185,12 +185,12 @@ public class ObeyDestEffect : TileEffector
 {
     public ObeyOrderEffect Parent;
 
-    public override void Apply()
+    protected override void OnApply()
     {
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);

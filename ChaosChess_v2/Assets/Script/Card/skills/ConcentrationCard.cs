@@ -12,12 +12,12 @@ class ConcentrationEffector : PieceEffector
     {
         this.piece = piece;
     }
-    public override void Apply()
+    protected override void OnApply()
     {
         BoardManager.Instance.ChangePiece(piece.Pos,piece.Color,'a');
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         if(piece)
             BoardManager.Instance.ChangePiece(piece.Pos,piece.Color,'s');
