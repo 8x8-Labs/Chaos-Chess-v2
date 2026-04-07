@@ -210,11 +210,11 @@ public class GameManager : MonoBehaviour
             if (extraPlayerActions > 0)
             {
                 extraPlayerActions--;
-                lockedPiece = null;
                 RefreshPlayerTurn();
             }
             else
             {
+                lockedPiece = null;
                 NextTurn();
                 RequestAIMove();
             }
