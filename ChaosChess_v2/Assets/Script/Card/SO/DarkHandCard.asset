@@ -12,17 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
   m_Name: DarkHandCard
   m_EditorClassIdentifier: 
-  CardName: "\uC131 \uC704\uC758 \uB9D0"
+  CardName: "\uC5B4\uB460 \uC18D\uC758 \uC190"
   CardImage: {fileID: 0}
-  CardDescription: "\uC774 \uAE30\uBBF9\uC774 \uC801\uC6A9\uB41C \uB098\uC774\uD2B8\uB294
-    \uB8E9\uACFC \uD569\uCCB4\uD560 \uC218 \uC788\uC74C. \uD569\uCCB4 \uC2DC, \uD574\uB2F9
-    \uAE30\uBB3C\uC740 \uCC48\uC2AC\uB7EC\uC758 \uD589\uB9C8\uBC95\uC744 \uAC00\uC9D0"
+  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C 1\uAC1C\uB97C 2\uD134\uAC04 \uC6C0\uC9C1\uC77C
+    \uC218 \uC5C6\uB3C4\uB85D \uACE0\uC815\uC2DC\uD0A8\uB2E4."
   Type: 0
-  CardTier: 3
-  PieceType: 10
-  PieceTargetColor: 0
-  PieceLimitTurn: -1
-  RequiredPieceCount: 2
+  CardTier: 1
+  PieceType: 15
+  PieceTargetColor: 1
+  PieceLimitTurn: 2
+  RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
   RestrictTiles: 0
