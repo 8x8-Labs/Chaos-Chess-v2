@@ -35,6 +35,19 @@ public abstract class CardData : MonoBehaviour
         effector.Init(DataSO.PieceType, color, duration);
         return effector;
     }
+
+    protected T CreateGameGlobalEffector<T>() where T : GameGlobalEffector
+    {
+        ApplyType color = DataSO.NeedTargetColor
+            ? (ApplyType)DataSO.GlobalTargetColor
+            : ApplyType.All;
+        int duration = DataSO.HasLimit ? DataSO.LimitTurn : -1;
+
+        GameObject host = new GameObject($"GlobalEffect_{typeof(T).Name}");
+        T effector = host.AddComponent<T>();
+        effector.Init(DataSO.PieceType, color, duration);
+        return effector;
+    }
 }
 
 public class CardEffectArgs

@@ -1,14 +1,65 @@
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
 /// 체크메이트 선언 - 전역
-/// 다음 6턴 안에 체크를 당할 경우, 상대의 기물 5개가 자동으로 파괴됩니다.
+/// 다음 4턴 안에 체크를 당할 경우, 상대의 기물 5개가 자동으로 파괴됩니다.
 /// </summary>
 public class CheckmateDeclarationCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
-        // TODO: DataSO.LimitTurn(6)턴 동안 체크 감지 이벤트 등록
-        //       체크 발생 시 상대 기물 5개 자동 파괴 처리
+        CheckmateDeclarationEffect effect = 
+            CreateGameGlobalEffector<CheckmateDeclarationEffect>();
+
+        effect.MaxTurn = DataSO.LimitTurn;
+        effect.Apply();
+    }
+}
+
+public class CheckmateDeclarationEffect : GameGlobalEffector
+{
+    public int MaxTurn;
+    private int currentStack = 0;
+    public override void Apply()
+    {
+        GameManager.Instance.OnPlayerTurnStarted += playerCheck;
+    }
+
+    public override void Revert()
+    {
+        GameManager.Instance.OnPlayerTurnStarted -= playerCheck;
+        Destroy(gameObject);
+    }
+
+    public void playerCheck()
+    {
+        currentStack++;
+        if (currentStack > MaxTurn)
+        {
+            Revert();
+            return;
+        }
+
+        bool check = FairyStockfishBridge.Instance.IsInCheck();
+        if (check)
+        {
+            List<Piece> list = BoardManager.Instance.GetAllPieces()
+                .Where(p => p.Color == GameManager.Instance.EnemyColor
+                         && p.Type != PieceType.King
+                         && p.Type != PieceType.Queen)
+                .ToList();
+
+            // 기물 5개 파괴
+            for (int i = 0; i < 5 && list.Count > 0; i++)
+            {
+                int rand = Random.Range(0, list.Count);
+                Piece target = list[rand];
+                BoardManager.Instance.DestroyPiece(target);
+                list.RemoveAt(rand);
+            }
+            Revert();
+        }
     }
 }
