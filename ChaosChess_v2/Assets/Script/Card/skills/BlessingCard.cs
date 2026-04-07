@@ -23,17 +23,14 @@ public class BlessingCard : CardData, ITileCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Vector3Int> tiles = args.TargetPos;
+        Vector3Int pos = args.TargetPos[0];
 
-        foreach (var pos in tiles)
-        {
-            GameObject obj = new GameObject("BlessingEffect");
-            BlessingEffect effect = obj.AddComponent<BlessingEffect>();
+        GameObject obj = new GameObject("BlessingEffect");
+        BlessingEffect effect = obj.AddComponent<BlessingEffect>();
 
-            effect.Init(pos);
-            effect.Apply();
-            effect.duration = DataSO.MaintainTurn;
-        }
+        effect.Init(pos);
+        effect.Apply();
+        effect.duration = DataSO.MaintainTurn;
     }
 }
 
@@ -75,7 +72,6 @@ public class BlessingEffect : TileEffector
             {
                 Promote(currentPiece);
 
-                // 다시 예약 (핵심)
                 isScheduled = false;
                 SchedulePromotion(BoardManager.Instance.GetPiece(piece.Pos));
             }
