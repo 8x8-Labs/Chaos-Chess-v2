@@ -17,6 +17,9 @@ public class GameManager : MonoBehaviour
 
     public bool IsGameInput = true;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
+
+    /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
+    public event Action OnPlayerTurnStarted;
     public PieceColor turnColor
     {
         get
@@ -126,6 +129,9 @@ public class GameManager : MonoBehaviour
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+
+        if (IsPlayerTurn)
+            OnPlayerTurnStarted?.Invoke();
     }
 
     /// <summary>

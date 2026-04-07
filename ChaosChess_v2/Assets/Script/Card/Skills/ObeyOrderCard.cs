@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,14 +30,13 @@ public class ObeyOrderCard : CardData, ITileCard
 
 public class ObeyOrderEffect : TileEffector
 {
+    private enum ObeyState { Idle, WaitingForDest, WatchingObedience }
+
     public int ObeyCount = 0;
     private Piece enterPiece = null;
     public Piece EnterPiece => enterPiece;
 
-    // WatchDisobedience 세대 카운터.
-    // FulfillCommand에서 증가 → 이전 WatchDisobedience 코루틴이 자신의 세대와 불일치를 감지해 종료.
-    private int _watchGeneration = 0;
-
+    private ObeyState _state = ObeyState.Idle;
     private readonly List<TileEffector> _childEffects = new List<TileEffector>();
 
     public override void Apply()
@@ -48,19 +46,28 @@ public class ObeyOrderEffect : TileEffector
 
     public override void Revert()
     {
+        UnsubscribeFromTurnEvent();
         CleanupChildEffects();
+        _state = ObeyState.Idle;
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
+    }
+
+    // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
+    private void OnDestroy()
+    {
+        UnsubscribeFromTurnEvent();
     }
 
     public override void OnPieceEnter(Piece piece)
     {
         Debug.Log("입장");
-        if (enterPiece == null)
+
+        if (_state == ObeyState.Idle)
         {
             enterPiece = piece;
             Debug.Log("enterPiece 삽입 완료");
-            StartCoroutine(PlaceDestEffect());
+            TransitionTo(ObeyState.WaitingForDest);
         }
         else if (piece != enterPiece)
         {
@@ -68,27 +75,63 @@ public class ObeyOrderEffect : TileEffector
         }
     }
 
-    private IEnumerator PlaceDestEffect()
+    // ── 이벤트 구독/해제 ────────────────────────────────────────
+    private void SubscribeToTurnEvent()
     {
-        // 1단계: NextTurn에서 CanMovePos가 초기화(Count==0)될 때까지 대기
-        while (enterPiece != null && enterPiece.CanMovePos.Count > 0)
-            yield return null;
+        if (GameManager.Instance != null)
+            GameManager.Instance.OnPlayerTurnStarted += OnPlayerTurnStarted;
+    }
 
-        // 2단계: AI 이동 완료 후 플레이어 턴 CanMovePos가 갱신될 때까지 대기
-        int phase2 = 600;
-        while (enterPiece != null && enterPiece.CanMovePos.Count == 0 && phase2-- > 0)
-            yield return null;
+    private void UnsubscribeFromTurnEvent()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.OnPlayerTurnStarted -= OnPlayerTurnStarted;
+    }
 
-        if (enterPiece == null || enterPiece.CanMovePos.Count == 0) yield break;
+    // ── 상태 전환 ───────────────────────────────────────────────
+    private void TransitionTo(ObeyState newState)
+    {
+        UnsubscribeFromTurnEvent();
+        _state = newState;
 
+        if (newState == ObeyState.WaitingForDest || newState == ObeyState.WatchingObedience)
+            SubscribeToTurnEvent();
+    }
+
+    // ── 플레이어 턴 시작 핸들러 ─────────────────────────────────
+    private void OnPlayerTurnStarted()
+    {
+        if (enterPiece == null)
+        {
+            Debug.Log("[ObeyOrder] 감시 기물이 없어졌습니다. 효과 제거!");
+            Revert();
+            return;
+        }
+
+        switch (_state)
+        {
+            case ObeyState.WaitingForDest:
+                HandleWaitingForDest();
+                break;
+            case ObeyState.WatchingObedience:
+                HandleDisobedience();
+                break;
+        }
+    }
+
+    private void HandleWaitingForDest()
+    {
         List<Vector3Int> moves = enterPiece.CanMovePos;
 
-        // 랜덤 목적지 선택
-        int destIdx = Random.Range(0, moves.Count);
-        Vector3Int destPos = moves[destIdx];
-        Debug.Log("다음 위치 : " + destPos);
+        if (moves == null || moves.Count == 0)
+        {
+            Debug.LogWarning("[ObeyOrder] CanMovePos가 비어있습니다. 다음 턴 재시도.");
+            return; // 구독 유지, 다음 플레이어 턴에 재시도
+        }
 
-        // 목적지 칸에 ObeyDestEffect 등록
+        Vector3Int destPos = moves[Random.Range(0, moves.Count)];
+        Debug.Log("[ObeyOrder] 다음 위치 : " + destPos);
+
         GameObject destHost = new GameObject($"ObeyDestEffect_{destPos}");
         ObeyDestEffect destEffect = destHost.AddComponent<ObeyDestEffect>();
         destEffect.Init(destPos, -1);
@@ -96,40 +139,23 @@ public class ObeyOrderEffect : TileEffector
         destEffect.Apply();
         _childEffects.Add(destEffect);
 
-        // 현재 세대 캡처 후 불복종 감시 코루틴 시작
-        int myGen = _watchGeneration;
-        StartCoroutine(WatchDisobedience(myGen));
+        TransitionTo(ObeyState.WatchingObedience);
     }
 
-    private IEnumerator WatchDisobedience(int myGen)
+    private void HandleDisobedience()
     {
-        // Phase 1: 기물이 이동할 때까지 무한 대기 (플레이어 응답 시간 제한 없음)
-        while (enterPiece != null && enterPiece.CanMovePos.Count > 0)
-            yield return null;
-
-        // Phase 2: AI 이동 완료 후 플레이어 턴 CanMovePos가 갱신될 때까지 대기
-        int phase2 = 600;
-        while (enterPiece != null && enterPiece.CanMovePos.Count == 0 && phase2-- > 0)
-            yield return null;
-
-        // 이미 FulfillCommand가 호출되어 세대가 바뀌었으면 종료
-        if (myGen != _watchGeneration) yield break;
-
-        if (enterPiece == null) yield break; // 기물이 잡혔으면 종료
-
-        // 명령 불복종 → 모든 효과 제거
         Debug.Log($"[ObeyOrder] {enterPiece.name} 이(가) 명령을 불복종했습니다. 효과 제거!");
         Revert();
     }
 
+    // ── 명령 이행 처리 ──────────────────────────────────────────
     public void FulfillCommand(Piece piece)
     {
         if (piece != enterPiece) return;
 
-        // 세대 증가 → 현재 실행 중인 WatchDisobedience 무효화
-        _watchGeneration++;
         ObeyCount++;
         CleanupChildEffects();
+        Debug.Log($"[ObeyOrder] {piece.name} 명령 이행 #{ObeyCount}");
 
         if (ObeyCount >= 3)
         {
@@ -140,10 +166,11 @@ public class ObeyOrderEffect : TileEffector
             return;
         }
 
-        // 다음 명령 목적지 표기
-        StartCoroutine(PlaceDestEffect());
+        // 다음 목적지 대기 상태로 전환 (구독은 TransitionTo가 관리)
+        TransitionTo(ObeyState.WaitingForDest);
     }
 
+    // ── 헬퍼 ────────────────────────────────────────────────────
     private void CleanupChildEffects()
     {
         foreach (TileEffector e in _childEffects)
