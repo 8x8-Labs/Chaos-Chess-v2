@@ -2,9 +2,13 @@ public class Chancellor : Piece
 {
     public override string GetFen()
     {
-        if (Color == PieceColor.White)
-            return "Y";
+        if (FenOverride != null)
+            return FenOverride;
         else
-            return "y";
+        {
+            bool Upper = Color == PieceColor.White;
+            if (Upper) return "Y";
+            else return "y";
+        }
     }
 }

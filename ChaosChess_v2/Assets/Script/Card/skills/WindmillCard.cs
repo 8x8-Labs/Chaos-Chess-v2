@@ -45,5 +45,4 @@ public class WindmillEffector : PieceEffector
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }
-
 }

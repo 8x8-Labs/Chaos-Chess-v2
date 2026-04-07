@@ -311,6 +311,9 @@ public class BoardManager : MonoBehaviour
 
         Vector3Int from = piece.Pos;
 
+        if (!CanMoveToTile(piece, from, target))
+            return true; // 기물 이동을 안하고 턴을 넘김
+
         Vector3Int prevEP = enPassantPos;
         enPassantPos = new Vector3Int(-1, -1, -1);
 
@@ -613,6 +616,19 @@ public class BoardManager : MonoBehaviour
         return halfmoveClock;
     }
 
+    private bool CanMoveToTile(Piece piece, Vector3Int from, Vector3Int to)
+    {
+        if (!tileEffectors.TryGetValue(to, out var list)) return true;
+
+        foreach (var effector in list)
+        {
+            if (!effector.CanPieceEnter(piece, from, to))
+                return false;
+        }
+
+        return true;
+    }
+
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
     {
         if (!tileEffectors.TryGetValue(pos, out var list))
@@ -667,6 +683,18 @@ public class BoardManager : MonoBehaviour
     public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0', bool useTurn = false)
     {
         Vector3Int from = piece.Pos;
+
+        if (!CanMoveToTile(piece, from, target))
+        {
+            if (useTurn)
+            {
+                GameManager.Instance.NextTurn();
+            }
+            else
+            {
+                RefreshMoves();
+            }
+        }
 
         TriggerTileExit(from, piece);
         board[from.x, from.y] = null;
