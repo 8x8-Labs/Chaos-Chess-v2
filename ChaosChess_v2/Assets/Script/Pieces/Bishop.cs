@@ -3,9 +3,7 @@ public class Bishop : Piece
     public override string GetFen()
     {
         if (MoveFenOverride != null)
-            return Color == PieceColor.White
-                ? MoveFenOverride.ToUpper()
-                : MoveFenOverride.ToLower();
+            return MoveFenOverride;
 
         if (FenOverride != null)
             return FenOverride;
