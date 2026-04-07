@@ -3337,7 +3337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9cc2e5015fe2048b92607aa98cc663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardType: 0
+  cardType: 1
 --- !u!114 &1507320768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3347,10 +3347,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aec14787697ce394b8e4a9539ab8cc15, type: 3}
+  m_Script: {fileID: 11500000, guid: 1bc062f30433c574ea6dbd0cb18ad029, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: 55fd9a77e834ce14285295f219051ec0, type: 2}
+  DataSO: {fileID: 11400000, guid: c0c4c83bbe40098408b3997d33b14fde, type: 2}
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
@@ -3758,7 +3758,7 @@ MonoBehaviour:
   - {fileID: -3018244367335226746, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   - {fileID: 8280881136048196920, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   - {fileID: -695501977606394889, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
-  - {fileID: 2814865572437366622, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: 2868539044483428322, guid: 5ab4d9c5554412643afbf35f49100d06, type: 3}
   WhiteSprites:
   - {fileID: 6566083228530636619, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   - {fileID: 8601286217340042903, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
@@ -3769,7 +3769,7 @@ MonoBehaviour:
   - {fileID: -4919676682383813925, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   - {fileID: 5841647090300243477, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   - {fileID: -2604665796007036816, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
-  - {fileID: 2814865572437366622, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - {fileID: -5107677499478342438, guid: 5ab4d9c5554412643afbf35f49100d06, type: 3}
   IsGameInput: 1
 --- !u!114 &1629911494
 MonoBehaviour:
