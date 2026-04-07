@@ -33,7 +33,9 @@ public class ObeyOrderEffect : TileEffector
 {
     public int ObeyCount = 0;
     private Piece enterPiece = null;
-    private readonly List<ObeyDestEffect> _destEffects = new List<ObeyDestEffect>();
+    public Piece EnterPiece => enterPiece;
+    private bool _commandFulfilled = false;
+    private readonly List<TileEffector> _childEffects = new List<TileEffector>();
 
     public override void Apply()
     {
@@ -42,7 +44,7 @@ public class ObeyOrderEffect : TileEffector
 
     public override void Revert()
     {
-        CleanupDestEffects();
+        CleanupChildEffects();
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
@@ -79,22 +81,50 @@ public class ObeyOrderEffect : TileEffector
         List<Vector3Int> moves = enterPiece.CanMovePos;
         if (moves.Count == 0) yield break;
 
-        Vector3Int pos = moves[Random.Range(0, moves.Count)];
-        Debug.Log("다음 위치 : " + pos);
-        GameObject host = new GameObject($"ObeyDestEffect_{pos}");
-        ObeyDestEffect destEffect = host.AddComponent<ObeyDestEffect>();
-        destEffect.Init(pos, -1);
+        // 랜덤 목적지 선택
+        int destIdx = Random.Range(0, moves.Count);
+        Vector3Int destPos = moves[destIdx];
+        Debug.Log("다음 위치 : " + destPos);
+
+        // 목적지 칸에 ObeyDestEffect 등록
+        GameObject destHost = new GameObject($"ObeyDestEffect_{destPos}");
+        ObeyDestEffect destEffect = destHost.AddComponent<ObeyDestEffect>();
+        destEffect.Init(destPos, -1);
         destEffect.Parent = this;
         destEffect.Apply();
-        _destEffects.Add(destEffect);
+        _childEffects.Add(destEffect);
+
+        // 불복종 감지 코루틴 시작
+        _commandFulfilled = false;
+        StartCoroutine(WatchDisobedience());
+    }
+
+    private IEnumerator WatchDisobedience()
+    {
+        // Phase 1: 기물이 이동할 때까지 무한 대기 (플레이어 응답 시간 제한 없음)
+        while (enterPiece != null && enterPiece.CanMovePos.Count > 0)
+            yield return null;
+
+        // Phase 2: AI 이동 완료 후 플레이어 턴 CanMovePos가 갱신될 때까지 대기
+        int phase2 = 600;
+        while (enterPiece != null && enterPiece.CanMovePos.Count == 0 && phase2-- > 0)
+            yield return null;
+
+        if (_commandFulfilled) yield break;  // 명령 복종 → 아무것도 안 함
+        if (enterPiece == null) yield break; // 기물 사라짐 (예: 잡힘)
+
+        // 명령 불복종 → 모든 효과 제거
+        Debug.Log($"[ObeyOrder] {enterPiece.name} 이(가) 명령을 불복종했습니다. 효과 제거!");
+        Revert();
     }
 
     public void FulfillCommand(Piece piece)
     {
         if (piece != enterPiece) return;
 
+        _commandFulfilled = true;
         ObeyCount++;
-        CleanupDestEffects();
+        CleanupChildEffects();
 
         if (ObeyCount >= 3)
         {
@@ -109,13 +139,13 @@ public class ObeyOrderEffect : TileEffector
         StartCoroutine(PlaceDestEffect());
     }
 
-    private void CleanupDestEffects()
+    private void CleanupChildEffects()
     {
-        foreach (ObeyDestEffect e in _destEffects)
+        foreach (TileEffector e in _childEffects)
         {
             if (e != null) e.Revert();
         }
-        _destEffects.Clear();
+        _childEffects.Clear();
     }
 }
 
