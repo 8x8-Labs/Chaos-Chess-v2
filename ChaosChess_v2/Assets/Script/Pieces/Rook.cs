@@ -2,9 +2,13 @@ public class Rook : Piece
 {
     public override string GetFen()
     {
-        if (Color == PieceColor.White)
-            return "R";
+        if (FenOverride != null)
+            return FenOverride;
         else
-            return "r";
+        {
+            bool Upper = Color == PieceColor.White;
+            if (Upper) return "R";
+            else return "r";
+        }
     }
 }
