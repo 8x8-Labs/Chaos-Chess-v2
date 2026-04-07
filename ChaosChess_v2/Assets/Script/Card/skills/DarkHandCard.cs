@@ -22,7 +22,25 @@ public class DarkHandCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> pieces = args.Targets;
-        // TODO: 선택된 기물을 2턴간 이동 불가(고정) 상태로 처리
+        Piece piece = args.Targets[0];
+        var effector = CreatePieceEffector<DarkHandEffector>(piece);
+        effector.Apply();
+        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
+    }
+}
+
+public class DarkHandEffector : PieceEffector
+{
+    protected override void OnApply()
+    {
+        target.FenOverride = "a";
+        BoardManager.Instance.RefreshMoves();
+    }
+
+    protected override void OnRevert()
+    {
+        target.FenOverride = null;
+        BoardManager.Instance.RefreshMoves();
+        Destroy(this);
     }
 }
