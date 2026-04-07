@@ -24,16 +24,21 @@ public class CheckmateDeclarationEffect : GameGlobalEffector
     private int currentStack = 0;
     public override void Apply()
     {
-        GameManager.Instance.OnPlayerTurnStarted += playerCheck;
+        GameManager.Instance.OnPlayerTurnStarted += PlayerCheck;
     }
 
     public override void Revert()
     {
-        GameManager.Instance.OnPlayerTurnStarted -= playerCheck;
+        GameManager.Instance.OnPlayerTurnStarted -= PlayerCheck;
         Destroy(gameObject);
     }
 
-    public void playerCheck()
+    public void OnDestroy()
+    {
+        Revert();
+    }
+
+    public void PlayerCheck()
     {
         currentStack++;
         if (currentStack > MaxTurn)
