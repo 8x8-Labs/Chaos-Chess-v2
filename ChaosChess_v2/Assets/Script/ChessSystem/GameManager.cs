@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour
     private BoardUI boardUI;
 
     private Piece selectedPiece;
+    private int extraPlayerActions = 0;
+    private Piece lockedPiece = null;
 
     private void Awake()
     {
@@ -84,10 +86,18 @@ public class GameManager : MonoBehaviour
         if (!IsPlayerTurn) return;
         if (!BoardManager.Instance.IsInside(pos)) return;
 
+        // 파괴된 기물이 잠겨있으면 잠금 해제
+        if (lockedPiece != null && !lockedPiece)
+        {
+            extraPlayerActions = 0;
+            lockedPiece = null;
+        }
+
         Piece piece = BoardManager.Instance.GetPiece(pos);
 
         if (piece != null && piece.Color == turnColor && !(piece is Wall))
         {
+            if (lockedPiece != null && piece != lockedPiece) return;
             SelectPiece(piece);
             boardUI.DrawSelectTile(pos);
         }
@@ -96,6 +106,24 @@ public class GameManager : MonoBehaviour
             MoveSelected(pos);
             boardUI.DeleteSelectTile();
         }
+    }
+
+    /// <summary>현재 플레이어에게 추가 행동권을 부여합니다. piece가 지정되면 해당 기물만 움직일 수 있습니다.</summary>
+    public void GrantExtraPlayerAction(Piece piece = null)
+    {
+        extraPlayerActions++;
+        lockedPiece = piece;
+    }
+
+    private void RefreshPlayerTurn()
+    {
+        BoardManager.Instance.UpdateFEN();
+        string fen = BoardManager.Instance.GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        EvaluateGameState(moves);
+        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+        OnPlayerTurnStarted?.Invoke();
     }
 
     private void HandlePromotion(Piece pawn, Vector3Int pos)
@@ -179,9 +207,17 @@ public class GameManager : MonoBehaviour
             if (!IsGameInput)
                 return;
 
-            NextTurn();
-
-            RequestAIMove();
+            if (extraPlayerActions > 0)
+            {
+                extraPlayerActions--;
+                RefreshPlayerTurn();
+            }
+            else
+            {
+                lockedPiece = null;
+                NextTurn();
+                RequestAIMove();
+            }
         }
     }
 
