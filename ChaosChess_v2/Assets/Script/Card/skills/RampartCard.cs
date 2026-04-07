@@ -23,6 +23,10 @@ public class RampartCard : CardData, ITileCard
     public void Execute(CardEffectArgs args = null)
     {
         List<Vector3Int> tiles = args.TargetPos;
-        // TODO: 선택된 칸에 벽 생성, 기물이 넘어갈 수 없도록 처리, 공격 시 벽 파괴 처리
+        PieceColor color = GameManager.Instance.turnColor;
+        foreach (Vector3Int pos in tiles)
+        {
+            BoardManager.Instance.ChangePiece(pos, color, 'a');
+        }
     }
 }
