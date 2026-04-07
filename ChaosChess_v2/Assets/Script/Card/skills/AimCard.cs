@@ -22,7 +22,18 @@ public class AimCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> pieces = args.Targets;
-        // TODO: 선택된 폰에게 이번 턴 전방 사선 이동 1회 허용 처리
+        Piece piece = args.Targets[0];
+        piece.MoveFenOverride = "t";
+        BoardManager.Instance.RefreshMoves();
+
+        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, () =>
+        {
+            ResetMoveFen(piece);
+        });
+    }
+    public void ResetMoveFen(Piece piece)
+    {
+        piece.MoveFenOverride = null;
+        BoardManager.Instance.RefreshMoves();
     }
 }

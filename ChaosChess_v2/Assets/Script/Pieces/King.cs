@@ -2,6 +2,9 @@ public class King : Piece
 {
     public override string GetFen()
     {
+        if (MoveFenOverride != null)
+            return MoveFenOverride;
+
         if (FenOverride != null)
             return FenOverride;
         else

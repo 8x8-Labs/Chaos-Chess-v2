@@ -1,7 +1,12 @@
+using UnityEngine;
+
 public class Pawn : Piece
 {
     public override string GetFen()
     {
+        if (MoveFenOverride != null)
+            return MoveFenOverride;
+
         if (FenOverride != null)
             return FenOverride;
         else
