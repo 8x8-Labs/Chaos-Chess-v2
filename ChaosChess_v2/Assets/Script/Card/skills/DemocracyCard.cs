@@ -10,7 +10,6 @@ public class DemocracyCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
-        Debug.Log("카드 사용");
         DemocracyEffect effect =
             CreateGlobalEffector<DemocracyEffect>();
 
@@ -57,10 +56,11 @@ public class DemocracyEffect : GlobalEffector
                 }
             }
         }
-        Debug.Log($"폰 개수: {pawnCount}, 기타 기물 개수: {otherCount}");
+
         if (pawnCount >= 2 * otherCount)
         {
             GameManager.Instance.OnSurrender(GameManager.Instance.EnemyColor);
+            OnRevert();
         }
     }
 }
