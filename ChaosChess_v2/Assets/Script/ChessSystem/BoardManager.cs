@@ -393,6 +393,10 @@ public class BoardManager : MonoBehaviour
         }
 
         TriggerTileEnter(target, piece);
+
+        foreach (var eff in piece.GetComponents<IPieceEffect>())
+            eff.OnPieceMove(target);
+
         return true;
     }
 
