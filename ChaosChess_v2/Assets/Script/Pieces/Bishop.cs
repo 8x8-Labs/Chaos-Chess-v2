@@ -2,9 +2,13 @@ public class Bishop : Piece
 {
     public override string GetFen()
     {
-        if (Color == PieceColor.White)
-            return "B";
+        if (FenOverride != null)
+            return FenOverride;
         else
-            return "b";
+        {
+            bool Upper = Color == PieceColor.White;
+            if (Upper) return "B";
+            else return "b";
+        }
     }
 }

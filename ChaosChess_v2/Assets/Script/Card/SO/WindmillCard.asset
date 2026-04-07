@@ -20,7 +20,7 @@ MonoBehaviour:
   CardTier: 2
   PieceType: 12
   PieceTargetColor: 0
-  PieceLimitTurn: -1
+  PieceLimitTurn: 2
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
