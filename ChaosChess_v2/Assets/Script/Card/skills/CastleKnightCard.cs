@@ -27,5 +27,8 @@ public class CastleKnightCard : CardData, IPieceCard
         // pieces[0]: 나이트, pieces[1]: 룩
         // TODO: 나이트를 룩 위치로 이동, 두 기물을 챈슬러(커스텀 기물)로 합체 승격
         //       나이트 원래 자리는 빈 칸으로 처리, 턴 소모 없음
+
+        BoardManager.Instance.DestroyPiece(pieces[0]);
+        BoardManager.Instance.ChangePiece(pieces[1].Pos, pieces[1].Color, 's');
     }
 }
