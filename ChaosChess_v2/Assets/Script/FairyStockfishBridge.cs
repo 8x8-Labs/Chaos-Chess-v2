@@ -186,7 +186,7 @@ public class FairyStockfishBridge : MonoBehaviour
             }
         }
 
-        UnityEngine.Debug.Log("[Fairy] 합법적인 수: " + moves.Count + "개");
+        // UnityEngine.Debug.Log("[Fairy] 합법적인 수: " + moves.Count + "개");
         return moves.ToArray();
 #endif
     }
