@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -14,7 +14,6 @@ public class ChaoticKnightCard : CardData, IPieceCard
         selector = FindFirstObjectByType<PieceSelector>();
     }
 
-    [ContextMenu("Execute")]
     public void LoadPieceSelector()
     {
         if (selector == null) selector = FindFirstObjectByType<PieceSelector>();

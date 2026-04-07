@@ -13,6 +13,19 @@ public class Piece : MonoBehaviour
     // 무언갈 잡을때 효과 발동
     private List<Action<Vector3Int>> onCaptureEffects = new();
 
+    /// <summary>1회 죽음 무효화 플래그. AI가 이 기물을 잡으려 하면 취소됩니다.</summary>
+    public bool IsInvincible { get; private set; } = false;
+
+    public void SetInvincible()
+    {
+        IsInvincible = true;
+    }
+
+    public void ConsumeInvincibility()
+    {
+        IsInvincible = false;
+    }
+
     [SerializeField] protected Sprite WhitePiece;
     [SerializeField] protected Sprite BlackPiece;
     [SerializeField] protected PieceType type;
@@ -23,11 +36,18 @@ public class Piece : MonoBehaviour
     [SerializeField] private Vector3Int pos;
     private string _fenOverride;
 
-    protected List<Vector3Int> CanMovePos;
+    protected List<Vector3Int> canMovePos;
 
     private MaterialPropertyBlock mpb;
     private static readonly int OutlineThickId = Shader.PropertyToID("_OutlineThick");
 
+    public List<Vector3Int> CanMovePos
+    {
+        get
+        {
+            return canMovePos;
+        }
+    }
     public PieceColor Color
     {
         get { return color; }
@@ -95,7 +115,7 @@ public class Piece : MonoBehaviour
 
     public virtual bool CanMoveTo(BoardManager board, Vector3Int target)
     {
-        foreach (Vector3Int pos in CanMovePos)
+        foreach (Vector3Int pos in canMovePos)
         {
             if (target == pos)
             {
@@ -107,12 +127,12 @@ public class Piece : MonoBehaviour
 
     public void ResetCanMovePos()
     {
-        CanMovePos = new List<Vector3Int>();
+       canMovePos = new List<Vector3Int>();
     }
 
     public void AddCanMovePos(Vector3Int pos)
     {
-        CanMovePos.Add(pos);
+        canMovePos.Add(pos);
     }
 
     public virtual void Move(Vector3Int target, Vector3 WorldPos)
