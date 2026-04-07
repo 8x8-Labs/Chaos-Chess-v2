@@ -23,11 +23,11 @@ Effector (abstract)
 |---|---|
 | `IsExpired` | 효과가 만료됐는지 여부 (`remainingTurns == 0`) |
 | `IsPermanent` | 영구 효과 여부 (`remainingTurns < 0`) |
-| `Apply()` | **sealed** — `GameManager.OnAnyTurnChanged`에 구독 후 `OnApply()` 호출 |
-| `Revert()` | **sealed** — `GameManager.OnAnyTurnChanged` 구독 해제 후 `OnRevert()` 호출 |
+| `Apply()` | **sealed** — `GameManager.OnTurnChanged`에 구독 후 `OnApply()` 호출 |
+| `Revert()` | **sealed** — `GameManager.OnTurnChanged` 구독 해제 후 `OnRevert()` 호출 |
 | `OnApply()` | **abstract** — 서브클래스에서 훅/버프를 부착하는 실제 구현 |
 | `OnRevert()` | **abstract** — 서브클래스에서 훅/버프를 해제하는 실제 구현 (`Destroy(this)` 포함) |
-| `OnTurnChanged()` | 매 턴(`GameManager.NextTurn()`) 자동 호출 → 카운트 감소, 만료 시 `Revert()` 자동 호출 |
+| `OnTurnChanged()` | 매 턴(플레이어 차례) 자동 호출 → 카운트 감소, 만료 시 Revert() 자동 호출 |
 
 > `Apply()` / `Revert()`는 sealed입니다. 서브클래스에서는 반드시 `OnApply()` / `OnRevert()`를 override하세요.
 
