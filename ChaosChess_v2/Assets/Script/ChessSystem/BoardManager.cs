@@ -680,6 +680,18 @@ public class BoardManager : MonoBehaviour
     {
         Vector3Int from = piece.Pos;
 
+        if (!CanMoveToTile(piece, from, target))
+        {
+            if (useTurn)
+            {
+                GameManager.Instance.NextTurn();
+            }
+            else
+            {
+                RefreshMoves();
+            }
+        }
+
         TriggerTileExit(from, piece);
         board[from.x, from.y] = null;
 
