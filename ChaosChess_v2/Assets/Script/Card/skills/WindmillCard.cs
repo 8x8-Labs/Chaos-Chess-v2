@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -33,13 +33,13 @@ public class WindmillCard : CardData, IPieceCard
 public class WindmillEffector : PieceEffector
 {
     public string change;
-    public override void Apply()
+    protected override void OnApply()
     {
         target.FenOverride = change;
         BoardManager.Instance.RefreshMoves();
     }
 
-    public override void Revert()
+    protected override void OnRevert()
     {
         target.FenOverride = null;
         BoardManager.Instance.RefreshMoves();
