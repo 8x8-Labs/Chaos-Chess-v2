@@ -95,19 +95,3 @@ public abstract class GlobalEffector : Effector
         return typeMatch && colorMatch;
     }
 }
-
-/// <summary>
-/// 게임 전역에 들어가는 효과
-/// </summary>
-public abstract class GameGlobalEffector : Effector
-{
-    protected PieceType type;   // 효과가 적용될 기물 타입 (Flags 조합 가능, None = 모든 타입)
-    protected ApplyType color;  // 적용될 기물 색상
-
-    public void Init(PieceType type, ApplyType color, int duration = -1)
-    {
-        this.type = type;
-        this.color = color;
-        SetDuration(duration);
-    }
-}

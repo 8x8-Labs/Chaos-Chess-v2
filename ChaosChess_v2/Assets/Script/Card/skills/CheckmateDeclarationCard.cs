@@ -11,14 +11,14 @@ public class CheckmateDeclarationCard : CardData, ICard
     public void Execute(CardEffectArgs args = null)
     {
         CheckmateDeclarationEffect effect = 
-            CreateGameGlobalEffector<CheckmateDeclarationEffect>();
+            CreateGlobalEffector<CheckmateDeclarationEffect>();
 
         effect.MaxTurn = DataSO.LimitTurn;
         effect.Apply();
     }
 }
 
-public class CheckmateDeclarationEffect : GameGlobalEffector
+public class CheckmateDeclarationEffect : GlobalEffector
 {
     public int MaxTurn;
     private int currentStack = 0;
