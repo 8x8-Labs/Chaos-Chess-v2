@@ -73,7 +73,7 @@ public class BlessingEffect : TileEffector
                 Promote(currentPiece);
 
                 isScheduled = false;
-                SchedulePromotion(BoardManager.Instance.GetPiece(piece.Pos));
+                SchedulePromotion(BoardManager.Instance.GetPiece(tilePos));
             }
             else
             {
