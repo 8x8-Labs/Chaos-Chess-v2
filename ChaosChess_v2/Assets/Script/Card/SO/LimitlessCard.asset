@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: LimitlessCard
+  m_EditorClassIdentifier: 
+  CardName: "\uBB34\uD558\uD55C"
+  CardImage: {fileID: 0}
+  CardDescription: "\uBC18\uACBD 1\uCE78 \uB0B4\uB85C \uC5B4\uB5A0\uD55C \uAE30\uBB3C\uB3C4
+    \uC811\uADFC/\uC774\uB3D9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. (\uC774 \uAE30\uBBF9\uC774
+    \uC801\uC6A9\uB41C \uAE30\uBB3C\uC740 \uC6C0\uC9C1\uC77C \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.)
+    \u2190 \uBB34\uC81C\uD55C, \uC0C1\uB300/\uC544\uAD70\uC774 \uB4E4\uC5B4\uC624\uB824\uACE0
+    \uC2DC\uB3C4\uD558\uBA74 \uC218\uB97C \uCDE8\uC18C\uD558\uACE0 \uD574\uC81C."
+  Type: 0
+  CardTier: 1
+  PieceType: -1
+  PieceTargetColor: 0
+  PieceLimitTurn: -1
+  RequiredPieceCount: 1
+  TileCount: 0
+  MaintainTurn: 0
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0
