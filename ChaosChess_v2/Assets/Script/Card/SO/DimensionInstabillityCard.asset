@@ -12,18 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
   m_Name: DimensionInstabillityCard
   m_EditorClassIdentifier: 
-  CardName: "\uCC28\uC6D0 \uAD50\uB780"
+  CardName: "\uCC28\uC6D0 \uBD88\uC548"
   CardImage: {fileID: 0}
-  CardDescription: "\uCC28\uC6D0\uAD50\uB780"
+  CardDescription: "\uB098\uC774\uD2B8\uAC00 \uC774\uB3D9 \uD560 \uB54C, \uB79C\uB364\uD55C
+    \uACBD\uC6B0\uC758 \uC218\uB85C \uAC00\uC0C1\uC758 \uB098\uC774\uD2B8\uAC00 \uC774\uB3D9\uD569\uB2C8\uB2E4.
+    \uB9CC\uC57D \uB098\uC774\uD2B8\uAC00 \uC7A1\uD790 \uC2DC \uAC00\uC0C1\uC758
+    \uB098\uC774\uD2B8\uC758 \uC704\uCE58\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 0
-  PieceType: 15
-  TargetColor: 1
-  PieceLimitTurn: -1
-  RequiredPieceCount: 2
+  CardTier: 3
+  PieceType: 2
+  PieceTargetColor: 0
+  PieceLimitTurn: 1
+  RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
-  _TargetColor: 0
+  GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
   NeedAdditionalDescription: 0
