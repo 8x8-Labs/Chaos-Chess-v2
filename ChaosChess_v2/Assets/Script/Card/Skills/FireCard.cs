@@ -1,6 +1,6 @@
 ﻿/// <summary>
 /// 불바다
-/// 현재 타일에 진입한 기물이 1턴 뒤 제거됩니다.
+/// 현재 타일에 진입한 기물이 2턴 뒤 제거됩니다.
 /// </summary>
 public class FireCard : CardData, ITileCard
 {
