@@ -458,12 +458,11 @@ public class BoardManager : MonoBehaviour
         if (piece == null) return;
 
         board[piece.Pos.x, piece.Pos.y] = null;
-
         piece.GetComponent<IPieceEffect>()?.OnPieceCaptured();
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
 
-        if(refresh) RefreshMoves();
+        if (refresh) RefreshMoves();
     }
 
     ///<summary> 기물들을 지웁니다 </summary> 
