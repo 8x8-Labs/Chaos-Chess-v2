@@ -182,6 +182,8 @@ public class Piece : MonoBehaviour
     {
         var copy = new List<Action<Vector3Int>>(onCaptureEffects);
 
+        GetComponent<IPieceEffect>()?.OnPieceCapture();
+
         foreach (var effect in copy)
         {
             effect?.Invoke(Pos);

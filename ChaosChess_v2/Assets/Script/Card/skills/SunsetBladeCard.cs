@@ -59,6 +59,6 @@ public class SunsetBladeEffector : PieceEffector
             var p = BoardManager.Instance.GetPiece(target.Pos + dir);
             if(p != null) pieces.Add(p);
         }
-        BoardManager.Instance.DestroyPiece(pieces);
+        BoardManager.Instance.DestroyPieces(pieces);
     }
 }
