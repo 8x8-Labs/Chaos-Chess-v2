@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -9,17 +9,20 @@ public class MutinyCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
-        Piece queen = BoardManager.Instance.GetPiece<Queen>(
-            GameManager.Instance.EnemyColor).FirstOrDefault();
+        List<Queen> queens = BoardManager.Instance.GetPiece<Queen>
+            (GameManager.Instance.EnemyColor);
 
-        if(queen == null)
+        if(queens == null)
         {
             Debug.Log("상대 퀸이 없습니다!");
             return;
         }
 
-        MutinyEffect effect = CreatePieceEffector<MutinyEffect>(queen);
-        effect.Apply();
+        foreach(Queen p in queens)
+        {
+            MutinyEffect effect = CreatePieceEffector<MutinyEffect>(p);
+            effect.Apply();
+        }
     }
 }
 
