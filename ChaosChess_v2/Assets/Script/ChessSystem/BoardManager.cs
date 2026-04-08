@@ -477,7 +477,28 @@ public class BoardManager : MonoBehaviour
         RefreshMoves();
     }
 
-    ///<summary> UCI 좌표를 Vector3Int로 바꿉니다 </summary> 
+    /// <summary>기물을 보드 배열과 리스트에서 제거합니다. GameObject는 유지됩니다.</summary>
+    public void HidePiece(Piece piece)
+    {
+        if (piece == null) return;
+        board[piece.Pos.x, piece.Pos.y] = null;
+        Pieces.Remove(piece);
+        piece.gameObject.SetActive(false);
+    }
+
+    /// <summary>HidePiece로 숨긴 기물을 원래 위치(piece.Pos)에 복원합니다.</summary>
+    public void RestorePiece(Piece piece)
+    {
+        if (piece == null) return;
+        board[piece.Pos.x, piece.Pos.y] = piece;
+        if (!Pieces.Contains(piece)) Pieces.Add(piece);
+        piece.gameObject.SetActive(true);
+    }
+
+    /// <summary>캐슬링 상태를 FEN 문자열로 복원합니다. 투기장 Timeout 복원에 사용됩니다.</summary>
+    public void SetCastlingFromFEN(string castlingFen) => castling.SetFen(castlingFen);
+
+    ///<summary> UCI 좌표를 Vector3Int로 바꿉니다 </summary>
     public Vector3Int UCIToGrid(string sq)
     {
         int x = sq[0] - 'a'; // 'a'~'h' → 0~7
