@@ -11,7 +11,7 @@ public class HoneytrapCard : CardData, ICard
     {
         List<Piece> pieces = BoardManager.Instance.GetAllPieces();
         List<Piece> queens = new();
-        Piece king = new();
+        Piece king = null;
         PieceColor pcolor = GameManager.Instance.turnColor;
         for (int i = 0; i < pieces.Count; i++)
         {
@@ -22,7 +22,7 @@ public class HoneytrapCard : CardData, ICard
         }
         if (queens.Count == 0)
             return;
-        Piece queen = queens[UnityEngine.Random.Range(0, queens.Count-1) ];
+        Piece queen = queens[UnityEngine.Random.Range(0, queens.Count) ];
         int[] dx = { -1, -1, -1, 0, 1, 1, 1, 0 };
         int[] dy = { -1, 0, 1, 1, 1, 0, -1, -1 };
         int minv = 1000;
