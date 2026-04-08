@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Security.Authentication.ExtendedProtection;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 /// <summary>
@@ -35,11 +37,31 @@ public class DimensionInstabillityEffector : PieceEffector
     bool flag = false;
     protected override void OnApply()
     {
+        cells = GetMovableCells(target);
+    }
+    public override void OnPieceMove(Vector3Int dest)
+    {
+        Debug.Log("move");
+        flag = true;
+        if (cells.Contains(dest))
+        {
+            cells.Remove(dest);
+        }
+    }
+    public override void OnPieceCaptured()
+    {
+        Debug.Log(cells.Count);
+        if (cells.Count == 0)
+            return;
+        if (flag)
+        {
+            Vector3Int pos = cells[Random.Range(0, cells.Count)];
+            BoardManager.Instance.ChangePiece(pos, target.Color, 'n');
+        }
     }
     protected override void OnRevert()
     {
-        target.FenOverride = null;
-        BoardManager.Instance.RefreshMoves();
+        Debug.Log("revert");
         Destroy(this);
     }
     private List<Vector3Int> GetMovableCells(Piece knight)
@@ -66,7 +88,9 @@ public class DimensionInstabillityEffector : PieceEffector
     private bool IsOccupied(Vector3Int candidate)
     {
         Piece p = BoardManager.Instance.GetPiece(candidate);
-        return p != null;
+        if (p == null)
+            return false;
+        return p.Color == target.Color;
     }
 
 }
