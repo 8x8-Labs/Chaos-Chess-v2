@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: ThunderclapFlashCard
+  m_EditorClassIdentifier: 
+  CardName: "\uBCBD\uB825\uC77C\uC12C"
+  CardImage: {fileID: 0}
+  CardDescription: "\uC120\uD0DD\uD55C \uB8E9\uC774 \uD55C \uD134 \uB3D9\uC548 \uC9C0\uB098\uAC04
+    \uC790\uB9AC\uC758 \uBAA8\uB4E0 \uAE30\uBB3C(\uBCF8\uC778\uAE30\uBB3C \uD3EC\uD568)\uC774
+    \uC8FD\uC2B5\uB2C8\uB2E4. \u2190 4\uCE78 \uC218 \uC81C\uD55C"
+  Type: 0
+  CardTier: 2
+  PieceType: 8
+  PieceTargetColor: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 1
+  TileCount: 0
+  MaintainTurn: 0
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0
