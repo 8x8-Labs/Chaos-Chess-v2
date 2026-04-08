@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
-  m_Name: GodsMoveCard 1
+  m_Name: HoneyTrapCard
   m_EditorClassIdentifier: 
-  CardName: "\uC2E0\uC758 \uC218"
+  CardName: "\uBBF8\uC778\uACC4"
   CardImage: {fileID: 0}
-  CardDescription: "\uC120\uD0DD \uAE30\uBB3C\uC744 \uD55C \uB2E8\uACC4 \uC704\uB85C
-    \uC2B9\uACA9\uC2DC\uD0A8\uB2E4."
-  Type: 0
+  CardDescription: "\uD0B9\uC744 \uC544\uAD70\uC758 \uD038 \uCABD\uC73C\uB85C \uB04C\uC5B4\uB2F9\uAE34\uB2E4."
+  Type: 2
+  CardTier: 0
   PieceType: 15
   PieceTargetColor: 0
   PieceLimitTurn: -1

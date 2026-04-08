@@ -23,11 +23,9 @@ public class HoneytrapCard : CardData, ICard
         if (queens.Count == 0)
             return;
         Piece queen = queens[UnityEngine.Random.Range(0, queens.Count-1) ];
-        Debug.Log(queen.Pos);
-        Debug.Log(king.Pos);
         int[] dx = { -1, -1, -1, 0, 1, 1, 1, 0 };
         int[] dy = { -1, 0, 1, 1, 1, 0, -1, -1 };
-        float minv = 1000;
+        int minv = 1000;
         Vector3Int k = king.Pos;
         Vector3Int ans = new();
         for (int i = 0; i < 8; i++)
@@ -37,7 +35,7 @@ public class HoneytrapCard : CardData, ICard
             Vector3Int can = new Vector3Int(k.x + x, k.y + y, k.z);
             if (BoardManager.Instance.IsInside(can) && !IsOccupied(can))
             {
-                float dist = Vector3Int.Distance(k, can);
+                int dist = MDist(can, queen.Pos);
 
                 if (dist < minv)
                 {
@@ -48,8 +46,13 @@ public class HoneytrapCard : CardData, ICard
         }
         if (minv == 1000)
             return;
-        BoardManager.Instance.MovePiece(king, ans);
-
+        Debug.Log(ans);
+        Debug.Log(king.Pos);
+        BoardManager.Instance.ForceTeleport(king, ans);
+    }
+    private int MDist(Vector3Int a, Vector3Int b)
+    {
+        return Math.Abs(a.x - b.x) + Math.Abs(a.y - b.y);
     }
     private bool IsOccupied(Vector3Int candidate)
     {
