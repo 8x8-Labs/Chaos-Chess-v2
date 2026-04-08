@@ -168,6 +168,10 @@ public class GameManager : MonoBehaviour
             OnPlayerTurnStarted?.Invoke();
         }
         OnHalfTurnChanged?.Invoke();
+
+        BoardManager.Instance.RefreshMoves();
+        moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        EvaluateGameState(moves);
     }
 
     /// <summary>
