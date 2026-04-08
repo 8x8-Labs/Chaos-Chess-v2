@@ -1,4 +1,9 @@
-﻿public class MissingPromotionCard : CardData, IPieceCard
+﻿
+/// <summary>
+/// 진급누락 - 기물 전용(레어)
+/// 상대 기물(킹, 퀸 제외)을 선택해 강제로 폰으로 바꿉니다. 
+/// </summary>
+public class MissingPromotionCard : CardData, IPieceCard
 {
     private PieceSelector selector;
 

@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 텔레포트 - 기물 전용
