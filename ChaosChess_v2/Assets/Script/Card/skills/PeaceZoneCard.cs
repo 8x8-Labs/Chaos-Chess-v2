@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// 평화 협정 공간 - 타일 전용 (일반)
-/// 이 칸을 밟은 기물은 3턴동안 킹의 행마법을 가집니다.
+/// 평화 협정 공간 - 타일 전용 (고급)
+/// 선택한 칸에서 공격당할 시 공격을 1회 취소하고 칸 효과를 해제합니다.
 /// </summary>
 public class PeaceZoneCard : CardData, ITileCard
 {
