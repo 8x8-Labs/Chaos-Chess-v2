@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: PsilocybinMushroomCard
+  m_EditorClassIdentifier: 
+  CardName: "\uD658\uAC01 \uBC84\uC12F"
+  CardImage: {fileID: 0}
+  CardDescription: "\uC774 \uCE78\uC744 \uBC1F\uC740 \uAE30\uBB3C\uC740 3\uD134\uB3D9\uC548
+    \uD0B9\uC758 \uD589\uB9C8\uBC95\uC744 \uAC00\uC9D1\uB2C8\uB2E4."
+  Type: 1
+  CardTier: 0
+  PieceType: 0
+  PieceTargetColor: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 0
+  TileCount: 1
+  MaintainTurn: -1
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0
