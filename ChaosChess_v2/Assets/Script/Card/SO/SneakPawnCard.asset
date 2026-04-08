@@ -12,15 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
   m_Name: SneakPawnCard
   m_EditorClassIdentifier: 
-  CardName: 
+  CardName: "\uC554\uC2B5\uC758 \uD3F0"
   CardImage: {fileID: 0}
-  CardDescription: 
+  CardDescription: "\uD3F0 \uAE30\uBB3C\uC774 \uB098\uC774\uD2B8 \uAE30\uBB3C\uC758
+    \uC774\uB3D9 \uBC29\uC2DD\uC744 1\uD68C \uAC00\uC9C0\uAC8C \uB41C\uB2E4."
   Type: 0
-  CardTier: 0
-  PieceType: 0
+  CardTier: 2
+  PieceType: 1
   PieceTargetColor: 0
-  PieceLimitTurn: 0
-  RequiredPieceCount: 0
+  PieceLimitTurn: 1
+  RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
   RestrictTiles: 0
