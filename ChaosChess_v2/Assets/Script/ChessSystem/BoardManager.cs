@@ -136,9 +136,12 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>문자열 FEN의 값을 이용해서 Board와 Pieces를 초기화합니다</summary> 
-    public void LoadFEN()
+    public void LoadFEN(string fenOverride = null)
     {
+        if (fenOverride != null)
+            FEN = fenOverride;
         Pieces.Clear();
+
         board = new Piece[8, 8];
 
         int x = 0;

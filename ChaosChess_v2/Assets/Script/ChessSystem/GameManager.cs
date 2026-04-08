@@ -25,6 +25,8 @@ public class GameManager : MonoBehaviour
     public event Action OnTurnChanged;
     /// <summary>반 턴 종료 직후 발행됩니다.</summary>
     public event Action OnHalfTurnChanged;
+    /// <summary>시간역행 카드 전용 이벤트 입니다.</summary>
+    public event Action<Action, Action> OnTimeReversalRequired;
     public PieceColor turnColor
     {
         get
@@ -76,6 +78,8 @@ public class GameManager : MonoBehaviour
         uiManager = FindFirstObjectByType<UIManager>();
 
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
+
+        OnTimeReversalRequired += HandleTimeReversal;
 
         BoardManager.Instance.LoadFEN();
 
@@ -146,6 +150,31 @@ public class GameManager : MonoBehaviour
 
             RequestAIMove();
         });
+    }
+
+    private void HandleTimeReversal(Action onYes, Action onNo)
+    {
+        IsGameInput = false;
+
+        uiManager.ShowTimeReversal(
+            () =>
+            {
+                onYes?.Invoke();
+
+                IsGameInput = true;
+            },
+            () =>
+            {
+                onNo?.Invoke();
+
+                IsGameInput = true;
+            }
+        );
+    }
+
+    public void RequestTimeReversal(Action onYes, Action onNo)
+    {
+        OnTimeReversalRequired?.Invoke(onYes, onNo);
     }
 
     private void SelectPiece(Piece piece)
