@@ -139,6 +139,7 @@ public class BoardManager : MonoBehaviour
     public void LoadFEN()
     {
         Pieces.Clear();
+
         board = new Piece[8, 8];
 
         int x = 0;
@@ -628,6 +629,11 @@ public class BoardManager : MonoBehaviour
     public string GetFEN()
     {
         return FEN;
+    }
+    /// <summary>시간역행 카드 전용으로, 문자열 FEN을 수정합니다. </summary>
+    public void SetFEN(string fen)
+    {
+        FEN = fen;
     }
 
     public int GetHalfmoveClock()
