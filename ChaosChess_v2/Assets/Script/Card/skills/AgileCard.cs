@@ -43,16 +43,6 @@ public class AgileEffect : PieceEffector
         Destroy(this);
     }
 
-    public override void OnPieceCaptured()
-    {
-        base.OnPieceCaptured();
-    }
-
-    public override void OnPieceCapture()
-    {
-        base.OnPieceCapture();
-    }
-
     public override void OnPieceMove(Vector3Int dest)
     {
         Revert();
