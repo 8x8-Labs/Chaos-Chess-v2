@@ -20,17 +20,29 @@ public class FastMarchCard : CardData, IPieceCard
     public void Execute(CardEffectArgs args = null)
     {
         Piece piece = args.Targets[0];
-        piece.MoveFenOverride = "q";
+        FastMarchCardEffector effector = CreatePieceEffector<FastMarchCardEffector>(piece);
+
+        effector.Apply(true);
+    }
+}
+
+public class FastMarchCardEffector : PieceEffector
+{
+    protected override void OnApply()
+    {
+        target.MoveFenOverride = "q";
+        BoardManager.Instance.RefreshMoves();
+    }
+
+    protected override void OnRevert()
+    {
+        target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, () =>
-        {
-            ResetMoveFen(piece);
-        });
+        Destroy(this);
     }
-    public void ResetMoveFen(Piece piece)
+    protected override void OnHalfTurnChanged()
     {
-        piece.MoveFenOverride = null;
-        BoardManager.Instance.RefreshMoves();
+        Revert();
     }
 }
