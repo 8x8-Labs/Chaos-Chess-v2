@@ -2,28 +2,28 @@
 using UnityEngine;
 
 /// <summary>
-/// 투기장 - 타일 전용 (투기장)
-/// 지정된 구역에 랜덤한 기물이 배치되며, 해당 구역에서 기물들이 전투를 벌입니다.
+/// 투기장
+/// 랜덤한 상대 기물 3개와 플레이어 전체 기물이 투기장으로 이동합니다.
+/// 상대 기물이 모두 잡혔을 경우 잡힌 기물만 사라집니다.
+/// 최대 8턴 내에 처리하지 못하면 무효 처리됩니다.
 /// </summary>
-public class ArenaCard : CardData, ITileCard
+public class ArenaCard : CardData, ICard
 {
-    private TileSelector selector;
-
-    private void Awake()
-    {
-        selector = FindFirstObjectByType<TileSelector>();
-    }
-
-    public void LoadTileSelector()
-    {
-        if (selector == null) selector = FindFirstObjectByType<TileSelector>();
-        selector.EnableSelector(this);
-    }
-
     public void Execute(CardEffectArgs args = null)
     {
-        List<Vector3Int> tiles = args.TargetPos;
-        // TODO: 선택된 칸에 투기장 효과 적용
-        //       해당 구역에 랜덤한 기물 배치 및 투기장 카메라 활성화 처리
+        // 상대 King 제외 기물 중 랜덤 3개 선택
+        List<Piece> opponents = BoardManager.Instance.GetAllPieces()
+            .FindAll(p => p.Color == GameManager.Instance.EnemyColor
+                       && p.Type != PieceType.King);
+
+        // Fisher-Yates shuffle
+        for (int i = opponents.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (opponents[i], opponents[j]) = (opponents[j], opponents[i]);
+        }
+
+        List<Piece> arenaOpponents = opponents.GetRange(0, Mathf.Min(3, opponents.Count));
+        ArenaManager.Instance.StartArena(arenaOpponents);
     }
 }

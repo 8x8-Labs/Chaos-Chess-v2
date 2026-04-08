@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
+    public bool IsArenaMode { get; set; } = false;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
@@ -109,6 +110,9 @@ public class GameManager : MonoBehaviour
             boardUI.DeleteSelectTile();
         }
     }
+
+    /// <summary>lockedPiece를 설정합니다. 투기장 등 외부에서 기물 잠금이 필요할 때 사용합니다.</summary>
+    public void SetLockedPiece(Piece piece) => lockedPiece = piece;
 
     /// <summary>현재 플레이어에게 추가 행동권을 부여합니다. piece가 지정되면 해당 기물만 움직일 수 있습니다.</summary>
     public void GrantExtraPlayerAction(Piece piece = null)
@@ -222,11 +226,23 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                lockedPiece = null;
+                if (!IsArenaMode) lockedPiece = null;
                 NextTurn();
+                // EndArena(Timeout/PlayerWon)는 NextTurn 내부 OnHalfTurnChanged에서 SyncPositionToStockfish만 수행.
+                // RequestAIMove는 NextTurn()이 완전히 끝난 뒤 여기서 호출해 GetLegalMoves와의 충돌을 방지.
                 RequestAIMove();
             }
         }
+    }
+
+    /// <summary>현재 보드 상태를 Stockfish에 동기화합니다. 투기장 종료 후 기물 복원 시 사용합니다.</summary>
+    public void SyncPositionToStockfish()
+    {
+        BoardManager.Instance.UpdateFEN();
+        string fen = BoardManager.Instance.GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
 
     public void RequestAIMove()
@@ -243,6 +259,13 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateGameState(string[] moves)
     {
+        if (IsArenaMode)
+        {
+            // 투기장 중 체크메이트는 아레나 정리 후 처리 (OnCheckmate 직접 호출 시 RequestAIMove와 경합)
+            if (moves.Length == 0 && FairyStockfishBridge.Instance.IsInCheck())
+                ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
+            return;
+        }
         if (BoardManager.Instance.GetHalfmoveClock() >= 150)
         {
             OnDraw();

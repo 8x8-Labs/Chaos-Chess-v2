@@ -3337,7 +3337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9cc2e5015fe2048b92607aa98cc663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardType: 1
+  cardType: 2
 --- !u!114 &1507320768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3347,10 +3347,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 107788934f44d73409738a4110b4778b, type: 3}
+  m_Script: {fileID: 11500000, guid: 585ea241c0416734a93d11b210438685, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: bed52b2cef3e157418643de0b9b99aaf, type: 2}
+  DataSO: {fileID: 11400000, guid: 5386cf88badf52e4285efc816faebdc5, type: 2}
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
@@ -3797,7 +3797,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac18b6f187956544a39dae33ac45dcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  FEN: rnbqkbnr/8/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   FENMapList:
   - FENChar: 112
     prefab: {fileID: 4250557358645613848, guid: 284f131cb8f24b946a2208b0313947c3, type: 3}
@@ -4232,6 +4232,50 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UIChessBoard: {fileID: 1170031624}
   SelectTile: {fileID: 11400000, guid: 9523c4d553996d148a094f0f3aab6732, type: 2}
+--- !u!1 &1920602517
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1920602518}
+  - component: {fileID: 1920602519}
+  m_Layer: 0
+  m_Name: ArenaManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1920602518
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920602517}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1920602519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920602517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c348ec35ec64034fb16e3079b555922, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2040316850
 GameObject:
   m_ObjectHideFlags: 0
@@ -4466,3 +4510,4 @@ SceneRoots:
   - {fileID: 1155877494}
   - {fileID: 430042879}
   - {fileID: 1507320765}
+  - {fileID: 1920602518}
