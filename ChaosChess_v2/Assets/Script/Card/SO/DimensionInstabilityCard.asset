@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
-  m_Name: DimensionInstabillityCard
+  m_Name: DimensionInstabilityCard
   m_EditorClassIdentifier: 
   CardName: "\uCC28\uC6D0 \uBD88\uC548"
   CardImage: {fileID: 0}
