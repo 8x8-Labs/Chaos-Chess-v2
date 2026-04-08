@@ -2,9 +2,16 @@ public class Amazon : Piece
 {
     public override string GetFen()
     {
-        if (Color == PieceColor.White)
-            return "S";
+        if (MoveFenOverride != null)
+            return MoveFenOverride;
+
+        if (FenOverride != null)
+            return FenOverride;
         else
-            return "s";
+        {
+            bool Upper = Color == PieceColor.White;
+            if (Upper) return "S";
+            else return "s";
+        }
     }
 }

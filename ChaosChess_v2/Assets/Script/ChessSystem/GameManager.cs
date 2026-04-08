@@ -259,6 +259,19 @@ public class GameManager : MonoBehaviour
         Debug.Log("체크");
     }
 
+    public void OnSurrender(PieceColor color)
+    {
+        if (color == PlayerColor)
+        {
+            Debug.Log("플레이어 항복");
+        }
+        else
+        {
+            Debug.Log("AI 항복");
+        }
+        ExitGame();
+    }
+
     private void OnCheckmate()
     {
         if (NowTurn == 'w')

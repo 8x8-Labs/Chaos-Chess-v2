@@ -79,6 +79,7 @@ public abstract class TileEffector : Effector, ITileEffect
 
     public virtual void OnPieceEnter(Piece piece) { }
     public virtual void OnPieceExit(Piece piece) { }
+    public virtual bool CanPieceEnter(Piece piece, Vector3Int from, Vector3Int to) { return true; }
 }
 
 /// <summary>특정 타입의 기물이 행동(이동/잡기)했을 때 반응하는 전역 효과의 기반 추상 클래스</summary>

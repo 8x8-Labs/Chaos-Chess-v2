@@ -36,6 +36,8 @@ public class Piece : MonoBehaviour
     [SerializeField] private Vector3Int pos;
     private string _fenOverride;
 
+    private string _moveFenOverride; // 행마 전용 (t, u, p2 등)
+
     protected List<Vector3Int> canMovePos;
 
     private MaterialPropertyBlock mpb;
@@ -64,6 +66,37 @@ public class Piece : MonoBehaviour
     {
         get { return type; }
     }
+
+    /// <summary>
+    /// 효과를 통해 행마만 변경된 기물의 FEN을 저장합니다.
+    /// </summary>
+    public string MoveFenOverride
+    {
+        get
+        {
+            if (_moveFenOverride == null) return null;
+
+            return Color == PieceColor.White
+                ? _moveFenOverride.ToUpper()
+                : _moveFenOverride.ToLower();
+        }
+        set
+        {
+            if (value == null)
+            {
+                _moveFenOverride = null;
+            }
+            else
+            {
+                string v =
+                    Color == PieceColor.White
+                    ? value.ToUpper()
+                    : value.ToLower();
+                _moveFenOverride = v;
+            }
+        }
+    }
+
     /// <summary>
     /// 효과를 통해 변경된 기물의 FEN을 저장합니다.
     /// </summary>
@@ -78,7 +111,7 @@ public class Piece : MonoBehaviour
         }
         set
         {
-            if(value == null)
+            if (value == null)
             {
                 _fenOverride = null;
                 ResetSprite();
@@ -127,7 +160,7 @@ public class Piece : MonoBehaviour
 
     public void ResetCanMovePos()
     {
-       canMovePos = new List<Vector3Int>();
+        canMovePos = new List<Vector3Int>();
     }
 
     public void AddCanMovePos(Vector3Int pos)
@@ -148,6 +181,8 @@ public class Piece : MonoBehaviour
     public void TriggerOnCapture()
     {
         var copy = new List<Action<Vector3Int>>(onCaptureEffects);
+
+        GetComponent<IPieceEffect>()?.OnPieceCapture();
 
         foreach (var effect in copy)
         {
@@ -205,17 +240,17 @@ public class Piece : MonoBehaviour
     {
         return type switch
         {
-            PieceType.Pawn   => 'p',
+            PieceType.Pawn => 'p',
             PieceType.Knight => 'n',
             PieceType.Bishop => 'b',
-            PieceType.Rook   => 'r',
-            PieceType.Queen  => 'q',
-            PieceType.King   => 'k',
+            PieceType.Rook => 'r',
+            PieceType.Queen => 'q',
+            PieceType.King => 'k',
             PieceType.Amazon => 's',
             PieceType.Chancellor => 'y',
             PieceType.KnightRider => 'z',
             PieceType.Wall => 'a',
-            _                => '?'
+            _ => '?'
         };
     }
 

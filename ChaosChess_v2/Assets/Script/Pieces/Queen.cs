@@ -2,9 +2,15 @@ public class Queen : Piece
 {
     public override string GetFen()
     {
-        if (Color == PieceColor.White)
-            return "Q";
+        if (MoveFenOverride != null)
+            return MoveFenOverride;
+        if (FenOverride != null)
+            return FenOverride;
         else
-            return "q";
+        {
+            bool Upper = Color == PieceColor.White;
+            if (Upper) return "Q";
+            else return "q";
+        }
     }
 }
