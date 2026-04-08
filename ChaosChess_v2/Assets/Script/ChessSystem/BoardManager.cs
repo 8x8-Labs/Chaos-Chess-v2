@@ -453,7 +453,7 @@ public class BoardManager : MonoBehaviour
     }
 
     ///<summary> 기물을 지웁니다 </summary> 
-    public void DestroyPiece(Piece piece)
+    public void DestroyPiece(Piece piece, bool refresh = true)
     {
         if (piece == null) return;
 
@@ -461,7 +461,7 @@ public class BoardManager : MonoBehaviour
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
 
-        RefreshMoves();
+        if(refresh) RefreshMoves();
     }
 
     ///<summary> 기물들을 지웁니다 </summary> 
@@ -471,8 +471,9 @@ public class BoardManager : MonoBehaviour
 
         foreach (Piece piece in pieces)
         {
-            DestroyPiece(piece);
+            DestroyPiece(piece, false);
         }
+        RefreshMoves();
     }
 
     ///<summary> UCI 좌표를 Vector3Int로 바꿉니다 </summary> 
