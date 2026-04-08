@@ -362,6 +362,7 @@ public class BoardManager : MonoBehaviour
             {
                 castling.OnRookDie(targetPiece.Color, target);
             }
+            // 잡히는 대상 파괴
             DestroyPiece(target);
         }
 
@@ -370,6 +371,7 @@ public class BoardManager : MonoBehaviour
         piece.Move(target, WorldPos);
 
         if (isCapture)
+            // 잡는 대상의 이벤트 호출
             piece.TriggerOnCapture();
 
         if (piece is Pawn || isCapture)
@@ -451,7 +453,7 @@ public class BoardManager : MonoBehaviour
     }
 
     ///<summary> 기물을 지웁니다 </summary> 
-    public void DestroyPiece(Piece piece)
+    public void DestroyPiece(Piece piece, bool refresh = true)
     {
         if (piece == null) return;
 
@@ -459,23 +461,18 @@ public class BoardManager : MonoBehaviour
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
 
-        RefreshMoves();
+        if(refresh) RefreshMoves();
     }
 
     ///<summary> 기물들을 지웁니다 </summary> 
-    public void DestroyPiece(List<Piece> pieces)
+    public void DestroyPieces(List<Piece> pieces)
     {
         if (pieces == null) return;
 
         foreach (Piece piece in pieces)
         {
-            if (piece == null) continue;
-
-            board[piece.Pos.x, piece.Pos.y] = null;
-            Pieces.Remove(piece);
-            Destroy(piece.gameObject);
+            DestroyPiece(piece, false);
         }
-
         RefreshMoves();
     }
 
