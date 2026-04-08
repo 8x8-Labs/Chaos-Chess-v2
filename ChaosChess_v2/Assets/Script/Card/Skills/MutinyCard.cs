@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// 하극상 - 기물 전용 (레어)
@@ -10,6 +11,12 @@ public class MutinyCard : CardData, ICard
     {
         Piece queen = BoardManager.Instance.GetPiece<Queen>(
             GameManager.Instance.EnemyColor).FirstOrDefault();
+
+        if(queen == null)
+        {
+            Debug.Log("상대 퀸이 없습니다!");
+            return;
+        }
 
         MutinyEffect effect = CreatePieceEffector<MutinyEffect>(queen);
         effect.Apply();

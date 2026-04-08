@@ -26,8 +26,8 @@ MonoBehaviour:
   MaintainTurn: 0
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  NeedTargetColor: 0
-  GlobalTargetColor: 0
+  NeedTargetColor: 1
+  GlobalTargetColor: 1
   HasLimit: 0
   LimitTurn: 0
   NeedAdditionalDescription: 0
