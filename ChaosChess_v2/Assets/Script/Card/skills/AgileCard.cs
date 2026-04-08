@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 민첩 - 기물 전용 (일반)
@@ -42,6 +41,16 @@ public class AgileEffect : PieceEffector
         target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
+    }
+
+    public override void OnPieceCaptured()
+    {
+        base.OnPieceCaptured();
+    }
+
+    public override void OnPieceCapture()
+    {
+        base.OnPieceCapture();
     }
 
     public override void OnPieceMove(Vector3Int dest)

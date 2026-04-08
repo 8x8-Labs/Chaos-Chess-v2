@@ -36,6 +36,7 @@ public class FireEffect : TileEffector
 
     protected override void OnRevert()
     {
+        boardManager.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
 
@@ -61,8 +62,5 @@ public class FireEffect : TileEffector
         }
     }
 
-    private void OnDestroy()
-    {
-        boardManager.UnregisterTileEffector(tilePos, this);
-    }
+    private void OnDestroy() => Revert();
 }

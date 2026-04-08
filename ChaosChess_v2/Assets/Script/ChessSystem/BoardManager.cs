@@ -458,7 +458,8 @@ public class BoardManager : MonoBehaviour
         if (piece == null) return;
 
         board[piece.Pos.x, piece.Pos.y] = null;
-        piece.GetComponent<IPieceEffect>().OnPieceCaptured();
+
+        piece.GetComponent<IPieceEffect>()?.OnPieceCaptured();
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
 
