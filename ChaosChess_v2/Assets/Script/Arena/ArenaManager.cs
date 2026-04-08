@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
@@ -62,6 +63,7 @@ public class ArenaManager : MonoBehaviour
 
         BoardManager bm = BoardManager.Instance;
         GameManager gm = GameManager.Instance;
+        var allPiece = bm.GetAllPieces();
 
         // 아레나 시작 시 모든 기물 위치 저장 (Timeout 시 완전 복원에 사용)
         savedPositions.Clear();
@@ -73,8 +75,8 @@ public class ArenaManager : MonoBehaviour
         savedCastlingFen = bm.GetFEN().Split(' ')[2];
 
         // 양쪽 King 참조 저장 — Stockfish 연산에 필요
-        playerKing = bm.GetAllPieces().Find(p => p.Color == gm.PlayerColor && p.Type == PieceType.King);
-        opponentKing = bm.GetAllPieces().Find(p => p.Color == gm.EnemyColor && p.Type == PieceType.King);
+        playerKing = allPiece.Find(p => p.Color == gm.PlayerColor && p.Type == PieceType.King);
+        opponentKing = allPiece.Find(p => p.Color == gm.EnemyColor && p.Type == PieceType.King);
 
         // 플레이어 전체 기물 + 상대 arena 3개 + 상대 King 외 모든 기물을 보드에서 숨김
         // — 숨겨진 기물은 SetActive(false) + 보드 배열 제거로 Stockfish FEN에 포함되지 않음
@@ -82,7 +84,7 @@ public class ArenaManager : MonoBehaviour
             bm.GetAllPieces().FindAll(p => p.Color == gm.PlayerColor));
         keepPieces.UnionWith(opponents);
         keepPieces.Add(opponentKing); // playerKing은 플레이어 기물로 이미 포함됨
-        foreach (Piece p in bm.GetAllPieces())
+        foreach (Piece p in allPiece)
         {
             if (!keepPieces.Contains(p))
             {
