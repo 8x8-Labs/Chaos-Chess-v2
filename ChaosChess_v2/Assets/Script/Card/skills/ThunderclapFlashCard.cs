@@ -1,11 +1,8 @@
-
-
-using JetBrains.Annotations;
 using UnityEngine;
 
 /// <summary>
 /// 벽력일섬 - 기물 전용 (고급)
-/// 선택한 룩이 한 턴 동안 지나간 자리의 모든 기물(본인기물 포함)이 죽습니다. ← 4칸 수 제한
+/// 선택한 룩이 한 턴 동안 지나간 자리의 모든 기물(본인기물 포함)이 죽습니다. ← 3칸 수 제한
 /// </summary>
 public class ThunderclapFlashCard : CardData, IPieceCard
 {
@@ -27,7 +24,7 @@ public class ThunderclapFlashCard : CardData, IPieceCard
         Piece piece = args.Targets[0];
         ThunderclapFlashEffector effector = CreatePieceEffector<ThunderclapFlashEffector>(piece);
 
-        effector.Apply();
+        effector.Apply(true);
         effector.targetPos = piece.Pos;
     }
 }
@@ -35,6 +32,7 @@ public class ThunderclapFlashCard : CardData, IPieceCard
 public class ThunderclapFlashEffector : PieceEffector
 {
     public Vector3Int targetPos;
+    
     protected override void OnApply()
     {
         target.MoveFenOverride = "m";
@@ -66,7 +64,7 @@ public class ThunderclapFlashEffector : PieceEffector
 
         Destroy(this);
     }
-    public override void OnTurnChanged()
+    protected override void OnHalfTurnChanged()
     {
         Revert();
     }

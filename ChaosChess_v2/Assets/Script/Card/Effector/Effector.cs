@@ -4,6 +4,7 @@
 public abstract class Effector : MonoBehaviour, IEffect
 {
     private int remainingTurns; // -1 = 영구 효과
+    private bool useHalfTurn; // 반턴 사용 여부
 
     public bool IsExpired => remainingTurns == 0;
     public bool IsPermanent => remainingTurns < 0;
@@ -14,9 +15,14 @@ public abstract class Effector : MonoBehaviour, IEffect
     }
 
     /// <summary>효과를 대상에 등록합니다. 턴 이벤트를 구독하고 OnApply()를 호출합니다.</summary>
-    public void Apply()
+    public void Apply(bool halfTurn = false)
     {
         GameManager.Instance.OnTurnChanged += OnTurnChanged;
+
+        useHalfTurn = halfTurn;
+        if (useHalfTurn)
+            GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
+
         OnApply();
     }
 
@@ -24,8 +30,12 @@ public abstract class Effector : MonoBehaviour, IEffect
     public void Revert()
     {
         GameManager.Instance.OnTurnChanged -= OnTurnChanged;
+        if (useHalfTurn)
+            GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
+
         OnRevert();
     }
+
 
     /// <summary>서브클래스에서 훅/버프를 부착합니다.</summary>
     protected abstract void OnApply();
@@ -41,6 +51,8 @@ public abstract class Effector : MonoBehaviour, IEffect
         if (IsExpired)
             Revert();
     }
+
+    protected virtual void OnHalfTurnChanged() { }
 }
 
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
