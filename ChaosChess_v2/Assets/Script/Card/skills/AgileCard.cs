@@ -23,24 +23,29 @@ public class AgileCard : CardData, IPieceCard
     public void Execute(CardEffectArgs args = null)
     {
         Piece pawn = args.Targets[0];
-        BoardManager bm = BoardManager.Instance;
+        AgileEffect effect = CreatePieceEffector<AgileEffect>(pawn);
 
-        // 후방 대각선 방향 (백: y-1, 흑: y+1)
-        int backDir = pawn.Color == PieceColor.White ? -1 : 1;
-        Vector3Int pos = pawn.Pos;
+        effect.Apply();
+    }
+}
 
-        Vector3Int[] backCaptures =
-        {
-            new Vector3Int(pos.x - 1, pos.y + backDir, 0),
-            new Vector3Int(pos.x + 1, pos.y + backDir, 0),
-        };
+public class AgileEffect : PieceEffector
+{
+    protected override void OnApply()
+    {
+        target.MoveFenOverride = "u";
+        BoardManager.Instance.RefreshMoves();
+    }
 
-        foreach (Vector3Int capturePos in backCaptures)
-        {
-            if (!bm.IsInside(capturePos)) continue;
-            Piece target = bm.GetPiece(capturePos);
-            if (target != null && target.Color != pawn.Color)
-                pawn.AddCanMovePos(capturePos);
-        }
+    protected override void OnRevert()
+    {
+        target.MoveFenOverride = null;
+        BoardManager.Instance.RefreshMoves();
+        Destroy(this);
+    }
+
+    public override void OnPieceMove(Vector3Int dest)
+    {
+        Revert();
     }
 }
