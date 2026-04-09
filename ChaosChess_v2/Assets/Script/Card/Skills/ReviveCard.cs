@@ -86,6 +86,9 @@ public class ReviveEffector : TileEffector
         pieces.Remove(res);
         BoardManager.Instance.ChangePiece(TilePos, GameManager.Instance.turnColor,TypeToChar(res));
         Revert();
+        GameManager.Instance.NextTurn();
+        if (!GameManager.Instance.IsPlayerTurn)
+            GameManager.Instance.RequestAIMove();
     }
 
     protected override void OnRevert()
