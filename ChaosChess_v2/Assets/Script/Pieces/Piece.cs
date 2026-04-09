@@ -291,6 +291,11 @@ public class Piece : MonoBehaviour
             'q' => 7,  // Queen
             'k' => 8,  // King
             'a' => 9,  // Wall
+            'o' => 10,
+            'i' => 11,
+            'h' => 12,
+            'g' => 13,
+            'j' => 14,
             _ => throw new ArgumentException($"알 수 없는 FEN 문자: {c}")
         };
     }
