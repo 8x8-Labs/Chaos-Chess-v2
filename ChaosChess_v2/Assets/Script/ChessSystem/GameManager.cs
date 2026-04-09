@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
+    public bool IsArenaMode { get; set; } = false;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
@@ -24,6 +25,8 @@ public class GameManager : MonoBehaviour
     public event Action OnTurnChanged;
     /// <summary>반 턴 종료 직후 발행됩니다.</summary>
     public event Action OnHalfTurnChanged;
+    /// <summary>시간역행 카드 전용 이벤트 입니다.</summary>
+    public event Action<Action, Action> OnTimeReversalRequired;
     public PieceColor turnColor
     {
         get
@@ -76,6 +79,8 @@ public class GameManager : MonoBehaviour
 
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
 
+        OnTimeReversalRequired += HandleTimeReversal;
+
         BoardManager.Instance.LoadFEN();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
@@ -110,6 +115,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>lockedPiece를 설정합니다. 투기장 등 외부에서 기물 잠금이 필요할 때 사용합니다.</summary>
+    public void SetLockedPiece(Piece piece) => lockedPiece = piece;
+
     /// <summary>현재 플레이어에게 추가 행동권을 부여합니다. piece가 지정되면 해당 기물만 움직일 수 있습니다.</summary>
     public void GrantExtraPlayerAction(Piece piece = null)
     {
@@ -142,6 +150,31 @@ public class GameManager : MonoBehaviour
 
             RequestAIMove();
         });
+    }
+
+    private void HandleTimeReversal(Action onYes, Action onNo)
+    {
+        IsGameInput = false;
+
+        uiManager.ShowTimeReversal(
+            () =>
+            {
+                onYes?.Invoke();
+
+                IsGameInput = true;
+            },
+            () =>
+            {
+                onNo?.Invoke();
+
+                IsGameInput = true;
+            }
+        );
+    }
+
+    public void RequestTimeReversal(Action onYes, Action onNo)
+    {
+        OnTimeReversalRequired?.Invoke(onYes, onNo);
     }
 
     private void SelectPiece(Piece piece)
@@ -222,11 +255,23 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                lockedPiece = null;
+                if (!IsArenaMode) lockedPiece = null;
                 NextTurn();
+                // EndArena(Timeout/PlayerWon)는 NextTurn 내부 OnHalfTurnChanged에서 SyncPositionToStockfish만 수행.
+                // RequestAIMove는 NextTurn()이 완전히 끝난 뒤 여기서 호출해 GetLegalMoves와의 충돌을 방지.
                 RequestAIMove();
             }
         }
+    }
+
+    /// <summary>현재 보드 상태를 Stockfish에 동기화합니다. 투기장 종료 후 기물 복원 시 사용합니다.</summary>
+    public void SyncPositionToStockfish()
+    {
+        BoardManager.Instance.UpdateFEN();
+        string fen = BoardManager.Instance.GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
 
     public void RequestAIMove()
@@ -243,6 +288,13 @@ public class GameManager : MonoBehaviour
     }
     private void EvaluateGameState(string[] moves)
     {
+        if (IsArenaMode)
+        {
+            // 투기장 중 체크메이트는 아레나 정리 후 처리 (OnCheckmate 직접 호출 시 RequestAIMove와 경합)
+            if (moves.Length == 0 && FairyStockfishBridge.Instance.IsInCheck())
+                ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
+            return;
+        }
         if (BoardManager.Instance.GetHalfmoveClock() >= 150)
         {
             OnDraw();
