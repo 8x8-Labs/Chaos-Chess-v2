@@ -349,8 +349,4 @@ public class Piece : MonoBehaviour
     }
 
     public virtual string GetFen() { return ""; }
-    private void OnDestroy()
-    {
-        BoardManager.Instance.AppendDeadPiece(type,color);
-    }
 }

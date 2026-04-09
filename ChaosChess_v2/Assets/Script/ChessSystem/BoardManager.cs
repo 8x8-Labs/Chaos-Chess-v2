@@ -366,6 +366,7 @@ public class BoardManager : MonoBehaviour
                 castling.OnRookDie(targetPiece.Color, target);
             }
             // 잡히는 대상 파괴
+            AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
         }
 
@@ -729,6 +730,7 @@ public class BoardManager : MonoBehaviour
             {
                 castling.OnRookDie(targetPiece.Color, target);
             }
+            AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
         }
 
