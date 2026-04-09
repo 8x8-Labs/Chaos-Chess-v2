@@ -9,7 +9,37 @@ public class TimeReversalCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
-        // TODO: 현재 보드 상태를 스냅샷으로 저장
-        //       8턴 후 플레이어에게 해당 상태로 복원할지 선택 UI 표시
+        TimeReversalEffecter effect = CreateGlobalEffector<TimeReversalEffecter>();
+
+        effect.Apply();
+    }
+}
+
+public class TimeReversalEffecter : GlobalEffector
+{
+    private string fen;
+
+    protected override void OnApply()
+    {
+        fen = BoardManager.Instance.GetFEN();
+    }
+
+    protected override void OnRevert()
+    {
+        GameManager.Instance.RequestTimeReversal(
+            () =>
+            {
+                BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces());
+                BoardManager.Instance.LoadFEN(fen);
+
+                BoardManager.Instance.RefreshMoves();
+
+                Destroy(gameObject);
+            },
+            () =>
+            {
+                Destroy(gameObject);
+            }
+        );
     }
 }
