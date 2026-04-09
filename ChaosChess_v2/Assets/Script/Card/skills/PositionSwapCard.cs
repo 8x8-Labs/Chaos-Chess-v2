@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using UnityEngine;
+using System.Text;
 
 /// <summary>
 /// 입장 반전 - 전역
-/// 자신의 기물 전체와 상대 기물 전체를 교환하며 기물에 적용된 카드 효과가 전부 사라집니다.
-/// 기물 수가 다를 경우 적은 쪽의 수만큼 교환됩니다.
+/// 자신의 기물 전체와 상대 기물 전체를 교환하며 모든 기물, 타일 효과가 사라집니다.
 /// </summary>
 public class PositionSwapCard : CardData, ICard
 {
@@ -12,33 +11,106 @@ public class PositionSwapCard : CardData, ICard
     {
         BoardManager bm = BoardManager.Instance;
 
-        PieceColor myColor = GameManager.Instance.PlayerColor;
-        PieceColor oppColor = GameManager.Instance.EnemyColor;
+        string fen = bm.GetFEN();
 
-        List<Piece> myPieces = bm.GetAllPieces().FindAll(p => p.Color == myColor);
-        List<Piece> oppPieces = bm.GetAllPieces().FindAll(p => p.Color == oppColor);
+        string flipped = FlipFEN(fen);
 
-        int swapCount = Mathf.Min(myPieces.Count, oppPieces.Count);
+        bm.DestroyPieces(bm.GetAllPieces(), false);
+        bm.LoadFEN(flipped);
+        bm.ClearAllTileEffectors();
+        bm.RefreshMoves();
 
-        // 교환 전 위치 저장
-        List<Vector3Int> myPositions = myPieces.ConvertAll(p => p.Pos);
-        List<Vector3Int> oppPositions = oppPieces.ConvertAll(p => p.Pos);
+        GameManager.Instance.NextTurn();
+        if (!GameManager.Instance.IsPlayerTurn)
+            GameManager.Instance.RequestAIMove();
+    }
 
-        // 두 그룹을 하나의 배치 작업으로 처리 (Phase 1 clear → Phase 2 place)
-        List<Piece> batch = new List<Piece>(swapCount * 2);
-        List<Vector3Int> newPositions = new List<Vector3Int>(swapCount * 2);
+    private string FlipFEN(string fen)
+    {
+        string[] parts = fen.Split(' ');
 
-        for (int i = 0; i < swapCount; i++)
+        string[] ranks = parts[0].Split('/');
+        List<string> newRanks = new List<string>();
+
+        for (int i = 7; i >= 0; i--)
         {
-            batch.Add(myPieces[i]);
-            newPositions.Add(oppPositions[i]);
+            string rank = ranks[i];
+            List<char> expanded = new List<char>();
 
-            batch.Add(oppPieces[i]);
-            newPositions.Add(myPositions[i]);
+            foreach (char c in rank)
+            {
+                if (char.IsDigit(c))
+                {
+                    int count = c - '0';
+                    for (int k = 0; k < count; k++)
+                        expanded.Add('.');
+                }
+                else expanded.Add(c);
+            }
+
+            for (int j = 0; j < expanded.Count; j++)
+            {
+                char c = expanded[j];
+                if (c == '.') continue;
+
+                expanded[j] = char.IsUpper(c)
+                    ? char.ToLower(c)
+                    : char.ToUpper(c);
+            }
+
+            StringBuilder newRank = new StringBuilder();
+            int empty = 0;
+
+            foreach (char c in expanded)
+            {
+                if (c == '.') empty++;
+                else
+                {
+                    if (empty > 0)
+                    {
+                        newRank.Append(empty);
+                        empty = 0;
+                    }
+                    newRank.Append(c);
+                }
+            }
+            if (empty > 0) newRank.Append(empty);
+
+            newRanks.Add(newRank.ToString());
         }
 
-        bm.BatchReassign(batch, newPositions);
+        string newBoard = string.Join("/", newRanks);
 
-        // TODO: 기물에 적용된 카드 효과 제거 (효과 시스템 구현 후 처리)
+        // 캐슬링 반전
+        string castling = parts[2];
+        string newCastling = "-";
+        if (castling != "-")
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in castling)
+            {
+                if (c == 'K') sb.Append('k');
+                else if (c == 'Q') sb.Append('q');
+                else if (c == 'k') sb.Append('K');
+                else if (c == 'q') sb.Append('Q');
+            }
+            newCastling = sb.Length == 0 ? "-" : sb.ToString();
+        }
+
+        // 앙파상 반전
+        string ep = parts[3];
+        string newEP = "-";
+        if (ep != "-")
+        {
+            char file = ep[0];
+            char rank = ep[1];
+
+            char newFile = (char)('h' - (file - 'a'));
+            char newRank = (char)('8' - (rank - '1'));
+
+            newEP = $"{newFile}{newRank}";
+        }
+
+        return $"{newBoard} {parts[1]} {newCastling} {newEP} {parts[4]} {parts[5]}";
     }
 }
