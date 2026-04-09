@@ -683,16 +683,6 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void ClearAllGlobalEffectors()
-    {
-        foreach (var effector in globalEffectors)
-        {
-            effector.Revert();
-        }
-
-        globalEffectors.Clear();
-    }
-
     public void ClearAllTileEffectors()
     {
         foreach (var pair in tileEffectors)

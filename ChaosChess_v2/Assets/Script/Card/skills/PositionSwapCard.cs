@@ -3,7 +3,7 @@ using System.Text;
 
 /// <summary>
 /// 입장 반전 - 전역
-/// 자신의 기물 전체와 상대 기물 전체를 교환하며 카드 효과가 전부 사라집니다.
+/// 자신의 기물 전체와 상대 기물 전체를 교환하며 모든 기물, 타일 효과가 사라집니다.
 /// </summary>
 public class PositionSwapCard : CardData, ICard
 {
@@ -18,7 +18,6 @@ public class PositionSwapCard : CardData, ICard
         bm.DestroyPieces(bm.GetAllPieces(), false);
         bm.LoadFEN(flipped);
         bm.ClearAllTileEffectors();
-        bm.ClearAllGlobalEffectors();
         bm.RefreshMoves();
 
         GameManager.Instance.NextTurn();
