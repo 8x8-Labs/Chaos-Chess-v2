@@ -5,6 +5,8 @@
 - **Edit only** `.cs`, ScriptableObject, and config files
 - **Never enter Play Mode** (including setting `EditorApplication.isPlaying`)
 - Verify behavior via code review / static analysis only
+- **Never access `.meta` files** — do not read, edit, or reference them
+- **Scope file access strictly** — if a file path is provided, read only that file and directly related files; do not browse or inspect other files without explicit request
 
 ---
 

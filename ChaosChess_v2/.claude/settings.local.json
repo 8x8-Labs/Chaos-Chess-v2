@@ -4,8 +4,13 @@
       "mcp__claude_ai_Notion__notion-search",
       "mcp__claude_ai_Notion__notion-fetch",
       "Bash(xargs grep:*)",
-      "Bash(find . -name \"*.cs\" -exec grep -l \"CardEffectArgs\" {} \\\\;)",
-      "Bash(grep -l \"OnTurnChanged\\\\|EventManager\\\\|OnPieceEnter\" \"C:\\\\Users\\\\llssw\\\\Desktop\\\\My Files\\\\Repo\\\\Chaos-Chess-v2\\\\ChaosChess_v2/Assets/Script/Card/Skills\"/*.cs)"
+      "Bash(find . -name \"*.cs\" -exec grep -l \"CardEffectArgs\" {} \\;)",
+      "Bash(grep -l \"OnTurnChanged\\|EventManager\\|OnPieceEnter\" .../*.cs)"
     ]
+  },
+  "env": {
+    "MAX_OUTPUT_TOKENS": "8000",
+    "MAX_THINKING_TOKENS": "10000",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "claude-haiku-4-5-20251001"
   }
 }
