@@ -17,7 +17,7 @@ public class DestroyerTankCards : CardData, ICard
         else
             watchColor = ApplyType.Black;
 
-        effector.Init(PieceType.Pawn, watchColor);
+        effector.Init(PieceType.Pawn, watchColor, DataSO.LimitTurn);
         effector.Apply();
     }
 }
