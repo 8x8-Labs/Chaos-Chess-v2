@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
 
         Piece piece = BoardManager.Instance.GetPiece(pos);
 
-        if (piece != null && piece.Color == turnColor && !(piece is Wall))
+        if (piece != null && piece.Color == turnColor && piece.Type != PieceType.Wall)
         {
             if (lockedPiece != null && piece != lockedPiece) return;
             SelectPiece(piece);
@@ -139,7 +139,7 @@ public class GameManager : MonoBehaviour
     private void HandlePromotion(Piece pawn, Vector3Int pos)
     {
         IsGameInput = false;
-
+    
         uiManager.Show((type) =>
         {
             BoardManager.Instance.ChangePiece(pos, pawn.Color, type);

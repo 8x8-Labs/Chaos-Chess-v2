@@ -100,6 +100,11 @@ public class BoardManager : MonoBehaviour
 
     public System.Action<Piece, Vector3Int> OnPromotionRequired;
 
+    /// <summary>
+    ///  
+    /// </summary>
+    private List<GlobalEffector> globalEffectors = new();
+
     private Castling castling = new Castling();
     private Vector3Int enPassantPos = new Vector3Int(-1, -1, -1);
 
@@ -209,6 +214,9 @@ public class BoardManager : MonoBehaviour
 
         halfmoveClock = int.Parse(SliceFEN[4]);
         fullmoveNumber = int.Parse(SliceFEN[5]);
+
+        CheckCastlingRights();
+        UpdateFEN();
 
         FairyStockfishBridge.Instance.SetPosition(FEN);
     }
@@ -400,6 +408,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
+        TriggerGlobalEffectors(piece, target, isCapture);
         TriggerTileEnter(target, piece);
 
         foreach (var eff in piece.GetComponents<IPieceEffect>())
@@ -649,6 +658,27 @@ public class BoardManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void RegisterGlobalEffector(GlobalEffector effector)
+    {
+        globalEffectors.Add(effector);
+    }
+
+    public void UnregisterGlobalEffector(GlobalEffector effector)
+    {
+        globalEffectors.Remove(effector);
+    }
+
+    private void TriggerGlobalEffectors(Piece piece, Vector3Int dest, bool isCapture)
+    {
+        foreach (var effector in new List<GlobalEffector>(globalEffectors))
+        {
+            effector.OnPieceAct(piece, dest);
+            if (isCapture)
+                effector.OnPieceCapture(piece, dest);
+
+        }
     }
 
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
