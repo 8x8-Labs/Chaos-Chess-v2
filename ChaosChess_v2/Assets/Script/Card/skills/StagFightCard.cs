@@ -18,7 +18,16 @@ public class StagFightCard : CardData, ICard
 }
 public class StagFightEffector : GlobalEffector
 {
-    List<Piece> changed = new();
+    private readonly List<Piece> changed = new();
+    private static readonly Dictionary<PieceType, string> MoveOverrides = new()
+    {
+        { PieceType.Rook, "o" },
+        { PieceType.Bishop, "i" },
+        { PieceType.Queen, "h" },
+        { PieceType.Knight, "g" }
+    };
+    private static readonly HashSet<string> RevertableFens = new(MoveOverrides.Values);
+
     protected override void OnApply()
     {
         List<Piece> pieces = BoardManager.Instance.GetAllPieces();
@@ -26,32 +35,15 @@ public class StagFightEffector : GlobalEffector
         {
             if (piece.FenOverride != null || piece.MoveFenOverride != null)
                 continue;
-            changed.Add(piece);
-            switch (piece.Type)
-            {
-                case PieceType.Rook:
-                    piece.MoveFenOverride = "o";
-                    break;
-                case PieceType.Bishop:
-                    piece.MoveFenOverride = "i";
-                    break;
-                case PieceType.Queen:
-                    piece.MoveFenOverride = "h";
-                    break;
-                case PieceType.Knight:
-                    piece.MoveFenOverride = "g";
-                    break;
-                // PieceType.King 제외: "j"(fK)는 non-royal 기물이라 FEN에서 킹이 사라져 legal moves = 0 발생
-                default:
-                    changed.Remove(piece);
-                    break;
-            }
 
+            if (MoveOverrides.TryGetValue(piece.Type, out var overrideFen))
+            {
+                piece.MoveFenOverride = overrideFen;
+                changed.Add(piece);
+            }
         }
 
         BoardManager.Instance.RefreshMoves();
-        foreach (Piece piece in changed)
-            Debug.Log(piece.Type);
     }
 
     protected override void OnRevert()
@@ -59,9 +51,10 @@ public class StagFightEffector : GlobalEffector
         foreach (Piece piece in changed)
         {
             string p = piece.MoveFenOverride?.ToLower();
-            if (p == "o" || p == "i" || p == "h" || p == "g")
+            if (p != null && RevertableFens.Contains(p))
                 piece.MoveFenOverride = null;
         }
         BoardManager.Instance.RefreshMoves();
+        Destroy(gameObject);
     }
 }
