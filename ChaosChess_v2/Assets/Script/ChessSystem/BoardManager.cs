@@ -687,7 +687,7 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var pair in tileEffectors)
         {
-            foreach (var effector in pair.Value)
+            foreach (var effector in new List<TileEffector>(pair.Value))
             {
                 effector.Revert();
             }
