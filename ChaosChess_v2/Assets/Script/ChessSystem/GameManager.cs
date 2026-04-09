@@ -139,7 +139,7 @@ public class GameManager : MonoBehaviour
     private void HandlePromotion(Piece pawn, Vector3Int pos)
     {
         IsGameInput = false;
-    
+
         uiManager.Show((type) =>
         {
             BoardManager.Instance.ChangePiece(pos, pawn.Color, type);
@@ -317,6 +317,20 @@ public class GameManager : MonoBehaviour
     private void OnCheck()
     {
         Debug.Log("체크");
+    }
+    
+    public void EndGame(PieceColor winner)
+    {
+        if (winner == PlayerColor)
+        {
+            Debug.Log("플레이어 승리");
+        }
+        else
+        {
+            Debug.Log("AI 승리");
+        }
+
+        ExitGame();
     }
 
     public void OnSurrender(PieceColor color)
