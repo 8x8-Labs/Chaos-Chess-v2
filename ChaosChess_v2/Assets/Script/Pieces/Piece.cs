@@ -56,6 +56,27 @@ public class Piece : MonoBehaviour
         set { color = value; }
     }
 
+    public PieceValue Value
+    {
+        get
+        {
+            return type switch
+            {
+                PieceType.Pawn => PieceValue.Pawn,
+                PieceType.Knight => PieceValue.Knight,
+                PieceType.Bishop => PieceValue.Bishop,
+                PieceType.Rook => PieceValue.Rook,
+                PieceType.Queen => PieceValue.Queen,
+                PieceType.King => PieceValue.King,
+                PieceType.Amazon => PieceValue.Amazon,
+                PieceType.Chancellor => PieceValue.Chancellor,
+                PieceType.KnightRider => PieceValue.KnightRider,
+                PieceType.Wall => PieceValue.Wall,
+                _ => 0
+            };
+        }
+    }
+
     public Vector3Int Pos
     {
         get { return pos; }

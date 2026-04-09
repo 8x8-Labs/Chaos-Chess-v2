@@ -10,23 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
-  m_Name: ChargeCard
+  m_Name: ReviveCard
   m_EditorClassIdentifier: 
-  CardName: "\uB3CC\uACA9"
+  CardName: "\uBD80\uD65C"
   CardImage: {fileID: 0}
-  CardDescription: "\uC790\uC2E0\uC758 \uC774\uB3D9 \uBC29\uD5A5\uC73C\uB85C \uC804\uC9C4\uD560
-    \uC218 \uC788\uB294 \uBAA8\uB4E0 \uD3F0\uC774 \uD55C \uCE78 \uC804\uC9C4\uD569\uB2C8\uB2E4."
-  Type: 2
-  CardTier: 0
-  PieceType: 0
+  CardDescription: "\uC120\uD0DD\uD55C \uD0C0\uC77C\uC5D0\uC11C \uC8FD\uC740 \uAE30\uBB3C
+    \uC911 \uAC00\uC7A5 \uAC00\uCE58\uAC00 \uB192\uC740 \uAE30\uBB3C\uC774 \uBD80\uD65C\uD569\uB2C8\uB2E4."
+  Type: 1
+  CardTier: 4
+  PieceType: 12
   PieceTargetColor: 0
-  PieceLimitTurn: 0
-  RequiredPieceCount: 0
-  TileCount: 0
+  PieceLimitTurn: 2
+  RequiredPieceCount: 1
+  TileCount: 1
   MaintainTurn: 0
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  NeedTargetColor: 1
+  NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0

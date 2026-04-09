@@ -373,6 +373,7 @@ public class BoardManager : MonoBehaviour
                 castling.OnRookDie(targetPiece.Color, target);
             }
             // 잡히는 대상 파괴
+            AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
         }
 
@@ -796,6 +797,7 @@ public class BoardManager : MonoBehaviour
             {
                 castling.OnRookDie(targetPiece.Color, target);
             }
+            AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
         }
 
@@ -854,6 +856,30 @@ public class BoardManager : MonoBehaviour
             board[target.x, target.y] = pieces[i];
             Vector3 worldPos = GridPosToWorldPos(target);
             pieces[i].Move(target, worldPos);
+        }
+    }
+
+    private List<PieceType> whiteDeadPieces = new();
+    private List<PieceType> blackDeadPieces = new();
+    public void AppendDeadPiece(PieceType type,PieceColor color)
+    {
+        if (color == PieceColor.White)
+            whiteDeadPieces.Add(type);
+        else
+            blackDeadPieces.Add(type);
+    }
+    public List<PieceType> WhiteDeadPieces
+    {
+        get
+        {
+            return whiteDeadPieces;
+        }
+    }
+    public List<PieceType> BlackDeadPieces
+    {
+        get
+        {
+            return blackDeadPieces;
         }
     }
 }
