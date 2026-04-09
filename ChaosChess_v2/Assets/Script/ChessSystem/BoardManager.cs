@@ -790,16 +790,27 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    private List<Piece> deadPieces;
-    public void AppendDeadPiece(Piece piece)
+    private List<PieceType> whiteDeadPieces = new();
+    private List<PieceType> blackDeadPieces = new();
+    public void AppendDeadPiece(PieceType type,PieceColor color)
     {
-        deadPieces.Add(piece);
+        if (color == PieceColor.White)
+            whiteDeadPieces.Add(type);
+        else
+            blackDeadPieces.Add(type);
     }
-    public List<Piece> DeadPieces
+    public List<PieceType> WhiteDeadPieces
     {
         get
         {
-            return deadPieces;
+            return whiteDeadPieces;
+        }
+    }
+    public List<PieceType> BlackDeadPieces
+    {
+        get
+        {
+            return blackDeadPieces;
         }
     }
 }

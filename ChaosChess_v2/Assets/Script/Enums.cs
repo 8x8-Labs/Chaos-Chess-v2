@@ -15,11 +15,12 @@ public enum PieceType
     Chancellor = 256,
     KnightRider = 512
 }
-public enum Value
+public enum PieceValue
 {
     Wall = 0,
     Pawn = 1,
     Knight = 3,
+    King = 3,
     Bishop = 3,
     Rook = 5,
     KnightRider = 7,
