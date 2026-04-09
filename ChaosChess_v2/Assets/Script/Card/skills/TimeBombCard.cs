@@ -25,8 +25,6 @@ public class TimeBombCard : CardData, ITileCard
     public void Execute(CardEffectArgs args = null)
     {
         List<Vector3Int> tiles = args.TargetPos;
-        // TODO: 선택된 빈 칸에 시한폭탄 배치
-        //       DataSO.MaintainTurn(3)턴 후 해당 칸과 상하좌우 4칸의 기물을 모두 파괴 처리
 
         Vector3Int center = args.TargetPos[0];
 
