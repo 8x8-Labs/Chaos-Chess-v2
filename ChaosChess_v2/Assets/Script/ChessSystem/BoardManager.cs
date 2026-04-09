@@ -477,7 +477,7 @@ public class BoardManager : MonoBehaviour
     }
 
     ///<summary> 기물들을 지웁니다 </summary> 
-    public void DestroyPieces(List<Piece> pieces)
+    public void DestroyPieces(List<Piece> pieces, bool Refresh = true)
     {
         if (pieces == null) return;
 
@@ -485,7 +485,8 @@ public class BoardManager : MonoBehaviour
         {
             DestroyPiece(piece, false);
         }
-        RefreshMoves();
+        if (Refresh)
+            RefreshMoves();
     }
 
     /// <summary>기물을 보드 배열과 리스트에서 제거합니다. GameObject는 유지됩니다.</summary>
@@ -680,6 +681,29 @@ public class BoardManager : MonoBehaviour
                 effector.OnPieceCapture(piece, dest);
 
         }
+    }
+
+    public void ClearAllGlobalEffectors()
+    {
+        foreach (var effector in globalEffectors)
+        {
+            effector.Revert();
+        }
+
+        globalEffectors.Clear();
+    }
+
+    public void ClearAllTileEffectors()
+    {
+        foreach (var pair in tileEffectors)
+        {
+            foreach (var effector in pair.Value)
+            {
+                effector.Revert();
+            }
+        }
+
+        tileEffectors.Clear();
     }
 
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
