@@ -15,7 +15,19 @@ public enum PieceType
     Chancellor = 256,
     KnightRider = 512
 }
-
+public enum PieceValue
+{
+    Wall = 0,
+    Pawn = 1,
+    Knight = 3,
+    King = 3,
+    Bishop = 3,
+    Rook = 5,
+    KnightRider = 7,
+    Queen = 9,
+    Chancellor = 9,
+    Amazon = 13
+}
 /// <summary>
 /// [전역 대상] 기물 적용 대상을 구별합니다.
 /// </summary>
