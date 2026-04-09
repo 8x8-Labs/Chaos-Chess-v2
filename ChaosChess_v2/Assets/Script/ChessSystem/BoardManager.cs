@@ -789,4 +789,17 @@ public class BoardManager : MonoBehaviour
             pieces[i].Move(target, worldPos);
         }
     }
+
+    private List<Piece> deadPieces;
+    public void AppendDeadPiece(Piece piece)
+    {
+        deadPieces.Add(piece);
+    }
+    public List<Piece> DeadPieces
+    {
+        get
+        {
+            return deadPieces;
+        }
+    }
 }
