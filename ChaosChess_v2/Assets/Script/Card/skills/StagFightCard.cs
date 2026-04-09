@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 /// <summary>
 /// 배수진 - 전역
@@ -9,8 +9,11 @@ public class StagFightCard : CardData, ICard
     public void Execute(CardEffectArgs args = null)
     {
         var effector = CreateGlobalEffector<StagFightEffector>();
+        // CreateGlobalEffector는 LimitTurn으로 초기화하지만 Revert는 AppendAction(PieceLimitTurn)으로만 처리.
+        // 내부 카운트다운이 먼저 만료되어 조기 초기화되는 문제를 막기 위해 영구 지속으로 덮어씀.
+        effector.Init(DataSO.PieceType, ApplyType.All, DataSO.LimitTurn);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
+        // GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
     }
 }
 public class StagFightEffector : GlobalEffector
@@ -38,9 +41,7 @@ public class StagFightEffector : GlobalEffector
                 case PieceType.Knight:
                     piece.MoveFenOverride = "g";
                     break;
-                case PieceType.King:
-                    piece.MoveFenOverride = "j";
-                    break;
+                // PieceType.King 제외: "j"(fK)는 non-royal 기물이라 FEN에서 킹이 사라져 legal moves = 0 발생
                 default:
                     changed.Remove(piece);
                     break;
@@ -57,11 +58,9 @@ public class StagFightEffector : GlobalEffector
     {
         foreach (Piece piece in changed)
         {
-            string p = piece.MoveFenOverride;
-            if (p == "o" || p == "i" || p == "h" || p == "g" || p == "j")
-            {
+            string p = piece.MoveFenOverride?.ToLower();
+            if (p == "o" || p == "i" || p == "h" || p == "g")
                 piece.MoveFenOverride = null;
-            }
         }
         BoardManager.Instance.RefreshMoves();
     }

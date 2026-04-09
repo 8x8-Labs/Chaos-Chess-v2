@@ -586,20 +586,20 @@ public class BoardManager : MonoBehaviour
 
         //백룩
         Piece rook1 = GetPiece(UCIToGrid("a1"));
-        if (!(rook1 is Rook) || rook1.Color != PieceColor.White)
+        if (!(rook1 is Rook) || rook1.Color != PieceColor.White || rook1.MoveFenOverride != null)
             castling.OnRookMove(PieceColor.White, UCIToGrid("a1"));
 
         Piece rook2 = GetPiece(UCIToGrid("h1"));
-        if (!(rook2 is Rook) || rook2.Color != PieceColor.White)
+        if (!(rook2 is Rook) || rook2.Color != PieceColor.White || rook2.MoveFenOverride != null)
             castling.OnRookMove(PieceColor.White, UCIToGrid("h1"));
 
         //흑룩
         Piece rook3 = GetPiece(UCIToGrid("a8"));
-        if (!(rook3 is Rook) || rook3.Color != PieceColor.Black)
+        if (!(rook3 is Rook) || rook3.Color != PieceColor.Black || rook3.MoveFenOverride != null)
             castling.OnRookMove(PieceColor.Black, UCIToGrid("a8"));
 
         Piece rook4 = GetPiece(UCIToGrid("h8"));
-        if (!(rook4 is Rook) || rook4.Color != PieceColor.Black)
+        if (!(rook4 is Rook) || rook4.Color != PieceColor.Black || rook4.MoveFenOverride != null)
             castling.OnRookMove(PieceColor.Black, UCIToGrid("h8"));
     }
 
