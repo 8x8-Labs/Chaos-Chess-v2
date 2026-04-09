@@ -100,6 +100,8 @@ public class BoardManager : MonoBehaviour
 
     public System.Action<Piece, Vector3Int> OnPromotionRequired;
 
+    private List<GlobalEffector> globalEffectors = new();
+
     private Castling castling = new Castling();
     private Vector3Int enPassantPos = new Vector3Int(-1, -1, -1);
 
@@ -210,7 +212,12 @@ public class BoardManager : MonoBehaviour
         halfmoveClock = int.Parse(SliceFEN[4]);
         fullmoveNumber = int.Parse(SliceFEN[5]);
 
+        CheckCastlingRights();
+        UpdateFEN();
+
         FairyStockfishBridge.Instance.SetPosition(FEN);
+
+        CheckKingExistence();
     }
 
     /// <summary> 모든 기물들이 이동 가능한 위치를 업데이트 합니다 </summary>
@@ -400,6 +407,7 @@ public class BoardManager : MonoBehaviour
             }
         }
 
+        TriggerGlobalEffectors(piece, target, isCapture);
         TriggerTileEnter(target, piece);
 
         foreach (var eff in piece.GetComponents<IPieceEffect>())
@@ -581,6 +589,8 @@ public class BoardManager : MonoBehaviour
 
         FEN += halfmoveClock + " " + fullmoveNumber;
         FairyStockfishBridge.Instance.SetPosition(FEN);
+
+        CheckKingExistence();
     }
 
     /// <summary>FEN을 업데이트하고 기물들이 이동 가능한 위치를 초기화합니다 </summary>
@@ -651,6 +661,27 @@ public class BoardManager : MonoBehaviour
         return true;
     }
 
+    public void RegisterGlobalEffector(GlobalEffector effector)
+    {
+        globalEffectors.Add(effector);
+    }
+
+    public void UnregisterGlobalEffector(GlobalEffector effector)
+    {
+        globalEffectors.Remove(effector);
+    }
+
+    private void TriggerGlobalEffectors(Piece piece, Vector3Int dest, bool isCapture)
+    {
+        foreach (var effector in new List<GlobalEffector>(globalEffectors))
+        {
+            effector.OnPieceAct(piece, dest);
+            if (isCapture)
+                effector.OnPieceCapture(piece, dest);
+
+        }
+    }
+
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
     {
         if (!tileEffectors.TryGetValue(pos, out var list))
@@ -699,6 +730,28 @@ public class BoardManager : MonoBehaviour
             }
         }
         return targetPieces;
+    }
+
+    private void CheckKingExistence()
+    {
+        bool whiteAlive = HasKing(PieceColor.White);
+        bool blackAlive = HasKing(PieceColor.Black);
+
+        if (!whiteAlive || !blackAlive)
+        {
+            PieceColor winner = whiteAlive ? PieceColor.White : PieceColor.Black;
+            GameManager.Instance.EndGame(winner);
+        }
+    }
+
+    private bool HasKing(PieceColor color)
+    {
+        foreach (var piece in Pieces)
+        {
+            if (piece is King && piece.Color == color)
+                return true;
+        }
+        return false;
     }
 
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>

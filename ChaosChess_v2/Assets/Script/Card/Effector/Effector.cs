@@ -112,6 +112,11 @@ public abstract class GlobalEffector : Effector
     /// <param name="dest">이동한 목적지</param>
     public virtual void OnPieceAct(Piece piece, Vector3Int dest) { }
 
+    /// <summary>조건에 맞는 기물이 다른 기물을 잡을 때 호출됩니다.</summary>
+    /// <param name="piece">행동한 기물</param>
+    /// <param name="dest">이동한 목적지</param>
+    public virtual void OnPieceCapture(Piece piece, Vector3Int dest) { }
+
     /// <summary>행동한 기물이 감시 조건(타입, 색상)에 해당하는지 확인합니다.</summary>
     protected bool IsWatching(Piece piece)
     {
