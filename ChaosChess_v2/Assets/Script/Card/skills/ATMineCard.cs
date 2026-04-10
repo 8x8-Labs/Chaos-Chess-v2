@@ -115,6 +115,7 @@ public class ATMineEffector : GlobalEffector
 
     private void Explode()
     {
+        bool pieceDestroyed = false;
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
@@ -123,10 +124,13 @@ public class ATMineEffector : GlobalEffector
 
                 Piece target = BoardManager.Instance.GetPiece(checkPos);
                 if (target == null) continue;
-
-                BoardManager.Instance.DestroyPiece(target);
+                BoardManager.Instance.DestroyPiece(target, false);
+                pieceDestroyed = true;
             }
         }
+
+        if (pieceDestroyed)
+            BoardManager.Instance.RefreshMoves();
 
         Revert();
     }
