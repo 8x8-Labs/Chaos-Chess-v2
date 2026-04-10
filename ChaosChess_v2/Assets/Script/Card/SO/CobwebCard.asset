@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: CobwebCard
+  m_EditorClassIdentifier: 
+  CardName: "\uAC70\uBBF8\uC904"
+  CardImage: {fileID: 0}
+  CardDescription: "\uD2B9\uC815 \uCE78\uC5D0 \uAC70\uBBF8\uC904\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4.\r\n\uAE30\uBB3C\uC758
+    \uC774\uB3D9\uACBD\uB85C\uC5D0 \uAC70\uBBF8\uC904\uC774 \uC788\uC73C\uBA74 3\uD134\uB3D9\uC548
+    \uADF8 \uAE30\uBB3C\uC740 \uC774\uB3D9 \uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
+  Type: 1
+  CardTier: 1
+  PieceType: 0
+  PieceTargetColor: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 0
+  TileCount: 1
+  MaintainTurn: 3
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 1
+  LimitTurn: 3
+  NeedAdditionalDescription: 0
+  DescriptionType: 0

@@ -126,4 +126,6 @@ public abstract class GlobalEffector : Effector
             || (watchColor == ApplyType.Black && piece.Color == PieceColor.Black);
         return typeMatch && colorMatch;
     }
+
+    public virtual bool CanPieceAct(Piece piece, Vector3Int from, Vector3Int to) { return true; }
 }
