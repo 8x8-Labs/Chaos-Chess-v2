@@ -318,10 +318,14 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("체크");
     }
-    
-    public void EndGame(PieceColor winner)
+
+    public void EndGame(ApplyType winner)
     {
-        if (winner == PlayerColor)
+        if (winner == ApplyType.All)
+        {
+            OnDraw();
+        }
+        else if (winner == ApplyType.White)
         {
             Debug.Log("플레이어 승리");
         }
