@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 /// <summary>
@@ -23,8 +25,46 @@ public class GiantCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Piece> pieces = args.Targets;
-        // TODO: 선택된 기물에게 거대화 효과 부여
-        //       해당 기물이 이동할 때마다 1칸 반경의 기물들을 1턴 동안 이동 불가(무력화) 처리
+        Piece piece = args.Targets[0];
+        var effector = CreatePieceEffector<GiantEffector>(piece);
+        effector.Apply();
     }
+}
+public class GiantEffector : PieceEffector
+{
+    protected override void OnApply()
+    {
+    }
+    int[] dx = { -1, -1, -1, 0, 1, 1, 1, 0 };
+    int[] dy = { -1, 0, 1, 1, 1, 0, -1, -1 };
+    List<Piece> changed = new();
+    public override void OnPieceMove(Vector3Int dest)
+    {
+        for(int i = 0; i < 8; i++)
+        {
+            int x = dx[i];
+            int y = dy[i];
+            Vector3Int pos = new Vector3Int(dest.x + x, dest.y + y, dest.z);
+            if (BoardManager.Instance.IsInside(pos))
+            {
+                Piece target = BoardManager.Instance.GetPiece(pos);
+                if (target != null)
+                {
+                    changed.Add(target);
+                    target.MoveFenOverride = "a";
+                }
+            }
+        }
+    }
+    protected override void OnRevert()
+    {
+        if (changed == null)
+            return;
+        foreach(Piece piece in changed)
+        {
+            piece.MoveFenOverride = null;
+        }
+        Destroy(this);
+    }
+
 }
