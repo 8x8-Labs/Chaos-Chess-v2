@@ -25,7 +25,7 @@ public class OverbearingEffector : GlobalEffector
             if (piece.Color == GameManager.Instance.turnColor)
                 continue;
             Vector3Int cur = piece.Pos;
-            Vector3Int nx = new Vector3Int(cur.x, cur.y + (piece.Color == PieceColor.White) ? -1 : 1;, cur.z);
+            Vector3Int nx = new Vector3Int(cur.x, cur.y + (piece.Color == PieceColor.White ? -1 : 1), cur.z);
             if (BoardManager.Instance.IsInside(nx) && !IsOccupied(nx))
                 BoardManager.Instance.ForceTeleport(piece, nx);
             else
