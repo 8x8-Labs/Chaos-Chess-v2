@@ -184,6 +184,7 @@ public class BoardManager : MonoBehaviour
 
                 // 상태 설정
                 piece.Init(pos, isWhite ? PieceColor.White : PieceColor.Black);
+                piece.StartPos = pos;
 
                 // 보드 등록
                 AddPiece(piece, pos);
@@ -425,7 +426,7 @@ public class BoardManager : MonoBehaviour
         // AI 프로모션 (UCI)
         if (promotion != '\0')
         {
-            ChangePiece(pos, color, promotion);
+            ChangePiece(pos, color, promotion,pawn);
         }
         else
         {
@@ -435,8 +436,12 @@ public class BoardManager : MonoBehaviour
     }
 
     ///<summary> pos에 새로운 기물을 추가합니다 </summary> 
-    public void ChangePiece(Vector3Int pos, PieceColor color, char type)
+    public void ChangePiece(Vector3Int pos, PieceColor color, char type,Piece prom=null)
     {
+        Vector3Int sp = new();
+        if (prom != null)
+            sp = prom.StartPos;
+
         DestroyPiece(pos);
 
         char key = char.ToLower(type);
@@ -447,6 +452,11 @@ public class BoardManager : MonoBehaviour
 
             newPiece.Init(pos, color);
             AddPiece(newPiece, pos);
+            if (prom != null)
+            {
+                newPiece.IsPromotioned = true;
+                newPiece.StartPos = sp;
+            }
 
             Vector3 WorldPos = GridPosToWorldPos(pos);
             newPiece.Move(pos, WorldPos);

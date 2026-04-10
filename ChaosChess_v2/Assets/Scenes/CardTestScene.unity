@@ -3618,10 +3618,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2ab82db7fd23444aa4b970cd14f82af, type: 3}
+  m_Script: {fileID: 11500000, guid: 7280cf3106c6edd498ad72fa5754092d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: 79abf7259bcdaa24890eca638dad2470, type: 2}
+  DataSO: {fileID: 11400000, guid: b46ad858c7f486d4497ddeac23e32d62, type: 2}
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
@@ -4155,7 +4155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac18b6f187956544a39dae33ac45dcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FEN: 8/rnbk4/pppp4/8/8/8/PPPPPPPS/RNBQKBNR w KQkq - 0 1
+  FEN: 8/3k4/pppp4/8/8/8/4PPPS/4KBNR w KQkq - 0 1
   FENMapList:
   - FENChar: 112
     prefab: {fileID: 4250557358645613848, guid: 284f131cb8f24b946a2208b0313947c3, type: 3}

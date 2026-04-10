@@ -16,8 +16,10 @@ public class Piece : MonoBehaviour
     /// <summary>1회 죽음 무효화 플래그. AI가 이 기물을 잡으려 하면 취소됩니다.</summary>
     public bool IsInvincible { get; private set; } = false;
 
-    public Vector3Int PrevPos { get; private set; }
+    public Vector3Int StartPos;
+    public bool IsPromotioned = false;
 
+    public Vector3Int PrevPos { get; private set; }
     public void SetInvincible()
     {
         IsInvincible = true;
