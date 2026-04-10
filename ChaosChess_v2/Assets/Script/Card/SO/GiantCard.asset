@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: GiantCard
+  m_EditorClassIdentifier: 
+  CardName: "\uAC70\uB300\uD654"
+  CardImage: {fileID: 0}
+  CardDescription: "\uAE30\uBB3C \uC774\uB3D9 \uC2DC 1\uCE78 \uBC18\uACBD\uC758 \uAE30\uBB3C\uB4E4\uC744
+    1\uD134 \uB3D9\uC548 \uBB34\uB825\uD654\uC2DC\uD0B5\uB2C8\uB2E4."
+  Type: 0
+  CardTier: 2
+  PieceType: 7
+  PieceTargetColor: 0
+  PieceLimitTurn: 2
+  RequiredPieceCount: 1
+  TileCount: 0
+  MaintainTurn: 0
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0
