@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 
 /// <summary>
@@ -33,7 +31,7 @@ public class CobwebCard : CardData, ITileCard
         effect.Apply();
     }
 
-    public void OnStuckWap(Piece piece)
+    public void OnStuckWrap(Piece piece)
     {
         CobwebPieceEffector pieceEffect = piece.gameObject.AddComponent<CobwebPieceEffector>();
         pieceEffect.Init(piece, DataSO.LimitTurn);
@@ -74,7 +72,7 @@ public class CobwebEffector : GlobalEffector
             {
                 isTriggered = true;
                 BoardManager.Instance.ForceTeleport(piece, TilePos, '\0', false);
-                cobwebCard.OnStuckWap(piece);
+                cobwebCard.OnStuckWrap(piece);
                 BoardManager.Instance.RefreshMoves();
                 Revert();
                 return false;
