@@ -23,19 +23,20 @@ public class FatherEnemyCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        var effector = CreatePieceEffector<FatherEnemyEffector>(args.Targets[0]);
+        Create(args.Targets[0]);
+    }
+
+    public void Create(Piece piece)
+    {
+        var effector = CreatePieceEffector<FatherEnemyEffector>(piece);
+        effector.fatherEnemyCard = this;
         effector.Apply();
     }
 }
 
 public class FatherEnemyEffector : PieceEffector
 {
-    protected override void OnApply()
-    {
-        target.IsAwakened = true;
-
-        GameManager.Instance.OnAwakenedPieceSelected += OnPieceSelected;
-    }
+    public FatherEnemyCard fatherEnemyCard;
 
     private void OnPieceSelected(Piece piece)
     {
@@ -44,9 +45,22 @@ public class FatherEnemyEffector : PieceEffector
         GameManager.Instance.UI.ShowAwakenButton(() => UpgradePiece());
     }
 
+    protected override void OnApply()
+    {
+        target.IsAwakened = true;
+
+        GameManager.Instance.OnAwakenedPieceSelected += OnPieceSelected;
+    }
+
     protected override void OnRevert()
     {
         GameManager.Instance.OnAwakenedPieceSelected -= OnPieceSelected;
+
+        GameManager.Instance.NextTurn();
+
+        if (!GameManager.Instance.IsPlayerTurn)
+            GameManager.Instance.RequestAIMove();
+
         Destroy(this);
     }
 
@@ -79,17 +93,17 @@ public class FatherEnemyEffector : PieceEffector
 
         BoardManager.Instance.ChangePiece(pos, color, nextType);
         target = BoardManager.Instance.GetPiece(pos);
-        target.IsAwakened = true;
 
         if (nextType == 'q')
         {
             FinishAwakening();
         }
+        else
+        {
+            OnRevert();
+            fatherEnemyCard.Create(target);
+        }
 
-        GameManager.Instance.NextTurn();
-
-        if (!GameManager.Instance.IsPlayerTurn)
-            GameManager.Instance.RequestAIMove();
     }
 
     private void FinishAwakening()
