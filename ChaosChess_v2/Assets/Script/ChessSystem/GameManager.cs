@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     public event Action OnHalfTurnChanged;
     /// <summary>시간역행 카드 전용 이벤트 입니다.</summary>
     public event Action<Action, Action> OnTimeReversalRequired;
-    /// <summary>부모님의 원수 카드 전용 이벤트 입니다.</summary>
+    /// <summary>아버지의 원수 카드 전용 이벤트 입니다.</summary>
     public event Action<Piece> OnAwakenedPieceSelected;
 
     public PieceColor turnColor

@@ -55,25 +55,25 @@ public class UIManager : MonoBehaviour
     }
 
 
-    [SerializeField] private GameObject AwakenPenal;
+    [SerializeField] private GameObject AwakenPanel;
 
     private System.Action onAwakenClick;
 
     public void HideAwakenButton()
     {
-        AwakenPenal.SetActive(false);
+        AwakenPanel.SetActive(false);
         onAwakenClick = null;
     }
 
     public void ShowAwakenButton(System.Action callback)
     {
         onAwakenClick = callback;
-        AwakenPenal.SetActive(true);
+        AwakenPanel.SetActive(true);
     }
 
     public void OnClickAwaken()
     {
-        AwakenPenal.SetActive(false);
+        AwakenPanel.SetActive(false);
         onAwakenClick?.Invoke();
     }
 }

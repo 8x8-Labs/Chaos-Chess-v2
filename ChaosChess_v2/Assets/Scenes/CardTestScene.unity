@@ -4406,7 +4406,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PromotionPanel: {fileID: 2040316850}
   TimeReversalPanel: {fileID: 1616586413}
-  AwakenPenal: {fileID: 923123053}
+  AwakenPanel: {fileID: 923123053}
 --- !u!1 &1754209157
 GameObject:
   m_ObjectHideFlags: 0

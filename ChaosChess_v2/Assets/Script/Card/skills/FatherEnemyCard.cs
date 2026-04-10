@@ -73,8 +73,10 @@ public class FatherEnemyEffector : PieceEffector
             case "b":
                 nextType = 'q';
                 break;
+            default:
+                return;
         }
-        Debug.Log(nextType);
+
         BoardManager.Instance.ChangePiece(pos, color, nextType);
         target = BoardManager.Instance.GetPiece(pos);
         target.IsAwakened = true;
