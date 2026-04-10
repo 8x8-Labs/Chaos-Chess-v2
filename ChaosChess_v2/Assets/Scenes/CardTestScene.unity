@@ -3608,7 +3608,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9cc2e5015fe2048b92607aa98cc663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardType: 1
+  cardType: 2
 --- !u!114 &1507320768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3618,10 +3618,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f074356b39cf4246aaecc3cd1b70891, type: 3}
+  m_Script: {fileID: 11500000, guid: 395a443c22426be46a1df3b7a5565103, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: 57323082823e8ff44874da6ace4ceb9f, type: 2}
+  DataSO: {fileID: 11400000, guid: 6fc371a23ffb25d43b0282302c228715, type: 2}
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
@@ -4155,7 +4155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac18b6f187956544a39dae33ac45dcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPS/RNBQKBNR w KQkq - 0 1
+  FEN: 8/rnbk4/pppp4/8/8/8/PPPPPPPS/RNBQKBNR w KQkq - 0 1
   FENMapList:
   - FENChar: 112
     prefab: {fileID: 4250557358645613848, guid: 284f131cb8f24b946a2208b0313947c3, type: 3}
