@@ -16,6 +16,9 @@ public class Piece : MonoBehaviour
     /// <summary>1회 죽음 무효화 플래그. AI가 이 기물을 잡으려 하면 취소됩니다.</summary>
     public bool IsInvincible { get; private set; } = false;
 
+    /// <summary>부모님의 원수 카드에 사용하는 현재 기물이 각성상태인지 확인하는 변수입니다 </summary>
+    public bool IsAwakened { get; set; }
+
     public Vector3Int PrevPos { get; private set; }
 
     public void SetInvincible()

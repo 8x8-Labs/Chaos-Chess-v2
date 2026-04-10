@@ -53,4 +53,27 @@ public class UIManager : MonoBehaviour
         TimeReversalPanel.SetActive(false);
         onNo?.Invoke();
     }
+
+
+    [SerializeField] private GameObject AwakenPenal;
+
+    private System.Action onAwakenClick;
+
+    public void HideAwakenButton()
+    {
+        AwakenPenal.SetActive(false);
+        onAwakenClick = null;
+    }
+
+    public void ShowAwakenButton(System.Action callback)
+    {
+        onAwakenClick = callback;
+        AwakenPenal.SetActive(true);
+    }
+
+    public void OnClickAwaken()
+    {
+        AwakenPenal.SetActive(false);
+        onAwakenClick?.Invoke();
+    }
 }
