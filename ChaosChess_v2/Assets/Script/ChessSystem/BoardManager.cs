@@ -752,12 +752,19 @@ public class BoardManager : MonoBehaviour
         bool whiteAlive = HasKing(PieceColor.White);
         bool blackAlive = HasKing(PieceColor.Black);
 
-        if (!whiteAlive || !blackAlive)
+        if (!whiteAlive && !blackAlive)
         {
-            PieceColor winner = whiteAlive ? PieceColor.White : PieceColor.Black;
-            GameManager.Instance.EndGame(winner);
+            GameManager.Instance.EndGame(ApplyType.All);
         }
-    }
+        else if (!whiteAlive)
+        {
+            GameManager.Instance.EndGame(ApplyType.Black);
+        }
+        else if (!blackAlive)
+        {
+            GameManager.Instance.EndGame(ApplyType.White);
+        }
+    }   
 
     private bool HasKing(PieceColor color)
     {
@@ -861,7 +868,7 @@ public class BoardManager : MonoBehaviour
 
     private List<PieceType> whiteDeadPieces = new();
     private List<PieceType> blackDeadPieces = new();
-    public void AppendDeadPiece(PieceType type,PieceColor color)
+    public void AppendDeadPiece(PieceType type, PieceColor color)
     {
         if (color == PieceColor.White)
             whiteDeadPieces.Add(type);
