@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// 윤회 - 기물 전용 (고급)
-/// 2턴 동안 룩은 비숍의 행마법대로, 비숍은 룩의 행마법대로 움직입니다.
+/// 프로모션한 상대 폰의 모습과 위치를 되돌립니다.
 /// </summary>
 public class TransmigrationCard : CardData, IPieceCard
 {
@@ -38,7 +38,7 @@ public class TransmigrationCard : CardData, IPieceCard
                     int y = dy[i];
                     Vector3Int can = new Vector3Int(sp.x + x, sp.y + y, sp.z);
                     Piece p = BoardManager.Instance.GetPiece(can);
-                    if (p == null && flag)
+                    if (BoardManager.Instance.IsInside(can) && p == null && flag)
                     {
                         Debug.Log("moved");
                         BoardManager.Instance.ForceTeleport(cur,can);
