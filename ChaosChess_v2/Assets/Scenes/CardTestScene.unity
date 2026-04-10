@@ -3608,7 +3608,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd9cc2e5015fe2048b92607aa98cc663, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardType: 2
+  cardType: 0
 --- !u!114 &1507320768
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3618,10 +3618,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1507320761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 395a443c22426be46a1df3b7a5565103, type: 3}
+  m_Script: {fileID: 11500000, guid: 865d3bbe888352d4b9b4b62382bba6c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: 6fc371a23ffb25d43b0282302c228715, type: 2}
+  DataSO: {fileID: 11400000, guid: b5b8cb25f2e7e904ca8c7d279042d131, type: 2}
 --- !u!1 &1567853222
 GameObject:
   m_ObjectHideFlags: 0
