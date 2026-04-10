@@ -662,8 +662,13 @@ public class BoardManager : MonoBehaviour
 
     private bool CanMoveToTile(Piece piece, Vector3Int from, Vector3Int to)
     {
-        if (!tileEffectors.TryGetValue(to, out var list)) return true;
+        foreach (var effector in globalEffectors)
+        {
+            if (!effector.CanPieceAct(piece, from, to))
+                return false;
+        }
 
+        if (!tileEffectors.TryGetValue(to, out var list)) return true;
         foreach (var effector in list)
         {
             if (!effector.CanPieceEnter(piece, from, to))
@@ -774,7 +779,7 @@ public class BoardManager : MonoBehaviour
         {
             GameManager.Instance.EndGame(ApplyType.White);
         }
-    }   
+    }
 
     private bool HasKing(PieceColor color)
     {

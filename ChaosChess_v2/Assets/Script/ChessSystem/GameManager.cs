@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
     public event Action OnHalfTurnChanged;
     /// <summary>시간역행 카드 전용 이벤트 입니다.</summary>
     public event Action<Action, Action> OnTimeReversalRequired;
+    /// <summary>아버지의 원수 카드 전용 이벤트 입니다.</summary>
+    public event Action<Piece> OnAwakenedPieceSelected;
+
     public PieceColor turnColor
     {
         get
@@ -49,6 +52,8 @@ public class GameManager : MonoBehaviour
     }
 
     private UIManager uiManager;
+    public UIManager UI => uiManager;
+
     private BoardUI boardUI;
 
     private Piece selectedPiece;
@@ -99,6 +104,8 @@ public class GameManager : MonoBehaviour
             extraPlayerActions = 0;
             lockedPiece = null;
         }
+
+        UI.HideAwakenButton();
 
         Piece piece = BoardManager.Instance.GetPiece(pos);
 
@@ -180,6 +187,7 @@ public class GameManager : MonoBehaviour
     private void SelectPiece(Piece piece)
     {
         selectedPiece = piece;
+        OnAwakenedPieceSelected?.Invoke(piece);
     }
 
     public void NextTurn()

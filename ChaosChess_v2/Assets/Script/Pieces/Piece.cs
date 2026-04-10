@@ -18,6 +18,8 @@ public class Piece : MonoBehaviour
 
     public Vector3Int StartPos;
     public bool IsPromotioned = false;
+    /// <summary>부모님의 원수 카드에 사용하는 현재 기물이 각성상태인지 확인하는 변수입니다 </summary>
+    public bool IsAwakened { get; set; }
 
     public Vector3Int PrevPos { get; private set; }
     public void SetInvincible()
