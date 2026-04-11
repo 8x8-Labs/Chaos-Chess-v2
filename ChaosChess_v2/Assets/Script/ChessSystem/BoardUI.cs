@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.Tilemaps;
@@ -23,14 +23,14 @@ public class BoardUI : MonoBehaviour
         UIChessBoard.SetTile(pos, SelectTile);
         UIChessBoard.SetTileFlags(pos, TileFlags.None);
 
-        Matrix4x4 startMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.zero);
+        Matrix4x4 startMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(0.5f, 0.5f, 1f));
         UIChessBoard.SetTransformMatrix(pos, startMatrix);
 
-        DOTween.To(() => 0f, val =>
+        DOTween.To(() => 0.5f, val =>
         {
             Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(val, val, 1));
             UIChessBoard.SetTransformMatrix(pos, matrix);
-        }, 1f, 0.15f).SetEase(Ease.OutBack); // 살짝 튕기는 효과
+        }, 1f, 0.25f).SetEase(Ease.OutQuint);
     }
     
     public void DeleteSelectTile()
@@ -69,11 +69,11 @@ public class BoardUI : MonoBehaviour
             UIChessBoard.SetTransformMatrix(pos, startMatrix);
 
             Vector3Int capturedPos = pos;
-            DOTween.To(() => 0f, val =>
+            DOTween.To(() => 0.5f, val =>
             {
                 Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(val, val, 1));
                 UIChessBoard.SetTransformMatrix(capturedPos, matrix);
-            }, 1f, 0.15f).SetEase(Ease.OutBack);
+            }, 1f, 0.25f).SetEase(Ease.OutQuint);
 
             drawnMoveTilePositions.Add(pos);
         }

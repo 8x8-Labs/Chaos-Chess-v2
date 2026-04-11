@@ -200,12 +200,14 @@ public class Piece : MonoBehaviour
         canMovePos.Add(pos);
     }
 
+    public const float MoveDuration = 0.5f;
+
     public virtual void Move(Vector3Int target, Vector3 WorldPos, bool animate = true)
     {
         Pos = target;
 
         if (animate)
-            transform.DOMove(WorldPos, 0.2f).SetEase(Ease.OutQuad);
+            transform.DOMove(WorldPos, MoveDuration).SetEase(Ease.OutQuint);
         else
             transform.position = WorldPos;
     }
