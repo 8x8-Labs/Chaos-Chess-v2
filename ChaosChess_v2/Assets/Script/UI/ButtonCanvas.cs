@@ -65,7 +65,7 @@ public class ButtonCanvas : ButtonParent
         canvasGroup.DOFade(0f, fadeDuration)
             .OnComplete(() => 
             {
-                DisableParent();
+                canvas.enabled = false;
             });
     }
 }
