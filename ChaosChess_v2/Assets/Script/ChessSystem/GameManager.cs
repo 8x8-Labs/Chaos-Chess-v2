@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public GameResult FinishType { private get; set; } = GameResult.None;
+    public GameResult FinishType { get; set; } = GameResult.None;
 
     public static GameManager Instance;
 
@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
-    public bool IsEndGame = false;
+    public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
 
