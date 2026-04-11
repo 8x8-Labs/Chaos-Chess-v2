@@ -31,7 +31,7 @@ public class MapManager : MonoBehaviour
         currentFloor = 0;
 
         int startELO = Random.Range(800, 1200);
-        for (int i = 0; i < totalFloors; i++)
+        for (int i = totalFloors-1; i >= 0; i--)
         {
             Map map = new Map();
             map.ELO = startELO + 150 * i;
