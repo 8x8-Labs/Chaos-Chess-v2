@@ -8,6 +8,8 @@ public class CardAnim : MonoBehaviour
     [SerializeField] private float duration;
     [SerializeField] private Ease enableEase;
     [SerializeField] private Ease disableEase;
+
+    private Ease disappearEase = Ease.InOutQuad;
     private Image cardSprite;
 
     private CardData cardData;
@@ -35,7 +37,15 @@ public class CardAnim : MonoBehaviour
 
     public void DestroyCard()
     {
-        cardSprite.rectTransform.DOAnchorPosY(startYPos, duration).SetEase(disableEase)
-            .OnComplete(() => Destroy(gameObject));
+        var rt = GetComponent<RectTransform>();
+        cardSprite.rectTransform.DOAnchorPosY(startYPos, duration / 2f)
+            .SetEase(disableEase)
+            .OnComplete(
+            () =>
+            {
+                rt.DOSizeDelta(new Vector2(0, rt.sizeDelta.y), 0.2f)
+                    .SetEase(disappearEase)
+                    .OnComplete(() => Destroy(gameObject));
+            });
     }
 }

@@ -205,3 +205,4 @@ MonoBehaviour:
   duration: 0.7
   enableEase: 12
   disableEase: 4
+  cardWidth: 436
