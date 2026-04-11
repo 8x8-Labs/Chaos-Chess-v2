@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
+    public bool IsEndGame = false;
     public bool IsArenaMode { get; set; } = false;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
 
@@ -389,8 +390,7 @@ public class GameManager : MonoBehaviour
     // (임시) 게임 종료 메서드
     private void EndGame()
     {
-        Debug.Log("끝");
-
+        IsEndGame = true;
         UI.ShowEndGamePanel(FinishType);
     }
 }
