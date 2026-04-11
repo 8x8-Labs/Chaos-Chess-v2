@@ -6,16 +6,15 @@ public class CardRandomizer : MonoBehaviour
     [SerializeField] private GameObject[] cardPrefabs;
     [SerializeField] private Transform content;
     [SerializeField] private int drawCount = 3;
+    [SerializeField] private int startCard = 3;
 
     private int currentCardCnt = 0;
 
-    private void Update()
+    private void Start()
     {
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            GenerateCards();
-        }
+        for (int i = 0; i < startCard; i++) GenerateCards();
     }
+
     public void GenerateCards()
     {
         //foreach (Transform child in content)

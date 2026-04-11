@@ -20,7 +20,7 @@ public class PieceSelector : Selector<Piece>
         selectedTargets.Remove(Target);
         pieceDrawer.EraseSelectPiece(Target);
 
-        Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
+        // Debug.Log($"기물 선택 해제! 현재 남은 개수: {selectedTargets.Count}");
         selectorUI.UpdateButtonState(executable);
     }
     public override void DeselectAllTarget()
@@ -78,7 +78,7 @@ public class PieceSelector : Selector<Piece>
 
         selectedTargets.Add(Target);
         pieceDrawer.DrawSelectPiece(Target);
-        Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
+        // Debug.Log($"현재 큐 개수 : {selectedTargets.Count}");
         selectorUI.UpdateButtonState(executable);
     }
 
@@ -128,7 +128,7 @@ public class PieceSelector : Selector<Piece>
             }
         }
 
-        Debug.Log("기물에 효과가 모두 적용되었습니다!");
+        // Debug.Log("기물에 효과가 모두 적용되었습니다!");
         return false;
     }
 

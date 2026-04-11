@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8015185349047404026
+--- !u!1001 &9074794920069963808
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -90,7 +90,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8533880715623004422, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
       propertyPath: m_Name
-      value: GodsMoveCard
+      value: PsilocybinMushroomCard
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -98,23 +98,23 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8533880715623004422, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1825227580232461984}
+      addedObject: {fileID: 9208627612101207288}
   m_SourcePrefab: {fileID: 100100000, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
---- !u!1 &1825584920951602428 stripped
+--- !u!1 &837188690412951846 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8533880715623004422, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
-  m_PrefabInstance: {fileID: 8015185349047404026}
+  m_PrefabInstance: {fileID: 9074794920069963808}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1825227580232461984
+--- !u!114 &9208627612101207288
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1825584920951602428}
+  m_GameObject: {fileID: 837188690412951846}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7536fc307aa8cb468296e283351b65d, type: 3}
+  m_Script: {fileID: 11500000, guid: 107788934f44d73409738a4110b4778b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: 8cc817f0f26ce4e409127c47788c395e, type: 2}
+  DataSO: {fileID: 11400000, guid: bed52b2cef3e157418643de0b9b99aaf, type: 2}

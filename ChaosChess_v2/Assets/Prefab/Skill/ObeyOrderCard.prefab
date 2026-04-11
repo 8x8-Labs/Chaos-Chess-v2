@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8015185349047404026
+--- !u!1001 &7426388320886295313
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -90,7 +90,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8533880715623004422, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
       propertyPath: m_Name
-      value: GodsMoveCard
+      value: ObeyOrderCard
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -98,23 +98,23 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8533880715623004422, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1825227580232461984}
+      addedObject: {fileID: 1045788756222780578}
   m_SourcePrefab: {fileID: 100100000, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
---- !u!1 &1825584920951602428 stripped
+--- !u!1 &1252488463577149975 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8533880715623004422, guid: c30bbe22cb9af694c959e8cd7bccdd5d, type: 3}
-  m_PrefabInstance: {fileID: 8015185349047404026}
+  m_PrefabInstance: {fileID: 7426388320886295313}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1825227580232461984
+--- !u!114 &1045788756222780578
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1825584920951602428}
+  m_GameObject: {fileID: 1252488463577149975}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7536fc307aa8cb468296e283351b65d, type: 3}
+  m_Script: {fileID: 11500000, guid: a8b9a4b937521e74caeb508d2a5bada1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DataSO: {fileID: 11400000, guid: 8cc817f0f26ce4e409127c47788c395e, type: 2}
+  DataSO: {fileID: 11400000, guid: 96ccf15b71c587f4e9fe47a7cdebce4d, type: 2}
