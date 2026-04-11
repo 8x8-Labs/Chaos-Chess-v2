@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 [System.Serializable]
 class FENPrefabPair
@@ -307,7 +308,7 @@ public class BoardManager : MonoBehaviour
         if (piece != null)
             MovePiece(piece, to, promotion);
 
-        GameManager.Instance.NextTurn();
+        DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.NextTurn());
     }
 
     /// <summary>
