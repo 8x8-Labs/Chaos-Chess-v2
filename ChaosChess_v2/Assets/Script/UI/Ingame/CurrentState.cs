@@ -4,7 +4,6 @@ using UnityEngine;
 public class CurrentState : MonoBehaviour
 {
     private PieceColor currentColor => GameManager.Instance.turnColor;
-
     [SerializeField] private TMP_Text turnText;
 
     private void Start() => GameManager.Instance.OnHalfTurnChanged += OnChangedState;

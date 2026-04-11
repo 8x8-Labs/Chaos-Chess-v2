@@ -1,8 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class CardDescPanel : ButtonPanel
 {
     private GameManager gameManager = GameManager.Instance;
+
+    [Header("UI Elements")]
+    [SerializeField] private Image cardImage;
+    [SerializeField] private TMP_Text cardTitle;
+    [SerializeField] private TMP_Text cardDesc;
+    [SerializeField] private Button executeButton;
 
     public override void DisablePanel()
     {
@@ -16,5 +25,42 @@ public class CardDescPanel : ButtonPanel
         base.EnablePanel();
         if( gameManager == null ) gameManager = GameManager.Instance;
         gameManager.IsGameInput = false;
+    }
+
+    public void SetCardData(CardData data)
+    {
+        UpdateUI(data.DataSO);
+
+        executeButton.onClick.RemoveAllListeners();
+        // 현재 추가된 인터페이스에 따라 실행을 변경(선택자 호출 or 즉발)
+
+        Action cardExecute = null;
+
+        CardType type = data.DataSO.Type;
+        switch(type){
+            case CardType.Piece:
+                cardExecute = () => data.GetComponent<IPieceCard>()?.LoadPieceSelector();
+                break;
+            case CardType.Tile:
+                cardExecute = () => data.GetComponent<ITileCard>()?.LoadTileSelector();
+                break;
+            case CardType.Global:
+                cardExecute = () => data.GetComponent<ICard>()?.Execute();
+                break;
+        }
+
+        executeButton.onClick.AddListener(() =>
+            {
+                DisablePanel();
+                cardExecute?.Invoke();
+            }
+        );
+    }
+
+    private void UpdateUI(CardDataSO data)
+    {
+        cardImage.sprite = data.CardImage;
+        cardTitle.text = data.CardName;
+        cardDesc.text = data.CardDescription;
     }
 }
