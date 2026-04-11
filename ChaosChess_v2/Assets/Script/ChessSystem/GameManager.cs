@@ -149,8 +149,8 @@ public class GameManager : MonoBehaviour
     private void HandlePromotion(Piece pawn, Vector3Int pos)
     {
         IsGameInput = false;
-
-        uiManager.Show((type) =>
+        
+        uiManager.ShowPromotion((type) =>
         {
             BoardManager.Instance.ChangePiece(pos, pawn.Color, type);
 

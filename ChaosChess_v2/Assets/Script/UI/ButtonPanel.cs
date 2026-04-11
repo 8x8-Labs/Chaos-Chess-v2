@@ -27,6 +27,7 @@ public class ButtonPanel : MonoBehaviour
     // 패널을 활성화시키고 효과 및 첫 선택 버튼을 설정
     public virtual void EnablePanel()
     {
+        Debug.Log("?");
         canvasGroup.alpha = 0f;
         OnPanelEnabled?.Invoke();
         FadeOut();
