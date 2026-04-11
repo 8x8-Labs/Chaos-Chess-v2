@@ -80,12 +80,13 @@ public class UIManager : MonoBehaviour
 
 
     [SerializeField] private GameObject EndGamePanel;
+    [SerializeField] private GameObject BGPanel;
     [SerializeField] private TextMeshProUGUI resultText;
 
     public void ShowEndGamePanel(GameResult result)
     {
         EndGamePanel.SetActive(true);
-
+        BGPanel.SetActive(true);
         switch (result)
         {
             case GameResult.WhiteWin:
@@ -104,8 +105,6 @@ public class UIManager : MonoBehaviour
 
     public void OnClickNext()
     {
-        EndGamePanel.SetActive(false);
-
         UnityEngine.SceneManagement.SceneManager.LoadScene("RewardScene");
     }
 }
