@@ -5,7 +5,6 @@ public class CardRandomizer : MonoBehaviour
 {
     [SerializeField] private GameObject[] cardPrefabs;
     [SerializeField] private Transform content;
-    [SerializeField] private int drawCount = 3;
     [SerializeField] private int startCard = 3;
 
     private int currentCardCnt = 0;
@@ -36,13 +35,10 @@ public class CardRandomizer : MonoBehaviour
             (pool[i], pool[j]) = (pool[j], pool[i]);
         }
 
-        int count = Mathf.Min(drawCount, pool.Count);
-        for (int i = 0; i < count; i++)
-        {
-            currentCardCnt++;
-            var instance = Instantiate(pool[i], content);
-            _activeCards[instance] = pool[i];
-        }
+        if (pool.Count == 0) return;
+        currentCardCnt++;
+        var instance = Instantiate(pool[0], content);
+        _activeCards[instance] = pool[0];
     }
 
     public void RemoveCard(GameObject card)
