@@ -85,7 +85,6 @@ public class UIManager : MonoBehaviour
 
     public void ShowEndGamePanel(GameResult result)
     {
-        EndGamePanel.SetActive(true);
         BGPanel.SetActive(true);
         switch (result)
         {

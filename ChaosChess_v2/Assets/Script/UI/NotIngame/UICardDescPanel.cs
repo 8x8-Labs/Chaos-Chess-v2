@@ -1,12 +1,9 @@
-﻿using System;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UICardDescPanel : ButtonPanel
 {
-    private GameManager gameManager = GameManager.Instance;
-
     [Header("UI Elements")]
     [SerializeField] private Image cardImage;
     [SerializeField] private TMP_Text cardTitle;
