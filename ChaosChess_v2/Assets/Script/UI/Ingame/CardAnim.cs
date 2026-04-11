@@ -17,10 +17,10 @@ public class CardAnim : MonoBehaviour
         cardSprite = GetComponentInChildren<Image>();
         cardData = GetComponent<CardData>();
         panel = FindObjectOfType<CardDescPanel>();
-        cardAnimation();
+        CardAnimation();
     }
 
-    private void cardAnimation()
+    private void CardAnimation()
     {
         cardSprite.rectTransform.anchoredPosition = new Vector3(0, startYPos, 0);
         cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(ease);
