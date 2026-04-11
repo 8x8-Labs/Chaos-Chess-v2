@@ -598,9 +598,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 257742047}
-        m_TargetAssemblyTypeName: UICardDescPanel, Assembly-CSharp
-        m_MethodName: EnablePanel
+      - m_Target: {fileID: 1576928544}
+        m_TargetAssemblyTypeName: UICardAnim, Assembly-CSharp
+        m_MethodName: EnableCardDataUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4277,9 +4277,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 257742047}
-        m_TargetAssemblyTypeName: UICardDescPanel, Assembly-CSharp
-        m_MethodName: EnablePanel
+      - m_Target: {fileID: 1664142601}
+        m_TargetAssemblyTypeName: UICardAnim, Assembly-CSharp
+        m_MethodName: EnableCardDataUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4421,9 +4421,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 257742047}
-        m_TargetAssemblyTypeName: UICardDescPanel, Assembly-CSharp
-        m_MethodName: EnablePanel
+      - m_Target: {fileID: 1999960988}
+        m_TargetAssemblyTypeName: UICardAnim, Assembly-CSharp
+        m_MethodName: EnableCardDataUI
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5186,7 +5186,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1576928540}
   - component: {fileID: 1576928543}
-  - component: {fileID: 1576928541}
+  - component: {fileID: 1576928544}
   - component: {fileID: 1576928542}
   m_Layer: 5
   m_Name: Card (2)
@@ -5215,22 +5215,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 436, y: 581.3}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1576928541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1576928539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a6b2721f17ea484d8266167b51211fd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startYPos: -1000
-  duration: 0.7
-  enableEase: 0
-  disableEase: 0
 --- !u!114 &1576928542
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5252,6 +5236,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1576928539}
   m_CullTransparentMesh: 1
+--- !u!114 &1576928544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1576928539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c462aa921f5d584b8521ab3e9b41937, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startYPos: -1000
+  duration: 0.7
+  enableEase: 0
+  disableEase: 0
 --- !u!1 &1588770513
 GameObject:
   m_ObjectHideFlags: 0
@@ -6393,7 +6393,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1999960984}
   - component: {fileID: 1999960987}
-  - component: {fileID: 1999960985}
+  - component: {fileID: 1999960988}
   - component: {fileID: 1999960986}
   m_Layer: 5
   m_Name: Card (1)
@@ -6422,22 +6422,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 436, y: 581.3}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1999960985
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1999960983}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a6b2721f17ea484d8266167b51211fd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startYPos: -1000
-  duration: 0.7
-  enableEase: 0
-  disableEase: 0
 --- !u!114 &1999960986
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6459,6 +6443,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1999960983}
   m_CullTransparentMesh: 1
+--- !u!114 &1999960988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1999960983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c462aa921f5d584b8521ab3e9b41937, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startYPos: -1000
+  duration: 0.7
+  enableEase: 0
+  disableEase: 0
 --- !u!1 &2034370591
 GameObject:
   m_ObjectHideFlags: 0

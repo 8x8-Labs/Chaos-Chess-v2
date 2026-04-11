@@ -33,6 +33,7 @@ public class UICardAnim : MonoBehaviour
     {
         panel.SetCardData(cardData);
         panel.EnablePanel();
+        Destroy(gameObject);
     }
 
     public void DestroyCard()
