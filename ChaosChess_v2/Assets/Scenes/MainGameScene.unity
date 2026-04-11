@@ -4686,7 +4686,6 @@ MonoBehaviour:
   - {fileID: 488242485071545191, guid: 0cdb9f69432c82549ae2f1314219c7df, type: 3}
   - {fileID: 8303811246170913227, guid: 77982229fa8f1bd4b93b873330076c48, type: 3}
   content: {fileID: 232779361}
-  drawCount: 1
   startCard: 3
 --- !u!1 &1136904357
 GameObject:
@@ -6780,6 +6779,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UIChessBoard: {fileID: 81987907}
   SelectTile: {fileID: 11400000, guid: 9523c4d553996d148a094f0f3aab6732, type: 2}
+  MoveTile: {fileID: 11400000, guid: 62a53786bd4cc6c4db98665423525238, type: 2}
+  CaptureTile: {fileID: 11400000, guid: 5cf46e4da3ae88d43adfcc7529c75573, type: 2}
 --- !u!114 &1629911495
 MonoBehaviour:
   m_ObjectHideFlags: 0

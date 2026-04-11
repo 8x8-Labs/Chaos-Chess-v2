@@ -20,6 +20,7 @@ public class UIButton : Button
     [SerializeField] private ButtonType buttonType;
 
     private IUIAnimation uIAnimation;
+    private SoundManager soundManager = SoundManager.Instance;
 
     [SerializeField] private MonoBehaviour uIAnimationObject; // 인스펙터에 노출
     [SerializeField] private bool isStartAnimation = false;
@@ -38,6 +39,8 @@ public class UIButton : Button
         {
             disablePanel = GetComponentInParent<ButtonPanel>();
         }
+
+        if(soundManager == null) soundManager = SoundManager.Instance;
         // Debug.Log($"{gameObject.name}의 disableCanvas: {disableCanvas?.name}");
     }
 
@@ -66,6 +69,7 @@ public class UIButton : Button
 
     public void OnClicked()
     {
+        if(clickSound != null) soundManager.SFXPlay("UIClick", clickSound);
         switch (buttonType)
         {
             case ButtonType.ChangeCanvas:

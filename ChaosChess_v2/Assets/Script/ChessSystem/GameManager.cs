@@ -114,11 +114,13 @@ public class GameManager : MonoBehaviour
             if (lockedPiece != null && piece != lockedPiece) return;
             SelectPiece(piece);
             boardUI.DrawSelectTile(pos);
+            boardUI.DrawValidMoveTiles(piece);
         }
         else
         {
             MoveSelected(pos);
             boardUI.DeleteSelectTile();
+            boardUI.DeleteValidMoveTiles();
         }
     }
 
