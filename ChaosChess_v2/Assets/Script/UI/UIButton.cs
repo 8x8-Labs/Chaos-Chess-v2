@@ -38,6 +38,7 @@ public class UIButton : Button
         {
             disablePanel = GetComponentInParent<ButtonPanel>();
         }
+        // Debug.Log($"{gameObject.name}의 disableCanvas: {disableCanvas?.name}");
     }
 
 
@@ -52,7 +53,7 @@ public class UIButton : Button
         base.OnPointerClick(eventData);
         // 클릭 사운드 재생
         OnClicked();
-        Debug.Log($"{name} 버튼 클릭됨 (PointerClick)");
+        //Debug.Log($"{name} 버튼 클릭됨 (PointerClick)");
     }
 
     public override void OnSubmit(BaseEventData eventData)
@@ -60,7 +61,7 @@ public class UIButton : Button
         base.OnSubmit(eventData);
         // 클릭 사운드 재생
         OnClicked();
-        Debug.Log($"{name} 버튼 클릭됨 (Submit)");
+        //Debug.Log($"{name} 버튼 클릭됨 (Submit)");
     }
 
     public void OnClicked()
@@ -91,6 +92,7 @@ public class UIButton : Button
 
     private IEnumerator changeCanvasCoroutine()
     {
+        // Debug.Log($"{gameObject.name}의 비활성화/활성화 캔버스 : {disableCanvas.name}, {enableCanvas.name}");
         disableCanvas.FadeIn();
         yield return new WaitForSeconds(0.2f);
         enableCanvas.EnableParent();
