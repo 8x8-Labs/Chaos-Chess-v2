@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public enum PieceColor
 {
@@ -199,11 +200,14 @@ public class Piece : MonoBehaviour
         canMovePos.Add(pos);
     }
 
-    public virtual void Move(Vector3Int target, Vector3 WorldPos)
+    public virtual void Move(Vector3Int target, Vector3 WorldPos, bool animate = true)
     {
         Pos = target;
 
-        transform.position = WorldPos;
+        if (animate)
+            transform.DOMove(WorldPos, 0.2f).SetEase(Ease.OutQuad);
+        else
+            transform.position = WorldPos;
     }
 
     /// <summary>

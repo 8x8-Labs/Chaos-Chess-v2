@@ -191,7 +191,7 @@ public class BoardManager : MonoBehaviour
 
                 // 위치 반영 (Transform 이동 등)
                 Vector3 WorldPos = GridPosToWorldPos(pos);
-                piece.Move(pos, WorldPos);
+                piece.Move(pos, WorldPos, animate: false);
 
                 Pieces.Add(piece);
             }
