@@ -9,6 +9,7 @@ public class CardRandomizer : MonoBehaviour
     [SerializeField] private int startCard = 3;
 
     private int currentCardCnt = 0;
+    private Dictionary<GameObject, GameObject> _activeCards = new();
 
     private void Start()
     {
@@ -20,7 +21,15 @@ public class CardRandomizer : MonoBehaviour
         //foreach (Transform child in content)
         //    Destroy(child.gameObject);
 
-        List<GameObject> pool = new List<GameObject>(cardPrefabs);
+        HashSet<GameObject> usedPrefabs = new HashSet<GameObject>(_activeCards.Values);
+
+        List<GameObject> pool = new List<GameObject>();
+        foreach (var prefab in cardPrefabs)
+        {
+            if (!usedPrefabs.Contains(prefab))
+                pool.Add(prefab);
+        }
+
         for (int i = pool.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
@@ -31,7 +40,8 @@ public class CardRandomizer : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             currentCardCnt++;
-            Instantiate(pool[i], content);
+            var instance = Instantiate(pool[i], content);
+            _activeCards[instance] = pool[i];
         }
     }
 
@@ -39,5 +49,6 @@ public class CardRandomizer : MonoBehaviour
     {
         card.GetComponent<CardAnim>().DestroyCard();
         currentCardCnt--;
+        _activeCards.Remove(card);
     }
 }

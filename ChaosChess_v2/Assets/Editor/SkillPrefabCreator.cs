@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public static class SkillPrefabCreator
@@ -151,6 +152,40 @@ public static class SkillPrefabCreator
         if (prefab.GetComponent(expectedType) == null) return true;
 
         return false;
+    }
+
+    [MenuItem("Tools/Populate Card Randomizer")]
+    public static void PopulateCardRandomizer()
+    {
+        CardRandomizer[] randomizers = UnityEngine.Object.FindObjectsOfType<CardRandomizer>();
+        if (randomizers.Length == 0)
+        {
+            Debug.LogError("[SkillPrefabCreator] 씬에서 CardRandomizer를 찾을 수 없습니다.");
+            return;
+        }
+
+        string[] guids = AssetDatabase.FindAssets("t:Prefab", new[] { OutputPath });
+        var prefabs = new List<GameObject>();
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (Path.GetFileNameWithoutExtension(path) == "Card") continue;
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (prefab != null) prefabs.Add(prefab);
+        }
+
+        foreach (CardRandomizer randomizer in randomizers)
+        {
+            SerializedObject so = new SerializedObject(randomizer);
+            SerializedProperty prop = so.FindProperty("cardPrefabs");
+            prop.arraySize = prefabs.Count;
+            for (int i = 0; i < prefabs.Count; i++)
+                prop.GetArrayElementAtIndex(i).objectReferenceValue = prefabs[i];
+            so.ApplyModifiedProperties();
+            EditorSceneManager.MarkSceneDirty(randomizer.gameObject.scene);
+        }
+
+        Debug.Log($"[SkillPrefabCreator] CardRandomizer에 {prefabs.Count}개의 카드 프리팹을 할당했습니다. 씬을 저장해주세요.");
     }
 
     /// <summary>
