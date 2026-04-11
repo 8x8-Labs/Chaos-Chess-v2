@@ -23,6 +23,7 @@ public class ButtonCanvas : ButtonParent
     private void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
+        // Debug.Log($"{gameObject.name}에 있는 캔버스 그룹 오브젝트: {canvasGroup.gameObject.name}");
         canvas = GetComponent<Canvas>();
         scrollRect = GetComponentInChildren<ScrollRect>();
     }
@@ -59,10 +60,11 @@ public class ButtonCanvas : ButtonParent
     }
     public void FadeIn()
     {
+        // Debug.Log($"{gameObject.name} 캔버스 그룹 인스턴스 아이디: {canvasGroup.GetInstanceID()} ");
         canvasGroup.DOFade(0f, fadeDuration)
             .OnComplete(() => 
-            { 
-                canvas.enabled = false; 
+            {
+                canvas.enabled = false;
             });
     }
 }
