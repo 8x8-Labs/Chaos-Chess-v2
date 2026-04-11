@@ -74,6 +74,6 @@ Material:
     - _Dir: {r: 0, g: 0, b: 0, a: 0}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _ScreenParams: {r: 0, g: 0, b: 0, a: 0}
-    - _TileOffset: {r: 0.28125, g: 0.5, b: 0, a: 0}
+    - _TileOffset: {r: 0.23684211, g: 0.5, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

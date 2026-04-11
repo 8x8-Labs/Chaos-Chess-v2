@@ -25,7 +25,7 @@ public class ButtonPanel : MonoBehaviour
 
 
     // 패널을 활성화시키고 효과 및 첫 선택 버튼을 설정
-    public void EnablePanel()
+    public virtual void EnablePanel()
     {
         canvasGroup.alpha = 0f;
         OnPanelEnabled?.Invoke();
@@ -33,7 +33,7 @@ public class ButtonPanel : MonoBehaviour
     }
 
     // 패널을 비활성화 시키고 알파를 0으로 바꿈
-    public void DisablePanel()
+    public virtual void DisablePanel()
     {
         isDisabled = true;
         OnPanelDisabled?.Invoke();
