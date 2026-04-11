@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -75,5 +76,36 @@ public class UIManager : MonoBehaviour
     {
         AwakenPanel.SetActive(false);
         onAwakenClick?.Invoke();
+    }
+
+
+    [SerializeField] private GameObject EndGamePanel;
+    [SerializeField] private TextMeshProUGUI resultText;
+
+    public void ShowEndGamePanel(GameResult result)
+    {
+        EndGamePanel.SetActive(true);
+
+        switch (result)
+        {
+            case GameResult.WhiteWin:
+                resultText.text = "플레이어 승리";
+                break;
+            case GameResult.BlackWin:
+                resultText.text = "AI 승리";
+                break;
+            case GameResult.Draw:
+                resultText.text = "무승부";
+                break;
+        }
+
+        EndGamePanel.SetActive(true);
+    }
+
+    public void OnClickNext()
+    {
+        EndGamePanel.SetActive(false);
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("RewardScene");
     }
 }
