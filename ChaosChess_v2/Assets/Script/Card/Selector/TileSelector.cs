@@ -100,6 +100,7 @@ public class TileSelector : Selector<Vector3Int>
         };
 
         skillCard.Execute(args);
+        cardRandomizer?.RemoveCard(cardData.gameObject);
 
         DisableSelector();
     }

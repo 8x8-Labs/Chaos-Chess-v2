@@ -49,7 +49,11 @@ public class CardDescPanel : ButtonPanel
                 cardExecute = () => tileCard?.LoadTileSelector();
                 break;
             case CardType.Global:
-                cardExecute = () => cardInterface?.Execute();
+                cardExecute = () =>
+                {
+                    cardInterface?.Execute();
+                    FindFirstObjectByType<CardRandomizer>()?.RemoveCard(data.gameObject);
+                };
                 break;
         }
 
