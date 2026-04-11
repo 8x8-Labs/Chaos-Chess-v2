@@ -37,15 +37,19 @@ public class CardDescPanel : ButtonPanel
         Action cardExecute = null;
 
         CardType type = data.DataSO.Type;
+        var pieceCard = data.GetComponent<IPieceCard>();
+        var tileCard = data.GetComponent<ITileCard>();
+        var cardInterface = data.GetComponent<ICard>();
+
         switch(type){
             case CardType.Piece:
-                cardExecute = () => data.GetComponent<IPieceCard>()?.LoadPieceSelector();
+                cardExecute = () => pieceCard?.LoadPieceSelector();
                 break;
             case CardType.Tile:
-                cardExecute = () => data.GetComponent<ITileCard>()?.LoadTileSelector();
+                cardExecute = () => tileCard?.LoadTileSelector();
                 break;
             case CardType.Global:
-                cardExecute = () => data.GetComponent<ICard>()?.Execute();
+                cardExecute = () => cardInterface?.Execute();
                 break;
         }
 
