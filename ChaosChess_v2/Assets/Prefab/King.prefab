@@ -114,3 +114,4 @@ MonoBehaviour:
   - {fileID: 8300000, guid: e80f1faa6aeb08646942474d63b2eb0d, type: 3}
   - {fileID: 8300000, guid: 00341d0dd80edd7439768469fafeff20, type: 3}
   - {fileID: 8300000, guid: bed439e146bfb4b45951f85a7d5a4a25, type: 3}
+  selectSFX: {fileID: 8300000, guid: bbf9737f1931150488a80d99f8057ae9, type: 3}

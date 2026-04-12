@@ -190,6 +190,7 @@ public class GameManager : MonoBehaviour
     private void SelectPiece(Piece piece)
     {
         selectedPiece = piece;
+        selectedPiece.PieceSelect();
         OnAwakenedPieceSelected?.Invoke(piece);
     }
 

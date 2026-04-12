@@ -42,6 +42,7 @@ public class Piece : MonoBehaviour
     [SerializeField] private Material outlineMaterial;
     [SerializeField] private Vector3Int pos;
     [SerializeField] private AudioClip[] moveSFX;
+    [SerializeField] private AudioClip selectSFX;
 
     private string _fenOverride;
 
@@ -258,6 +259,11 @@ public class Piece : MonoBehaviour
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat(OutlineThickId, 1f);
         spriteRenderer.SetPropertyBlock(mpb);
+    }
+
+    public void PieceSelect()
+    {
+        soundManager.SFXPlay("SelectSFX", selectSFX);
     }
 
     public void OnDeselect()
