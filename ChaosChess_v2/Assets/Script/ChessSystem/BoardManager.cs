@@ -427,7 +427,7 @@ public class BoardManager : MonoBehaviour
         // AI 프로모션 (UCI)
         if (promotion != '\0')
         {
-            ChangePiece(pos, color, promotion,pawn);
+            ChangePiece(pos, color, promotion, pawn);
         }
         else
         {
@@ -437,7 +437,7 @@ public class BoardManager : MonoBehaviour
     }
 
     ///<summary> pos에 새로운 기물을 추가합니다 </summary> 
-    public void ChangePiece(Vector3Int pos, PieceColor color, char type,Piece prom=null)
+    public void ChangePiece(Vector3Int pos, PieceColor color, char type, Piece prom = null)
     {
         Vector3Int sp = new();
         if (prom != null)
@@ -469,10 +469,10 @@ public class BoardManager : MonoBehaviour
     }
 
     ///<summary> target에 기물을 지웁니다 </summary> 
-    public void DestroyPiece(Vector3Int target)
+    public void DestroyPiece(Vector3Int target, bool refresh = true)
     {
         Piece targetPiece = GetPiece(target);
-        DestroyPiece(targetPiece);
+        DestroyPiece(targetPiece, refresh);
     }
 
     ///<summary> 기물을 지웁니다 </summary> 
@@ -770,15 +770,19 @@ public class BoardManager : MonoBehaviour
 
         if (!whiteAlive && !blackAlive)
         {
-            GameManager.Instance.EndGame(ApplyType.All);
+            GameManager.Instance.FinishType = GameResult.Draw;
         }
         else if (!whiteAlive)
         {
-            GameManager.Instance.EndGame(ApplyType.Black);
+            GameManager.Instance.FinishType = GameResult.BlackWin;
         }
         else if (!blackAlive)
         {
-            GameManager.Instance.EndGame(ApplyType.White);
+            GameManager.Instance.FinishType = GameResult.WhiteWin;
+        }
+        else
+        {
+            GameManager.Instance.FinishType = GameResult.None;
         }
     }
 

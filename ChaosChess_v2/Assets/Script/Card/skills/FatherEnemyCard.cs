@@ -42,7 +42,7 @@ public class FatherEnemyEffector : PieceEffector
     {
         if (piece != target) return;
 
-        GameManager.Instance.UI.ShowAwakenButton(() => UpgradePiece());
+        GameManager.Instance.UI.ShowAwaken(() => UpgradePiece());
     }
 
     protected override void OnApply()

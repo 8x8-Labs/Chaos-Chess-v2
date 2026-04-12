@@ -5,6 +5,8 @@ using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
+    public GameResult FinishType { get; set; } = GameResult.None;
+
     public static GameManager Instance;
 
     public PieceColor PlayerColor = PieceColor.White;
@@ -17,6 +19,7 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
+    public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
 
@@ -152,7 +155,7 @@ public class GameManager : MonoBehaviour
     {
         IsGameInput = false;
 
-        uiManager.Show((type) =>
+        uiManager.ShowPromotion((type) =>
         {
             BoardManager.Instance.ChangePiece(pos, pawn.Color, type);
 
@@ -305,6 +308,7 @@ public class GameManager : MonoBehaviour
             }
         );
     }
+
     private void EvaluateGameState(string[] moves)
     {
         if (IsArenaMode)
@@ -314,9 +318,11 @@ public class GameManager : MonoBehaviour
                 ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
             return;
         }
+
+        if (FinishType != GameResult.None) return;
         if (BoardManager.Instance.GetHalfmoveClock() >= 150)
         {
-            OnDraw();
+            FinishType = GameResult.Draw;
         }
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
 
@@ -326,77 +332,73 @@ public class GameManager : MonoBehaviour
             if (isCheck)
                 OnCheckmate();
             else
-                OnDraw();
+                FinishType = GameResult.Draw;
         }
         else if (isCheck)
         {
             OnCheck();
         }
     }
+
     private void OnCheck()
     {
         Debug.Log("체크");
-    }
-
-    public void EndGame(ApplyType winner)
-    {
-        if (winner == ApplyType.All)
-        {
-            OnDraw();
-        }
-        else if (winner == ApplyType.White)
-        {
-            Debug.Log("플레이어 승리");
-        }
-        else
-        {
-            Debug.Log("AI 승리");
-        }
-
-        ExitGame();
     }
 
     public void OnSurrender(PieceColor color)
     {
         if (color == PlayerColor)
         {
+            FinishType = GameResult.BlackWin;
             Debug.Log("플레이어 항복");
         }
         else
         {
+            FinishType = GameResult.WhiteWin;
             Debug.Log("AI 항복");
         }
-        ExitGame();
+        ApplyGameResult();
     }
 
     private void OnCheckmate()
     {
         if (NowTurn == 'w')
         {
+            FinishType = GameResult.BlackWin;
             Debug.Log("체크메이트");
             Debug.Log("흑 승");
         }
         else
         {
+            FinishType = GameResult.WhiteWin;
             Debug.Log("체크메이트");
             Debug.Log("백 승");
         }
-        ExitGame();
     }
 
-    private void OnDraw()
+    private void ApplyGameResult()
     {
-        Debug.Log("무승부");
-        ExitGame();
+        if (FinishType == GameResult.None) return;
+
+        switch (FinishType)
+        {
+            case GameResult.WhiteWin:
+                Debug.Log("플레이어 승리");
+                break;
+            case GameResult.BlackWin:
+                Debug.Log("AI 승리");
+                break;
+            case GameResult.Draw:
+                Debug.Log("무승부");
+                break;
+        }
+
+        EndGame();
     }
 
-    // (임시) 게임 종료 메서드
-    private void ExitGame()
+    private void EndGame()
     {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        IsEndGame = true;
+        UI.ShowEndGame(FinishType);
     }
 }

@@ -1,79 +1,41 @@
+using System;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private GameObject PromotionPanel;
+    [SerializeField] private PromotionPanel promotionPanel;
 
-    private System.Action<char> onSelected;
-
-    void Awake()
+    public void ShowPromotion(Action<char> callback)
     {
-        PromotionPanel.SetActive(false);
-    }
-
-    public void Show(System.Action<char> callback)
-    {
-        onSelected = callback;
-        PromotionPanel.SetActive(true);
-    }
-
-    public void OnClickQueen() => Select('q');
-    public void OnClickRook() => Select('r');
-    public void OnClickBishop() => Select('b');
-    public void OnClickKnight() => Select('n');
-
-    private void Select(char type)
-    {
-        PromotionPanel.SetActive(false);
-        onSelected?.Invoke(type);
+        promotionPanel.Show(callback);
     }
 
 
-    [SerializeField] private GameObject TimeReversalPanel;
+    [SerializeField] private TimeReversalPanel timeReversalPanel;
 
-    private System.Action onYes;
-    private System.Action onNo;
-
-    public void ShowTimeReversal(System.Action yes, System.Action no)
+    public void ShowTimeReversal(Action yes, Action no)
     {
-        onYes = yes;
-        onNo = no;
-
-        TimeReversalPanel.SetActive(true);
-    }
-
-    public void OnClickTimeReversalYes()
-    {
-        TimeReversalPanel.SetActive(false);
-        onYes?.Invoke();
-    }
-
-    public void OnClickTimeReversalNo()
-    {
-        TimeReversalPanel.SetActive(false);
-        onNo?.Invoke();
+        timeReversalPanel.Show(yes, no);
     }
 
 
-    [SerializeField] private GameObject AwakenPanel;
+    [SerializeField] private AwakenPanel awakenPanel;
 
-    private System.Action onAwakenClick;
+    public void ShowAwaken(Action callback)
+    {
+        awakenPanel.Show(callback);
+    }
 
     public void HideAwakenButton()
     {
-        AwakenPanel.SetActive(false);
-        onAwakenClick = null;
+        awakenPanel.Hide();
     }
 
-    public void ShowAwakenButton(System.Action callback)
-    {
-        onAwakenClick = callback;
-        AwakenPanel.SetActive(true);
-    }
 
-    public void OnClickAwaken()
+    [SerializeField] private EndGamePanel endGamePanel;
+
+    public void ShowEndGame(GameResult result)
     {
-        AwakenPanel.SetActive(false);
-        onAwakenClick?.Invoke();
+        endGamePanel.Show(result);
     }
 }

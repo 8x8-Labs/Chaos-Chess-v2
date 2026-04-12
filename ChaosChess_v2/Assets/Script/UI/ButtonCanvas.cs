@@ -33,7 +33,7 @@ public class ButtonCanvas : ButtonParent
     public override void EnableParent()
     {
         canvas.enabled = true;
-        if(scrollRect != null)
+        if (scrollRect != null)
         {
             scrollRect.verticalNormalizedPosition = 1;
             scrollRect.horizontalNormalizedPosition = 1;
@@ -49,11 +49,11 @@ public class ButtonCanvas : ButtonParent
         canvas.enabled = false;
         canvasGroup.alpha = 0f;
     }
-    
+
     public void FadeOut()
     {
         canvasGroup.DOFade(1f, fadeDuration);
-        for(int i = 0; i < animationButtons.Count; i++)
+        for (int i = 0; i < animationButtons.Count; i++)
         {
             animationButtons[i].StartAnimation(i * uiAnimDelay);
         }
@@ -62,7 +62,7 @@ public class ButtonCanvas : ButtonParent
     {
         // Debug.Log($"{gameObject.name} 캔버스 그룹 인스턴스 아이디: {canvasGroup.GetInstanceID()} ");
         canvasGroup.DOFade(0f, fadeDuration)
-            .OnComplete(() => 
+            .OnComplete(() =>
             {
                 canvas.enabled = false;
             });
