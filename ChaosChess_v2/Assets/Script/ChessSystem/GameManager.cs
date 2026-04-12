@@ -150,7 +150,7 @@ public class GameManager : MonoBehaviour
     {
         IsGameInput = false;
 
-        uiManager.Show((type) =>
+        uiManager.ShowPromotion((type) =>
         {
             BoardManager.Instance.ChangePiece(pos, pawn.Color, type);
 
@@ -387,10 +387,9 @@ public class GameManager : MonoBehaviour
         EndGame();
     }
 
-    // (임시) 게임 종료 메서드
     private void EndGame()
     {
         IsEndGame = true;
-        UI.ShowEndGamePanel(FinishType);
+        UI.ShowEndGame(FinishType);
     }
 }
