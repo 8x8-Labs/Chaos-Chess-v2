@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,8 +14,15 @@ public class CardDescPanel : ButtonPanel
     [SerializeField] private TMP_Text cardDesc;
     [SerializeField] private Button executeButton;
 
+    private CardAnim selectedCard;
+
     public override void DisablePanel()
     {
+        if(selectedCard != null)
+        {
+            selectedCard.ClickOffAnimation();
+            selectedCard = null;
+        }
         base.DisablePanel();
         if( gameManager == null ) gameManager = GameManager.Instance;
         gameManager.IsGameInput = true;
@@ -27,13 +35,14 @@ public class CardDescPanel : ButtonPanel
         gameManager.IsGameInput = false;
     }
 
-    public void SetCardData(CardData data)
+    public void SetCardData(CardAnim card)
     {
+        selectedCard = card;
+        CardData data = card.cardData;
+
         UpdateUI(data.DataSO);
 
         executeButton.onClick.RemoveAllListeners();
-        // 현재 추가된 인터페이스에 따라 실행을 변경(선택자 호출 or 즉발)
-
         Action cardExecute = null;
 
         CardType type = data.DataSO.Type;

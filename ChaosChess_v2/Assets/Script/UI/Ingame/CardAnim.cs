@@ -5,15 +5,18 @@ using UnityEngine.UI;
 public class CardAnim : MonoBehaviour
 {
     [SerializeField] private float startYPos;
+    [SerializeField] private float clickYPos = 100;
+    [SerializeField] private float clickYDuration = 0.3f;
     [SerializeField] private float duration;
     [SerializeField] private AudioClip clickSFX;
     [SerializeField] private Ease enableEase;
     [SerializeField] private Ease disableEase;
 
     private Ease disappearEase = Ease.InOutQuad;
+    private Ease clickEase = Ease.OutCirc;
     private Image cardSprite;
 
-    private CardData cardData;
+    public CardData cardData { get; private set; } 
     private CardDescPanel panel;
 
     private void Awake()
@@ -33,8 +36,18 @@ public class CardAnim : MonoBehaviour
     public void EnableCardDataUI()
     {
         SoundManager.Instance.SFXPlay("CardClickSFX", clickSFX);
-        panel.SetCardData(cardData);
+        ClickOnAnimation();
+        panel.SetCardData(this);
         panel.EnablePanel();
+    }
+
+    public void ClickOnAnimation()
+    {
+        cardSprite.rectTransform.DOAnchorPosY(clickYPos, clickYDuration).SetEase(clickEase);
+    }
+    public void ClickOffAnimation()
+    {
+        cardSprite.rectTransform.DOAnchorPosY(0f, clickYDuration).SetEase(clickEase);
     }
 
     public void DestroyCard()
