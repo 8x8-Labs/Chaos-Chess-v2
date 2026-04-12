@@ -187,10 +187,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -208,7 +208,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 2104011993}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -842,8 +842,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalFloors: 6
-  mapContainer: {fileID: 1537558345}
-  mapButtonPrefab: {fileID: 4660915655800250675, guid: eea79cb657b37c742b12dc509f12ace2, type: 3}
   currentFloor: 0
   maps: []
   DefaultFEN: 'k7/aaaaaaaR/8/8/8/8/8/7K w - - 0 1 '
