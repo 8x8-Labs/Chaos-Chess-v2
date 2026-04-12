@@ -98,6 +98,18 @@ public class FairyStockfishBridge : MonoBehaviour
 #endif
     }
 
+    // ── ELO 강도 설정 ────────────────────────────────────
+    public void SetElo(int elo)
+    {
+        elo = Mathf.Clamp(elo, 500, 2850);
+#if UNITY_ANDROID && !UNITY_EDITOR
+        _fairyInstance?.Call("setElo", elo);
+#else
+        SendCommand("setoption name UCI_LimitStrength value true");
+        SendCommand("setoption name UCI_Elo value " + elo);
+#endif
+    }
+
     // ── 포지션 설정 ──────────────────────────────────────
     public void SetPosition(string fen, string moves = "")
     {
