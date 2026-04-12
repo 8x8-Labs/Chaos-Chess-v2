@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public class PromotionPanel : ButtonPanel
 {
@@ -8,7 +7,6 @@ public class PromotionPanel : ButtonPanel
 
     public void Show(Action<char> callback)
     {
-        Debug.Log("?");
         onSelected = callback;
         EnablePanel();
     }
@@ -16,7 +14,6 @@ public class PromotionPanel : ButtonPanel
     public override void EnablePanel()
     {
         base.EnablePanel();
-        Debug.Log("?");
         if (gameManager == null) gameManager = GameManager.Instance;
         gameManager.IsGameInput = false;
     }

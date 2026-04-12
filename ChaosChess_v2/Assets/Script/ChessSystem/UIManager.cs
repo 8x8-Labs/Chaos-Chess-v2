@@ -41,26 +41,16 @@ public class UIManager : MonoBehaviour
     }
 
 
-    [SerializeField] private GameObject AwakenPanel;
+    [SerializeField] private AwakenPanel awakenPanel;
 
-    Action onAwakenClick;
+    public void ShowAwaken(Action callback)
+    {
+        awakenPanel.Show(callback);
+    }
 
     public void HideAwakenButton()
     {
-        AwakenPanel.SetActive(false);
-        onAwakenClick = null;
-    }
-
-    public void ShowAwakenButton(Action callback)
-    {
-        onAwakenClick = callback;
-        AwakenPanel.SetActive(true);
-    }
-
-    public void OnClickAwaken()
-    {
-        AwakenPanel.SetActive(false);
-        onAwakenClick?.Invoke();
+        awakenPanel.Hide();
     }
 
 
