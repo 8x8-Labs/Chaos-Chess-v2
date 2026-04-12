@@ -638,6 +638,7 @@ MonoBehaviour:
   enableEase: 12
   disableEase: 14
   fadeDuration: 0.2
+  cardPrefab: {fileID: 0}
 --- !u!1 &245020124
 GameObject:
   m_ObjectHideFlags: 0
@@ -1161,6 +1162,7 @@ MonoBehaviour:
   enableEase: 12
   disableEase: 14
   fadeDuration: 0.3
+  cardPrefab: {fileID: 0}
 --- !u!222 &393153871
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2291,6 +2293,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 608581818}
   m_CullTransparentMesh: 1
+--- !u!1 &639524667
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 639524668}
+  - component: {fileID: 639524669}
+  m_Layer: 0
+  m_Name: PlayerData
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &639524668
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 639524667}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &639524669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 639524667}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1dd5181de99be443ae8f7486fcfff39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  StartFEN: 
+  CurrentCard: []
+  cardRandomizer: {fileID: 0}
+  cardPool: []
 --- !u!1 &761295387
 GameObject:
   m_ObjectHideFlags: 0
@@ -3745,6 +3795,7 @@ MonoBehaviour:
   enableEase: 12
   disableEase: 14
   fadeDuration: 0.3
+  cardPrefab: {fileID: 0}
 --- !u!222 &1319088934
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5117,3 +5168,4 @@ SceneRoots:
   - {fileID: 257742045}
   - {fileID: 1477368562}
   - {fileID: 1804843148}
+  - {fileID: 639524668}

@@ -15,30 +15,31 @@ public class CardRandomizer : MonoBehaviour
         for (int i = 0; i < startCard; i++) GenerateCards();
     }
 
-    public void GenerateCards()
-    {
-        //foreach (Transform child in content)
-        //    Destroy(child.gameObject);
+    /// <summary>내장 cardPrefabs 풀에서 랜덤 카드를 생성합니다.</summary>
+    public void GenerateCards() => GenerateCard(new List<GameObject>(cardPrefabs));
 
+    /// <summary>지정된 풀에서 중복 없이 랜덤 카드를 하나 생성합니다.</summary>
+    public void GenerateCard(List<GameObject> pool)
+    {
         HashSet<GameObject> usedPrefabs = new HashSet<GameObject>(_activeCards.Values);
 
-        List<GameObject> pool = new List<GameObject>();
-        foreach (var prefab in cardPrefabs)
+        List<GameObject> available = new List<GameObject>();
+        foreach (var prefab in pool)
         {
             if (!usedPrefabs.Contains(prefab))
-                pool.Add(prefab);
+                available.Add(prefab);
         }
 
-        for (int i = pool.Count - 1; i > 0; i--)
+        for (int i = available.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
-            (pool[i], pool[j]) = (pool[j], pool[i]);
+            (available[i], available[j]) = (available[j], available[i]);
         }
 
-        if (pool.Count == 0) return;
+        if (available.Count == 0) return;
         currentCardCnt++;
-        var instance = Instantiate(pool[0], content);
-        _activeCards[instance] = pool[0];
+        var instance = Instantiate(available[0], content);
+        _activeCards[instance] = available[0];
     }
 
     public void RemoveCard(GameObject card)

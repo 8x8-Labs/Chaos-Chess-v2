@@ -18,14 +18,18 @@ public class UICardAnim : MonoBehaviour
     private RectTransform rt;
     private float originalWidth;
 
+    [SerializeField] private GameObject cardPrefab;
+
     private CardData cardData;
     private UICardDescPanel panel;
+    private Player player;
 
     private void Awake()
     {
         cardSprite = GetComponentInChildren<Image>();
         cardData = GetComponent<CardData>();
         panel = FindObjectOfType<UICardDescPanel>();
+        player = FindObjectOfType<Player>();
         cardSprite.rectTransform.anchoredPosition = new Vector3(0, startYPos, 0);
 
         canvasGroup = GetComponent<CanvasGroup>();
@@ -46,26 +50,8 @@ public class UICardAnim : MonoBehaviour
             .Append(rt.DOSizeDelta(new Vector2(originalWidth, rt.sizeDelta.y), fadeDuration).SetEase(enableEase))
             .Join(canvasGroup.DOFade(1f, fadeDuration).SetEase(enableEase))
             .Join(cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(enableEase));
-    }
 
-    public void EnableCardDataUI()
-    {
-        panel.SetCardData(cardData);
-        panel.EnablePanel();
-        Destroy(gameObject);
-    }
-
-    public void DestroyCard()
-    {
-        canvasGroup.DOFade(0f, duration / 2f).SetEase(disableEase);
-        cardSprite.rectTransform.DOAnchorPosY(startYPos, duration / 2f)
-            .SetEase(disableEase)
-            .OnComplete(
-            () =>
-            {
-                rt.DOSizeDelta(new Vector2(0, rt.sizeDelta.y), 0.2f)
-                    .SetEase(disappearEase)
-                    .OnComplete(() => Destroy(gameObject));
-            });
+        if (cardPrefab != null)
+            player?.CardPool.Add(cardPrefab);
     }
 }
