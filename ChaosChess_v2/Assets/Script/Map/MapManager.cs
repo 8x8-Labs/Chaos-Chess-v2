@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance;
@@ -10,6 +11,7 @@ public class MapManager : MonoBehaviour
     public int currentFloor = 0;
     public List<Map> maps = new List<Map>();
     public List<string> bossFENs = new List<string>();
+    public Map curMap;
 
     private void Awake()
     {
@@ -47,12 +49,14 @@ public class MapManager : MonoBehaviour
     {
         if (mapId != currentFloor)
             return;
-        Map map = maps[mapId];
-        EnterMap(map);
+        curMap = maps[mapId];
+        EnterMap();
     }
 
-    private void EnterMap(Map map)
+    private void EnterMap()
     {
+
+        SceneManager.LoadScene("MainGameScene");
     }
 
     public void OnCombatCleared()
@@ -72,13 +76,12 @@ public class MapManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        for (int i = 0; i < maps.Count; i++)
+        for (int i = 0; i < totalFloors; i++)
         {
             Map map = maps[i];
 
             GameObject buttonObj = Instantiate(mapButtonPrefab, mapContainer);
             Button button = buttonObj.GetComponent<Button>();
-
 
             if (map.isCleared)
             {
@@ -95,7 +98,7 @@ public class MapManager : MonoBehaviour
                 buttonObj.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.3f);
             }
 
-            int capturedId = i;
+            int capturedId = totalFloors-i-1;
             button.onClick.AddListener(() => OnMapClicked(capturedId));
         }
     }
