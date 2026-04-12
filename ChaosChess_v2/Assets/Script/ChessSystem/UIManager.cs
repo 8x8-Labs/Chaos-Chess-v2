@@ -1,16 +1,12 @@
 using System;
-using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private PromotionPanel promotionPanel;
 
-    private Action<char> onSelected;
-
     public void ShowPromotion(Action<char> callback)
     {
-        Debug.Log("?");
         promotionPanel.Show(callback);
     }
 
