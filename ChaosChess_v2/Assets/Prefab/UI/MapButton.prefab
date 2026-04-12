@@ -127,11 +127,11 @@ MonoBehaviour:
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 0
+  buttonType: 5
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
-  nextSceneName: 
+  nextSceneName: MainGameScene
 --- !u!1 &8214327761176526416
 GameObject:
   m_ObjectHideFlags: 0

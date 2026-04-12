@@ -42,7 +42,6 @@ public class UIButton : Button
         // Debug.Log($"{gameObject.name}의 disableCanvas: {disableCanvas?.name}");
     }
 
-
     public override void OnSelect(BaseEventData eventData)
     {
         base.OnSelect(eventData);
@@ -67,7 +66,6 @@ public class UIButton : Button
 
     public void OnClicked()
     {
-        Debug.Log(buttonType);
         switch (buttonType)
         {
             case ButtonType.ChangeCanvas:
@@ -80,10 +78,7 @@ public class UIButton : Button
                     .FirstOrDefault();
                 changeCanvas(); break;
             case ButtonType.GoScene:
-                if (!string.IsNullOrEmpty(nextSceneName))
-                    SceneManager.LoadScene(nextSceneName);
-                else
-                    Debug.LogError("씬 이름이 비어있음");
+                SceneManager.LoadScene(nextSceneName);
                 break;
             case ButtonType.ClosePopup:
                 disablePanel.DisablePanel(); break;

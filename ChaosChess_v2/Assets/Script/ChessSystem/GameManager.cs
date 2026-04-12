@@ -102,12 +102,9 @@ public class GameManager : MonoBehaviour
         if (MapManager.Instance != null && MapManager.Instance.curMap != null)
         {
             int elo = MapManager.Instance.curMap.ELO;
-
             FairyStockfishBridge.Instance.SetElo(elo);
-            
+
             string fen = MapManager.Instance.curMap.FEN;
-            
-            
             BoardManager.Instance.LoadFEN(fen);
         }
         else
@@ -406,6 +403,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        MapManager.Instance.OnCombatCleared();
         EndGame();
     }
 
