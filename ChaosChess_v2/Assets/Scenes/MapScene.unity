@@ -845,6 +845,18 @@ MonoBehaviour:
   currentFloor: 0
   maps: []
   DefaultFEN: 'k7/aaaaaaaR/8/8/8/8/8/7K w - - 0 1 '
+  Boss1FEN:
+  - rnbqkbnr/pppppppp/2pppp2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/pppnnppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/bppppppb/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rrbqkbrr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbskbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  Boss2FEN:
+  - ynbqkbny/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/ppbnnbpp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - 8/8/pppppppp/rnbqkbnr/pppppppp/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - pppqkppp/pppppppp/pppppppp/pppppppp/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rzzqkzzr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   curMap:
     ELO: 0
     FEN: 
