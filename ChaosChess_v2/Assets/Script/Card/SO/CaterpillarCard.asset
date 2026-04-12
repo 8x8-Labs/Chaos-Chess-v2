@@ -30,5 +30,10 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  NeedAdditionalDescription: 0
+  NeedAdditionalDescription: 1
   DescriptionType: 0
+  AdditionalDescriptionTitle: "\uB098\uC774\uD2B8\uB77C\uC774\uB354"
+  PieceDescImage: {fileID: 7305455733785292759, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

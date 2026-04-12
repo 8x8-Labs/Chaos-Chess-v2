@@ -208,7 +208,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
-  m_Camera: {fileID: 2104011993}
+  m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -842,6 +842,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalFloors: 6
+  mapContainer: {fileID: 1537558345}
+  mapButtonPrefab: {fileID: 4660915655800250675, guid: eea79cb657b37c742b12dc509f12ace2, type: 3}
   currentFloor: 0
   maps: []
   DefaultFEN: 'k7/aaaaaaaR/8/8/8/8/8/7K w - - 0 1 '
@@ -872,52 +874,6 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 738.545, y: 1217.2856, z: -21.134129}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1978463613
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1978463615}
-  - component: {fileID: 1978463614}
-  m_Layer: 0
-  m_Name: MapUI
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1978463614
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1978463613}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47f75d22dc3f9904a8f623831d60588f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mapContainer: {fileID: 1537558345}
-  mapButtonPrefab: {fileID: 4660915655800250675, guid: eea79cb657b37c742b12dc509f12ace2, type: 3}
---- !u!4 &1978463615
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1978463613}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.0318493, y: -5.6008053, z: 542.4486}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1144,4 +1100,3 @@ SceneRoots:
   - {fileID: 338206600}
   - {fileID: 970325753}
   - {fileID: 1699512812}
-  - {fileID: 1978463615}

@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
 
 public class MapManager : MonoBehaviour
 {
@@ -39,20 +38,6 @@ public class MapManager : MonoBehaviour
 
         for (int i = 0; i < totalFloors; i++)
         {
-            Map map = new Map
-            {
-                ELO = startELO + 150 * i,
-                floor = i,
-                isCleared = false,
-                FEN = DefaultFEN
-            };
-
-            maps.Add(map);
-        }
-        curMap = maps[currentFloor];
-
-        for (int i = 0; i < totalFloors; i++)
-        {
             string fen = DefaultFEN;
             if (i == 2)
                 fen = Boss1FEN[Random.Range(0, Boss1FEN.Count - 1)];
@@ -66,10 +51,11 @@ public class MapManager : MonoBehaviour
                 FEN = fen
             };
 
-            SceneManager.LoadScene("MainGameScene");
+            maps.Add(map);
         }
-
+        curMap = maps[currentFloor];
     }
+
     public void OnCombatCleared()
     {
         maps[currentFloor].isCleared = true;
@@ -77,7 +63,7 @@ public class MapManager : MonoBehaviour
         currentFloor++;
 
         if (currentFloor >= totalFloors)
-            // todo: 게임 종료/메인 화면으로 이동/
+            // todo: ���� ����/���� ȭ������ �̵�/
             return;
         curMap = maps[currentFloor];
     }
