@@ -6,6 +6,7 @@ public class CardAnim : MonoBehaviour
 {
     [SerializeField] private float startYPos;
     [SerializeField] private float duration;
+    [SerializeField] private AudioClip clickSFX;
     [SerializeField] private Ease enableEase;
     [SerializeField] private Ease disableEase;
 
@@ -31,6 +32,7 @@ public class CardAnim : MonoBehaviour
 
     public void EnableCardDataUI()
     {
+        SoundManager.Instance.SFXPlay("CardClickSFX", clickSFX);
         panel.SetCardData(cardData);
         panel.EnablePanel();
     }

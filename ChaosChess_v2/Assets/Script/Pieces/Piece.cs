@@ -41,6 +41,8 @@ public class Piece : MonoBehaviour
     [SerializeField] private PieceColor color;
     [SerializeField] private Material outlineMaterial;
     [SerializeField] private Vector3Int pos;
+    [SerializeField] private AudioClip[] moveSFX;
+
     private string _fenOverride;
 
     private string _moveFenOverride; // 행마 전용 (t, u, p2 등)
@@ -48,6 +50,7 @@ public class Piece : MonoBehaviour
     protected List<Vector3Int> canMovePos;
 
     private MaterialPropertyBlock mpb;
+    private SoundManager soundManager = SoundManager.Instance;
     private static readonly int OutlineThickId = Shader.PropertyToID("_OutlineThick");
 
     public List<Vector3Int> CanMovePos
@@ -207,7 +210,11 @@ public class Piece : MonoBehaviour
         Pos = target;
 
         if (animate)
+        {
+            int idx = UnityEngine.Random.Range(0, moveSFX.Length);
+            soundManager.SFXPlay("MoveSFX", moveSFX[idx]);
             transform.DOMove(WorldPos, MoveDuration).SetEase(Ease.OutQuint);
+        }
         else
             transform.position = WorldPos;
     }
