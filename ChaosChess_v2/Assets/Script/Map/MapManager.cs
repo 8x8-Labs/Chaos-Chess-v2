@@ -12,6 +12,8 @@ public class MapManager : MonoBehaviour
     public List<Map> maps = new List<Map>();
     public List<string> bossFENs = new List<string>();
     public Map curMap;
+    public string DefaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 
     private void Awake()
     {
@@ -33,12 +35,13 @@ public class MapManager : MonoBehaviour
         currentFloor = 0;
 
         int startELO = Random.Range(800, 1200);
-        for (int i = totalFloors-1; i >= 0; i--)
+        for (int i = totalFloors - 1; i >= 0; i--)
         {
             Map map = new Map();
             map.ELO = startELO + 150 * i;
             map.floor = i;
             map.isCleared = false;
+            map.FEN = DefaultFEN;
             maps.Add(map);
         }
 
@@ -98,7 +101,7 @@ public class MapManager : MonoBehaviour
                 buttonObj.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.3f);
             }
 
-            int capturedId = totalFloors-i-1;
+            int capturedId = totalFloors - i - 1;
             button.onClick.AddListener(() => OnMapClicked(capturedId));
         }
     }
