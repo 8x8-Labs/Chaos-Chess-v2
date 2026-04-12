@@ -169,6 +169,10 @@ public class Piece : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sharedMaterial = outlineMaterial;
         mpb = new MaterialPropertyBlock();
+    }
+
+    private void Start()
+    {
         soundManager = SoundManager.Instance;
     }
 
