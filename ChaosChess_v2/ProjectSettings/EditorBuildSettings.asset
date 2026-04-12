@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/RewardScene.unity
+    guid: 675527bdcbd077240a18d7bb092dabc6
   m_configObjects:
     com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: 003ad4f002fa24e4e8e1a9bfb8141718, type: 2}
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 07fb4e160397254449f94a4ace30012d, type: 2}

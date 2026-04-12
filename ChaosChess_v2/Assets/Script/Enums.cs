@@ -60,3 +60,14 @@ public enum Tier
     Rare,
     Legendary
 }
+
+/// <summary>
+/// 게임 한판의 결과를 저장할때 사용합니다
+/// </summary>
+public enum GameResult
+{
+    None,
+    WhiteWin,
+    BlackWin,
+    Draw
+}

@@ -13,6 +13,7 @@ public abstract class Selector<T> : MonoBehaviour
     protected Camera mainCamera;
     protected List<T> selectedTargets = new List<T>();
     protected bool selectState = false;
+    protected CardRandomizer cardRandomizer;
 
     protected virtual void Awake()
     {
@@ -20,6 +21,7 @@ public abstract class Selector<T> : MonoBehaviour
         selectorCanvas.enabled = false;
 
         mainCamera = Camera.main;
+        cardRandomizer = FindFirstObjectByType<CardRandomizer>();
     }
 
     public abstract void EnableSelector(CardData data);

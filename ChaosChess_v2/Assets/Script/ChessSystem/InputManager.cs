@@ -8,6 +8,8 @@ public class InputManager : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance.IsEndGame)
+            return;
         if (!GameManager.Instance.IsGameInput)
             return;
         if (Input.GetMouseButtonDown(0))
