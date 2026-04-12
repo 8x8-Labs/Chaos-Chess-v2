@@ -202,7 +202,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startYPos: -1000
+  clickYPos: 150
+  clickYDuration: 0.3
   duration: 0.7
+  clickSFX: {fileID: 8300000, guid: 472aa3d34b095fa468cc44b3fa88ae6e, type: 3}
   enableEase: 12
   disableEase: 4
-  cardWidth: 436

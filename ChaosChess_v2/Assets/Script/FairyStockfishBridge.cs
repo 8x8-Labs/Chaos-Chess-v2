@@ -98,6 +98,18 @@ public class FairyStockfishBridge : MonoBehaviour
 #endif
     }
 
+    // ── ELO 강도 설정 ────────────────────────────────────
+    public void SetElo(int elo)
+    {
+        elo = Mathf.Clamp(elo, 500, 2850);
+#if UNITY_ANDROID && !UNITY_EDITOR
+        _fairyInstance?.Call("setElo", elo);
+#else
+        SendCommand("setoption name UCI_LimitStrength value true");
+        SendCommand("setoption name UCI_Elo value " + elo);
+#endif
+    }
+
     // ── 포지션 설정 ──────────────────────────────────────
     public void SetPosition(string fen, string moves = "")
     {
@@ -147,6 +159,26 @@ public class FairyStockfishBridge : MonoBehaviour
                 callback?.Invoke(bestMove);
             });
         });
+        thread.Start();
+#endif
+    }
+
+    // ── 합법적인 수 전체 비동기 반환 ─────────────────────
+    public void GetLegalMovesAsync(Action<string[]> callback)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        string[] moves = GetLegalMoves();
+        callback?.Invoke(moves);
+#else
+        Thread thread = new Thread(() =>
+        {
+            string[] moves = GetLegalMoves();
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                callback?.Invoke(moves);
+            });
+        });
+        thread.IsBackground = true;
         thread.Start();
 #endif
     }

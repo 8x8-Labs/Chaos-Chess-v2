@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public enum PieceColor
 {
@@ -40,6 +41,9 @@ public class Piece : MonoBehaviour
     [SerializeField] private PieceColor color;
     [SerializeField] private Material outlineMaterial;
     [SerializeField] private Vector3Int pos;
+    [SerializeField] private AudioClip[] moveSFX;
+    [SerializeField] private AudioClip selectSFX;
+
     private string _fenOverride;
 
     private string _moveFenOverride; // 행마 전용 (t, u, p2 등)
@@ -47,6 +51,7 @@ public class Piece : MonoBehaviour
     protected List<Vector3Int> canMovePos;
 
     private MaterialPropertyBlock mpb;
+    private SoundManager soundManager = SoundManager.Instance;
     private static readonly int OutlineThickId = Shader.PropertyToID("_OutlineThick");
 
     public List<Vector3Int> CanMovePos
@@ -199,11 +204,20 @@ public class Piece : MonoBehaviour
         canMovePos.Add(pos);
     }
 
-    public virtual void Move(Vector3Int target, Vector3 WorldPos)
+    public const float MoveDuration = 0.5f;
+
+    public virtual void Move(Vector3Int target, Vector3 WorldPos, bool animate = true)
     {
         Pos = target;
 
-        transform.position = WorldPos;
+        if (animate)
+        {
+            int idx = UnityEngine.Random.Range(0, moveSFX.Length);
+            soundManager.SFXPlay("MoveSFX", moveSFX[idx]);
+            transform.DOMove(WorldPos, MoveDuration).SetEase(Ease.OutQuint);
+        }
+        else
+            transform.position = WorldPos;
     }
 
     /// <summary>
@@ -245,6 +259,11 @@ public class Piece : MonoBehaviour
         spriteRenderer.GetPropertyBlock(mpb);
         mpb.SetFloat(OutlineThickId, 1f);
         spriteRenderer.SetPropertyBlock(mpb);
+    }
+
+    public void PieceSelect()
+    {
+        soundManager.SFXPlay("SelectSFX", selectSFX);
     }
 
     public void OnDeselect()

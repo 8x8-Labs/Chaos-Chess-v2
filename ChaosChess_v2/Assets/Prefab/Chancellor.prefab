@@ -100,9 +100,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f93c103e1a08c56488766c60637256c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  StartPos: {x: 0, y: 0, z: 0}
+  IsPromotioned: 0
   WhitePiece: {fileID: -8814276152573212690, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   BlackPiece: {fileID: 8588170755874669975, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   type: 256
   color: 0
   outlineMaterial: {fileID: 2100000, guid: 5f98fe7e34c6e494aac571d357daabee, type: 2}
   pos: {x: 1, y: 1, z: 0}
+  moveSFX:
+  - {fileID: 8300000, guid: 3a356754082b40d43bd1cb9ed322a21f, type: 3}
+  - {fileID: 8300000, guid: 2ff34856c54dd114b878d2c098059f81, type: 3}
+  - {fileID: 8300000, guid: e80f1faa6aeb08646942474d63b2eb0d, type: 3}
+  - {fileID: 8300000, guid: 00341d0dd80edd7439768469fafeff20, type: 3}
+  - {fileID: 8300000, guid: bed439e146bfb4b45951f85a7d5a4a25, type: 3}
+  selectSFX: {fileID: 8300000, guid: bbf9737f1931150488a80d99f8057ae9, type: 3}
