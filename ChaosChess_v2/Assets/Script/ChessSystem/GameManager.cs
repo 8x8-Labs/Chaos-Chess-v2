@@ -86,7 +86,7 @@ public class GameManager : MonoBehaviour
 
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
         OnTimeReversalRequired += HandleTimeReversal;
- 
+
         LoadMapManager();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
@@ -415,6 +415,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        MapManager.Instance.OnCombatCleared();
         EndGame();
     }
 

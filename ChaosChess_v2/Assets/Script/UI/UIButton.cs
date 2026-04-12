@@ -83,10 +83,7 @@ public class UIButton : Button
                     .FirstOrDefault();
                 changeCanvas(); break;
             case ButtonType.GoScene:
-                if (!string.IsNullOrEmpty(nextSceneName))
-                    SceneManager.LoadScene(nextSceneName);
-                else
-                    Debug.LogError("씬 이름이 비어있음");
+                SceneManager.LoadScene(nextSceneName);
                 break;
             case ButtonType.ClosePopup:
                 disablePanel.DisablePanel(); break;
