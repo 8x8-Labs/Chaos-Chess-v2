@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -69,24 +70,31 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
-        boardUI = GetComponent<BoardUI>();
-        uiManager = FindFirstObjectByType<UIManager>();
     }
 
-    void Start()
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (scene.name != "MainGameScene")
+            return;
+        boardUI = FindFirstObjectByType<BoardUI>();
+        uiManager = FindFirstObjectByType<UIManager>();
+
         curTurn = 1;
 
+        BoardManager.Instance.OnPromotionRequired -= HandlePromotion;
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
+
+        OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 
         LoadMapManager();
-
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
