@@ -11,6 +11,7 @@ public class MapManager : MonoBehaviour
     public int currentFloor = 0;
     public List<Map> maps = new List<Map>();
     public List<string> bossFENs = new List<string>();
+    public string DefaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public Map curMap;
 
     private void Awake()
@@ -33,12 +34,13 @@ public class MapManager : MonoBehaviour
         currentFloor = 0;
 
         int startELO = Random.Range(800, 1200);
-        for (int i = totalFloors-1; i >= 0; i--)
+        for (int i = totalFloors - 1; i >= 0; i--)
         {
             Map map = new Map();
             map.ELO = startELO + 150 * i;
             map.floor = i;
             map.isCleared = false;
+            map.FEN = DefaultFEN;
             maps.Add(map);
         }
 
@@ -55,7 +57,6 @@ public class MapManager : MonoBehaviour
 
     private void EnterMap()
     {
-
         SceneManager.LoadScene("MainGameScene");
     }
 
@@ -81,7 +82,7 @@ public class MapManager : MonoBehaviour
             Map map = maps[i];
 
             GameObject buttonObj = Instantiate(mapButtonPrefab, mapContainer);
-            Button button = buttonObj.GetComponent<Button>();
+            Button button = buttonObj.GetComponent<UIButton>();
 
             if (map.isCleared)
             {
@@ -98,7 +99,7 @@ public class MapManager : MonoBehaviour
                 buttonObj.GetComponent<Image>().color = new Color(0.3f, 0.3f, 0.3f);
             }
 
-            int capturedId = totalFloors-i-1;
+            int capturedId = totalFloors - i - 1;
             button.onClick.AddListener(() => OnMapClicked(capturedId));
         }
     }

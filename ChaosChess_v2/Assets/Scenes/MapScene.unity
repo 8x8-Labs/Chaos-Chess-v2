@@ -208,7 +208,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 2104011993}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -846,8 +846,14 @@ MonoBehaviour:
   mapButtonPrefab: {fileID: 4660915655800250675, guid: eea79cb657b37c742b12dc509f12ace2, type: 3}
   currentFloor: 0
   maps: []
-  bossFENs: []
-  curMap: {fileID: 0}
+  bossFENs:
+  - 
+  DefaultFEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  curMap:
+    ELO: 0
+    FEN: 
+    isCleared: 0
+    floor: 0
 --- !u!4 &1699512812
 Transform:
   m_ObjectHideFlags: 0
