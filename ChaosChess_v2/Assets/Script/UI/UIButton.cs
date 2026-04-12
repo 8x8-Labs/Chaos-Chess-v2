@@ -20,7 +20,7 @@ public class UIButton : Button
     [SerializeField] private ButtonType buttonType;
 
     private IUIAnimation uIAnimation;
-    private SoundManager soundManager = SoundManager.Instance;
+    private SoundManager soundManager;
 
     [SerializeField] private MonoBehaviour uIAnimationObject; // 인스펙터에 노출
     [SerializeField] private bool isStartAnimation = false;

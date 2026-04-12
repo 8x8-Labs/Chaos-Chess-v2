@@ -13,6 +13,14 @@ public class CardDescPanel : ButtonPanel
     [SerializeField] private TMP_Text cardTitle;
     [SerializeField] private TMP_Text cardDesc;
     [SerializeField] private Button executeButton;
+    [SerializeField] private GameObject subDesc;
+    [SerializeField] private TMP_Text subDescTitle;
+    // 기물 타입
+    [SerializeField] private Image subDescPieceImage;
+    [SerializeField] private Image subDescMovementImage;
+    [SerializeField] private TMP_Text subDescPieceContent;
+    // 규칙 타입
+    [SerializeField] private TMP_Text subDescContent;
 
     private CardAnim selectedCard;
 
@@ -79,5 +87,37 @@ public class CardDescPanel : ButtonPanel
         cardImage.sprite = data.CardImage;
         cardTitle.text = data.CardName;
         cardDesc.text = data.CardDescription;
+
+        if (data.NeedAdditionalDescription)
+        {
+            subDesc.SetActive(true);
+            if (subDescTitle != null)
+                subDescTitle.text = data.AdditionalDescriptionTitle;
+
+            bool isPiece = data.DescriptionType == AdditionalDescription.Piece;
+            if (subDescPieceImage != null) subDescPieceImage.gameObject.SetActive(isPiece);
+            if (subDescMovementImage != null) subDescMovementImage.gameObject.SetActive(isPiece);
+            if (subDescPieceContent != null) subDescPieceContent.gameObject.SetActive(isPiece);
+            if (subDescContent != null) subDescContent.gameObject.SetActive(!isPiece);
+
+            if (isPiece)
+            {
+                if (subDescPieceImage != null)
+                    subDescPieceImage.sprite = data.PieceDescImage;
+                if (subDescMovementImage != null)
+                    subDescMovementImage.sprite = data.MovementImage;
+                if (subDescPieceContent != null)
+                    subDescPieceContent.text = data.PieceDescContent;
+            }
+            else
+            {
+                if (subDescContent != null)
+                    subDescContent.text = data.AdditionalDescriptionContent;
+            }
+        }
+        else
+        {
+            subDesc.SetActive(false);
+        }
     }
 }
