@@ -36,31 +36,10 @@ public class UIManager : MonoBehaviour
     }
 
 
-    [SerializeField] private GameObject EndGamePanel;
-    [SerializeField] private GameObject BGPanel;
-    [SerializeField] private TextMeshProUGUI resultText;
+    [SerializeField] private EndGamePanel endGamePanel;
 
-    public void ShowEndGamePanel(GameResult result)
+    public void ShowEndGame(GameResult result)
     {
-        BGPanel.SetActive(true);
-        switch (result)
-        {
-            case GameResult.WhiteWin:
-                resultText.text = "플레이어 승리";
-                break;
-            case GameResult.BlackWin:
-                resultText.text = "AI 승리";
-                break;
-            case GameResult.Draw:
-                resultText.text = "무승부";
-                break;
-        }
-
-        EndGamePanel.SetActive(true);
-    }
-
-    public void OnClickNext()
-    {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("RewardScene");
+        endGamePanel.Show(result);
     }
 }
