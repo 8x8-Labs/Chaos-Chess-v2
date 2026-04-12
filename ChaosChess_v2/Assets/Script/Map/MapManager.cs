@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class MapManager : MonoBehaviour
 {
@@ -63,7 +64,7 @@ public class MapManager : MonoBehaviour
         currentFloor++;
 
         if (currentFloor >= totalFloors)
-            // todo: ���� ����/���� ȭ������ �̵�/
+            // todo: 게임 종료/메인 화면으로 이동/
             return;
         curMap = maps[currentFloor];
     }
