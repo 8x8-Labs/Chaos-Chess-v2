@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
@@ -114,11 +115,13 @@ public class GameManager : MonoBehaviour
             if (lockedPiece != null && piece != lockedPiece) return;
             SelectPiece(piece);
             boardUI.DrawSelectTile(pos);
+            boardUI.DrawValidMoveTiles(piece);
         }
         else
         {
             MoveSelected(pos);
             boardUI.DeleteSelectTile();
+            boardUI.DeleteValidMoveTiles();
         }
     }
 
@@ -137,10 +140,12 @@ public class GameManager : MonoBehaviour
         BoardManager.Instance.UpdateFEN();
         string fen = BoardManager.Instance.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        EvaluateGameState(moves);
-        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
-        OnPlayerTurnStarted?.Invoke();
+        FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
+        {
+            EvaluateGameState(moves);
+            BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+            OnPlayerTurnStarted?.Invoke();
+        });
     }
 
     private void HandlePromotion(Piece pawn, Vector3Int pos)
@@ -153,9 +158,7 @@ public class GameManager : MonoBehaviour
 
             IsGameInput = true;
 
-            NextTurn();
-
-            RequestAIMove();
+            NextTurn(() => RequestAIMove());
         });
     }
 
@@ -190,7 +193,7 @@ public class GameManager : MonoBehaviour
         OnAwakenedPieceSelected?.Invoke(piece);
     }
 
-    public void NextTurn()
+    public void NextTurn(Action onComplete = null)
     {
         curTurn += 1;
         BoardManager.Instance.UpdateFEN(); // 디버깅
@@ -199,20 +202,26 @@ public class GameManager : MonoBehaviour
 
         ReturnAction();
 
-        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        EvaluateGameState(moves);
-        BoardManager.Instance.UpdatePiecesCanMovePos(moves);
-
-        if (IsPlayerTurn)
+        FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
         {
-            OnTurnChanged?.Invoke();
-            OnPlayerTurnStarted?.Invoke();
-        }
-        OnHalfTurnChanged?.Invoke();
+            EvaluateGameState(moves);
+            BoardManager.Instance.UpdatePiecesCanMovePos(moves);
 
-        BoardManager.Instance.RefreshMoves();
-        moves = FairyStockfishBridge.Instance.GetLegalMoves();
-        EvaluateGameState(moves);
+            if (IsPlayerTurn)
+            {
+                OnTurnChanged?.Invoke();
+                OnPlayerTurnStarted?.Invoke();
+            }
+            OnHalfTurnChanged?.Invoke();
+
+            BoardManager.Instance.RefreshMoves();
+
+            FairyStockfishBridge.Instance.GetLegalMovesAsync(moves2 =>
+            {
+                EvaluateGameState(moves2);
+                onComplete?.Invoke();
+            });
+        });
     }
 
     /// <summary>
@@ -256,19 +265,20 @@ public class GameManager : MonoBehaviour
             if (!IsGameInput)
                 return;
 
-            if (extraPlayerActions > 0)
+            DOVirtual.DelayedCall(Piece.MoveDuration, () =>
             {
-                extraPlayerActions--;
-                RefreshPlayerTurn();
-            }
-            else
-            {
-                if (!IsArenaMode) lockedPiece = null;
-                NextTurn();
-                // EndArena(Timeout/PlayerWon)는 NextTurn 내부 OnHalfTurnChanged에서 SyncPositionToStockfish만 수행.
-                // RequestAIMove는 NextTurn()이 완전히 끝난 뒤 여기서 호출해 GetLegalMoves와의 충돌을 방지.
-                RequestAIMove();
-            }
+                if (extraPlayerActions > 0)
+                {
+                    extraPlayerActions--;
+                    RefreshPlayerTurn();
+                }
+                else
+                {
+                    if (!IsArenaMode) lockedPiece = null;
+                    // RequestAIMove는 NextTurn 콜백 완료 후 호출해 GetLegalMoves와의 충돌을 방지.
+                    NextTurn(() => RequestAIMove());
+                }
+            });
         }
     }
 

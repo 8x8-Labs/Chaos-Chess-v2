@@ -151,6 +151,26 @@ public class FairyStockfishBridge : MonoBehaviour
 #endif
     }
 
+    // ── 합법적인 수 전체 비동기 반환 ─────────────────────
+    public void GetLegalMovesAsync(Action<string[]> callback)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        string[] moves = GetLegalMoves();
+        callback?.Invoke(moves);
+#else
+        Thread thread = new Thread(() =>
+        {
+            string[] moves = GetLegalMoves();
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                callback?.Invoke(moves);
+            });
+        });
+        thread.IsBackground = true;
+        thread.Start();
+#endif
+    }
+
     // ── 합법적인 수 전체 반환 ────────────────────────────
     public string[] GetLegalMoves()
     {

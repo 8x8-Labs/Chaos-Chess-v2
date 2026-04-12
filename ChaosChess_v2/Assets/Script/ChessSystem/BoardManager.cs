@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 [System.Serializable]
 class FENPrefabPair
@@ -191,7 +192,7 @@ public class BoardManager : MonoBehaviour
 
                 // 위치 반영 (Transform 이동 등)
                 Vector3 WorldPos = GridPosToWorldPos(pos);
-                piece.Move(pos, WorldPos);
+                piece.Move(pos, WorldPos, animate: false);
 
                 Pieces.Add(piece);
             }
@@ -307,7 +308,7 @@ public class BoardManager : MonoBehaviour
         if (piece != null)
             MovePiece(piece, to, promotion);
 
-        GameManager.Instance.NextTurn();
+        DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.NextTurn());
     }
 
     /// <summary>

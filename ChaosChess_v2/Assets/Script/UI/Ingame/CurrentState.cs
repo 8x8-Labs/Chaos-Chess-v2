@@ -1,10 +1,13 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CurrentState : MonoBehaviour
 {
     private PieceColor currentColor => GameManager.Instance.turnColor;
-    [SerializeField] private TMP_Text turnText;
+    [SerializeField] private Image turnColor;
+    [SerializeField] private Sprite whiteColor;
+    [SerializeField] private Sprite blackColor;
 
     private void Start() => GameManager.Instance.OnHalfTurnChanged += OnChangedState;
 
@@ -14,13 +17,11 @@ public class CurrentState : MonoBehaviour
     {
         if (currentColor == PieceColor.Black)
         {
-            turnText.text = "BLACK";
-            turnText.color = Color.black;
+            turnColor.sprite = blackColor;
         }
         else
         {
-            turnText.text = "WHITE";
-            turnText.color = Color.white;
+            turnColor.sprite = whiteColor;
         }
     }
 }

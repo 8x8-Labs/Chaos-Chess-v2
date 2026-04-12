@@ -444,7 +444,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 1953392893}
   enableCanvas: {fileID: 1843443124}
@@ -3175,7 +3175,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -140994.95}
+  m_AnchoredPosition: {x: 0, y: -902285.6}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &347282249
@@ -4473,7 +4473,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: e1a84ab5827257b42a802c0d89ba6464, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 1843443124}
   enableCanvas: {fileID: 237120367}
@@ -5470,7 +5470,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 52d67d257b1750a4e9311edac97490f7, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
@@ -7989,7 +7989,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00016812516, y: -200228.62}
+  m_AnchoredPosition: {x: -0.00016812516, y: -961519.1}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1053581299
@@ -8800,7 +8800,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 66e81216f7940f348827b30533732848, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
@@ -9939,7 +9939,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 1843443124}
   enableCanvas: {fileID: 1843443124}
@@ -11074,7 +11074,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 66e81216f7940f348827b30533732848, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
@@ -11995,7 +11995,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 237120367}
   enableCanvas: {fileID: 1843443124}
@@ -12539,7 +12539,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: e1a84ab5827257b42a802c0d89ba6464, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 1843443124}
   enableCanvas: {fileID: 1953392893}
@@ -16345,7 +16345,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: e1a84ab5827257b42a802c0d89ba6464, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 1843443124}
   enableCanvas: {fileID: 1953392893}
