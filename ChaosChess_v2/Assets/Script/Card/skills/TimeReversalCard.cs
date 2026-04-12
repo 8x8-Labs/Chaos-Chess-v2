@@ -17,28 +17,35 @@ public class TimeReversalCard : CardData, ICard
 
 public class TimeReversalEffecter : GlobalEffector
 {
-    private string fen;
+    private string DefaultFEN;
 
     protected override void OnApply()
     {
-        fen = BoardManager.Instance.GetFEN();
+        DefaultFEN = BoardManager.Instance.GetFEN();
     }
 
     protected override void OnRevert()
     {
+        string NewFEN = BoardManager.Instance.GetFEN();
+
+        BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces());
+        BoardManager.Instance.LoadFEN(DefaultFEN);
+
+        BoardManager.Instance.RefreshMoves();
+
         GameManager.Instance.RequestTimeReversal(
             () =>
             {
-                BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces());
-                BoardManager.Instance.LoadFEN(fen);
-
-                BoardManager.Instance.RefreshMoves();
-
                 Destroy(gameObject);
             },
             () =>
             {
                 Destroy(gameObject);
+                BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces());
+                BoardManager.Instance.LoadFEN(NewFEN);
+
+                BoardManager.Instance.RefreshMoves();
+
             }
         );
     }
