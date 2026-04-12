@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class UIButton : Button
 {
@@ -30,11 +31,11 @@ public class UIButton : Button
 
     protected override void Start()
     {
-        if(buttonType != ButtonType.ChangeCanvas)
+        if (buttonType != ButtonType.ChangeCanvas)
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
         }
-        if(buttonType == ButtonType.ClosePopup && disablePanel == null)
+        if (buttonType == ButtonType.ClosePopup && disablePanel == null)
         {
             disablePanel = GetComponentInParent<ButtonPanel>();
         }
@@ -66,6 +67,7 @@ public class UIButton : Button
 
     public void OnClicked()
     {
+        Debug.Log(buttonType);
         switch (buttonType)
         {
             case ButtonType.ChangeCanvas:
@@ -78,7 +80,10 @@ public class UIButton : Button
                     .FirstOrDefault();
                 changeCanvas(); break;
             case ButtonType.GoScene:
-                Debug.Log("씬 이동");
+                if (!string.IsNullOrEmpty(nextSceneName))
+                    SceneManager.LoadScene(nextSceneName);
+                else
+                    Debug.LogError("씬 이름이 비어있음");
                 break;
             case ButtonType.ClosePopup:
                 disablePanel.DisablePanel(); break;
