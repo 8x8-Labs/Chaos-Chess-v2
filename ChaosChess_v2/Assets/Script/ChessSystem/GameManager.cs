@@ -74,26 +74,48 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        boardUI = GetComponent<BoardUI>();
+        uiManager = FindFirstObjectByType<UIManager>();
     }
 
     void Start()
     {
-        FairyStockfishBridge.Instance.InitEngine("chess");
-
         curTurn = 1;
 
-        boardUI = GetComponent<BoardUI>();
-        uiManager = FindFirstObjectByType<UIManager>();
-
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
-
         OnTimeReversalRequired += HandleTimeReversal;
 
-        BoardManager.Instance.LoadFEN();
+        LoadMapManager();
+
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+    }
+
+    /// <summary>
+    /// MapManager에서 FEN과 ELO(맵의 전체적인 상태)를 받아와서 스톡피쉬에 적용한다
+    /// </summary>
+    private void LoadMapManager()
+    {
+        FairyStockfishBridge.Instance.InitEngine("chess");
+        if (MapManager.Instance != null && MapManager.Instance.curMap != null)
+        {
+            int elo = MapManager.Instance.curMap.ELO;
+
+            FairyStockfishBridge.Instance.SetElo(elo);
+            
+            string fen = MapManager.Instance.curMap.FEN;
+            
+            
+            BoardManager.Instance.LoadFEN(fen);
+        }
+        else
+        {
+            FairyStockfishBridge.Instance.SetElo(1000);
+
+            BoardManager.Instance.LoadFEN();
+        }
     }
 
     public void SelectGrid(Vector3Int pos)

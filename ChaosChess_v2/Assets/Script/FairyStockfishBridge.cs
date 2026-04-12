@@ -372,6 +372,17 @@ public class FairyStockfishBridge : MonoBehaviour
         //        UnityEngine.Debug.Log("[UCI →] " + command);
     }
 
+    public void SetElo(int elo)
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+    _fairyInstance?.Call("setOption", "UCI_LimitStrength", "true");
+    _fairyInstance?.Call("setOption", "UCI_Elo", elo.ToString());
+#else
+        SendCommand("setoption name UCI_LimitStrength value true");
+        SendCommand($"setoption name UCI_Elo value {elo}");
+#endif
+    }
+
     private string WaitForOutput(string keyword, int timeoutMs = 5000)
     {
         string result = "";
