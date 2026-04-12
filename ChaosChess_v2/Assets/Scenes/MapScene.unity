@@ -207,7 +207,7 @@ Canvas:
   m_GameObject: {fileID: 338206599}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
+  m_RenderMode: 1
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -769,7 +769,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 640}
+  m_AnchoredPosition: {x: 0, y: 1440}
   m_SizeDelta: {x: 704, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1537558346
@@ -790,7 +790,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 7
-  m_Spacing: 100
+  m_Spacing: 200
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
@@ -847,6 +847,7 @@ MonoBehaviour:
   currentFloor: 0
   maps: []
   bossFENs: []
+  curMap: {fileID: 0}
 --- !u!4 &1699512812
 Transform:
   m_ObjectHideFlags: 0

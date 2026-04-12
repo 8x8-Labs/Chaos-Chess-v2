@@ -63,7 +63,7 @@ public class MapManager : MonoBehaviour
     {
         maps[currentFloor].isCleared = true;
         int next = currentFloor + 1;
-        if (next < totalFloors)
+        if (next == totalFloors)
         {
         }
         RefreshMapUI();
