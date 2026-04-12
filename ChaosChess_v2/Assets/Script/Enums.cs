@@ -40,9 +40,8 @@ public enum ApplyType
 
 public enum AdditionalDescription
 {
-    Break,
-    Revive
-    // ...
+    Piece,
+    Rule
 }
 
 public enum CardType

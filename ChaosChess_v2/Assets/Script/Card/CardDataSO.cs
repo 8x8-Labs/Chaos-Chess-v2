@@ -57,5 +57,18 @@ public class CardDataSO : ScriptableObject
     [Header("부가 정보 설정")]
     [Tooltip("부가적인 정보가 필요하다면 활성화해주세요.")]
     public bool NeedAdditionalDescription;
-    public AdditionalDescription DescriptionType;    
+    public AdditionalDescription DescriptionType;
+    public string AdditionalDescriptionTitle;
+
+    // 기물 타입 부가 설명
+    [Tooltip("기물 이미지")]
+    public Sprite PieceDescImage;
+    [Tooltip("행마법 이미지")]
+    public Sprite MovementImage;
+    [TextArea]
+    public string PieceDescContent;
+
+    // 규칙 타입 부가 설명
+    [TextArea]
+    public string AdditionalDescriptionContent;
 }

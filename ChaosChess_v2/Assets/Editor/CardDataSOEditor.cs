@@ -32,6 +32,11 @@ public class CardDataSOEditor : Editor
     // 부가 정보
     SerializedProperty needAdditionalDescription;
     SerializedProperty descriptionType;
+    SerializedProperty additionalDescriptionTitle;
+    SerializedProperty pieceDescImage;
+    SerializedProperty movementImage;
+    SerializedProperty pieceDescContent;
+    SerializedProperty additionalDescriptionContent;
 
     // 섹션 토글 상태
     bool showBaseInfo = true;
@@ -67,6 +72,11 @@ public class CardDataSOEditor : Editor
 
         needAdditionalDescription = serializedObject.FindProperty("NeedAdditionalDescription");
         descriptionType = serializedObject.FindProperty("DescriptionType");
+        additionalDescriptionTitle = serializedObject.FindProperty("AdditionalDescriptionTitle");
+        pieceDescImage = serializedObject.FindProperty("PieceDescImage");
+        movementImage = serializedObject.FindProperty("MovementImage");
+        pieceDescContent = serializedObject.FindProperty("PieceDescContent");
+        additionalDescriptionContent = serializedObject.FindProperty("AdditionalDescriptionContent");
     }
 
     public override void OnInspectorGUI()
@@ -116,6 +126,19 @@ public class CardDataSOEditor : Editor
                 {
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(descriptionType, new GUIContent("설명 타입"));
+                    EditorGUILayout.PropertyField(additionalDescriptionTitle, new GUIContent("부가 설명 제목"));
+
+                    var type = (AdditionalDescription)descriptionType.enumValueIndex;
+                    if (type == AdditionalDescription.Piece)
+                    {
+                        EditorGUILayout.PropertyField(pieceDescImage, new GUIContent("기물 이미지"));
+                        EditorGUILayout.PropertyField(movementImage, new GUIContent("행마법 이미지"));
+                        EditorGUILayout.PropertyField(pieceDescContent, new GUIContent("기물 설명 내용"));
+                    }
+                    else if (type == AdditionalDescription.Rule)
+                    {
+                        EditorGUILayout.PropertyField(additionalDescriptionContent, new GUIContent("규칙 내용"));
+                    }
                     EditorGUI.indentLevel--;
                 }
             }
