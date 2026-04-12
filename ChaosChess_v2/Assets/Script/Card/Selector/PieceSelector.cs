@@ -7,7 +7,6 @@ public class PieceSelector : Selector<Piece>
 {
     [SerializeField] private UIPieceDrawer pieceDrawer;
     [SerializeField] private SelectorUI selectorUI;
-    [SerializeField] private TMP_Text errorText;
     private IPieceCard skillCard;
     private bool executable => isExecute();
 

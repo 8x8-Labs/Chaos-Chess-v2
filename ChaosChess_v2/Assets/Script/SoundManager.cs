@@ -10,14 +10,7 @@ public class SoundManager : MonoBehaviour
     public AudioMixer audioMixer;
     [SerializeField] private AudioSource bgmSource;
 
-    public static SoundManager Instance
-    {
-        get
-        {
-            if (instance == null) instance = new SoundManager();
-            return instance;
-        }
-    }
+    public static SoundManager Instance => instance;
     private void Awake()
     {
         if (instance == null)

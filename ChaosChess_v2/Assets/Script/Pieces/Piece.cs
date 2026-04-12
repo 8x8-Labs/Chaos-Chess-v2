@@ -51,7 +51,7 @@ public class Piece : MonoBehaviour
     protected List<Vector3Int> canMovePos;
 
     private MaterialPropertyBlock mpb;
-    private SoundManager soundManager = SoundManager.Instance;
+    private SoundManager soundManager;
     private static readonly int OutlineThickId = Shader.PropertyToID("_OutlineThick");
 
     public List<Vector3Int> CanMovePos
@@ -169,6 +169,7 @@ public class Piece : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.sharedMaterial = outlineMaterial;
         mpb = new MaterialPropertyBlock();
+        soundManager = SoundManager.Instance;
     }
 
     public virtual void Init(Vector3Int pos, PieceColor color)
@@ -213,7 +214,7 @@ public class Piece : MonoBehaviour
         if (animate)
         {
             int idx = UnityEngine.Random.Range(0, moveSFX.Length);
-            soundManager.SFXPlay("MoveSFX", moveSFX[idx]);
+            if (soundManager != null) soundManager.SFXPlay("MoveSFX", moveSFX[idx]);
             transform.DOMove(WorldPos, MoveDuration).SetEase(Ease.OutQuint);
         }
         else
@@ -263,7 +264,7 @@ public class Piece : MonoBehaviour
 
     public void PieceSelect()
     {
-        soundManager.SFXPlay("SelectSFX", selectSFX);
+        if (soundManager != null) soundManager.SFXPlay("SelectSFX", selectSFX);
     }
 
     public void OnDeselect()

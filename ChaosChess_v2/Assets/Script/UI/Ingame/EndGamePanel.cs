@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 public class EndGamePanel : ButtonPanel
@@ -10,10 +10,12 @@ public class EndGamePanel : ButtonPanel
         switch (result)
         {
             case GameResult.WhiteWin:
-                resultText.text = "플레이어 승리";
+                resultText.text = "승리";
+                resultText.color = Color.yellow;
                 break;
             case GameResult.BlackWin:
-                resultText.text = "AI 승리";
+                resultText.color = Color.gray;
+                resultText.text = "패배";
                 break;
             case GameResult.Draw:
                 resultText.text = "무승부";
