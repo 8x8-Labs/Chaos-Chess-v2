@@ -15,29 +15,11 @@ public class UIManager : MonoBehaviour
     }
 
 
-    [SerializeField] private GameObject TimeReversalPanel;
-
-    private Action onYes;
-    private Action onNo;
+    [SerializeField] private TimeReversalPanel timeReversalPanel;
 
     public void ShowTimeReversal(Action yes, Action no)
     {
-        onYes = yes;
-        onNo = no;
-
-        TimeReversalPanel.SetActive(true);
-    }
-
-    public void OnClickTimeReversalYes()
-    {
-        TimeReversalPanel.SetActive(false);
-        onYes?.Invoke();
-    }
-
-    public void OnClickTimeReversalNo()
-    {
-        TimeReversalPanel.SetActive(false);
-        onNo?.Invoke();
+        timeReversalPanel.Show(yes, no);
     }
 
 
