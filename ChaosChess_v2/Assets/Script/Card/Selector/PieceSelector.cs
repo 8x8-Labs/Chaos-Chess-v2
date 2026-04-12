@@ -99,7 +99,8 @@ public class PieceSelector : Selector<Piece>
         };
         
         skillCard.Execute(args);
-        cardRandomizer?.RemoveCard(cardData.gameObject);
+        if(cardData != null)
+            cardRandomizer?.RemoveCard(cardData.gameObject);
 
         DisableSelector();
     }
