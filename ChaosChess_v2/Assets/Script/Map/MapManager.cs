@@ -11,6 +11,8 @@ public class MapManager : MonoBehaviour
 
     public List<Map> maps = new List<Map>();
     public string DefaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public List<string> Boss1FEN = new();
+    public List<string> Boss2FEN = new();
 
     public Map curMap;
 
@@ -37,12 +39,17 @@ public class MapManager : MonoBehaviour
 
         for (int i = 0; i < totalFloors; i++)
         {
+            string fen = DefaultFEN;
+            if (i == 2)
+                fen = Boss1FEN[Random.Range(0, Boss1FEN.Count - 1)];
+            if (i == 5)
+                fen = Boss2FEN[Random.Range(0, Boss2FEN.Count - 1)];
             Map map = new Map
             {
                 ELO = startELO + 150 * i,
                 floor = i,
                 isCleared = false,
-                FEN = DefaultFEN
+                FEN = fen
             };
 
             maps.Add(map);
