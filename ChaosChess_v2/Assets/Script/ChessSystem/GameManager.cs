@@ -83,6 +83,7 @@ public class GameManager : MonoBehaviour
     {
         if (scene.name != "MainGameScene")
             return;
+        IsEndGame = false;
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
 
