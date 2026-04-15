@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: TeleportCard
+  m_EditorClassIdentifier: 
+  CardName: "\uD154\uB808\uD3EC\uD2B8"
+  CardImage: {fileID: 0}
+  CardDescription: "\uD3F0 \uAE30\uBB3C\uC774 \uC120\uD0DD\uD55C \uBE44\uC5B4\uC788\uB294
+    \uCE78\uC73C\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4. "
+  Type: 0
+  PieceType: 1
+  PieceTargetColor: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 1
+  TileCount: 1
+  MaintainTurn: -1
+  RestrictTiles: 1
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010101010100
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0

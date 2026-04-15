@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: CheckmateDeclarationCard
+  m_EditorClassIdentifier: 
+  CardName: "\uCCB4\uD06C\uBA54\uC774\uD2B8 \uC120\uC5B8"
+  CardImage: {fileID: 0}
+  CardDescription: "\uB2E4\uC74C 4\uD134 \uC548\uC5D0 \uCCB4\uD06C\uB97C \uB2F9\uD560
+    \uACBD\uC6B0, \uC0C1\uB300\uC758 \uAE30\uBB3C 5\uAC1C\uAC00 \uC790\uB3D9\uC73C\uB85C
+    \uD30C\uAD34\uB429\uB2C8\uB2E4."
+  Type: 2
+  CardTier: 3
+  PieceType: 0
+  PieceTargetColor: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 0
+  TileCount: 0
+  MaintainTurn: 0
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 1
+  LimitTurn: 4
+  NeedAdditionalDescription: 0
+  DescriptionType: 0

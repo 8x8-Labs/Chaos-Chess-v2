@@ -1,0 +1,54 @@
+﻿using DG.Tweening;
+using UnityEngine;
+using UnityEngine.Events;
+
+public class ButtonPanel : MonoBehaviour
+{
+    [SerializeField] private bool baseEnabled = false;
+    [SerializeField] private float fadeDuration = 0.2f;
+    [SerializeField] private UnityEvent OnPanelEnabled;
+    [SerializeField] private UnityEvent OnPanelDisabled;
+
+    private bool isDisabled = false;
+    private CanvasGroup canvasGroup;
+
+    private void Awake()
+    {
+        canvasGroup = GetComponent<CanvasGroup>();
+    }
+
+    private void Start()
+    {
+        if(!baseEnabled) DisablePanel();
+    }
+
+
+    // 패널을 활성화시키고 효과 및 첫 선택 버튼을 설정
+    public virtual void EnablePanel()
+    {
+        canvasGroup.alpha = 0f;
+        OnPanelEnabled?.Invoke();
+        FadeOut();
+    }
+
+    // 패널을 비활성화 시키고 알파를 0으로 바꿈
+    public virtual void DisablePanel()
+    {
+        isDisabled = true;
+        OnPanelDisabled?.Invoke();
+        FadeIn();
+    }
+
+    public void FadeOut()
+    {
+        canvasGroup.DOFade(1f, fadeDuration).OnComplete(() =>
+        {
+            canvasGroup.blocksRaycasts = true;
+        });
+    }
+    public void FadeIn()
+    {
+        canvasGroup.blocksRaycasts = false;
+        canvasGroup.DOFade(0f, fadeDuration);
+    }
+}

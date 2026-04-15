@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: TestTile
+  m_EditorClassIdentifier: 
+  CardName: "\uD14C\uC2A4\uD2B8 \uCE74\uB4DC"
+  CardImage: {fileID: 5407276388446273561, guid: 8005fd67b092a404785cc915b51a0a17, type: 3}
+  CardDescription: "\u3141\u3134\u3147\u313B\u3134\u3147\u3139"
+  Type: 1
+  PieceType: -1
+  RequiredPieceCount: 2
+  TileCount: 2
+  MaintainTurn: 2
+  HasLimit: 0
+  LimitTurn: 0
+  NeedAdditionalDescription: 0
+  DescriptionType: 0
