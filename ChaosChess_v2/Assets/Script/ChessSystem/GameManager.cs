@@ -417,6 +417,8 @@ public class GameManager : MonoBehaviour
 
     private void ApplyGameResult()
     {
+        if (IsEndGame)
+            return;
         if (FinishType == GameResult.None) return;
 
         switch (FinishType)

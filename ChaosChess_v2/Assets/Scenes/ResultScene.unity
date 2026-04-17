@@ -5090,11 +5090,11 @@ MonoBehaviour:
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 8
+  buttonType: 5
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
-  nextSceneName: 
+  nextSceneName: MainScene
 --- !u!114 &1053713943
 MonoBehaviour:
   m_ObjectHideFlags: 0
