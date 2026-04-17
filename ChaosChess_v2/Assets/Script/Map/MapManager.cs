@@ -64,7 +64,6 @@ public class MapManager : MonoBehaviour
         currentFloor++;
 
         if (currentFloor >= totalFloors)
-            // todo: 게임 종료/메인 화면으로 이동/
             return;
         curMap = maps[currentFloor];
     }

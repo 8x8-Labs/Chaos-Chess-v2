@@ -22,7 +22,6 @@ public class MapUI : MonoBehaviour
 
         for (int i = manager.totalFloors - 1; i >= 0; i--)
         {
-            Debug.Log(i);
             int id = i;
             Map map = manager.maps[i];
 

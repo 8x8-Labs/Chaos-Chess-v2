@@ -89,6 +89,8 @@ public class GameManager : MonoBehaviour
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
 
+        FinishType = GameResult.None;
+
         curTurn = 1;
 
         BoardManager.Instance.OnPromotionRequired -= HandlePromotion;
@@ -245,10 +247,12 @@ public class GameManager : MonoBehaviour
                 OnTurnChanged?.Invoke();
                 OnPlayerTurnStarted?.Invoke();
             }
-            ApplyGameResult();
 
             OnHalfTurnChanged?.Invoke();
+
             ApplyGameResult();
+
+            BoardManager.Instance.CheckKingExistence();
 
             BoardManager.Instance.RefreshMoves();
 
@@ -330,6 +334,9 @@ public class GameManager : MonoBehaviour
 
     public void RequestAIMove()
     {
+        if (IsEndGame)
+            return;
+
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,
             moveTimeMs: 2000,
@@ -425,6 +432,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        MapManager.Instance.OnCombatCleared();
         EndGame();
     }
 
