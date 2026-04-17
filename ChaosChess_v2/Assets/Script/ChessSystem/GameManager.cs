@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -64,12 +65,15 @@ public class GameManager : MonoBehaviour
     private int extraPlayerActions = 0;
     private Piece lockedPiece = null;
 
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -77,24 +81,49 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void Start()
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        FairyStockfishBridge.Instance.InitEngine("chess");
+        if (scene.name != "MainGameScene")
+            return;
+        IsEndGame = false;
+        boardUI = FindFirstObjectByType<BoardUI>();
+        uiManager = FindFirstObjectByType<UIManager>();
 
         curTurn = 1;
 
-        boardUI = GetComponent<BoardUI>();
-        uiManager = FindFirstObjectByType<UIManager>();
-
+        BoardManager.Instance.OnPromotionRequired -= HandlePromotion;
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
 
+        OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 
-        BoardManager.Instance.LoadFEN();
+        LoadMapManager();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+    }
+
+    /// <summary>
+    /// MapManager에서 FEN과 ELO(맵의 전체적인 상태)를 받아와서 스톡피쉬에 적용한다
+    /// </summary>
+    private void LoadMapManager()
+    {
+        FairyStockfishBridge.Instance.InitEngine("chess");
+        if (MapManager.Instance != null && MapManager.Instance.curMap != null)
+        {
+            int elo = MapManager.Instance.curMap.ELO;
+            FairyStockfishBridge.Instance.SetElo(elo);
+
+            string fen = MapManager.Instance.curMap.FEN;
+            BoardManager.Instance.LoadFEN(fen);
+        }
+        else
+        {
+            FairyStockfishBridge.Instance.SetElo(1000);
+
+            BoardManager.Instance.LoadFEN();
+        }
     }
 
     public void SelectGrid(Vector3Int pos)
@@ -216,7 +245,10 @@ public class GameManager : MonoBehaviour
                 OnTurnChanged?.Invoke();
                 OnPlayerTurnStarted?.Invoke();
             }
+            ApplyGameResult();
+
             OnHalfTurnChanged?.Invoke();
+            ApplyGameResult();
 
             BoardManager.Instance.RefreshMoves();
 
