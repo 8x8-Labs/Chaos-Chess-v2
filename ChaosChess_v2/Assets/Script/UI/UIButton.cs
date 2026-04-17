@@ -29,7 +29,6 @@ public class UIButton : Button
 
     [SerializeField] private string nextSceneName;
 
-
     protected override void Start()
     {
         if (buttonType != ButtonType.ChangeCanvas)
@@ -44,6 +43,8 @@ public class UIButton : Button
         if (soundManager == null) soundManager = SoundManager.Instance;
         // Debug.Log($"{gameObject.name}의 disableCanvas: {disableCanvas?.name}");
     }
+
+    public void SetNextScene(string nextScene) => nextSceneName = nextScene;
 
 
     public override void OnSelect(BaseEventData eventData)
