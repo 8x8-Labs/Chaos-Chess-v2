@@ -29,6 +29,6 @@ public class CastleKnightCard : CardData, IPieceCard
         //       나이트 원래 자리는 빈 칸으로 처리, 턴 소모 없음
 
         BoardManager.Instance.DestroyPiece(pieces[0]);
-        BoardManager.Instance.ChangePiece(pieces[1].Pos, pieces[1].Color, 's');
+        BoardManager.Instance.ChangePiece(pieces[1].Pos, pieces[1].Color, 'y');
     }
 }
