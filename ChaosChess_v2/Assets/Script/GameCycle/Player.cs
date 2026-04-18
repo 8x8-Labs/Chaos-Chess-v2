@@ -44,10 +44,4 @@ public class Player : MonoBehaviour
         _playerTurnCount = 0;
         cardRandomizer.GenerateCard(_cardPool);
     }
-
-    /// <summary>카드 지급 주기를 delta만큼 조정합니다. 최소값은 1입니다.</summary>
-    public void ModifyCardInterval(int delta)
-    {
-        _cardInterval = Mathf.Max(1, _cardInterval + delta);
-    }
 }

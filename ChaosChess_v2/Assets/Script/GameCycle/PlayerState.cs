@@ -1,6 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 게임의 데이터를 저장하는 클래스
+/// 데이터 종류
+/// - 카드 획득 턴 수
+/// - 현재 얻은 버프
+/// - 현재 가지고있는 카드
+/// - 승,무,패 횟수
+/// - 현재 게임 결과
+/// </summary>
 public class PlayerState : MonoBehaviour
 {
     public static PlayerState Instance;
@@ -18,7 +27,8 @@ public class PlayerState : MonoBehaviour
         }
     }
 
-    public int DefaultCardInterval = 5;
+    private int _defaultCardInterval = 5;
+    public int DefaultCardInterval => _defaultCardInterval;
 
     [SerializeField] private List<GameObject> _cardPool = new();
     public IReadOnlyList<GameObject> CardPool => _cardPool;
@@ -32,6 +42,10 @@ public class PlayerState : MonoBehaviour
     [field: SerializeField] public int WinCount { get; private set; } = 0;
     [field: SerializeField] public int DrawCount { get; private set; } = 0;
     [field: SerializeField] public int LoseCount { get; private set; } = 0;
+
+    [SerializeField] private GameResult curGameResult = GameResult.None;
+
+    public GameResult CurGameResult => curGameResult;
 
     public void EndGame(GameResult result)
     {
@@ -47,5 +61,12 @@ public class PlayerState : MonoBehaviour
                 DrawCount++;
                 break;
         }
+        curGameResult = result;
+    }
+
+    /// <summary>카드 지급 주기를 delta만큼 조정합니다. 최소값은 1입니다.</summary>
+    public void ModifyCardInterval(int delta)
+    {
+        _defaultCardInterval = Mathf.Max(1, _defaultCardInterval + delta);
     }
 }

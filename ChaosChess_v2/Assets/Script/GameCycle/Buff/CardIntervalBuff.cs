@@ -9,6 +9,6 @@ public class CardIntervalBuff : IPlayerBuff
         _reduction = reduction;
     }
 
-    public void OnApply(Player player) => player.ModifyCardInterval(-_reduction);
-    public void OnRemove(Player player) => player.ModifyCardInterval(_reduction);
+    public void OnApply(Player player) => PlayerState.Instance.ModifyCardInterval(-_reduction);
+    public void OnRemove(Player player) => PlayerState.Instance.ModifyCardInterval(_reduction);
 }
