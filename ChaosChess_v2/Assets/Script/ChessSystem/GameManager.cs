@@ -442,5 +442,6 @@ public class GameManager : MonoBehaviour
     {
         IsEndGame = true;
         UI.ShowEndGame(FinishType);
+        PlayerState.Instance.EndGame(FinishType);
     }
 }
