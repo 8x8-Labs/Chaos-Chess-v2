@@ -128,6 +128,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>AI ELO를 delta만큼 조정합니다.</summary>
+    public void ModifyELO(int delta)
+    {
+        int elo = MapManager.Instance.curMap.ELO + delta;
+        MapManager.Instance.curMap.ELO = elo;
+        FairyStockfishBridge.Instance.SetElo(elo);
+    }
+
     public void SelectGrid(Vector3Int pos)
     {
         if (!IsPlayerTurn) return;
