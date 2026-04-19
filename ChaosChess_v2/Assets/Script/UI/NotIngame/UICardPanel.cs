@@ -1,9 +1,12 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class UICardPanel : ButtonPanel
 {
     public UICardAnim[] anims;
+    public int cardCount;
+
     public override void EnablePanel()
     {
         base.EnablePanel();
@@ -17,7 +20,7 @@ public class UICardPanel : ButtonPanel
 
     private IEnumerator spawnAnims()
     {
-        for (int i = 0; i < anims.Length; i++)
+        for (int i = 0; i < cardCount; i++)
         {
             // 카드 내용 추가
             // ...
