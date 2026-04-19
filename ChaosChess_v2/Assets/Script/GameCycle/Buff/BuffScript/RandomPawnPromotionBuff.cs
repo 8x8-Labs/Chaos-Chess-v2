@@ -18,8 +18,25 @@ public class RandomPawnPromotionBuff : BuffSO
 
         Piece target = pawns[Random.Range(0, pawns.Count)];
         PieceType promoteTo = PromotionTargets[Random.Range(0, PromotionTargets.Length)];
-        // 기물 승격시키기
-        // BoardManager.Instance.ChangePiece(target.Pos, PieceColor.White, )
+
+        char promoteType = ' ';
+        switch (promoteTo)
+        {
+            case PieceType.Queen:
+                promoteType = 'q';
+                break;
+            case PieceType.Rook:
+                promoteType = 'r';
+                break;
+            case PieceType.Bishop:
+                promoteType = 'b';
+                break;
+            case PieceType.Knight:
+                promoteType = 'k';
+                break;
+        }
+
+        BoardManager.Instance.ChangePiece(target.Pos, PieceColor.White, promoteType);
     }
 
     public override void OnRemove(Player player) { }
