@@ -763,7 +763,7 @@ public class BoardManager : MonoBehaviour
         return targetPieces;
     }
 
-    private void CheckKingExistence()
+    public void CheckKingExistence()
     {
         bool whiteAlive = HasKing(PieceColor.White);
         bool blackAlive = HasKing(PieceColor.Black);
@@ -779,10 +779,6 @@ public class BoardManager : MonoBehaviour
         else if (!blackAlive)
         {
             GameManager.Instance.FinishType = GameResult.WhiteWin;
-        }
-        else
-        {
-            GameManager.Instance.FinishType = GameResult.None;
         }
     }
 
@@ -826,6 +822,7 @@ public class BoardManager : MonoBehaviour
             }
             AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
+            CheckKingExistence();
         }
 
         if (piece is King)
