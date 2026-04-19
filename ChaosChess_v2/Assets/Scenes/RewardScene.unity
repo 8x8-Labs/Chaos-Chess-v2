@@ -524,8 +524,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: eab9fc0c4351b044bb49fadb4e6ced6e, type: 2}
   debuffSO:
   - {fileID: 11400000, guid: 671948a437aa02c4096c92c67df0314c, type: 2}
-  buffPanel: {fileID: 1948879690}
-  debuffPanel: {fileID: 761295387}
+  buffPanel: {fileID: 1948879695}
+  debuffPanel: {fileID: 761295392}
 --- !u!1 &125163302
 GameObject:
   m_ObjectHideFlags: 0

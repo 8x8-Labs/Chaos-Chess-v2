@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b5f3c8c2ae4cc547964f18422e3ff8f, type: 3}
+  m_Script: {fileID: 11500000, guid: 11d6adbe182ff6444ba60f321d885fd0, type: 3}
   m_Name: CardIntervalDebuffSO
   m_EditorClassIdentifier: 
   description: "\uCE74\uB4DC \uC9C0\uAE09 \uC8FC\uAE30 +1"
   type: 1
-  reduction: -1
+  reduction: 1
