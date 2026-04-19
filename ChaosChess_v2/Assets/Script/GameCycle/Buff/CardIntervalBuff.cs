@@ -1,14 +1,17 @@
-/// <summary>지원 카드 지급 주기를 줄이는 버프</summary>
-public class CardIntervalBuff : IPlayerBuff
-{
-    private readonly int _reduction;
+using UnityEngine;
 
-    /// <param name="reduction">줄일 턴 수 (기본값 1)</param>
-    public CardIntervalBuff(int reduction = 1)
+[CreateAssetMenu(menuName = "Buff/CardInterval")]
+public class CardIntervalBuff : BuffSO
+{
+    public int reduction = 1;
+
+    public override void OnApply(Player player)
     {
-        _reduction = reduction;
+        PlayerState.Instance.ModifyCardInterval(-reduction);
     }
 
-    public void OnApply(Player player) => PlayerState.Instance.ModifyCardInterval(-_reduction);
-    public void OnRemove(Player player) => PlayerState.Instance.ModifyCardInterval(_reduction);
+    public override void OnRemove(Player player)
+    {
+        PlayerState.Instance.ModifyCardInterval(reduction);
+    }
 }

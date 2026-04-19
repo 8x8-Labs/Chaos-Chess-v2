@@ -2,13 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class RewardManager : MonoBehaviour
+public class CardRewardManager : MonoBehaviour
 {
     private int _rewardCardCount = 0;
 
     [SerializeField] private UICardPanel uiCardPanel;
-
-
     [SerializeField] private UICardRandomizer uiCardRandomizer;
 
     void Start()

@@ -405,6 +405,7 @@ GameObject:
   m_Component:
   - component: {fileID: 106018955}
   - component: {fileID: 106018956}
+  - component: {fileID: 106018958}
   - component: {fileID: 106018957}
   m_Layer: 0
   m_Name: RewardManager
@@ -505,6 +506,20 @@ MonoBehaviour:
   - {fileID: 634362111415927516, guid: 8dded743c90c9864790036b985db272b, type: 3}
   - {fileID: 488242485071545191, guid: 0cdb9f69432c82549ae2f1314219c7df, type: 3}
   - {fileID: 8303811246170913227, guid: 77982229fa8f1bd4b93b873330076c48, type: 3}
+--- !u!114 &106018958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 106018954}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1c799c5e793e94689689880fc78171, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  presets:
+  - {fileID: 0}
 --- !u!1 &125163302
 GameObject:
   m_ObjectHideFlags: 0
@@ -2417,7 +2432,7 @@ GameObject:
   - component: {fileID: 761295390}
   - component: {fileID: 761295389}
   m_Layer: 5
-  m_Name: Buff (2)
+  m_Name: DeBuff
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2494,7 +2509,7 @@ MonoBehaviour:
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 8
+  buttonType: 6
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
@@ -4151,7 +4166,7 @@ GameObject:
   - component: {fileID: 1529438536}
   - component: {fileID: 1529438535}
   m_Layer: 5
-  m_Name: Buff (1)
+  m_Name: CardBuff
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4748,26 +4763,14 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1948879693}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1948879690}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   clickSound: {fileID: 0}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
-  enablePanel: {fileID: 354940234}
-  buttonType: 3
+  enablePanel: {fileID: 0}
+  buttonType: 6
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
