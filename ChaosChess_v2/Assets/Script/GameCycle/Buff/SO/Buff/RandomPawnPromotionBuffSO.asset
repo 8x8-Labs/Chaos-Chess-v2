@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b5f3c8c2ae4cc547964f18422e3ff8f, type: 3}
-  m_Name: CardIntervalBuffSO
+  m_Script: {fileID: 11500000, guid: 344d56a6edf8f2e479c53dd7a562fca3, type: 3}
+  m_Name: RandomPawnPromotionBuffSO
   m_EditorClassIdentifier: 
-  description: "\uCE74\uB4DC \uC9C0\uAE09 \uC8FC\uAE30 -1"
+  description: "\uB79C\uB364\uD55C \uD3F0 \uD558\uB098\uB97C \uBB34\uC791\uC704 \uAE30\uBB3C\uB85C
+    \uC2B9\uAE09"
   type: 0
-  reduction: 1

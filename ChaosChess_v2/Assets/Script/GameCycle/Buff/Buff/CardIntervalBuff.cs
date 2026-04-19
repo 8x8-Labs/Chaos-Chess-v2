@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// 카드 지급 주기를 n만큼 줄이는 버프
+/// </summary>
 [CreateAssetMenu(menuName = "Buff/CardInterval")]
 public class CardIntervalBuff : BuffSO
 {

@@ -518,8 +518,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da1c799c5e793e94689689880fc78171, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  presets:
-  - {fileID: 0}
+  buffSO:
+  - {fileID: 11400000, guid: a079262bb246d9649b0c15b8fa3db988, type: 2}
+  - {fileID: 11400000, guid: eab9fc0c4351b044bb49fadb4e6ced6e, type: 2}
+  debuffSO: []
 --- !u!1 &125163302
 GameObject:
   m_ObjectHideFlags: 0
