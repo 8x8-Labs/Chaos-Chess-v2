@@ -18,6 +18,7 @@ public class UICardAnim : MonoBehaviour
     private float originalWidth;
 
     [SerializeField] private GameObject cardPrefab;
+    public GameObject CardPreFab { get { return cardPrefab; } set { cardPrefab = value; } }
 
     private CardData cardData;
     private UICardDescPanel panel;

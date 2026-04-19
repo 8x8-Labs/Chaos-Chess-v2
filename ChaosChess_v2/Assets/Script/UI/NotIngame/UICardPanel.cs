@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UICardPanel : ButtonPanel
@@ -17,6 +16,8 @@ public class UICardPanel : ButtonPanel
     {
         base.DisablePanel();
     }
+
+    public UICardAnim[] GetUICards => anims;
 
     private IEnumerator spawnAnims()
     {
