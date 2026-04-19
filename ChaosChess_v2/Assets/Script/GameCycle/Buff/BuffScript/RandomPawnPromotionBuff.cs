@@ -32,7 +32,7 @@ public class RandomPawnPromotionBuff : BuffSO
                 promoteType = 'b';
                 break;
             case PieceType.Knight:
-                promoteType = 'k';
+                promoteType = 'n';
                 break;
         }
 
