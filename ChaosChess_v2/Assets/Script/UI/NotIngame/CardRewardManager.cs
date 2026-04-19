@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class CardRewardManager : MonoBehaviour
@@ -8,6 +9,8 @@ public class CardRewardManager : MonoBehaviour
 
     [SerializeField] private UICardPanel uiCardPanel;
     [SerializeField] private UICardRandomizer uiCardRandomizer;
+
+    [SerializeField] private TextMeshProUGUI cardRewardText;
 
     void Start()
     {
@@ -31,5 +34,7 @@ public class CardRewardManager : MonoBehaviour
         {
             uiCards[i].CardPreFab = randomCards[i];
         }
+
+        cardRewardText.text = $"카드 {_rewardCardCount}개 얻기";
     }
 }
