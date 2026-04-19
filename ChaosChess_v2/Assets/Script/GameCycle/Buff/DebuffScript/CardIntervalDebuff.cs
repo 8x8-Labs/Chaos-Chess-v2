@@ -15,6 +15,6 @@ public class CardIntervalDebuff : BuffSO
 
     public override void OnRemove(Player player)
     {
-        player.ModifyCardInterval(reduction);
+        player.ModifyCardInterval(-reduction);
     }
 }

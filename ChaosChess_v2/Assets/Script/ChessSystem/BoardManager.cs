@@ -767,7 +767,7 @@ public class BoardManager : MonoBehaviour
     {
         bool whiteAlive = HasKing(PieceColor.White);
         bool blackAlive = HasKing(PieceColor.Black);
-        
+
         if (!whiteAlive && !blackAlive)
         {
             GameManager.Instance.FinishType = GameResult.Draw;
@@ -820,9 +820,9 @@ public class BoardManager : MonoBehaviour
             {
                 castling.OnRookDie(targetPiece.Color, target);
             }
-            CheckKingExistence();
             AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
+            CheckKingExistence();
         }
 
         if (piece is King)

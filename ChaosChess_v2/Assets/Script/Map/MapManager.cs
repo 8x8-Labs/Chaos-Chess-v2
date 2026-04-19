@@ -40,10 +40,10 @@ public class MapManager : MonoBehaviour
         for (int i = 0; i < totalFloors; i++)
         {
             string fen = DefaultFEN;
-            if (i == 2)
-                fen = Boss1FEN[Random.Range(0, Boss1FEN.Count - 1)];
-            if (i == 5)
-                fen = Boss2FEN[Random.Range(0, Boss2FEN.Count - 1)];
+            if (i == 2 && Boss1FEN.Count > 0)
+                fen = Boss1FEN[Random.Range(0, Boss1FEN.Count)];
+            if (i == 5 && Boss2FEN.Count > 0)
+                fen = Boss2FEN[Random.Range(0, Boss2FEN.Count)];
             Map map = new Map
             {
                 ELO = startELO + 150 * i,

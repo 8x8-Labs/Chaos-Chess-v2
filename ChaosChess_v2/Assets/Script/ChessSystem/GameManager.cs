@@ -258,9 +258,9 @@ public class GameManager : MonoBehaviour
 
             OnHalfTurnChanged?.Invoke();
 
-            ApplyGameResult();
-
             BoardManager.Instance.CheckKingExistence();
+
+            ApplyGameResult();
 
             BoardManager.Instance.RefreshMoves();
 
