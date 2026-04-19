@@ -10,11 +10,11 @@ public class CardIntervalBuff : BuffSO
 
     public override void OnApply(Player player)
     {
-        PlayerState.Instance.ModifyCardInterval(-reduction);
+        player.ModifyCardInterval(-reduction);
     }
 
     public override void OnRemove(Player player)
     {
-        PlayerState.Instance.ModifyCardInterval(reduction);
+        player.ModifyCardInterval(reduction);
     }
 }

@@ -63,10 +63,4 @@ public class PlayerState : MonoBehaviour
         }
         curGameResult = result;
     }
-
-    /// <summary>카드 지급 주기를 delta만큼 조정합니다. 최소값은 1입니다.</summary>
-    public void ModifyCardInterval(int delta)
-    {
-        _defaultCardInterval = Mathf.Max(1, _defaultCardInterval + delta);
-    }
 }
