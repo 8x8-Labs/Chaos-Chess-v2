@@ -33,11 +33,11 @@ public class PlayerState : MonoBehaviour
     [SerializeField] private List<GameObject> _cardPool = new();
     public IReadOnlyList<GameObject> CardPool => _cardPool;
 
-    private List<IPlayerBuff> _buffs = new();
-    public IReadOnlyList<IPlayerBuff> Buffs => _buffs;
+    [SerializeField] private List<BuffSO> _buffs = new();
+    public IReadOnlyList<BuffSO> Buffs => _buffs;
 
     public void AddCard(GameObject card) => _cardPool.Add(card);
-    public void AddBuff(IPlayerBuff buff) => _buffs.Add(buff);
+    public void AddBuff(BuffSO buff) => _buffs.Add(buff);
 
     [field: SerializeField] public int WinCount { get; private set; } = 0;
     [field: SerializeField] public int DrawCount { get; private set; } = 0;
