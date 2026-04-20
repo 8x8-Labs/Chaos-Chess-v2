@@ -23,7 +23,7 @@ public class CardDataSO : ScriptableObject
     [Range(-1, 10)]
     public int PieceLimitTurn;
     public int RequiredPieceCount;
-    
+
     // 타일 타입에 필요한 설정
     [Space(30)]
     [Header("타일 타입 설정")]

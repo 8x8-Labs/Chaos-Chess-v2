@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -64,12 +65,15 @@ public class GameManager : MonoBehaviour
     private int extraPlayerActions = 0;
     private Piece lockedPiece = null;
 
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -77,24 +81,59 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void Start()
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        FairyStockfishBridge.Instance.InitEngine("chess");
+        if (scene.name != "MainGameScene")
+            return;
+        IsEndGame = false;
+        boardUI = FindFirstObjectByType<BoardUI>();
+        uiManager = FindFirstObjectByType<UIManager>();
+
+        FinishType = GameResult.None;
 
         curTurn = 1;
 
-        boardUI = GetComponent<BoardUI>();
-        uiManager = FindFirstObjectByType<UIManager>();
-
+        BoardManager.Instance.OnPromotionRequired -= HandlePromotion;
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
 
+        OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 
-        BoardManager.Instance.LoadFEN();
+        LoadMapManager();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+    }
+
+    /// <summary>
+    /// MapManager에서 FEN과 ELO(맵의 전체적인 상태)를 받아와서 스톡피쉬에 적용한다
+    /// </summary>
+    private void LoadMapManager()
+    {
+        FairyStockfishBridge.Instance.InitEngine("chess");
+        if (MapManager.Instance != null && MapManager.Instance.curMap != null)
+        {
+            int elo = MapManager.Instance.curMap.ELO;
+            FairyStockfishBridge.Instance.SetElo(elo);
+
+            string fen = MapManager.Instance.curMap.FEN;
+            BoardManager.Instance.LoadFEN(fen);
+        }
+        else
+        {
+            FairyStockfishBridge.Instance.SetElo(1000);
+
+            BoardManager.Instance.LoadFEN();
+        }
+    }
+
+    /// <summary>AI ELO를 delta만큼 조정합니다.</summary>
+    public void ModifyELO(int delta)
+    {
+        int elo = MapManager.Instance.curMap.ELO + delta;
+        MapManager.Instance.curMap.ELO = elo;
+        FairyStockfishBridge.Instance.SetElo(elo);
     }
 
     public void SelectGrid(Vector3Int pos)
@@ -216,7 +255,12 @@ public class GameManager : MonoBehaviour
                 OnTurnChanged?.Invoke();
                 OnPlayerTurnStarted?.Invoke();
             }
+
             OnHalfTurnChanged?.Invoke();
+
+            BoardManager.Instance.CheckKingExistence();
+
+            ApplyGameResult();
 
             BoardManager.Instance.RefreshMoves();
 
@@ -298,6 +342,9 @@ public class GameManager : MonoBehaviour
 
     public void RequestAIMove()
     {
+        if (IsEndGame)
+            return;
+
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,
             moveTimeMs: 2000,
@@ -378,6 +425,8 @@ public class GameManager : MonoBehaviour
 
     private void ApplyGameResult()
     {
+        if (IsEndGame)
+            return;
         if (FinishType == GameResult.None) return;
 
         switch (FinishType)
@@ -393,6 +442,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        MapManager.Instance.OnCombatCleared();
         EndGame();
     }
 
@@ -400,5 +450,6 @@ public class GameManager : MonoBehaviour
     {
         IsEndGame = true;
         UI.ShowEndGame(FinishType);
+        PlayerState.Instance.EndGame(FinishType);
     }
 }
