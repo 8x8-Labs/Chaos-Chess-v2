@@ -20,6 +20,8 @@ public class CardDataSOEditor : Editor
     // 타일 타입
     SerializedProperty tileCount;
     SerializedProperty maintainTurn;
+    SerializedProperty needEffectTileBase;
+    SerializedProperty effectTileBase;
     SerializedProperty restrictTiles;
     SerializedProperty blockedTiles;
 
@@ -62,6 +64,8 @@ public class CardDataSOEditor : Editor
 
         tileCount = serializedObject.FindProperty("TileCount");
         maintainTurn = serializedObject.FindProperty("MaintainTurn");
+        needEffectTileBase = serializedObject.FindProperty("NeedEffectTileBase");
+        effectTileBase = serializedObject.FindProperty("EffectTileBase");
         restrictTiles = serializedObject.FindProperty("RestrictTiles");
         blockedTiles = serializedObject.FindProperty("BlockedTiles");
 
@@ -194,6 +198,13 @@ public class CardDataSOEditor : Editor
         if (maintainTurn.intValue == -1)
         {
             EditorGUILayout.HelpBox("-1 : 제한 없이 계속 유지됩니다.", MessageType.Warning);
+        }
+
+        EditorGUILayout.Space(4);
+        EditorGUILayout.PropertyField(needEffectTileBase, new GUIContent("이펙트 타일 필요"));
+        if (needEffectTileBase.boolValue)
+        {
+            EditorGUILayout.PropertyField(effectTileBase, new GUIContent("타일 베이스"));
         }
 
         EditorGUILayout.Space(4);
