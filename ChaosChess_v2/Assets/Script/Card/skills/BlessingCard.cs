@@ -28,11 +28,11 @@ public class BlessingCard : CardData, ITileCard
         GameObject obj = new GameObject("BlessingEffect");
         BlessingEffect effect = obj.AddComponent<BlessingEffect>();
 
+        effect.DataSO = DataSO;
+        
         effect.Init(pos);
         effect.Apply();
         effect.duration = DataSO.MaintainTurn;
-
-        effect.DataSO = DataSO;
     }
 }
 

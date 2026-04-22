@@ -26,8 +26,9 @@ public class JumpingPlatformCard : CardData, ITileCard
     {
         JumpingPlatformEffect effect = CreateTileEffector<JumpingPlatformEffect>(args.TargetPos[0]);
 
-        effect.Apply();
         effect.DataSO = DataSO;
+        
+        effect.Apply();
     }
 }
 

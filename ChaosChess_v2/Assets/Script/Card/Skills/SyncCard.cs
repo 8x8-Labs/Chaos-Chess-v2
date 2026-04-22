@@ -28,12 +28,12 @@ public class SyncCard : CardData, ITileCard
 
         SyncChild child = CreateTileEffector<SyncChild>(oppo);
         SyncEffect parent = CreateTileEffector<SyncEffect>(pos);
-        parent.child = child;
-        parent.Apply();
-
 
         child.DataSO = DataSO;
         parent.DataSO = DataSO;
+
+        parent.child = child;
+        parent.Apply();
     }
 }
 

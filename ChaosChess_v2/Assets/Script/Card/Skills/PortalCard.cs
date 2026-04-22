@@ -37,11 +37,11 @@ public class PortalSkill : CardData, ITileCard
         portalA.CasterColor = casterColor;
         portalB.CasterColor = casterColor;
 
-        portalA.Apply();
-        portalB.Apply();
-
         portalA.DataSO = DataSO;
         portalB.DataSO = DataSO;
+
+        portalA.Apply();
+        portalB.Apply();
     }
 }
 

@@ -28,9 +28,8 @@ public class CobwebCard : CardData, ITileCard
         CobwebEffector effect = CreateGlobalEffector<CobwebEffector>();
         effect.TilePos = pos;
         effect.cobwebCard = this;
-        effect.Apply();
-
         effect.DataSO = DataSO;
+        effect.Apply();
     }
 
     public void OnStuckWrap(Piece piece)

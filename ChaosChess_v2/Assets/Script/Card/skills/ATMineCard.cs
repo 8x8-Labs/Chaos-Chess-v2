@@ -33,10 +33,9 @@ public class ATMineCard : CardData, ITileCard
             PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider // 커스텀 기물
         );
 
+        effect.DataSO = DataSO;
         effect.Init(tergetPiecesType);
         effect.Apply();
-
-        effect.DataSO = DataSO;
     }
 }
 

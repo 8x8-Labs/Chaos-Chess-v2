@@ -24,10 +24,11 @@ public class PsilocybinMushroomCard : CardData, ITileCard
         Vector3Int tile = args.TargetPos[0];
 
         PsilocybinMushroomTileEffect effect = CreateTileEffector<PsilocybinMushroomTileEffect>(tile);
-        effect.SetOwner(this);
-        effect.Apply();
 
         effect.DataSO = DataSO;
+
+        effect.SetOwner(this);
+        effect.Apply();
     }
 
     public void ApplyPieceEffect(Piece piece)

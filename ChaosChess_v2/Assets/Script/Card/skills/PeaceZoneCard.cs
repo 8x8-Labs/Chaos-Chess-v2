@@ -24,9 +24,10 @@ public class PeaceZoneCard : CardData, ITileCard
         Vector3Int tile = args.TargetPos[0];
 
         PeaceZoneCardEffect effect = CreateTileEffector<PeaceZoneCardEffect>(tile);
-        effect.Apply();
-
+        
         effect.DataSO = DataSO;
+
+        effect.Apply();
     }
 }
 

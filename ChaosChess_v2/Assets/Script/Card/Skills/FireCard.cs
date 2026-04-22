@@ -19,9 +19,8 @@ public class FireCard : CardData, ITileCard
     public void Execute(CardEffectArgs args = null)
     {
         FireEffect effect = CreateTileEffector<FireEffect>(args.TargetPos[0]);
-        effect.Apply();
-
         effect.DataSO = DataSO;
+        effect.Apply();
     }
 }
 

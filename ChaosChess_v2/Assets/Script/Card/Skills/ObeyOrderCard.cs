@@ -24,9 +24,10 @@ public class ObeyOrderCard : CardData, ITileCard
     public void Execute(CardEffectArgs args = null)
     {
         ObeyOrderEffect effect = CreateTileEffector<ObeyOrderEffect>(args.TargetPos[0]);
-        effect.Apply();
-
+        
         effect.DataSO = DataSO;
+        
+        effect.Apply();
     }
 }
 
