@@ -28,6 +28,8 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 1
   MaintainTurn: -1
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
