@@ -121,6 +121,11 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private Transform pieceSpawnTransform;
 
+    /// <summary>타일에 이펙트를 적용하기 위한 클래스 </summary>
+    [SerializeField] private UITileEffectDrawer tileEffectDrawer;
+
+    public UITileEffectDrawer TileEffectDrawer => tileEffectDrawer;
+
     void Awake()
     {
         if (Instance == null)
