@@ -33,6 +33,7 @@ public class WeirdCastling : CardData, IPieceCard
         BoardManager.Instance.BatchReassign(pieces, newPositions);
 
         GameManager.Instance.NextTurn();
-        GameManager.Instance.RequestAIMove();
+        if (!GameManager.Instance.IsPlayerTurn)
+            GameManager.Instance.RequestAIMove();
     }
 }
