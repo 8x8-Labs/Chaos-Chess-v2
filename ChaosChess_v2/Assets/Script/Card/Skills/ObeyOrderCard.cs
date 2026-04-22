@@ -25,11 +25,15 @@ public class ObeyOrderCard : CardData, ITileCard
     {
         ObeyOrderEffect effect = CreateTileEffector<ObeyOrderEffect>(args.TargetPos[0]);
         effect.Apply();
+
+        effect.DataSO = DataSO;
     }
 }
 
 public class ObeyOrderEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     private enum ObeyState { Idle, WaitingForDest, WatchingObedience }
 
     public int ObeyCount = 0;
@@ -41,11 +45,19 @@ public class ObeyOrderEffect : TileEffector
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         UnsubscribeFromTurnEvent();
         CleanupChildEffects();
         _state = ObeyState.Idle;

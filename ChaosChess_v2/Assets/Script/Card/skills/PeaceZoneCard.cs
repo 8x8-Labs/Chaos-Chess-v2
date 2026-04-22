@@ -25,18 +25,30 @@ public class PeaceZoneCard : CardData, ITileCard
 
         PeaceZoneCardEffect effect = CreateTileEffector<PeaceZoneCardEffect>(tile);
         effect.Apply();
+
+        effect.DataSO = DataSO;
     }
 }
 
 public class PeaceZoneCardEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }

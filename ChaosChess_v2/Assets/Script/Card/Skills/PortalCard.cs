@@ -39,22 +39,35 @@ public class PortalSkill : CardData, ITileCard
 
         portalA.Apply();
         portalB.Apply();
+
+        portalA.DataSO = DataSO;
+        portalB.DataSO = DataSO;
     }
 }
 
 public class PortalEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     public PortalEffect Dest;
     public SharedCounter SharedUses;
     public PieceColor CasterColor;
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }

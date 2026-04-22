@@ -26,6 +26,8 @@ public class PsilocybinMushroomCard : CardData, ITileCard
         PsilocybinMushroomTileEffect effect = CreateTileEffector<PsilocybinMushroomTileEffect>(tile);
         effect.SetOwner(this);
         effect.Apply();
+
+        effect.DataSO = DataSO;
     }
 
     public void ApplyPieceEffect(Piece piece)
@@ -40,6 +42,8 @@ public class PsilocybinMushroomCard : CardData, ITileCard
 
 public class PsilocybinMushroomTileEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     private PsilocybinMushroomCard owner;
 
     public void SetOwner(PsilocybinMushroomCard card)
@@ -49,11 +53,19 @@ public class PsilocybinMushroomTileEffect : TileEffector
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         Destroy(gameObject);
     }
 
