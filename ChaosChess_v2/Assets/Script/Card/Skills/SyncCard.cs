@@ -40,16 +40,24 @@ public class SyncCard : CardData, ITileCard
 public class SyncEffect : TileEffector
 {
     public CardDataSO DataSO;
-    
+
     public SyncChild child;
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         if (child != null) child.Revert(); // 미활성 상태에서 소멸 시 child도 정리
         Destroy(gameObject);
@@ -76,6 +84,9 @@ public class SyncEffect : TileEffector
 
         // 입장 기물에 SyncFollower 부착 — 다음 이동 시 반대 기물 동기 이동
         SyncFollower follower = piece.gameObject.AddComponent<SyncFollower>();
+
+        follower.DataSO = DataSO;
+
         follower.syncChild = activatedChild;
         follower.syncEffect = this;
         follower.syncTilePos = tilePos;
