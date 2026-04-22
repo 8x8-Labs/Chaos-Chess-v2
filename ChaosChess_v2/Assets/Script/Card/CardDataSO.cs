@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 [CreateAssetMenu(fileName = "Card Data", menuName = "Card/Card Data")]
 public class CardDataSO : ScriptableObject
@@ -33,6 +34,14 @@ public class CardDataSO : ScriptableObject
     /// </summary>
     [Range(-1, 75)]
     public int MaintainTurn;
+    /// <summary>
+    /// 타일 이펙트가 필요한지 여부
+    /// </summary>
+    public bool NeedEffectTileBase;
+    /// <summary>
+    /// 효과가 적용된 타일에 표시할 타일베이스
+    /// </summary>
+    public TileBase EffectTileBase;
     /// <summary>
     /// 활성화 시 BlockedTiles 배열 기준으로 선택 불가 타일을 지정합니다.
     /// </summary>

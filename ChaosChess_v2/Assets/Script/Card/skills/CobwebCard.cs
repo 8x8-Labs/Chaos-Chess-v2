@@ -28,6 +28,7 @@ public class CobwebCard : CardData, ITileCard
         CobwebEffector effect = CreateGlobalEffector<CobwebEffector>();
         effect.TilePos = pos;
         effect.cobwebCard = this;
+        effect.DataSO = DataSO;
         effect.Apply();
     }
 
@@ -41,6 +42,8 @@ public class CobwebCard : CardData, ITileCard
 
 public class CobwebEffector : GlobalEffector
 {
+    public CardDataSO DataSO;
+
     private bool isTriggered = false;
 
     public Vector3Int TilePos;
@@ -48,11 +51,19 @@ public class CobwebEffector : GlobalEffector
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(TilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterGlobalEffector(this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(TilePos);
+
         BoardManager.Instance.UnregisterGlobalEffector(this);
         Destroy(gameObject);
     }
