@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC5B4\uB460 \uC18D\uC758 \uC190"
   CardImage: {fileID: 0}
-  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C 1\uAC1C\uB97C 2\uD134\uAC04 \uC6C0\uC9C1\uC77C
-    \uC218 \uC5C6\uB3C4\uB85D \uACE0\uC815\uC2DC\uD0A8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uC0C1\uB300 \uAE30\uBB3C 1\uAE30\uB97C 2\uD134\uB3D9\uC548
+    \uC6C0\uC9C1\uC774\uC9C0 \uBABB\uD558\uAC8C \uACE0\uC815\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 0
   CardTier: 1
   PieceType: 15
@@ -32,3 +32,8 @@ MonoBehaviour:
   LimitTurn: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

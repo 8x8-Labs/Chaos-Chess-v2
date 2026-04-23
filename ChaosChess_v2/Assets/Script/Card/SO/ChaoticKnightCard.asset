@@ -14,15 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uD63C\uB780\uC758 \uB098\uC774\uD2B8"
   CardImage: {fileID: 0}
-  CardDescription: "\uB098\uC774\uD2B8 \uAE30\uBB3C\uC774 5x5 \uC704\uCE58 \uC911
-    \uAC00\uB2A5\uD55C \uCE78\uC73C\uB85C \uB79C\uB364\uD558\uAC8C \uC774\uB3D9\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 \uBE44\uC5B4\uC788\uB294
+    \uC8FC\uBCC0 5x5 \uCE78 \uC911 \uB79C\uB364\uD55C \uCE78\uC73C\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 0
+  CardTier: 0
   PieceType: 2
+  PieceTargetColor: 0
   PieceLimitTurn: -1
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 
