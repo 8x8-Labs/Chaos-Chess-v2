@@ -5,8 +5,7 @@ using UnityEngine;
 public class CardHandLayout : MonoBehaviour
 {
     [SerializeField] public RectTransform areaBounds;
-    [SerializeField] private float padding = 20f;
-    [SerializeField] private float spacing = 20f;
+    [SerializeField] private float overlap = 40f;
     [SerializeField] private float cardY = 0f;
     [SerializeField] private float rearrangeDuration = 0.3f;
 
@@ -25,28 +24,21 @@ public class CardHandLayout : MonoBehaviour
         Refresh(animate: true);
     }
 
+    public void RefreshAnimated() => Refresh(animate: true);
+
     private void Refresh(bool animate)
     {
         int n = _cards.Count;
         if (n == 0) return;
 
         float cardWidth = _cards[0].sizeDelta.x;
-        float availableWidth = areaBounds.rect.width - 2f * padding;
-
-        float actualSpacing = spacing;
-        if (n > 1)
-        {
-            float totalWidth = cardWidth * n + spacing * (n - 1);
-            if (totalWidth > availableWidth)
-                actualSpacing = (availableWidth - cardWidth * n) / (n - 1);
-        }
-
-        float startX = areaBounds.rect.xMin + padding + cardWidth * 0.5f;
+        float totalWidth = cardWidth + (n - 1) * overlap;
+        float startX = areaBounds.rect.center.x - totalWidth * 0.5f + cardWidth * 0.5f;
 
         KillActiveTweens();
         for (int i = 0; i < n; i++)
         {
-            float x = startX + i * (cardWidth + actualSpacing);
+            float x = startX + i * overlap;
             if (animate)
             {
                 var tween = _cards[i].DOAnchorPos(new Vector2(x, cardY), rearrangeDuration).SetEase(Ease.OutQuad);
@@ -61,6 +53,7 @@ public class CardHandLayout : MonoBehaviour
         UpdateSiblingIndices();
     }
 
+    // 왼쪽 카드(index 0)가 위에 오도록 역순으로 SetAsLastSibling
     private void UpdateSiblingIndices()
     {
         for (int i = _cards.Count - 1; i >= 0; i--)

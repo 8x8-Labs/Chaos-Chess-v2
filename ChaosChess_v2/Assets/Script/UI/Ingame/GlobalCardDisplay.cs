@@ -2,7 +2,12 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+
+public struct GlobalCardData
+{
+    public RectTransform Rt;
+    public GlobalCardUI CardUI;
+}
 
 public class GlobalCardDisplay : MonoBehaviour
 {
@@ -10,7 +15,8 @@ public class GlobalCardDisplay : MonoBehaviour
     [SerializeField] private GameObject cardPrefab;
     [SerializeField] private float destroyDuration = 0.25f;
 
-    private readonly Dictionary<GlobalEffector, RectTransform> _displayedCards = new();
+    private readonly Dictionary<GlobalEffector, GlobalCardData> _displayedCards = new();
+    private readonly List<GlobalCardUI> _displayedCardUI = new();
 
     private void OnEnable()
     {
@@ -28,43 +34,48 @@ public class GlobalCardDisplay : MonoBehaviour
 
     private void HandleActivated(GlobalEffector ge)
     {
-        if (ge.CardSO == null) return;
+        if (ge.CardSO == null || !ge.CardSO.ShowStatusCard) return;
 
         var instance = Instantiate(cardPrefab, layout.areaBounds);
-        var rt = instance.GetComponent<RectTransform>();
 
-        var img = instance.GetComponentInChildren<Image>();
-        if (img != null) img.sprite = ge.CardSO.CardImage;
+        GlobalCardData data = new();
 
-        var tmp = instance.GetComponentInChildren<TMP_Text>();
-        if (tmp != null) tmp.text = GetDisplayText(ge);
+        GlobalCardUI cardUI = instance.GetComponent<GlobalCardUI>();
+        RectTransform rect = instance.GetComponent<RectTransform>();
 
-        _displayedCards[ge] = rt;
-        layout.AddCard(rt);
+        cardUI.CardImage.sprite = ge.CardSO.CardImage;
+        cardUI.RemainTurn.text = GetDisplayText(ge);
+        cardUI.Title.text = ge.IsPermanent ? ge.CardSO.CardName : "남은 턴";
+
+        data.Rt = rect;
+        data.CardUI = cardUI;
+
+        _displayedCards[ge] = data;
+        layout.AddCard(data.Rt);
+        cardUI.PlayAppearAnimation(() => layout.RefreshAnimated());
     }
 
     private void HandleTurnTicked(GlobalEffector ge)
     {
         if (!_displayedCards.TryGetValue(ge, out var rt)) return;
-        var tmp = rt.GetComponentInChildren<TMP_Text>();
-        if (tmp != null) tmp.text = GetDisplayText(ge);
+        rt.CardUI.RemainTurn.text = GetDisplayText(ge);
     }
 
     private static string GetDisplayText(GlobalEffector ge) =>
-        ge.IsPermanent ? ge.CardSO.CardName : $"{ge.CardSO.CardName} ({ge.RemainingTurns}턴)";
+        ge.IsPermanent ? "" : $"{ge.RemainingTurns}";
+
 
     private void HandleDeactivated(GlobalEffector ge)
     {
         if (!_displayedCards.TryGetValue(ge, out var rt)) return;
 
         _displayedCards.Remove(ge);
-        layout.RemoveCard(rt);
+        layout.RemoveCard(rt.Rt);
 
-        var cg = rt.gameObject.GetComponent<CanvasGroup>();
-        if (cg == null) cg = rt.gameObject.AddComponent<CanvasGroup>();
+        var cg = rt.Rt.GetComponent<CanvasGroup>();
+        if (cg == null) cg = rt.Rt.gameObject.AddComponent<CanvasGroup>();
 
-        cg.DOFade(0f, destroyDuration)
-            .SetEase(Ease.InQuad)
-            .OnComplete(() => Destroy(rt.gameObject));
+        cg.DOFade(0f, destroyDuration).SetEase(Ease.InQuad);
+        rt.CardUI.PlayDisappearAnimation(() => Destroy(rt.Rt.gameObject));
     }
 }
