@@ -30,6 +30,7 @@ public class CardDataSOEditor : Editor
     SerializedProperty targetColor;
     SerializedProperty hasLimit;
     SerializedProperty limitTurn;
+    SerializedProperty showStatusCard;
 
     // 부가 정보
     SerializedProperty needAdditionalDescription;
@@ -73,6 +74,7 @@ public class CardDataSOEditor : Editor
         targetColor = serializedObject.FindProperty("GlobalTargetColor");
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
+        showStatusCard = serializedObject.FindProperty("ShowStatusCard");
 
         needAdditionalDescription = serializedObject.FindProperty("NeedAdditionalDescription");
         descriptionType = serializedObject.FindProperty("DescriptionType");
@@ -276,6 +278,13 @@ public class CardDataSOEditor : Editor
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(limitTurn, new GUIContent("제한 턴 수"));
             EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.Space(4);
+        EditorGUILayout.PropertyField(showStatusCard, new GUIContent("상태 카드 UI 표시"));
+        if (showStatusCard.boolValue)
+        {
+            EditorGUILayout.HelpBox("활성화 시 카드가 사용되면 전역 상태 카드 UI에 표시됩니다.", MessageType.Info);
         }
     }
 
