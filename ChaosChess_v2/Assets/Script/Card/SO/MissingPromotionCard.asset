@@ -12,17 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
   m_Name: MissingPromotionCard
   m_EditorClassIdentifier: 
-  CardName: "\uC9C4\uAE09\uB204"
+  CardName: "\uC9C4\uAE09\uB204\uB77D"
   CardImage: {fileID: 0}
-  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C(\uD0B9, \uD038 \uC81C\uC678)\uC744
-    \uC120\uD0DD\uD574 \uAC15\uC81C\uB85C \uD3F0\uC73C\uB85C \uBC14\uAFC9\uB2C8\uB2E4. "
+  CardDescription: "\uC120\uD0DD\uD55C \uC0C1\uB300\uC758 \uAE30\uBB3C\uC744 \uD3F0\uC73C\uB85C
+    \uBCC0\uACBD\uD569\uB2C8\uB2E4."
   Type: 0
+  CardTier: 3
   PieceType: 14
   PieceTargetColor: 1
   PieceLimitTurn: -1
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -31,3 +34,8 @@ MonoBehaviour:
   LimitTurn: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 
