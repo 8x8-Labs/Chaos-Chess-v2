@@ -34,7 +34,7 @@ public class ATMineCard : CardData, ITileCard
         );
 
         effect.DataSO = DataSO;
-        effect.Init(tergetPiecesType);
+        effect.Init(targetPiecesType);
         effect.Apply();
     }
 }
