@@ -26,11 +26,19 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 1
   GlobalTargetColor: 1
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 1
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 
