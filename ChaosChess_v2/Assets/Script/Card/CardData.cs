@@ -33,6 +33,7 @@ public abstract class CardData : MonoBehaviour
         GameObject host = new GameObject($"GlobalEffect_{typeof(T).Name}");
         T effector = host.AddComponent<T>();
         effector.Init(DataSO.PieceType, color, duration);
+        effector.CardSO = DataSO;
         return effector;
     }
 }
