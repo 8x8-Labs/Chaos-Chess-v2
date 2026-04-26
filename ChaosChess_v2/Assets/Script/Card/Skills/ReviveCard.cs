@@ -1,8 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 /// <summary>
-/// ºÎÈ° - Å¸ÀÏ Àü¿ë (·¹¾î)
-/// ¼±ÅÃÇÑ Å¸ÀÏ¿¡¼­ Á×Àº ±â¹° Áß °¡Àå °¡Ä¡°¡ ³ôÀº ±â¹°ÀÌ ºÎÈ°ÇÕ´Ï´Ù
+/// ï¿½ï¿½È° - Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½)
+/// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½â¹° ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½â¹°ï¿½ï¿½ ï¿½ï¿½È°ï¿½Õ´Ï´ï¿½
 /// </summary>
 public class ReviveCard : CardData, ITileCard
 {
@@ -73,7 +73,7 @@ public class ReviveEffector : TileEffector
         PieceType res = PieceType.Wall;
         if (pieces != null)
         {
-            foreach(PieceType piece in pieces)
+            foreach (PieceType piece in pieces)
             {
                 int g = (int)GetValue(piece);
                 if (g > maxv)
@@ -84,11 +84,9 @@ public class ReviveEffector : TileEffector
             }
         }
         pieces.Remove(res);
-        BoardManager.Instance.ChangePiece(TilePos, GameManager.Instance.turnColor,TypeToChar(res));
+        BoardManager.Instance.ChangePiece(TilePos, GameManager.Instance.turnColor, TypeToChar(res));
         Revert();
-        GameManager.Instance.NextTurn();
-        if (!GameManager.Instance.IsPlayerTurn)
-            GameManager.Instance.RequestAIMove();
+        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
 
     protected override void OnRevert()

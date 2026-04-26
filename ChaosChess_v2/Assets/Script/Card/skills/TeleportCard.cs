@@ -42,7 +42,6 @@ public class TeleportCard : CardData, IPieceCard, ITileCard
         Vector3Int target = args.TargetPos[0];
 
         BoardManager.Instance.ForceTeleport(pawn, target, '\0', true);
-        GameManager.Instance.RequestAIMove();
     }
 
 }
