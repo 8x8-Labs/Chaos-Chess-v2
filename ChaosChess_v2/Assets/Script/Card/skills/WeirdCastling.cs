@@ -32,8 +32,6 @@ public class WeirdCastling : CardData, IPieceCard
         List<Vector3Int> newPositions = new List<Vector3Int> { targetPiece.Pos, king.Pos };
         BoardManager.Instance.BatchReassign(pieces, newPositions);
 
-        GameManager.Instance.NextTurn();
-        if (!GameManager.Instance.IsPlayerTurn)
-            GameManager.Instance.RequestAIMove();
+        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
 }
