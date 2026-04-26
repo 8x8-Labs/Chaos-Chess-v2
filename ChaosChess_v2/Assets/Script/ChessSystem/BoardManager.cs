@@ -854,7 +854,7 @@ public class BoardManager : MonoBehaviour
 
         if (useTurn)
         {
-            GameManager.Instance.NextTurn();
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
         }
         else
         {

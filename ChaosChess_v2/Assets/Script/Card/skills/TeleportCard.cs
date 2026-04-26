@@ -26,7 +26,7 @@ public class TeleportCard : CardData, IPieceCard, ITileCard
     }
     public void LoadTileSelector()
     {
-        if(tileSelector == null) tileSelector = FindFirstObjectByType<TileSelector>();
+        if (tileSelector == null) tileSelector = FindFirstObjectByType<TileSelector>();
         tileSelector.EnableSelector(this);
     }
 
@@ -43,5 +43,4 @@ public class TeleportCard : CardData, IPieceCard, ITileCard
 
         BoardManager.Instance.ForceTeleport(pawn, target, '\0', true);
     }
-
 }
