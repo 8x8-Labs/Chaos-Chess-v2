@@ -363,7 +363,10 @@ public class GameManager : MonoBehaviour
         {
             // 투기장 중 체크메이트는 아레나 정리 후 처리 (OnCheckmate 직접 호출 시 RequestAIMove와 경합)
             if (moves.Length == 0 && FairyStockfishBridge.Instance.IsInCheck())
+            {
                 ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
+                ResetActions();
+            }
             return;
         }
 
