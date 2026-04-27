@@ -28,13 +28,13 @@ public class ATMineCard : CardData, ITileCard
         ATMineEffector effect = CreateGlobalEffector<ATMineEffector>();
         effect.MinePos = pos;
 
-        PieceType tergetPiecesType = (
+        PieceType targetPiecesType = (
             PieceType.Rook | PieceType.Queen | PieceType.King | // 일반 기물
             PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider // 커스텀 기물
         );
 
         effect.DataSO = DataSO;
-        effect.Init(tergetPiecesType);
+        effect.Init(targetPiecesType);
         effect.Apply();
     }
 }
