@@ -450,7 +450,21 @@ public class GameManager : MonoBehaviour
     private void EndGame()
     {
         IsEndGame = true;
+
+        ResetActions();
         UI.ShowEndGame(FinishType);
         PlayerState.Instance.EndGame(FinishType);
+    }
+
+    /// <summary>
+    /// 모든 액션을 지웁니다
+    /// </summary>
+    private void ResetActions()
+    {
+        OnPlayerTurnStarted = null;
+        OnTurnChanged = null;
+        OnHalfTurnChanged = null;
+        OnTimeReversalRequired = null;
+        OnAwakenedPieceSelected = null;
     }
 }
