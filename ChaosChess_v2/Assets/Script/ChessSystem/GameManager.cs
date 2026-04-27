@@ -363,7 +363,10 @@ public class GameManager : MonoBehaviour
         {
             // 투기장 중 체크메이트는 아레나 정리 후 처리 (OnCheckmate 직접 호출 시 RequestAIMove와 경합)
             if (moves.Length == 0 && FairyStockfishBridge.Instance.IsInCheck())
+            {
                 ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
+                ResetActions();
+            }
             return;
         }
 
@@ -450,7 +453,21 @@ public class GameManager : MonoBehaviour
     private void EndGame()
     {
         IsEndGame = true;
+
+        ResetActions();
         UI.ShowEndGame(FinishType);
         PlayerState.Instance.EndGame(FinishType);
+    }
+
+    /// <summary>
+    /// 모든 액션을 지웁니다
+    /// </summary>
+    private void ResetActions()
+    {
+        OnPlayerTurnStarted = null;
+        OnTurnChanged = null;
+        OnHalfTurnChanged = null;
+        OnTimeReversalRequired = null;
+        OnAwakenedPieceSelected = null;
     }
 }
