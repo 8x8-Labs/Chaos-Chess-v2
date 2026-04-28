@@ -222,13 +222,11 @@ public class ArenaManager : MonoBehaviour
     private void SuspendStoredEffects()
     {
         suspendedEffects.Clear();
+        BoardManager bm = BoardManager.Instance;
 
-        foreach (Effector effector in FindObjectsByType<Effector>(FindObjectsSortMode.None))
+        foreach (GlobalEffector effector in bm.GetGlobalEffectors())
         {
             if (effector == null || effector.IsSuspended)
-                continue;
-            // 요청사항: 기물 효과는 유지하고, 타일/전역 효과만 일시 정지
-            if (effector is not TileEffector && effector is not GlobalEffector)
                 continue;
             // 카드 특성상 투기장에서도 유지돼야 하는 효과는 제외
             if (effector is IArenaPersistentEffect)
@@ -238,7 +236,19 @@ public class ArenaManager : MonoBehaviour
             effector.SuspendForArena();
         }
 
-        BoardManager.Instance.RefreshMoves();
+        foreach (TileEffector effector in bm.GetAllTileEffectors())
+        {
+            if (effector == null || effector.IsSuspended)
+                continue;
+            // 카드 특성상 투기장에서도 유지돼야 하는 효과는 제외
+            if (effector is IArenaPersistentEffect)
+                continue;
+
+            suspendedEffects.Add(effector);
+            effector.SuspendForArena();
+        }
+
+        bm.RefreshMoves();
     }
 
     /// <summary>투기장 전에 저장해 둔 타일/전역 효과를 다시 활성화합니다.</summary>

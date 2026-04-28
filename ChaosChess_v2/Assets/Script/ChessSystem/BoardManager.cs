@@ -702,6 +702,12 @@ public class BoardManager : MonoBehaviour
         globalEffectors.Add(effector);
     }
 
+    /// <summary>현재 등록된 전역 이펙터 목록의 스냅샷을 반환합니다.</summary>
+    public List<GlobalEffector> GetGlobalEffectors()
+    {
+        return new List<GlobalEffector>(globalEffectors);
+    }
+
     public void UnregisterGlobalEffector(GlobalEffector effector)
     {
         globalEffectors.Remove(effector);
@@ -749,6 +755,21 @@ public class BoardManager : MonoBehaviour
     {
         if (tileEffectors.TryGetValue(pos, out var list))
             list.Remove(effector);
+    }
+
+    /// <summary>현재 보드에 등록된 모든 타일 이펙터를 중복 없이 반환합니다.</summary>
+    public List<TileEffector> GetAllTileEffectors()
+    {
+        HashSet<TileEffector> result = new HashSet<TileEffector>();
+        foreach (var pair in tileEffectors)
+        {
+            foreach (TileEffector effector in pair.Value)
+            {
+                if (effector != null)
+                    result.Add(effector);
+            }
+        }
+        return new List<TileEffector>(result);
     }
 
     private void TriggerTileEnter(Vector3Int pos, Piece piece)
