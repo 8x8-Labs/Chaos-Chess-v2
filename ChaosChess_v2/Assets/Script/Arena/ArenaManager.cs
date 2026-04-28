@@ -2,7 +2,6 @@
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 
@@ -25,8 +24,6 @@ public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 public class ArenaManager : MonoBehaviour
 {
     public static ArenaManager Instance;
-    /// <summary>투기장 시작 전 저장된(일시정지된) 타일/전역 효과가 존재하는지 여부입니다.</summary>
-    public bool AreStoredEffectsSuspended => isArenaActive && suspendedEffects.Count > 0;
 
     // 투기장 참가 기물
     private List<Piece> opponentArenaPieces = new();  // 상대 투기장 기물 (최대 3개)
@@ -44,10 +41,6 @@ public class ArenaManager : MonoBehaviour
     // Timeout 복원용: 아레나 시작 시점의 모든 기물 위치 스냅샷
     private Dictionary<Piece, Vector3Int> savedPositions = new();
     private string savedCastlingFen;  // 아레나 시작 시점의 캐슬링 권한 (Timeout 시 복원)
-    // 투기장 진입 전 잠시 꺼두는 효과 목록(타일/전역만)
-    private readonly List<Effector> suspendedEffects = new();
-    // 타일 이펙트(시각 효과) 복원용 스냅샷
-    private Dictionary<Vector3Int, TileBase> savedTileEffects = new();
 
     private void Awake()
     {
@@ -80,10 +73,6 @@ public class ArenaManager : MonoBehaviour
         // 캐슬링 권한 저장 — BatchReassign이 King/Rook 복원 시 플래그를 손상시키므로 별도 보존
         bm.UpdateFEN();
         savedCastlingFen = bm.GetFEN().Split(' ')[2];
-        savedTileEffects = bm.TileEffectDrawer.CaptureTileEffects();
-        SuspendStoredEffects();
-        gm.PauseQueuedActions();
-        bm.TileEffectDrawer.ClearAllTileEffects();
 
         // 양쪽 King 참조 저장 — Stockfish 연산에 필요
         playerKing = allPiece.Find(p => p.Color == gm.PlayerColor && p.Type == PieceType.King);
@@ -192,9 +181,6 @@ public class ArenaManager : MonoBehaviour
         foreach (Piece p in hiddenPieces)
             if (p != null) BoardManager.Instance.RestorePiece(p);
         hiddenPieces.Clear();
-        ResumeStoredEffects();
-        BoardManager.Instance.TileEffectDrawer.RestoreTileEffects(savedTileEffects);
-        gm.ResumeQueuedActions();
 
         switch (result)
         {
@@ -216,43 +202,5 @@ public class ArenaManager : MonoBehaviour
                 gm.OnSurrender(gm.EnemyColor);
                 break;
         }
-    }
-
-    /// <summary>투기장 시작 전 타일/전역 효과를 저장 목록에 넣고 일시 정지합니다.</summary>
-    private void SuspendStoredEffects()
-    {
-        suspendedEffects.Clear();
-
-        foreach (Effector effector in FindObjectsByType<Effector>(FindObjectsSortMode.None))
-        {
-            if (effector == null || effector.IsSuspended)
-                continue;
-            // 요청사항: 기물 효과는 유지하고, 타일/전역 효과만 일시 정지
-            if (effector is not TileEffector && effector is not GlobalEffector)
-                continue;
-            // 카드 특성상 투기장에서도 유지돼야 하는 효과는 제외
-            if (effector is IArenaPersistentEffect)
-                continue;
-
-            suspendedEffects.Add(effector);
-            effector.SuspendForArena();
-        }
-
-        BoardManager.Instance.RefreshMoves();
-    }
-
-    /// <summary>투기장 전에 저장해 둔 타일/전역 효과를 다시 활성화합니다.</summary>
-    private void ResumeStoredEffects()
-    {
-        foreach (Effector effector in suspendedEffects.ToList())
-        {
-            if (effector == null)
-                continue;
-
-            effector.ResumeFromArena();
-        }
-
-        suspendedEffects.Clear();
-        BoardManager.Instance.RefreshMoves();
     }
 }

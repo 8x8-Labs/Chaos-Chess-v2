@@ -28,7 +28,7 @@ public class TimeReversalEffecter : GlobalEffector
     {
         string NewFEN = BoardManager.Instance.GetFEN();
 
-        BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces(), false);
+        BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces());
         BoardManager.Instance.LoadFEN(DefaultFEN);
 
         BoardManager.Instance.RefreshMoves();

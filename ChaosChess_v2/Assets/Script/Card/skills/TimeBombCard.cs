@@ -28,21 +28,10 @@ public class TimeBombCard : CardData, ITileCard
 
         Vector3Int center = args.TargetPos[0];
 
-        // 타일 이펙트 추가
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(center, DataSO.EffectTileBase);
-
-
         GameManager.Instance.AppendAction(DataSO.MaintainTurn, () =>
         {
             Explode(center);
-            
-            // 타일 이펙트 제거
-            if (DataSO.NeedEffectTileBase)
-                BoardManager.Instance.TileEffectDrawer.ClearTileEffect(center);
-
         });
-
     }
 
     private void Explode(Vector3Int center)

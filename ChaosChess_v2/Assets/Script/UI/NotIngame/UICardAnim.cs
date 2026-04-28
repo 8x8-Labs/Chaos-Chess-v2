@@ -18,18 +18,17 @@ public class UICardAnim : MonoBehaviour
     private float originalWidth;
 
     [SerializeField] private GameObject cardPrefab;
-    public GameObject CardPreFab { get { return cardPrefab; } set { cardPrefab = value; } }
 
     private CardData cardData;
     private UICardDescPanel panel;
-    private PlayerState playerState;
+    private Player player;
 
     private void Awake()
     {
         cardSprite = GetComponentInChildren<Image>();
         cardData = GetComponent<CardData>();
         panel = FindObjectOfType<UICardDescPanel>();
-        playerState = FindObjectOfType<PlayerState>();
+        player = FindObjectOfType<Player>();
         cardSprite.rectTransform.anchoredPosition = new Vector3(0, startYPos, 0);
 
         canvasGroup = GetComponent<CanvasGroup>();
@@ -52,6 +51,6 @@ public class UICardAnim : MonoBehaviour
             .Join(cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(enableEase));
 
         if (cardPrefab != null)
-            playerState?.AddCard(cardPrefab);
+            player?.CardPool.Add(cardPrefab);
     }
 }
