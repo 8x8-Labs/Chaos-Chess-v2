@@ -33,6 +33,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 1
   LimitTurn: 8
+  ShowStatusCard: 1
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

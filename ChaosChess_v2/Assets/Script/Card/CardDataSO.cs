@@ -61,6 +61,8 @@ public class CardDataSO : ScriptableObject
     public PieceColor GlobalTargetColor;
     public bool HasLimit;
     public int LimitTurn;
+    [Tooltip("활성화 시 전역 상태 카드 UI를 표시합니다.")]
+    public bool ShowStatusCard;
 
     [Space(30)]
     [Header("부가 정보 설정")]

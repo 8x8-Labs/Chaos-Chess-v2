@@ -8,6 +8,7 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     public bool IsExpired => remainingTurns == 0;
     public bool IsPermanent => remainingTurns < 0;
+    public int RemainingTurns => remainingTurns;
 
     protected void SetDuration(int turns)
     {
@@ -24,6 +25,7 @@ public abstract class Effector : MonoBehaviour, IEffect
             GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
 
         OnApply();
+        OnEffectApplied();
     }
 
     /// <summary>효과를 대상에서 제거합니다. 턴 이벤트를 해제하고 OnRevert()를 호출합니다.</summary>
@@ -34,6 +36,7 @@ public abstract class Effector : MonoBehaviour, IEffect
             GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
 
         OnRevert();
+        OnEffectReverted();
     }
 
 
@@ -42,6 +45,9 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     /// <summary>서브클래스에서 훅/버프를 해제합니다.</summary>
     protected abstract void OnRevert();
+
+    protected virtual void OnEffectApplied() { }
+    protected virtual void OnEffectReverted() { }
 
     public virtual void OnTurnChanged()
     {
@@ -97,6 +103,21 @@ public abstract class TileEffector : Effector, ITileEffect
 /// <summary>특정 타입의 기물이 행동(이동/잡기)했을 때 반응하는 전역 효과의 기반 추상 클래스</summary>
 public abstract class GlobalEffector : Effector
 {
+    public static event System.Action<GlobalEffector> OnActivated;
+    public static event System.Action<GlobalEffector> OnDeactivated;
+    public static event System.Action<GlobalEffector> OnTurnTicked;
+
+    public CardDataSO CardSO { get; set; }
+
+    protected override void OnEffectApplied() => OnActivated?.Invoke(this);
+    protected override void OnEffectReverted() => OnDeactivated?.Invoke(this);
+
+    public override void OnTurnChanged()
+    {
+        base.OnTurnChanged();
+        if (!IsExpired) OnTurnTicked?.Invoke(this);
+    }
+
     protected PieceType watchType;   // 감시할 기물 타입 (Flags 조합 가능, None = 모든 타입)
     protected ApplyType watchColor;  // 감시할 기물 색상
 
