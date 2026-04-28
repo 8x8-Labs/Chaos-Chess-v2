@@ -24,6 +24,9 @@ public class GameManager : MonoBehaviour
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
+    // 투기장 진행 중 기존 예약 액션(폭탄, 지속효과 해제 등) 소모를 잠시 멈춥니다.
+    private bool areQueuedActionsPaused = false;
+    private int queuedActionPauseTurn = -1;
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
     public event Action OnPlayerTurnStarted;
@@ -288,6 +291,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void ReturnAction()
     {
+        if (areQueuedActionsPaused)
+            return;
+
         for (int i = recievedActions.Count - 1; i >= 0; i--)
         {
             var item = recievedActions[i];
@@ -299,6 +305,39 @@ public class GameManager : MonoBehaviour
             }
         }
 
+    }
+
+    /// <summary>예약 액션 소모를 일시 정지합니다.</summary>
+    public void PauseQueuedActions()
+    {
+        if (areQueuedActionsPaused)
+            return;
+
+        areQueuedActionsPaused = true;
+        queuedActionPauseTurn = curTurn;
+    }
+
+    /// <summary>
+    /// 예약 액션 소모를 재개합니다.
+    /// 일시정지 중 흘러간 턴 수만큼 예약 트리거 턴을 뒤로 밀어, 남은 지속 턴을 보존합니다.
+    /// </summary>
+    public void ResumeQueuedActions()
+    {
+        if (!areQueuedActionsPaused)
+            return;
+
+        int delta = curTurn - queuedActionPauseTurn;
+        if (delta != 0)
+        {
+            for (int i = 0; i < recievedActions.Count; i++)
+            {
+                var item = recievedActions[i];
+                recievedActions[i] = (item.turn + delta, item.action);
+            }
+        }
+
+        areQueuedActionsPaused = false;
+        queuedActionPauseTurn = -1;
     }
     // MoveSelected 안에서 플레이어 수 적용 후:
     private void MoveSelected(Vector3Int target)

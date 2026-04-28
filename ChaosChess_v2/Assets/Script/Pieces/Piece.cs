@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 
@@ -232,7 +233,10 @@ public class Piece : MonoBehaviour
     {
         var copy = new List<Action<Vector3Int>>(onCaptureEffects);
 
-        GetComponent<IPieceEffect>()?.OnPieceCapture();
+        foreach (var eff in GetComponents<MonoBehaviour>().OfType<IPieceEffect>())
+        {
+            eff.OnPieceCapture();
+        }
 
         foreach (var effect in copy)
         {
