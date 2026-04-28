@@ -146,7 +146,7 @@ public class ArenaManager : MonoBehaviour
                 EndArena(ArenaResult.Timeout);
         }
     }
-
+    
     /// <summary>
     /// 투기장을 종료하고 결과를 처리합니다.
     /// </summary>
