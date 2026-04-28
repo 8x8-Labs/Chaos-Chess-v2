@@ -10,7 +10,6 @@ public class CardHandLayout : MonoBehaviour
     [SerializeField] private float rearrangeDuration = 0.3f;
 
     private readonly List<RectTransform> _cards = new();
-    private readonly List<Tweener> _activeTweens = new();
 
     public void AddCard(RectTransform card)
     {
@@ -35,20 +34,14 @@ public class CardHandLayout : MonoBehaviour
         float totalWidth = cardWidth + (n - 1) * overlap;
         float startX = areaBounds.rect.center.x - totalWidth * 0.5f + cardWidth * 0.5f;
 
-        KillActiveTweens();
         for (int i = 0; i < n; i++)
         {
             float x = startX + i * overlap;
             _cards[i].DOKill();
             if (animate)
-            {
-                var tween = _cards[i].DOAnchorPos(new Vector2(x, cardY), rearrangeDuration).SetEase(Ease.OutQuad);
-                _activeTweens.Add(tween);
-            }
+                _cards[i].DOAnchorPos(new Vector2(x, cardY), rearrangeDuration).SetEase(Ease.OutQuad);
             else
-            {
                 _cards[i].anchoredPosition = new Vector2(x, cardY);
-            }
         }
 
         UpdateSiblingIndices();
@@ -59,12 +52,5 @@ public class CardHandLayout : MonoBehaviour
     {
         for (int i = _cards.Count - 1; i >= 0; i--)
             _cards[i].SetAsLastSibling();
-    }
-
-    private void KillActiveTweens()
-    {
-        foreach (var tween in _activeTweens)
-            if (tween.IsActive()) tween.Kill();
-        _activeTweens.Clear();
     }
 }
