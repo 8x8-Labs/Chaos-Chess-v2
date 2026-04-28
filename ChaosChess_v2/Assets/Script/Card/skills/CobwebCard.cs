@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
 /// 거미줄 - 타일전용
@@ -135,6 +136,11 @@ public class CobwebEffector : GlobalEffector
         }
 
         return Vector3Int.zero;
+    }
+
+    protected override IEnumerable<Vector3Int> GetVisualPositions()
+    {
+        yield return TilePos;
     }
 }
 

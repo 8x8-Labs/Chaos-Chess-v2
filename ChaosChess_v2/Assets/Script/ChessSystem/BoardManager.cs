@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 
@@ -419,7 +418,7 @@ public class BoardManager : MonoBehaviour
         TriggerGlobalEffectors(piece, target, isCapture);
         TriggerTileEnter(target, piece);
 
-        foreach (var eff in piece.GetComponents<MonoBehaviour>().OfType<IPieceEffect>())
+        foreach (var eff in piece.GetComponents<IPieceEffect>())
         {
             eff.OnPieceMove(target);
         }
@@ -489,7 +488,7 @@ public class BoardManager : MonoBehaviour
         if (piece == null) return;
 
         board[piece.Pos.x, piece.Pos.y] = null;
-        foreach (var eff in piece.GetComponents<MonoBehaviour>().OfType<IPieceEffect>())
+        foreach (var eff in piece.GetComponents<IPieceEffect>())
         {
             eff.OnPieceCaptured();
         }

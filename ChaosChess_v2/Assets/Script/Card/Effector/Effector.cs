@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 /// <summary>투기장 진입 시에도 일시정지하지 않고 유지할 효과 마커입니다.</summary>
@@ -107,9 +106,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과 타입별(DataSO) 타일 연출을 끄거나 켭니다.</summary>
     private void ToggleTileVisual(bool enabled)
     {
-        CardDataSO dataSO = GetType()
-            .GetField("DataSO", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-            ?.GetValue(this) as CardDataSO;
+        CardDataSO dataSO = VisualDataSO;
 
         if (dataSO == null || !dataSO.NeedEffectTileBase || dataSO.EffectTileBase == null)
             return;
@@ -123,20 +120,11 @@ public abstract class Effector : MonoBehaviour, IEffect
         }
     }
 
-    private IEnumerable<Vector3Int> GetVisualPositions()
-    {
-        var positions = new List<Vector3Int>();
-        var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+    /// <summary>타일 연출에 사용할 카드 데이터입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
+    protected virtual CardDataSO VisualDataSO => null;
 
-        foreach (string fieldName in new[] { "tilePos", "TilePos", "MinePos", "syncTilePos" })
-        {
-            FieldInfo field = GetType().GetField(fieldName, flags);
-            if (field?.FieldType == typeof(Vector3Int))
-                positions.Add((Vector3Int)field.GetValue(this));
-        }
-
-        return positions;
-    }
+    /// <summary>타일 연출에 사용할 좌표 목록입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
+    protected virtual IEnumerable<Vector3Int> GetVisualPositions() { yield break; }
 }
 
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
@@ -158,6 +146,8 @@ public abstract class PieceEffector : Effector, IPieceEffect
 /// <summary>타일에 부착되는 효과의 기반 추상 클래스</summary>
 public abstract class TileEffector : Effector, ITileEffect
 {
+    public CardDataSO CardSO { get; set; }
+
     public Vector3Int TilePos
     {
         get
@@ -185,6 +175,13 @@ public abstract class TileEffector : Effector, ITileEffect
     protected override void OnResumeFromArena()
     {
         BoardManager.Instance?.RegisterTileEffector(tilePos, this);
+    }
+
+    protected override CardDataSO VisualDataSO => CardSO;
+
+    protected override IEnumerable<Vector3Int> GetVisualPositions()
+    {
+        yield return tilePos;
     }
 }
 
@@ -247,4 +244,6 @@ public abstract class GlobalEffector : Effector
     {
         BoardManager.Instance?.RegisterGlobalEffector(this);
     }
+
+    protected override CardDataSO VisualDataSO => CardSO;
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -49,7 +50,7 @@ public class ATMineEffector : GlobalEffector
         // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.SetTileEffect(MinePos, DataSO.EffectTileBase);
-            
+
         BoardManager.Instance.RegisterGlobalEffector(this);
     }
 
@@ -144,5 +145,10 @@ public class ATMineEffector : GlobalEffector
             BoardManager.Instance.RefreshMoves();
 
         Revert();
+    }
+
+    protected override IEnumerable<Vector3Int> GetVisualPositions()
+    {
+        yield return MinePos;
     }
 }
