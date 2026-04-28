@@ -208,7 +208,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 2104011993}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -735,6 +735,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1301668090}
   m_CullTransparentMesh: 1
+--- !u!1 &1457591796
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1457591798}
+  - component: {fileID: 1457591797}
+  m_Layer: 0
+  m_Name: MapUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1457591797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457591796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e64794ba168985042a3951ee5fdae07e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapContainer: {fileID: 1537558345}
+  mapButtonPrefab: {fileID: 4660915655800250675, guid: eea79cb657b37c742b12dc509f12ace2, type: 3}
+--- !u!4 &1457591798
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457591796}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 720, y: 1544, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1537558344
 GameObject:
   m_ObjectHideFlags: 0
@@ -842,12 +888,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalFloors: 6
-  mapContainer: {fileID: 1537558345}
-  mapButtonPrefab: {fileID: 4660915655800250675, guid: eea79cb657b37c742b12dc509f12ace2, type: 3}
   currentFloor: 0
   maps: []
-  bossFENs: []
-  curMap: {fileID: 0}
+  DefaultFEN: 'k7/aaaaaaaR/8/8/8/8/8/7K w - - 0 1 '
+  Boss1FEN:
+  - rnbqkbnr/pppppppp/2pppp2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/pppnnppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/bppppppb/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/bppppppb/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbskbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  Boss2FEN:
+  - ynbqkbny/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/ppbnnbpp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - 8/8/pppppppp/rnbqkbnr/pppppppp/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - pppqkppp/pppppppp/pppppppp/pppppppp/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rzzqkzzr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  curMap:
+    ELO: 0
+    FEN: 
+    isCleared: 0
+    floor: 0
 --- !u!4 &1699512812
 Transform:
   m_ObjectHideFlags: 0
@@ -1084,3 +1144,4 @@ SceneRoots:
   - {fileID: 338206600}
   - {fileID: 970325753}
   - {fileID: 1699512812}
+  - {fileID: 1457591798}

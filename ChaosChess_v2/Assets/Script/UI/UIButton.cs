@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class UIButton : Button
 {
@@ -28,21 +29,22 @@ public class UIButton : Button
 
     [SerializeField] private string nextSceneName;
 
-
     protected override void Start()
     {
-        if(buttonType != ButtonType.ChangeCanvas)
+        if (buttonType != ButtonType.ChangeCanvas)
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
         }
-        if(buttonType == ButtonType.ClosePopup && disablePanel == null)
+        if (buttonType == ButtonType.ClosePopup && disablePanel == null)
         {
             disablePanel = GetComponentInParent<ButtonPanel>();
         }
 
-        if(soundManager == null) soundManager = SoundManager.Instance;
+        if (soundManager == null) soundManager = SoundManager.Instance;
         // Debug.Log($"{gameObject.name}의 disableCanvas: {disableCanvas?.name}");
     }
+
+    public void SetNextScene(string nextScene) => nextSceneName = nextScene;
 
 
     public override void OnSelect(BaseEventData eventData)
@@ -69,7 +71,8 @@ public class UIButton : Button
 
     public void OnClicked()
     {
-        if(clickSound != null) soundManager.SFXPlay("UIClick", clickSound);
+        if (!IsInteractable()) return;
+        if (clickSound != null) soundManager.SFXPlay("UIClick", clickSound);
         switch (buttonType)
         {
             case ButtonType.ChangeCanvas:
@@ -82,7 +85,7 @@ public class UIButton : Button
                     .FirstOrDefault();
                 changeCanvas(); break;
             case ButtonType.GoScene:
-                Debug.Log("씬 이동");
+                SceneManager.LoadScene(nextSceneName);
                 break;
             case ButtonType.ClosePopup:
                 disablePanel.DisablePanel(); break;

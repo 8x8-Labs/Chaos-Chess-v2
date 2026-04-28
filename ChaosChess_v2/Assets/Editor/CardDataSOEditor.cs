@@ -20,6 +20,8 @@ public class CardDataSOEditor : Editor
     // 타일 타입
     SerializedProperty tileCount;
     SerializedProperty maintainTurn;
+    SerializedProperty needEffectTileBase;
+    SerializedProperty effectTileBase;
     SerializedProperty restrictTiles;
     SerializedProperty blockedTiles;
 
@@ -28,6 +30,7 @@ public class CardDataSOEditor : Editor
     SerializedProperty targetColor;
     SerializedProperty hasLimit;
     SerializedProperty limitTurn;
+    SerializedProperty showStatusCard;
 
     // 부가 정보
     SerializedProperty needAdditionalDescription;
@@ -62,6 +65,8 @@ public class CardDataSOEditor : Editor
 
         tileCount = serializedObject.FindProperty("TileCount");
         maintainTurn = serializedObject.FindProperty("MaintainTurn");
+        needEffectTileBase = serializedObject.FindProperty("NeedEffectTileBase");
+        effectTileBase = serializedObject.FindProperty("EffectTileBase");
         restrictTiles = serializedObject.FindProperty("RestrictTiles");
         blockedTiles = serializedObject.FindProperty("BlockedTiles");
 
@@ -69,6 +74,7 @@ public class CardDataSOEditor : Editor
         targetColor = serializedObject.FindProperty("GlobalTargetColor");
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
+        showStatusCard = serializedObject.FindProperty("ShowStatusCard");
 
         needAdditionalDescription = serializedObject.FindProperty("NeedAdditionalDescription");
         descriptionType = serializedObject.FindProperty("DescriptionType");
@@ -197,6 +203,13 @@ public class CardDataSOEditor : Editor
         }
 
         EditorGUILayout.Space(4);
+        EditorGUILayout.PropertyField(needEffectTileBase, new GUIContent("이펙트 타일 필요"));
+        if (needEffectTileBase.boolValue)
+        {
+            EditorGUILayout.PropertyField(effectTileBase, new GUIContent("타일 베이스"));
+        }
+
+        EditorGUILayout.Space(4);
         EditorGUILayout.PropertyField(restrictTiles, new GUIContent("타일 제한 사용"));
         if (restrictTiles.boolValue)
         {
@@ -265,6 +278,13 @@ public class CardDataSOEditor : Editor
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(limitTurn, new GUIContent("제한 턴 수"));
             EditorGUI.indentLevel--;
+        }
+
+        EditorGUILayout.Space(4);
+        EditorGUILayout.PropertyField(showStatusCard, new GUIContent("상태 카드 UI 표시"));
+        if (showStatusCard.boolValue)
+        {
+            EditorGUILayout.HelpBox("활성화 시 카드가 사용되면 전역 상태 카드 UI에 표시됩니다.", MessageType.Info);
         }
     }
 

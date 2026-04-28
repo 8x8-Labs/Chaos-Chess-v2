@@ -28,6 +28,8 @@ public class BlessingCard : CardData, ITileCard
         GameObject obj = new GameObject("BlessingEffect");
         BlessingEffect effect = obj.AddComponent<BlessingEffect>();
 
+        effect.DataSO = DataSO;
+        
         effect.Init(pos);
         effect.Apply();
         effect.duration = DataSO.MaintainTurn;
@@ -36,6 +38,8 @@ public class BlessingCard : CardData, ITileCard
 
 public class BlessingEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     public int duration;
 
     private Piece currentPiece;
@@ -43,11 +47,19 @@ public class BlessingEffect : TileEffector
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+            
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }

@@ -121,6 +121,11 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private Transform pieceSpawnTransform;
 
+    /// <summary>타일에 이펙트를 적용하기 위한 클래스 </summary>
+    [SerializeField] private UITileEffectDrawer tileEffectDrawer;
+
+    public UITileEffectDrawer TileEffectDrawer => tileEffectDrawer;
+
     void Awake()
     {
         if (Instance == null)
@@ -414,7 +419,9 @@ public class BoardManager : MonoBehaviour
         TriggerTileEnter(target, piece);
 
         foreach (var eff in piece.GetComponents<IPieceEffect>())
+        {
             eff.OnPieceMove(target);
+        }
 
         return true;
     }
@@ -481,7 +488,10 @@ public class BoardManager : MonoBehaviour
         if (piece == null) return;
 
         board[piece.Pos.x, piece.Pos.y] = null;
-        piece.GetComponent<IPieceEffect>()?.OnPieceCaptured();
+        foreach (var eff in piece.GetComponents<IPieceEffect>())
+        {
+            eff.OnPieceCaptured();
+        }
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
 
@@ -665,6 +675,10 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var effector in globalEffectors)
         {
+            // 저장된(일시정지된) 전역 효과는 판정에서 제외합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             if (!effector.CanPieceAct(piece, from, to))
                 return false;
         }
@@ -672,6 +686,10 @@ public class BoardManager : MonoBehaviour
         if (!tileEffectors.TryGetValue(to, out var list)) return true;
         foreach (var effector in list)
         {
+            // 저장된(일시정지된) 타일 효과는 판정에서 제외합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             if (!effector.CanPieceEnter(piece, from, to))
                 return false;
         }
@@ -693,6 +711,10 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var effector in new List<GlobalEffector>(globalEffectors))
         {
+            // 저장된(일시정지된) 전역 효과는 발동하지 않습니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceAct(piece, dest);
             if (isCapture)
                 effector.OnPieceCapture(piece, dest);
@@ -733,14 +755,26 @@ public class BoardManager : MonoBehaviour
     {
         if (!tileEffectors.TryGetValue(pos, out var list)) return;
         foreach (var effector in new List<TileEffector>(list))
+        {
+            // 저장된(일시정지된) 타일 효과는 진입 트리거를 무시합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceEnter(piece);
+        }
     }
 
     private void TriggerTileExit(Vector3Int pos, Piece piece)
     {
         if (!tileEffectors.TryGetValue(pos, out var list)) return;
         foreach (var effector in new List<TileEffector>(list))
+        {
+            // 저장된(일시정지된) 타일 효과는 이탈 트리거를 무시합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceExit(piece);
+        }
     }
 
     /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>
@@ -763,7 +797,7 @@ public class BoardManager : MonoBehaviour
         return targetPieces;
     }
 
-    private void CheckKingExistence()
+    public void CheckKingExistence()
     {
         bool whiteAlive = HasKing(PieceColor.White);
         bool blackAlive = HasKing(PieceColor.Black);
@@ -779,10 +813,6 @@ public class BoardManager : MonoBehaviour
         else if (!blackAlive)
         {
             GameManager.Instance.FinishType = GameResult.WhiteWin;
-        }
-        else
-        {
-            GameManager.Instance.FinishType = GameResult.None;
         }
     }
 
@@ -805,7 +835,7 @@ public class BoardManager : MonoBehaviour
         {
             if (useTurn)
             {
-                GameManager.Instance.NextTurn();
+                GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
             }
             else
             {
@@ -826,6 +856,7 @@ public class BoardManager : MonoBehaviour
             }
             AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
+            CheckKingExistence();
         }
 
         if (piece is King)
@@ -852,7 +883,7 @@ public class BoardManager : MonoBehaviour
 
         if (useTurn)
         {
-            GameManager.Instance.NextTurn();
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
         }
         else
         {

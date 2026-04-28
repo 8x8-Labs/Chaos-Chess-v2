@@ -1,7 +1,5 @@
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Map : MonoBehaviour
+[System.Serializable]
+public class Map
 {
     public int ELO;
     public string FEN;

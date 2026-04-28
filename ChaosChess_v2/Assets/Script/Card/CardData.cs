@@ -19,6 +19,7 @@ public abstract class CardData : MonoBehaviour
         GameObject host = new GameObject($"TileEffect_{pos}");
         T effector = host.AddComponent<T>();
         effector.Init(pos, DataSO.MaintainTurn);
+        effector.CardSO = DataSO;
         return effector;
     }
 
@@ -33,6 +34,7 @@ public abstract class CardData : MonoBehaviour
         GameObject host = new GameObject($"GlobalEffect_{typeof(T).Name}");
         T effector = host.AddComponent<T>();
         effector.Init(DataSO.PieceType, color, duration);
+        effector.CardSO = DataSO;
         return effector;
     }
 }
