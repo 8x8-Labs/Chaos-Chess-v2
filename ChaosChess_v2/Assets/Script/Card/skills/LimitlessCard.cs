@@ -111,9 +111,10 @@ public class LimitlessFieldController
         if (pieceEff != null)
             pieceEff.Revert();
     }
+
 }
 
-public class LimitlessTileEffector : TileEffector
+public class LimitlessTileEffector : TileEffector, IArenaPersistentEffect
 {
     private LimitlessFieldController controller;
 

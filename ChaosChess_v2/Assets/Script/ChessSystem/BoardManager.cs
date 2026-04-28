@@ -419,7 +419,9 @@ public class BoardManager : MonoBehaviour
         TriggerTileEnter(target, piece);
 
         foreach (var eff in piece.GetComponents<IPieceEffect>())
+        {
             eff.OnPieceMove(target);
+        }
 
         return true;
     }
@@ -486,7 +488,10 @@ public class BoardManager : MonoBehaviour
         if (piece == null) return;
 
         board[piece.Pos.x, piece.Pos.y] = null;
-        piece.GetComponent<IPieceEffect>()?.OnPieceCaptured();
+        foreach (var eff in piece.GetComponents<IPieceEffect>())
+        {
+            eff.OnPieceCaptured();
+        }
         Pieces.Remove(piece);
         Destroy(piece.gameObject);
 
@@ -670,6 +675,10 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var effector in globalEffectors)
         {
+            // 저장된(일시정지된) 전역 효과는 판정에서 제외합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             if (!effector.CanPieceAct(piece, from, to))
                 return false;
         }
@@ -677,6 +686,10 @@ public class BoardManager : MonoBehaviour
         if (!tileEffectors.TryGetValue(to, out var list)) return true;
         foreach (var effector in list)
         {
+            // 저장된(일시정지된) 타일 효과는 판정에서 제외합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             if (!effector.CanPieceEnter(piece, from, to))
                 return false;
         }
@@ -689,6 +702,12 @@ public class BoardManager : MonoBehaviour
         globalEffectors.Add(effector);
     }
 
+    /// <summary>현재 등록된 전역 이펙터 목록의 스냅샷을 반환합니다.</summary>
+    public List<GlobalEffector> GetGlobalEffectors()
+    {
+        return new List<GlobalEffector>(globalEffectors);
+    }
+
     public void UnregisterGlobalEffector(GlobalEffector effector)
     {
         globalEffectors.Remove(effector);
@@ -698,6 +717,10 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var effector in new List<GlobalEffector>(globalEffectors))
         {
+            // 저장된(일시정지된) 전역 효과는 발동하지 않습니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceAct(piece, dest);
             if (isCapture)
                 effector.OnPieceCapture(piece, dest);
@@ -734,18 +757,45 @@ public class BoardManager : MonoBehaviour
             list.Remove(effector);
     }
 
+    /// <summary>현재 보드에 등록된 모든 타일 이펙터를 중복 없이 반환합니다.</summary>
+    public List<TileEffector> GetAllTileEffectors()
+    {
+        HashSet<TileEffector> result = new HashSet<TileEffector>();
+        foreach (var pair in tileEffectors)
+        {
+            foreach (TileEffector effector in pair.Value)
+            {
+                if (effector != null)
+                    result.Add(effector);
+            }
+        }
+        return new List<TileEffector>(result);
+    }
+
     private void TriggerTileEnter(Vector3Int pos, Piece piece)
     {
         if (!tileEffectors.TryGetValue(pos, out var list)) return;
         foreach (var effector in new List<TileEffector>(list))
+        {
+            // 저장된(일시정지된) 타일 효과는 진입 트리거를 무시합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceEnter(piece);
+        }
     }
 
     private void TriggerTileExit(Vector3Int pos, Piece piece)
     {
         if (!tileEffectors.TryGetValue(pos, out var list)) return;
         foreach (var effector in new List<TileEffector>(list))
+        {
+            // 저장된(일시정지된) 타일 효과는 이탈 트리거를 무시합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceExit(piece);
+        }
     }
 
     /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>

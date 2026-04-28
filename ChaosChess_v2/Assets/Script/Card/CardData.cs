@@ -19,6 +19,7 @@ public abstract class CardData : MonoBehaviour
         GameObject host = new GameObject($"TileEffect_{pos}");
         T effector = host.AddComponent<T>();
         effector.Init(pos, DataSO.MaintainTurn);
+        effector.CardSO = DataSO;
         return effector;
     }
 

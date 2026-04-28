@@ -7,6 +7,8 @@ public class PieceSelector : Selector<Piece>
 {
     [SerializeField] private UIPieceDrawer pieceDrawer;
     [SerializeField] private SelectorUI selectorUI;
+    // GetComponents(List<T>) 재사용 버퍼로 선택 시점 GC 할당을 줄입니다.
+    private readonly List<PieceEffector> pieceEffectorBuffer = new();
     private IPieceCard skillCard;
     private bool executable => isExecute();
 
@@ -61,8 +63,9 @@ public class PieceSelector : Selector<Piece>
     {
         if (!selectState) return;
 
-        if(Target.TryGetComponent<PieceEffector>(out var effector))
+        if (HasActivePieceEffector(Target))
         {
+            // 현재 활성(일시정지 아님) 기물 효과가 있으면 중복 적용을 막습니다.
             Target.NotSelect();
             return;
         }
@@ -124,7 +127,8 @@ public class PieceSelector : Selector<Piece>
         // 2. 기물 중 효과 적용 중인지 검사
         foreach(Piece piece in pieces)
         {
-            if(!piece.TryGetComponent<PieceEffector>(out var value))
+            // 효과가 전혀 없거나, 전부 투기장 일시정지 상태이면 대상 가능으로 봅니다.
+            if (!HasActivePieceEffector(piece))
             {
                 return true;
             }
@@ -165,5 +169,18 @@ public class PieceSelector : Selector<Piece>
         selectedTargets.Clear();
         selectorUI.DisableButtonState();
 
+    }
+
+    /// <summary>해당 기물에 일시정지되지 않은 PieceEffector가 하나라도 있는지 확인합니다.</summary>
+    private bool HasActivePieceEffector(Piece piece)
+    {
+        pieceEffectorBuffer.Clear();
+        piece.GetComponents(pieceEffectorBuffer);
+        foreach (PieceEffector effector in pieceEffectorBuffer)
+        {
+            if (effector != null && !effector.IsSuspended)
+                return true;
+        }
+        return false;
     }
 }

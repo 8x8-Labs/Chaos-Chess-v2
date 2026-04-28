@@ -1,14 +1,21 @@
-﻿using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>투기장 진입 시에도 일시정지하지 않고 유지할 효과 마커입니다.</summary>
+public interface IArenaPersistentEffect { }
 
 /// <summary>기물 또는 타일에 효과를 적용하고 관리하는 추상 컴포넌트</summary>
 public abstract class Effector : MonoBehaviour, IEffect
 {
     private int remainingTurns; // -1 = 영구 효과
     private bool useHalfTurn; // 반턴 사용 여부
+    // 투기장 등 특수 모드에서 효과 동작을 잠시 멈출 때 사용합니다.
+    private bool isSuspended;
 
     public bool IsExpired => remainingTurns == 0;
     public bool IsPermanent => remainingTurns < 0;
     public int RemainingTurns => remainingTurns;
+    public bool IsSuspended => isSuspended;
 
     protected void SetDuration(int turns)
     {
@@ -39,6 +46,39 @@ public abstract class Effector : MonoBehaviour, IEffect
         OnEffectReverted();
     }
 
+    /// <summary>투기장 동안 효과를 일시 정지합니다.</summary>
+    public void SuspendForArena()
+    {
+        if (isSuspended) return;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTurnChanged -= OnTurnChanged;
+            if (useHalfTurn)
+                GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
+        }
+
+        isSuspended = true;
+        ToggleTileVisual(false);
+        OnSuspendForArena();
+    }
+
+    /// <summary>투기장 종료 후 효과를 재개합니다.</summary>
+    public void ResumeFromArena()
+    {
+        if (!isSuspended) return;
+
+        isSuspended = false;
+        ToggleTileVisual(true);
+        OnResumeFromArena();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTurnChanged += OnTurnChanged;
+            if (useHalfTurn)
+                GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
+        }
+    }
 
     /// <summary>서브클래스에서 훅/버프를 부착합니다.</summary>
     protected abstract void OnApply();
@@ -48,6 +88,9 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     protected virtual void OnEffectApplied() { }
     protected virtual void OnEffectReverted() { }
+
+    protected virtual void OnSuspendForArena() { }
+    protected virtual void OnResumeFromArena() { }
 
     public virtual void OnTurnChanged()
     {
@@ -59,6 +102,29 @@ public abstract class Effector : MonoBehaviour, IEffect
     }
 
     protected virtual void OnHalfTurnChanged() { }
+
+    /// <summary>효과 타입별(DataSO) 타일 연출을 끄거나 켭니다.</summary>
+    private void ToggleTileVisual(bool enabled)
+    {
+        CardDataSO dataSO = VisualDataSO;
+
+        if (dataSO == null || !dataSO.NeedEffectTileBase || dataSO.EffectTileBase == null)
+            return;
+
+        foreach (Vector3Int pos in GetVisualPositions())
+        {
+            if (enabled)
+                BoardManager.Instance?.TileEffectDrawer?.SetTileEffect(pos, dataSO.EffectTileBase);
+            else
+                BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(pos);
+        }
+    }
+
+    /// <summary>타일 연출에 사용할 카드 데이터입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
+    protected virtual CardDataSO VisualDataSO => null;
+
+    /// <summary>타일 연출에 사용할 좌표 목록입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
+    protected virtual IEnumerable<Vector3Int> GetVisualPositions() { yield break; }
 }
 
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
@@ -80,6 +146,8 @@ public abstract class PieceEffector : Effector, IPieceEffect
 /// <summary>타일에 부착되는 효과의 기반 추상 클래스</summary>
 public abstract class TileEffector : Effector, ITileEffect
 {
+    public CardDataSO CardSO { get; set; }
+
     public Vector3Int TilePos
     {
         get
@@ -98,6 +166,23 @@ public abstract class TileEffector : Effector, ITileEffect
     public virtual void OnPieceEnter(Piece piece) { }
     public virtual void OnPieceExit(Piece piece) { }
     public virtual bool CanPieceEnter(Piece piece, Vector3Int from, Vector3Int to) { return true; }
+
+    protected override void OnSuspendForArena()
+    {
+        BoardManager.Instance?.UnregisterTileEffector(tilePos, this);
+    }
+
+    protected override void OnResumeFromArena()
+    {
+        BoardManager.Instance?.RegisterTileEffector(tilePos, this);
+    }
+
+    protected override CardDataSO VisualDataSO => CardSO;
+
+    protected override IEnumerable<Vector3Int> GetVisualPositions()
+    {
+        yield return tilePos;
+    }
 }
 
 /// <summary>특정 타입의 기물이 행동(이동/잡기)했을 때 반응하는 전역 효과의 기반 추상 클래스</summary>
@@ -149,4 +234,16 @@ public abstract class GlobalEffector : Effector
     }
 
     public virtual bool CanPieceAct(Piece piece, Vector3Int from, Vector3Int to) { return true; }
+
+    protected override void OnSuspendForArena()
+    {
+        BoardManager.Instance?.UnregisterGlobalEffector(this);
+    }
+
+    protected override void OnResumeFromArena()
+    {
+        BoardManager.Instance?.RegisterGlobalEffector(this);
+    }
+
+    protected override CardDataSO VisualDataSO => CardSO;
 }
