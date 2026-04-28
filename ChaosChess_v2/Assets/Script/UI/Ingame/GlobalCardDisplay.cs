@@ -16,7 +16,6 @@ public class GlobalCardDisplay : MonoBehaviour
     [SerializeField] private float destroyDuration = 0.25f;
 
     private readonly Dictionary<GlobalEffector, GlobalCardData> _displayedCards = new();
-    private readonly List<GlobalCardUI> _displayedCardUI = new();
 
     private void OnEnable()
     {
@@ -75,6 +74,7 @@ public class GlobalCardDisplay : MonoBehaviour
         var cg = rt.Rt.GetComponent<CanvasGroup>();
         if (cg == null) cg = rt.Rt.gameObject.AddComponent<CanvasGroup>();
 
+        cg.blocksRaycasts = false;
         cg.DOFade(0f, destroyDuration).SetEase(Ease.InQuad);
         rt.CardUI.PlayDisappearAnimation(() => Destroy(rt.Rt.gameObject));
     }

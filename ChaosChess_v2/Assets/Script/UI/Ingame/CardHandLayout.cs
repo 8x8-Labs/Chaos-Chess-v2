@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -39,6 +39,7 @@ public class CardHandLayout : MonoBehaviour
         for (int i = 0; i < n; i++)
         {
             float x = startX + i * overlap;
+            _cards[i].DOKill();
             if (animate)
             {
                 var tween = _cards[i].DOAnchorPos(new Vector2(x, cardY), rearrangeDuration).SetEase(Ease.OutQuad);
