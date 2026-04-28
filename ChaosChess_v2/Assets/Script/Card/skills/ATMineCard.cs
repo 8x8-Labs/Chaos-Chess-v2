@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -28,26 +29,37 @@ public class ATMineCard : CardData, ITileCard
         ATMineEffector effect = CreateGlobalEffector<ATMineEffector>();
         effect.MinePos = pos;
 
-        PieceType tergetPiecesType = (
+        PieceType targetPiecesType = (
             PieceType.Rook | PieceType.Queen | PieceType.King | // 일반 기물
             PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider // 커스텀 기물
         );
 
-        effect.Init(tergetPiecesType);
+        effect.DataSO = DataSO;
+        effect.Init(targetPiecesType);
         effect.Apply();
     }
 }
 
 public class ATMineEffector : GlobalEffector
 {
+    public CardDataSO DataSO;
+
     public Vector3Int MinePos;
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(MinePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterGlobalEffector(this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(MinePos);
+
         BoardManager.Instance.UnregisterGlobalEffector(this);
         Destroy(gameObject);
     }
@@ -133,5 +145,10 @@ public class ATMineEffector : GlobalEffector
             BoardManager.Instance.RefreshMoves();
 
         Revert();
+    }
+
+    protected override IEnumerable<Vector3Int> GetVisualPositions()
+    {
+        yield return MinePos;
     }
 }

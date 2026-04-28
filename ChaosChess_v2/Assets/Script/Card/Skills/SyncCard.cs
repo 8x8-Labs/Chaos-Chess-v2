@@ -28,6 +28,10 @@ public class SyncCard : CardData, ITileCard
 
         SyncChild child = CreateTileEffector<SyncChild>(oppo);
         SyncEffect parent = CreateTileEffector<SyncEffect>(pos);
+
+        child.DataSO = DataSO;
+        parent.DataSO = DataSO;
+
         parent.child = child;
         parent.Apply();
     }
@@ -35,15 +39,25 @@ public class SyncCard : CardData, ITileCard
 
 public class SyncEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     public SyncChild child;
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         if (child != null) child.Revert(); // 미활성 상태에서 소멸 시 child도 정리
         Destroy(gameObject);
@@ -70,6 +84,9 @@ public class SyncEffect : TileEffector
 
         // 입장 기물에 SyncFollower 부착 — 다음 이동 시 반대 기물 동기 이동
         SyncFollower follower = piece.gameObject.AddComponent<SyncFollower>();
+
+        follower.DataSO = DataSO;
+
         follower.syncChild = activatedChild;
         follower.syncEffect = this;
         follower.syncTilePos = tilePos;
@@ -80,16 +97,26 @@ public class SyncEffect : TileEffector
 
 public class SyncChild : TileEffector
 {
+    public CardDataSO DataSO;
+
     public Piece SynchronizedPiece;
     private bool isMirroring;
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+
         SynchronizedPiece = null;
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
@@ -137,6 +164,8 @@ public class SyncChild : TileEffector
 
 public class SyncFollower : PieceEffector
 {
+    public CardDataSO DataSO;
+
     public SyncChild syncChild;
     public SyncEffect syncEffect;
     public Vector3Int syncTilePos;
@@ -144,11 +173,19 @@ public class SyncFollower : PieceEffector
 
     protected override void OnApply()
     {
+        // 타일 이펙트 추가
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(syncTilePos, DataSO.EffectTileBase);
+
         isReady = false;
     }
 
     protected override void OnRevert()
     {
+        // 타일 이펙트 제거
+        if (DataSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(syncTilePos);
+
         Destroy(this);
     }
 
