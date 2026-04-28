@@ -13,7 +13,6 @@ public class GlobalCardDisplay : MonoBehaviour
 {
     [SerializeField] private CardHandLayout layout;
     [SerializeField] private GameObject cardPrefab;
-    [SerializeField] private float destroyDuration = 0.25f;
 
     private readonly Dictionary<GlobalEffector, GlobalCardData> _displayedCards = new();
 
@@ -72,10 +71,8 @@ public class GlobalCardDisplay : MonoBehaviour
         layout.RemoveCard(rt.Rt);
 
         var cg = rt.Rt.GetComponent<CanvasGroup>();
-        if (cg == null) cg = rt.Rt.gameObject.AddComponent<CanvasGroup>();
-
         cg.blocksRaycasts = false;
-        cg.DOFade(0f, destroyDuration).SetEase(Ease.InQuad);
+        cg.DOFade(0f, rt.CardUI.AnimationDuration).SetEase(Ease.InQuad);
         rt.CardUI.PlayDisappearAnimation(() => Destroy(rt.Rt.gameObject));
     }
 }
