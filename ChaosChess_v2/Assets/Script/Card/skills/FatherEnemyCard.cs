@@ -56,7 +56,10 @@ public class FatherEnemyEffector : PieceEffector
     {
         GameManager.Instance.OnAwakenedPieceSelected -= OnPieceSelected;
 
-        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+        GameManager.Instance.NextTurn();
+
+        if (!GameManager.Instance.IsPlayerTurn)
+            GameManager.Instance.RequestAIMove();
 
         Destroy(this);
     }

@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC131\uBCBD"
   CardImage: {fileID: 0}
-  CardDescription: "\uC120\uD0DD\uD55C \uB450 \uD0C0\uC77C\uC5D0 \uB118\uC5B4\uAC08
-    \uC218 \uC5C6\uC73C\uBA70 \uACF5\uACA9 \uC2DC \uD30C\uAD34\uB418\uB294 \uBCBD\uC744
-    \uC124\uCE58\uD569\uB2C8\uB2E4."
+  CardDescription: "\uB450\uAC1C\uC758 \uCE78\uC744 \uC120\uD0DD\uD558\uACE0 \uADF8
+    \uCE78\uC5D0 \uBCBD\uC744 \uC0DD\uC131\uD569\uB2C8\uB2E4. \n\uAE30\uBB3C\uC740
+    \uADF8 \uBCBD\uC744 \uB118\uC5B4 \uAC08 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \n\uC5B4\uB5A4
+    \uAE30\uBB3C\uC774 \uBCBD\uC744 \uACF5\uACA9\uD558\uBA74 \uBCBD\uC774 \uBD80\uC234\uC9C0\uACE0
+    \uADF8 \uAE30\uBB3C\uC774 \uBCBD\uC758 \uC704\uCE58\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4"
   Type: 1
   CardTier: 0
   PieceType: 0
@@ -33,8 +35,3 @@ MonoBehaviour:
   LimitTurn: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
-  AdditionalDescriptionTitle: 
-  PieceDescImage: {fileID: 0}
-  MovementImage: {fileID: 0}
-  PieceDescContent: 
-  AdditionalDescriptionContent: 

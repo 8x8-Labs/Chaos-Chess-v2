@@ -5,34 +5,43 @@ using UnityEngine;
 /// 풍차 - 기물 전용 (고급)
 /// 2턴 동안 룩은 비숍의 행마법대로, 비숍은 룩의 행마법대로 움직입니다.
 /// </summary>
-public class WindmillCard : CardData, ICard
+public class WindmillCard : CardData, IPieceCard
 {
+    private PieceSelector selector;
+
+    private void Awake()
+    {
+        selector = FindFirstObjectByType<PieceSelector>();
+    }
+
+    public void LoadPieceSelector()
+    {
+        if (selector == null) selector = FindFirstObjectByType<PieceSelector>();
+        selector.EnableSelector(this);
+    }
+
     public void Execute(CardEffectArgs args = null)
     {
-        var effector = CreateGlobalEffector<WindmillEffector>();
-        foreach (Piece piece in BoardManager.Instance.GetAllPieces())
-        {
-            piece.MoveFenOverride = piece.Type == PieceType.Rook ? "b" : piece.Type == PieceType.Bishop ? "r" : null;
-        }
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
+        Piece piece = args.Targets[0];
+        var effector = CreatePieceEffector<WindmillEffector>(piece);
+        effector.change = piece.Type == PieceType.Rook ? "b" : "r";
         effector.Apply();
+        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
 
     }
 }
-public class WindmillEffector : GlobalEffector
+public class WindmillEffector : PieceEffector
 {
+    public string change;
     protected override void OnApply()
     {
+        target.FenOverride = change;
         BoardManager.Instance.RefreshMoves();
     }
 
     protected override void OnRevert()
     {
-        foreach (Piece piece in BoardManager.Instance.GetAllPieces())
-        {
-            if (piece.Type == PieceType.Bishop || piece.Type == PieceType.Rook)
-                piece.MoveFenOverride = null;
-        }
+        target.FenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

@@ -20,7 +20,9 @@ public class PositionSwapCard : CardData, ICard
         bm.ClearAllTileEffectors();
         bm.RefreshMoves();
 
-        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+        GameManager.Instance.NextTurn();
+        if (!GameManager.Instance.IsPlayerTurn)
+            GameManager.Instance.RequestAIMove();
     }
 
     private string FlipFEN(string fen)

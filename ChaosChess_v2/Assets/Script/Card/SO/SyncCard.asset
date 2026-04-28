@@ -29,8 +29,6 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 1
   MaintainTurn: -1
-  NeedEffectTileBase: 0
-  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -43,8 +41,4 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uB3D9\uAE30\uD654 \uCE78\uC5D0 \uB4E4\uC5B4\uAC04
-    \uAE30\uBB3C\uC774 1\uD134 \uB3D9\uC548 \uBC18\uB300 \uD589 \uD574\uB2F9 \uC5F4\uC758
-    \uAE30\uBB3C\uACFC \uD568\uAED8 \uC6C0\uC9C1\uC785\uB2C8\uB2E4.\n\uB3D9\uAE30\uD654\uB41C
-    \uAE30\uBB3C\uC740 \uB2E4\uB978 \uCABD\uC73C\uB85C \uC774\uB3D9\uD560 \uACBD\uC6B0
-    \uD6A8\uACFC\uAC00 \uD574\uC81C\uB429\uB2C8\uB2E4."
+  AdditionalDescriptionContent: 

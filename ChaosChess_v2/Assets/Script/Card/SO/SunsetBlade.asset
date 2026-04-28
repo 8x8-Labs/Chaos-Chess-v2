@@ -14,19 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uB178\uC744\uBE5B \uAC80"
   CardImage: {fileID: 0}
-  CardDescription: "\uC774\uBC88 \uD134 \uB3D9\uC548 \uC120\uD0DD\uD55C \uD3F0\uC774
-    \uC0C1\uB300 \uAE30\uBB3C\uC744 \uC7A1\uC744 \uB54C \uC88C\uC6B0\uC5D0 \uC788\uB294
-    \uAE30\uBB3C\uC774 \uAC19\uC774 \uD30C\uAD34\uB429\uB2C8\uB2E4. (1\uD68C)"
+  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C\uC744 \uC7A1\uC744 \uB54C \uAE30\uBB3C
+    \uC606\uC5D0 \uC788\uB294 2\uAC1C\uC758 \uAE30\uBB3C\uB3C4 \uAC19\uC774 \uC7A1\uD798(1\uD68C)"
   Type: 0
-  CardTier: 0
   PieceType: 1
   PieceTargetColor: 0
   PieceLimitTurn: -1
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
-  NeedEffectTileBase: 0
-  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -35,8 +31,3 @@ MonoBehaviour:
   LimitTurn: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
-  AdditionalDescriptionTitle: 
-  PieceDescImage: {fileID: 0}
-  MovementImage: {fileID: 0}
-  PieceDescContent: 
-  AdditionalDescriptionContent: 

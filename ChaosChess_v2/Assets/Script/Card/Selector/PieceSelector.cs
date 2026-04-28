@@ -61,9 +61,8 @@ public class PieceSelector : Selector<Piece>
     {
         if (!selectState) return;
 
-        if (Target.GetComponents<PieceEffector>().Any(e => !e.IsSuspended))
+        if(Target.TryGetComponent<PieceEffector>(out var effector))
         {
-            // 현재 활성(일시정지 아님) 기물 효과가 있으면 중복 적용을 막습니다.
             Target.NotSelect();
             return;
         }
@@ -125,8 +124,7 @@ public class PieceSelector : Selector<Piece>
         // 2. 기물 중 효과 적용 중인지 검사
         foreach(Piece piece in pieces)
         {
-            // 효과가 전혀 없거나, 전부 투기장 일시정지 상태이면 대상 가능으로 봅니다.
-            if (!piece.GetComponents<PieceEffector>().Any(e => !e.IsSuspended))
+            if(!piece.TryGetComponent<PieceEffector>(out var value))
             {
                 return true;
             }

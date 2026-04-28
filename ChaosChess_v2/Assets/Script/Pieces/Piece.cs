@@ -232,10 +232,7 @@ public class Piece : MonoBehaviour
     {
         var copy = new List<Action<Vector3Int>>(onCaptureEffects);
 
-        foreach (var eff in GetComponents<IPieceEffect>())
-        {
-            eff.OnPieceCapture();
-        }
+        GetComponent<IPieceEffect>()?.OnPieceCapture();
 
         foreach (var effect in copy)
         {
