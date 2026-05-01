@@ -14,13 +14,13 @@ class ConcentrationEffector : PieceEffector
     }
     protected override void OnApply()
     {
-        BoardManager.Instance.ChangePiece(piece.Pos,piece.Color,'a');
+        piece.FenOverride = "a";
     }
 
     protected override void OnRevert()
     {
-        if(piece)
-            BoardManager.Instance.ChangePiece(piece.Pos,piece.Color,'s');
+        if (piece)
+            BoardManager.Instance.ChangePiece(piece.Pos, piece.Color, 's');
         Destroy(this);
     }
 }

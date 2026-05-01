@@ -189,6 +189,7 @@ public class GameManager : MonoBehaviour
         FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
         {
             EvaluateGameState(moves);
+            ApplyGameResult();
             BoardManager.Instance.UpdatePiecesCanMovePos(moves);
             OnPlayerTurnStarted?.Invoke();
         });
@@ -357,6 +358,10 @@ public class GameManager : MonoBehaviour
             {
                 if (extraPlayerActions > 0)
                 {
+                    // 데스페라도 추가 행동 중에도, 이미 상대가 체크메이트면 즉시 게임 종료합니다.
+                    if (TryApplyImmediateOpponentCheckmate())
+                        return;
+
                     extraPlayerActions--;
                     RefreshPlayerTurn();
                 }
@@ -368,6 +373,39 @@ public class GameManager : MonoBehaviour
                 }
             });
         }
+    }
+
+    /// <summary>
+    /// 현재 보드에서 "상대 턴" 기준으로 체크메이트를 판정해 즉시 승패를 적용합니다.
+    /// 데스페라도처럼 턴을 넘기지 않는 추가 행동 분기에서 사용합니다.
+    /// </summary>
+    private bool TryApplyImmediateOpponentCheckmate()
+    {
+        BoardManager.Instance.UpdateFEN();
+        string currentFen = BoardManager.Instance.GetFEN();
+
+        string[] fenParts = currentFen.Split(' ');
+        if (fenParts.Length < 2)
+            return false;
+
+        string originalTurn = fenParts[1];
+        fenParts[1] = (originalTurn == "w") ? "b" : "w";
+        string opponentTurnFen = string.Join(" ", fenParts);
+
+        FairyStockfishBridge.Instance.SetPosition(opponentTurnFen);
+        string[] opponentMoves = FairyStockfishBridge.Instance.GetLegalMoves();
+        bool opponentInCheck = FairyStockfishBridge.Instance.IsInCheck();
+
+        // 이후 흐름을 위해 엔진 포지션을 원래 턴 상태로 복원합니다.
+        FairyStockfishBridge.Instance.SetPosition(currentFen);
+
+        if (opponentMoves.Length == 0 && opponentInCheck)
+        {
+            OnSurrender(EnemyColor);
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>현재 보드 상태를 Stockfish에 동기화합니다. 투기장 종료 후 기물 복원 시 사용합니다.</summary>
