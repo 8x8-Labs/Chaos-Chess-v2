@@ -25,7 +25,6 @@ public class DimensionInstabilityCard : CardData, IPieceCard
         Piece piece = args.Targets[0];
         var effector = CreatePieceEffector<DimensionInstabilityEffector>(piece);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
     }
 }
 

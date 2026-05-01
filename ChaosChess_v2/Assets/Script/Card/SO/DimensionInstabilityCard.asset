@@ -22,16 +22,19 @@ MonoBehaviour:
   CardTier: 3
   PieceType: 2
   PieceTargetColor: 0
-  PieceLimitTurn: 1
+  PieceLimitTurn: -1
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uAC00\uC0C1\uC758 \uB098\uC774\uD2B8"
