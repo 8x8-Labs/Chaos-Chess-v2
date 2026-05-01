@@ -189,6 +189,7 @@ public class GameManager : MonoBehaviour
         FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
         {
             EvaluateGameState(moves);
+            ApplyGameResult();
             BoardManager.Instance.UpdatePiecesCanMovePos(moves);
             OnPlayerTurnStarted?.Invoke();
         });
