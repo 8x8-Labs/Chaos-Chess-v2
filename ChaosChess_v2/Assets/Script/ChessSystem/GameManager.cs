@@ -452,7 +452,7 @@ public class GameManager : MonoBehaviour
         {
             FinishType = GameResult.Draw;
         }
-        if (FairyStockfishBridge.Instance.IsInsufficientMaterial())
+        else if (FairyStockfishBridge.Instance.IsInsufficientMaterial())
         {
             FinishType = GameResult.Draw;
         }
