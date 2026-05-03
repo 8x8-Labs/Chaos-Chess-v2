@@ -452,6 +452,10 @@ public class GameManager : MonoBehaviour
         {
             FinishType = GameResult.Draw;
         }
+        if (FairyStockfishBridge.Instance.IsInsufficientMaterial())
+        {
+            FinishType = GameResult.Draw;
+        }
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
 
 
