@@ -23,8 +23,8 @@ public class Player : MonoBehaviour
         _buffs = new List<IPlayerBuff>(PlayerState.Instance.Buffs);
 
         ExecuteBuffs();
-        int CurrentCardCnt = cardRandomizer.CurrentCardCnt;
-        for (int i = 0; i < _maxCardCount - CurrentCardCnt; i++)
+        int currentCardCnt = cardRandomizer.CurrentCardCnt;
+        for (int i = 0; i < _maxCardCount - currentCardCnt; i++)
         {
             cardRandomizer.GenerateCard(_cardPool);
         }
@@ -47,8 +47,6 @@ public class Player : MonoBehaviour
     private void HandlePlayerTurnStarted()
     {
         _playerTurnCount++;
-        Debug.Log(cardRandomizer.CurrentCardCnt);
-        Debug.Log(_maxCardCount);
         if (_playerTurnCount < _cardInterval || cardRandomizer.CurrentCardCnt >= _maxCardCount) return;
         _playerTurnCount = 0;
 
@@ -63,8 +61,7 @@ public class Player : MonoBehaviour
 
     /// <summary>보유할 수 있는 카드 개수를 delta만큼 조정합니다. 최소값은 1, 최대값은 PlayerState.Instance.DefaultMaxCardCount(4)입니다.</summary>
     public void ModifyMaxCardCount(int delta)
-    {
-        Debug.Log("???");
+    {   
         _maxCardCount = Mathf.Clamp(_maxCardCount + delta, 1, PlayerState.Instance.DefaultMaxCardCount);
     }
 }
