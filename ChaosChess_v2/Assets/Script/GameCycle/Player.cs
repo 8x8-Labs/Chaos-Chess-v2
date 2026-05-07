@@ -8,8 +8,8 @@ public class Player : MonoBehaviour
     [SerializeField] private List<GameObject> _cardPool;
     [SerializeField] private List<IPlayerBuff> _buffs;
 
-    [SerializeField] private int _cardInterval;
-    [SerializeField] private int _maxCardCount;
+    private int _cardInterval;
+    private int _maxCardCount;
     private int _playerTurnCount = 0;
 
     private void Start()

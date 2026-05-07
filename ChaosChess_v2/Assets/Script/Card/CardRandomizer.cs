@@ -6,7 +6,7 @@ public class CardRandomizer : MonoBehaviour
 {
     [SerializeField] private Transform content;
 
-    [SerializeField] private int currentCardCnt = 0;
+    private int currentCardCnt = 0;
     public int CurrentCardCnt => currentCardCnt;
 
     private Dictionary<GameObject, GameObject> _activeCards = new();
