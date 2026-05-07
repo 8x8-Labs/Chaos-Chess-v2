@@ -5,6 +5,7 @@ using UnityEngine;
 /// 게임의 데이터를 저장하는 클래스
 /// 데이터 종류
 /// - 카드 획득 턴 수
+/// - 인게임에서의 최대 카드 보유 수
 /// - 현재 얻은 버프
 /// - 현재 가지고있는 카드
 /// - 승,무,패 횟수
@@ -29,6 +30,9 @@ public class PlayerState : MonoBehaviour
 
     private int _defaultCardInterval = 5;
     public int DefaultCardInterval => _defaultCardInterval;
+
+    private int _defaultMaxCardCount = 4;
+    public int DefaultMaxCardCount => _defaultMaxCardCount;
 
     [SerializeField] private List<GameObject> _cardPool = new();
     public IReadOnlyList<GameObject> CardPool => _cardPool;
