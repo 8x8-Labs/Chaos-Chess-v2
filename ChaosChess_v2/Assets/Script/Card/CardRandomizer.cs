@@ -4,20 +4,12 @@ using UnityEngine;
 
 public class CardRandomizer : MonoBehaviour
 {
-    [SerializeField] private GameObject[] cardPrefabs;
     [SerializeField] private Transform content;
-    [SerializeField] private int startCard = 3;
 
     private int currentCardCnt = 0;
+    public int CurrentCardCnt => currentCardCnt;
+
     private Dictionary<GameObject, GameObject> _activeCards = new();
-
-    private void Start()
-    {
-        for (int i = 0; i < startCard; i++) GenerateCards();
-    }
-
-    /// <summary>내장 cardPrefabs 풀에서 랜덤 카드를 생성합니다.</summary>
-    public void GenerateCards() => GenerateCard(new List<GameObject>(cardPrefabs));
 
     /// <summary>지정된 풀에서 중복 없이 랜덤 카드를 하나 생성합니다.</summary>
     public void GenerateCard(List<GameObject> pool)
@@ -37,6 +29,7 @@ public class CardRandomizer : MonoBehaviour
         var instance = Instantiate(available[0], content);
         _activeCards[instance] = available[0];
     }
+
 
     public void RemoveCard(GameObject card)
     {
