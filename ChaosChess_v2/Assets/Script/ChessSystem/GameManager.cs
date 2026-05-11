@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviour
     /// <summary>아버지의 원수 카드 전용 이벤트 입니다.</summary>
     public event Action<Piece> OnAwakenedPieceSelected;
 
+    private SoundManager soundManager;
     public PieceColor turnColor
     {
         get
@@ -83,6 +84,7 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        soundManager = FindFirstObjectByType<SoundManager>();
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -528,11 +530,12 @@ public class GameManager : MonoBehaviour
         }
 
         MapManager.Instance.OnCombatCleared();
+        
         EndGame();
     }
-
     private void EndGame()
     {
+
         IsEndGame = true;
 
         ResetActions();

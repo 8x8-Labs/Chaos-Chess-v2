@@ -3,6 +3,7 @@ using System.Security;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class CardDescPanel : ButtonPanel
 {
@@ -23,7 +24,12 @@ public class CardDescPanel : ButtonPanel
     [SerializeField] private TMP_Text subDescContent;
 
     private CardAnim selectedCard;
-
+    [SerializeField] private List<AudioClip> sounds;
+    private SoundManager soundManager;
+    void Awake()
+    {
+        soundManager = SoundManager.Instance;
+    }
     public override void DisablePanel()
     {
         if(selectedCard != null)
@@ -73,6 +79,8 @@ public class CardDescPanel : ButtonPanel
                 };
                 break;
         }
+        Tier tier = data.DataSO.CardTier;
+        soundManager.SFXPlay("wCardUse",sounds[(int)tier]);
 
         executeButton.onClick.AddListener(() =>
             {
