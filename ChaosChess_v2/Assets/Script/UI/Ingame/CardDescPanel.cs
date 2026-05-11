@@ -25,11 +25,7 @@ public class CardDescPanel : ButtonPanel
 
     private CardAnim selectedCard;
     [SerializeField] private List<AudioClip> sounds;
-    private SoundManager soundManager;
-    void Awake()
-    {
-        soundManager = SoundManager.Instance;
-    }
+    private SoundManager soundManager = SoundManager.Instance;
     public override void DisablePanel()
     {
         if(selectedCard != null)
