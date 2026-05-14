@@ -44,6 +44,11 @@ public class CardDescPanel : ButtonPanel
         if( gameManager == null ) gameManager = GameManager.Instance;
         gameManager.IsGameInput = false;
     }
+    public void SoundPlay(int tier)
+    {
+        if (soundManager == null) soundManager = SoundManager.Instance;
+        soundManager.SFXPlay("wCardUse", sounds[tier]);
+    }
 
     public void SetCardData(CardAnim card)
     {
@@ -54,13 +59,13 @@ public class CardDescPanel : ButtonPanel
 
         executeButton.onClick.RemoveAllListeners();
         Action cardExecute = null;
-
+        Tier tier = data.DataSO.CardTier;
         CardType type = data.DataSO.Type;
         var pieceCard = data.GetComponent<IPieceCard>();
         var tileCard = data.GetComponent<ITileCard>();
         var cardInterface = data.GetComponent<ICard>();
 
-        switch(type){
+        switch (type) {
             case CardType.Piece:
                 cardExecute = () => pieceCard?.LoadPieceSelector();
                 break;
@@ -75,13 +80,12 @@ public class CardDescPanel : ButtonPanel
                 };
                 break;
         }
-        Tier tier = data.DataSO.CardTier;
-        soundManager.SFXPlay("wCardUse",sounds[(int)tier]);
 
         executeButton.onClick.AddListener(() =>
             {
                 DisablePanel();
                 cardExecute?.Invoke();
+                SoundPlay((int)tier);
             }
         );
     }
