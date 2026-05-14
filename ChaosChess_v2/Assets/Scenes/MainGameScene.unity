@@ -8386,11 +8386,11 @@ MonoBehaviour:
   subDescPieceContent: {fileID: 834550414}
   subDescContent: {fileID: 402923178}
   sounds:
-  - {fileID: 8300000, guid: 0b09ede618a36314aaab7d3bf11badb0, type: 3}
-  - {fileID: 8300000, guid: 1cf3ed3292697da44978dad6597160d6, type: 3}
-  - {fileID: 8300000, guid: 54662b7ebb371bd47b277ac88aed2494, type: 3}
-  - {fileID: 8300000, guid: afa57af7752db1c42bc14cfe9eb8bd8d, type: 3}
-  - {fileID: 8300000, guid: 55f42d989eddf15408ab4ac93aff8425, type: 3}
+  - {fileID: 8300000, guid: b68f3c9a1c687184bb10800ed2f35be6, type: 3}
+  - {fileID: 8300000, guid: 59040f6e1bf9abd4e8f99f2295cdf666, type: 3}
+  - {fileID: 8300000, guid: 4410ce267a255344691b5455242cd807, type: 3}
+  - {fileID: 8300000, guid: fc496e44f2ac4e04db6b773c0e92d550, type: 3}
+  - {fileID: 8300000, guid: 8294169d618a8a24388dd66b7aea14eb, type: 3}
 --- !u!1 &1422633467
 GameObject:
   m_ObjectHideFlags: 0
