@@ -67,4 +67,16 @@ public class PlayerState : MonoBehaviour
         }
         curGameResult = result;
     }
+
+    public void ResetRun()
+    {
+        _buffs.Clear();
+        _cardPool.Clear();
+
+        WinCount = 0;
+        DrawCount = 0;
+        LoseCount = 0;
+
+        curGameResult = GameResult.None;
+    }
 }

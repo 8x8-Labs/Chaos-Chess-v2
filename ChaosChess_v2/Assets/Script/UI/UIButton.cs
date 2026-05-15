@@ -92,7 +92,7 @@ public class UIButton : Button
             case ButtonType.OpenPopup:
                 enablePanel.EnablePanel(); break;
             case ButtonType.GameStart:
-                SceneManager.LoadScene("MapScene"); break;
+                GamaCycleManager.Instance?.StartGame(); break;
 
         }
     }
