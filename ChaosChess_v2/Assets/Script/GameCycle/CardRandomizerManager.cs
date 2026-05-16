@@ -53,6 +53,25 @@ public class CardRandomizerManager : MonoBehaviour
             .ToList();
     }
 
+    public List<GameObject> GetRandomCardsByTier(Tier tier, int count)
+    {
+        List<GameObject> availableCards = allCards
+            .Where(card =>
+            {
+                CardData data = card.GetComponent<CardData>();
+
+                return data != null &&
+                       data.DataSO.CardTier == tier;
+            })
+            .ToList();
+
+        Shuffle(availableCards);
+
+        return availableCards
+            .Take(Mathf.Min(count, availableCards.Count))
+            .ToList();
+    }
+
     private void Shuffle(List<GameObject> list)
     {
         for (int i = list.Count - 1; i > 0; i--)

@@ -20,7 +20,7 @@ public class GamaCycleManager : MonoBehaviour
 
     public void StartGame()
     {
-        PlayerState.Instance?.ResetRun();
+        PlayerState.Instance?.InitializeRun();
         MapManager.Instance?.Init();
 
         SceneManager.LoadScene("MapScene");
