@@ -91,6 +91,9 @@ public class UIButton : Button
                 disablePanel.DisablePanel(); break;
             case ButtonType.OpenPopup:
                 enablePanel.EnablePanel(); break;
+            case ButtonType.GameStart:
+                GamaCycleManager.Instance?.StartGame(); break;
+
         }
     }
 

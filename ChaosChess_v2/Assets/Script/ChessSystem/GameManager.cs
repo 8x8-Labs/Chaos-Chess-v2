@@ -16,8 +16,7 @@ public class GameManager : MonoBehaviour
     public List<Sprite> BlackSprites = new List<Sprite>();
     public List<Sprite> WhiteSprites = new List<Sprite>();
 
-    [SerializeField]
-    private int curTurn = 1;
+    [SerializeField] private int curTurn;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
@@ -76,9 +75,6 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
-
-            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -87,10 +83,8 @@ public class GameManager : MonoBehaviour
         soundManager = FindFirstObjectByType<SoundManager>();
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void Start()
     {
-        if (scene.name != "MainGameScene")
-            return;
         IsEndGame = false;
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
@@ -538,7 +532,6 @@ public class GameManager : MonoBehaviour
 
         IsEndGame = true;
 
-        ResetActions();
         UI.ShowEndGame(FinishType);
         PlayerState.Instance.EndGame(FinishType);
     }

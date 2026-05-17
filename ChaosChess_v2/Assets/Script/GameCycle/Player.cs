@@ -61,7 +61,7 @@ public class Player : MonoBehaviour
 
     /// <summary>보유할 수 있는 카드 개수를 delta만큼 조정합니다. 최소값은 1, 최대값은 PlayerState.Instance.DefaultMaxCardCount(4)입니다.</summary>
     public void ModifyMaxCardCount(int delta)
-    {   
+    {
         _maxCardCount = Mathf.Clamp(_maxCardCount + delta, 1, PlayerState.Instance.DefaultMaxCardCount);
     }
 }

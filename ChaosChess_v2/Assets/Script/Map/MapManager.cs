@@ -30,7 +30,7 @@ public class MapManager : MonoBehaviour
         }
     }
 
-    private void Init()
+    public void Init()
     {
         maps.Clear();
         currentFloor = 0;
