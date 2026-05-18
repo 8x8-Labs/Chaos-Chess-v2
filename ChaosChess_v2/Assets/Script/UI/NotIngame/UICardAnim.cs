@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,6 +20,9 @@ public class UICardAnim : MonoBehaviour
 
     [SerializeField] private GameObject cardPrefab;
     public GameObject CardPreFab { get { return cardPrefab; } set { cardPrefab = value; } }
+
+    [SerializeField] private TextMeshProUGUI cardNameText;
+    [SerializeField] private Image cardImage;
 
     private CardData cardData;
     private UICardDescPanel panel;
@@ -52,6 +56,15 @@ public class UICardAnim : MonoBehaviour
             .Join(cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(enableEase));
 
         if (cardPrefab != null)
+        {
             playerState?.AddCard(cardPrefab);
+            CardDataSO dataSO = cardPrefab.GetComponent<CardData>().DataSO;
+
+            if (cardNameText != null)
+                cardNameText.text = dataSO?.CardName ?? cardNameText.text;
+
+            if (cardImage != null)
+                cardImage.sprite = dataSO?.CardImage ?? cardImage.sprite;
+        }
     }
 }
