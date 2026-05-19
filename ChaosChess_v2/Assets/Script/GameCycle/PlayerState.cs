@@ -78,27 +78,5 @@ public class PlayerState : MonoBehaviour
         LoseCount = 0;
 
         curGameResult = GameResult.None;
-
-        InitializeStarterDeck();
-    }
-
-    private void InitializeStarterDeck()
-    {
-        _cardPool.Clear();
-
-        CardRandomizerManager randomizer =
-            CardRandomizerManager.Instance;
-
-        _cardPool.AddRange(
-            randomizer.GetRandomCardsByTier(Tier.Common, 2)
-        );
-
-        _cardPool.AddRange(
-            randomizer.GetRandomCardsByTier(Tier.Uncommon, 1)
-        );
-
-        _cardPool.AddRange(
-            randomizer.GetRandomCardsByTier(Tier.Unique, 1)
-        );
     }
 }

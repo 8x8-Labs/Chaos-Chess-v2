@@ -92,7 +92,9 @@ public class UIButton : Button
             case ButtonType.OpenPopup:
                 enablePanel.EnablePanel(); break;
             case ButtonType.GameStart:
-                GamaCycleManager.Instance?.StartGame(); break;
+                GamaCycleManager.Instance?.StartGame();
+                changeCanvas();
+                break;
 
         }
     }
@@ -125,7 +127,7 @@ public enum ButtonType
     ClosePopup,     // 현재 팝업을 닫음
     GoScene,        // 다른 씬으로 이동
     Submit,         // 데이터 확인, 아이템 구매 등 서버/데이터 연동
-    GameStart,      // 씬 전환 (Scene Load)
+    GameStart,      // 게임 시작 준비 후 캔버스 전환
     GoMain,
     Quit            // 게임 종료
 }

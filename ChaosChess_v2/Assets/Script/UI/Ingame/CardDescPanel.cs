@@ -3,7 +3,6 @@ using System.Security;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class CardDescPanel : ButtonPanel
 {
@@ -24,8 +23,7 @@ public class CardDescPanel : ButtonPanel
     [SerializeField] private TMP_Text subDescContent;
 
     private CardAnim selectedCard;
-    [SerializeField] private List<AudioClip> sounds;
-    private SoundManager soundManager = SoundManager.Instance;
+
     public override void DisablePanel()
     {
         if(selectedCard != null)
@@ -44,11 +42,6 @@ public class CardDescPanel : ButtonPanel
         if( gameManager == null ) gameManager = GameManager.Instance;
         gameManager.IsGameInput = false;
     }
-    public void SoundPlay(int tier)
-    {
-        if (soundManager == null) soundManager = SoundManager.Instance;
-        soundManager.CardSFXPlay("wCardUse", sounds[tier]);
-    }
 
     public void SetCardData(CardAnim card)
     {
@@ -59,13 +52,13 @@ public class CardDescPanel : ButtonPanel
 
         executeButton.onClick.RemoveAllListeners();
         Action cardExecute = null;
-        Tier tier = data.DataSO.CardTier;
+
         CardType type = data.DataSO.Type;
         var pieceCard = data.GetComponent<IPieceCard>();
         var tileCard = data.GetComponent<ITileCard>();
         var cardInterface = data.GetComponent<ICard>();
 
-        switch (type) {
+        switch(type){
             case CardType.Piece:
                 cardExecute = () => pieceCard?.LoadPieceSelector();
                 break;
@@ -85,7 +78,6 @@ public class CardDescPanel : ButtonPanel
             {
                 DisablePanel();
                 cardExecute?.Invoke();
-                SoundPlay((int)tier);
             }
         );
     }

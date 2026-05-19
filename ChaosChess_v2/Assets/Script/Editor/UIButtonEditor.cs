@@ -74,6 +74,11 @@ public class UIButtonEditor : ButtonEditor
                 EditorGUILayout.PropertyField(disableObjectProp, new GUIContent("Canvas to Disable"));
                 EditorGUILayout.PropertyField(enableObjectProp, new GUIContent("Canvas to Enable"));
                 break;
+            case ButtonType.GameStart:
+                EditorGUILayout.HelpBox("게임 시작 데이터를 초기화한 뒤 현재 캔버스를 끄고 새로운 캔버스를 킵니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(disableObjectProp, new GUIContent("Canvas to Disable"));
+                EditorGUILayout.PropertyField(enableObjectProp, new GUIContent("Canvas to Enable"));
+                break;
             case ButtonType.ChangePanel:
                 EditorGUILayout.HelpBox("현재 버튼의 패널을 끄고 새로운 패널을 킵니다.", MessageType.Info);
                 EditorGUILayout.PropertyField(disablePanelProp, new GUIContent("Panel to Disable"));
