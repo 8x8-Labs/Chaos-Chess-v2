@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GamaCycleManager : MonoBehaviour
 {
@@ -22,7 +21,5 @@ public class GamaCycleManager : MonoBehaviour
     {
         PlayerState.Instance?.InitializeRun();
         MapManager.Instance?.Init();
-
-        SceneManager.LoadScene("MapScene");
     }
 }
