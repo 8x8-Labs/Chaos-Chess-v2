@@ -13566,6 +13566,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioMixer: {fileID: 24100000, guid: 9783473a218a7b74b837c6277fa570c7, type: 2}
   bgmSource: {fileID: 1786719295}
+  battleStageOneClip: {fileID: 8300000, guid: f327cfb7d8de23343bb761a4b5f77b6e, type: 3}
+  battleStageTwoClip: {fileID: 8300000, guid: 7f468940c865f2d459e94bd8241407c9, type: 3}
+  bossStageClip: {fileID: 8300000, guid: af1e69e14ffe23a4a9c773aa0dcc7c68, type: 3}
+  sceneBgmFadeDuration: 0.8
 --- !u!82 &1786719295
 AudioSource:
   m_ObjectHideFlags: 0

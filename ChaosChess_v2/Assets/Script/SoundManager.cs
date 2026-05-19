@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 
 
 public class SoundManager : MonoBehaviour
@@ -9,6 +10,10 @@ public class SoundManager : MonoBehaviour
 
     public AudioMixer audioMixer;
     [SerializeField] private AudioSource bgmSource;
+    [SerializeField] private AudioClip battleStageOneClip;
+    [SerializeField] private AudioClip battleStageTwoClip;
+    [SerializeField] private AudioClip bossStageClip;
+    [SerializeField] private float sceneBgmFadeDuration = 0.8f;
 
     public static SoundManager Instance => instance;
     private void Awake()
@@ -17,12 +22,56 @@ public class SoundManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
     }
+
+    private void OnDestroy()
+    {
+        if (instance == this)
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name != "MainGameScene")
+            return;
+
+        PlayStageBattleBGM();
+    }
+
+    private void PlayStageBattleBGM()
+    {
+        if (MapManager.Instance == null)
+            return;
+
+        AudioClip clip = GetBattleClip(MapManager.Instance.currentFloor);
+        if (clip == null || bgmSource == null)
+            return;
+
+        if (bgmSource.clip == clip && bgmSource.isPlaying)
+            return;
+
+        SwitchBGM(clip, sceneBgmFadeDuration);
+    }
+
+    private AudioClip GetBattleClip(int zeroBasedFloor)
+    {
+        switch (zeroBasedFloor % 3)
+        {
+            case 0:
+                return battleStageOneClip;
+            case 1:
+                return battleStageTwoClip;
+            default:
+                return bossStageClip;
+        }
+    }
+
     private void Start()
     {
         if (PlayerPrefs.HasKey("BGMSound"))
