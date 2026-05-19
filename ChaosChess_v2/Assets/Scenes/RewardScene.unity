@@ -1263,7 +1263,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
@@ -1409,7 +1409,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
@@ -2588,7 +2588,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
@@ -3023,7 +3023,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
