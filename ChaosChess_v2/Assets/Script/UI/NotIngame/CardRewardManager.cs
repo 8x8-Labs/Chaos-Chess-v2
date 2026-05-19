@@ -1,48 +1,34 @@
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 
 public class CardRewardManager : MonoBehaviour
 {
-    private int _rewardCardCount = 0;
-    private CardRandomizerManager cardRandomizerManager;
-
     [SerializeField] private UICardPanel uiCardPanel;
     [SerializeField] private TextMeshProUGUI cardRewardText;
 
-    void Awake()
-    {
-        cardRandomizerManager = CardRandomizerManager.Instance;
-    }
-
-    void Start()
+    private void Start()
     {
         if (PlayerState.Instance == null)
             return;
 
+        int rewardCardCount = ResolveRewardCardCount();
+        if (rewardCardCount <= 0 || uiCardPanel == null)
+            return;
+
+        uiCardPanel.SetRequestedCardCount(rewardCardCount);
+
+        if (cardRewardText != null)
+            cardRewardText.text = $"카드 {rewardCardCount}개 얻기";
+    }
+
+    private int ResolveRewardCardCount()
+    {
         if (PlayerState.Instance.CurGameResult == GameResult.WhiteWin)
-            _rewardCardCount = 3;
-        else if (PlayerState.Instance.CurGameResult == GameResult.Draw)
-            _rewardCardCount = 1;
+            return 3;
 
-        List<GameObject> ownedCards = PlayerState.Instance.CardPool.ToList<GameObject>();
-        List<GameObject> randomCards =
-            cardRandomizerManager.GetRandomCardsFromAll(
-                ownedCards,
-                _rewardCardCount
-            );
+        if (PlayerState.Instance.CurGameResult == GameResult.Draw)
+            return 1;
 
-        // 모든 카드를 다 가지고 있을 수 있음
-        _rewardCardCount = randomCards.Count;
-        uiCardPanel.cardCount = _rewardCardCount;
-
-        UICardAnim[] uiCards = uiCardPanel.GetUICards;
-        for (int i = 0; i < _rewardCardCount; i++)
-        {
-            uiCards[i].CardPreFab = randomCards[i];
-        }
-
-        cardRewardText.text = $"카드 {_rewardCardCount}개 얻기";
+        return 0;
     }
 }
