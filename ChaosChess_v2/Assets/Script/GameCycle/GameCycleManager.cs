@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GamaCycleManager : MonoBehaviour
+public class GameCycleManager : MonoBehaviour
 {
-    public static GamaCycleManager Instance;
+    public static GameCycleManager Instance;
 
     private void Awake()
     {
