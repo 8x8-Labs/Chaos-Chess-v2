@@ -20,6 +20,11 @@ public class CardRewardManager : MonoBehaviour
         List<GameObject> rewardCards =
             CardRandomizerManager.Instance.GetRandomCardsFromAll(ownedCards, rewardCardCount);
 
+        foreach (var card in rewardCards)
+        {
+            PlayerState.Instance?.AddCard(card);
+        }
+
         uiCardPanel.SetCards(rewardCards);
 
         if (cardRewardText != null)

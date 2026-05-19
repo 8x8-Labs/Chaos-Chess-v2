@@ -31,7 +31,7 @@ public class UIButton : Button
 
     protected override void Start()
     {
-        if (buttonType != ButtonType.ChangeCanvas && buttonType != ButtonType.GameStart)
+        if (buttonType != ButtonType.ChangeCanvas)
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
         }

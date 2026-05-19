@@ -41,7 +41,8 @@ public class UICardPanel : ButtonPanel
             uiCards[i].gameObject.SetActive(false);
         }
 
-        for (int i = 0; i < cardCount; i++)
+        int count = Mathf.Min(cardCount, uiCards.Length);
+        for (int i = 0; i < count; i++)
         {
             uiCards[i].CardPreFab = cards[i];
         }

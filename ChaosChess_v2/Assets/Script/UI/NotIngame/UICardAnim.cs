@@ -57,14 +57,15 @@ public class UICardAnim : MonoBehaviour
 
         if (cardPrefab != null)
         {
-            playerState?.AddCard(cardPrefab);
-            CardDataSO dataSO = cardPrefab.GetComponent<CardData>().DataSO;
-
-            if (cardNameText != null)
-                cardNameText.text = dataSO?.CardName ?? cardNameText.text;
-
-            if (cardImage != null)
-                cardImage.sprite = dataSO?.CardImage ?? cardImage.sprite;
+            CardData cardDataComp = cardPrefab.GetComponent<CardData>();
+            if (cardDataComp != null)
+            {
+                CardDataSO dataSO = cardDataComp.DataSO;
+                if (cardNameText != null)
+                    cardNameText.text = dataSO?.CardName ?? cardNameText.text;
+                if (cardImage != null)
+                    cardImage.sprite = dataSO?.CardImage ?? cardImage.sprite;
+            }
         }
     }
 }

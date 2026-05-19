@@ -16,7 +16,12 @@ public class StartDeckManager : MonoBehaviour
         starterCards.AddRange(randomizer.GetRandomCardsByTier(Tier.Common, commonCardCount));
         starterCards.AddRange(randomizer.GetRandomCardsByTier(Tier.Uncommon, uncommonCardCount));
         starterCards.AddRange(randomizer.GetRandomCardsByTier(Tier.Unique, uniqueCardCount));
-
+        
+        foreach (var card in starterCards)
+        {
+            PlayerState.Instance?.AddCard(card);
+        }
+        
         uiCardPanel.SetCards(starterCards);
     }
 }
