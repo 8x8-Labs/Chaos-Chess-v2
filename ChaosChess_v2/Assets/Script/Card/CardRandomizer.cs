@@ -11,30 +11,48 @@ public class CardRandomizer : MonoBehaviour
 
     private Dictionary<GameObject, GameObject> _activeCards = new();
 
-    /// <summary>지정된 풀에서 중복 없이 랜덤 카드를 하나 생성합니다.</summary>
-    public void GenerateCard(List<GameObject> pool)
+    private CardRandomizerManager cardRandomizerManager;
+
+    private void Awake()
     {
-        HashSet<GameObject> usedPrefabs = new HashSet<GameObject>(_activeCards.Values);
-
-        List<GameObject> available = pool.Except(usedPrefabs).ToList();
-
-        for (int i = available.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            (available[i], available[j]) = (available[j], available[i]);
-        }
-
-        if (available.Count == 0) return;
-        currentCardCnt++;
-        var instance = Instantiate(available[0], content);
-        _activeCards[instance] = available[0];
+        cardRandomizerManager = CardRandomizerManager.Instance;
     }
 
+    /// <summary>
+    /// 지정된 카드 풀에서 현재 활성 카드와
+    /// 중복되지 않는 랜덤 카드를 생성합니다.
+    /// </summary>
+    public void GenerateCard(List<GameObject> pool, int count = 1)
+    {
+        List<GameObject> usedCards =
+            _activeCards.Values.ToList();
 
+        List<GameObject> randomCards =
+            cardRandomizerManager.GetRandomCardsFromPool(
+                pool,
+                usedCards,
+                count
+            );
+
+        if (randomCards.Count == 0)
+            return;
+
+        foreach (GameObject cardPrefab in randomCards)
+        {
+            currentCardCnt++;
+
+            GameObject instance =
+                Instantiate(cardPrefab, content);
+
+            _activeCards[instance] = cardPrefab;
+        }
+    }
     public void RemoveCard(GameObject card)
     {
         card.GetComponent<CardAnim>().DestroyCard();
+
         currentCardCnt--;
+
         _activeCards.Remove(card);
     }
 }

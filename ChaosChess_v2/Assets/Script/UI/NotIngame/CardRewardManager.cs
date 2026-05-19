@@ -6,11 +6,15 @@ using UnityEngine;
 public class CardRewardManager : MonoBehaviour
 {
     private int _rewardCardCount = 0;
+    private CardRandomizerManager cardRandomizerManager;
 
     [SerializeField] private UICardPanel uiCardPanel;
-    [SerializeField] private UICardRandomizer uiCardRandomizer;
-
     [SerializeField] private TextMeshProUGUI cardRewardText;
+
+    void Awake()
+    {
+        cardRandomizerManager = CardRandomizerManager.Instance;
+    }
 
     void Start()
     {
@@ -23,7 +27,11 @@ public class CardRewardManager : MonoBehaviour
             _rewardCardCount = 1;
 
         List<GameObject> ownedCards = PlayerState.Instance.CardPool.ToList<GameObject>();
-        List<GameObject> randomCards = uiCardRandomizer.GetRandomCards(ownedCards, _rewardCardCount);
+        List<GameObject> randomCards =
+            cardRandomizerManager.GetRandomCardsFromAll(
+                ownedCards,
+                _rewardCardCount
+            );
 
         // 모든 카드를 다 가지고 있을 수 있음
         _rewardCardCount = randomCards.Count;

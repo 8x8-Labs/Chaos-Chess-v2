@@ -121,7 +121,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: e1a84ab5827257b42a802c0d89ba6464, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}

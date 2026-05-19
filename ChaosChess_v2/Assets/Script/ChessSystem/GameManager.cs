@@ -16,8 +16,7 @@ public class GameManager : MonoBehaviour
     public List<Sprite> BlackSprites = new List<Sprite>();
     public List<Sprite> WhiteSprites = new List<Sprite>();
 
-    [SerializeField]
-    private int curTurn = 1;
+    [SerializeField] private int curTurn = 1;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
 
     public bool IsGameInput = true;
@@ -39,6 +38,7 @@ public class GameManager : MonoBehaviour
     /// <summary>아버지의 원수 카드 전용 이벤트 입니다.</summary>
     public event Action<Piece> OnAwakenedPieceSelected;
 
+    private SoundManager soundManager;
     public PieceColor turnColor
     {
         get
@@ -75,20 +75,16 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
-
-            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
+        soundManager = FindFirstObjectByType<SoundManager>();
     }
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    private void Start()
     {
-        if (scene.name != "MainGameScene")
-            return;
         IsEndGame = false;
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
@@ -528,14 +524,14 @@ public class GameManager : MonoBehaviour
         }
 
         MapManager.Instance.OnCombatCleared();
+        
         EndGame();
     }
-
     private void EndGame()
     {
+
         IsEndGame = true;
 
-        ResetActions();
         UI.ShowEndGame(FinishType);
         PlayerState.Instance.EndGame(FinishType);
     }
