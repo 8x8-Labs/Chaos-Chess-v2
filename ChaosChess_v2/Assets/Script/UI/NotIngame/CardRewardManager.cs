@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -15,7 +16,11 @@ public class CardRewardManager : MonoBehaviour
         if (rewardCardCount <= 0 || uiCardPanel == null)
             return;
 
-        uiCardPanel.SetRequestedCardCount(rewardCardCount);
+        List<GameObject> ownedCards = new List<GameObject>(PlayerState.Instance.CardPool);
+        List<GameObject> rewardCards =
+            CardRandomizerManager.Instance.GetRandomCardsFromAll(ownedCards, rewardCardCount);
+
+        uiCardPanel.SetCards(rewardCards);
 
         if (cardRewardText != null)
             cardRewardText.text = $"카드 {rewardCardCount}개 얻기";

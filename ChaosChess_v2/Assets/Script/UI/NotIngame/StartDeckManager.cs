@@ -1,16 +1,22 @@
-using TMPro;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class StartDeckManager : MonoBehaviour
 {
     [SerializeField] private UICardPanel uiCardPanel;
-    [SerializeField] private int startCardCount = 4;
+    [SerializeField] private int commonCardCount = 2;
+    [SerializeField] private int uncommonCardCount = 1;
+    [SerializeField] private int uniqueCardCount = 1;
 
     private void Start()
     {
-        if (uiCardPanel == null)
-            return;
+        CardRandomizerManager randomizer = CardRandomizerManager.Instance;
 
-        uiCardPanel.SetRequestedCardCount(startCardCount);
+        List<GameObject> starterCards = new List<GameObject>();
+        starterCards.AddRange(randomizer.GetRandomCardsByTier(Tier.Common, commonCardCount));
+        starterCards.AddRange(randomizer.GetRandomCardsByTier(Tier.Uncommon, uncommonCardCount));
+        starterCards.AddRange(randomizer.GetRandomCardsByTier(Tier.Unique, uniqueCardCount));
+
+        uiCardPanel.SetCards(starterCards);
     }
 }

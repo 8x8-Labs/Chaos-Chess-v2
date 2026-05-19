@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
@@ -11,13 +10,13 @@ public class UICardPanel : ButtonPanel
     [SerializeField] private float cardInterval = 0.2f;
     [SerializeField] private float panelCloseDelay = 0.5f;
 
-    private CardRandomizerManager cardRandomizerManager = CardRandomizerManager.Instance;
+    private readonly List<GameObject> cards = new List<GameObject>();
     private Sequence cardSequence;
-    private int requestedCardCount;
 
-    public void SetRequestedCardCount(int count)
+    public void SetCards(List<GameObject> newCards)
     {
-        requestedCardCount = count;
+        cards.Clear();
+        cards.AddRange(newCards);
     }
 
     public override void EnablePanel()
@@ -32,22 +31,10 @@ public class UICardPanel : ButtonPanel
         base.DisablePanel();
     }
 
-    public UICardAnim[] GetUICards => anims;
-
     private void PrepareCards()
     {
-        if (PlayerState.Instance == null || cardRandomizerManager == null)
-            return;
-
-        List<GameObject> ownedCards = PlayerState.Instance.CardPool.ToList();
-        List<GameObject> randomCards =
-            cardRandomizerManager.GetRandomCardsFromAll(
-                ownedCards,
-                requestedCardCount
-            );
-
-        cardCount = randomCards.Count;
-        UICardAnim[] uiCards = GetUICards;
+        cardCount = cards.Count;
+        UICardAnim[] uiCards = anims;
 
         for (int i = 0; i < uiCards.Length; i++)
         {
@@ -56,7 +43,7 @@ public class UICardPanel : ButtonPanel
 
         for (int i = 0; i < cardCount; i++)
         {
-            uiCards[i].CardPreFab = randomCards[i];
+            uiCards[i].CardPreFab = cards[i];
         }
     }
 
@@ -76,7 +63,10 @@ public class UICardPanel : ButtonPanel
             cardSequence.AppendInterval(cardInterval);
         }
 
-        cardSequence.AppendInterval(panelCloseDelay);
-        cardSequence.AppendCallback(DisablePanel);
+        if (panelCloseDelay >= 0f)
+        {
+            cardSequence.AppendInterval(panelCloseDelay);
+            cardSequence.AppendCallback(DisablePanel);
+        }
     }
 }

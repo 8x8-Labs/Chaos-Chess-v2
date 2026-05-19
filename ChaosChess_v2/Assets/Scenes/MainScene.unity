@@ -326,7 +326,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uD63C\uB3C8\uC758 \uCCB4\uC2A4\uC5D0 \uC624\uC2E0 \uAC83\uC744 \uD658\uC601\uD569\uB2C8\uB2E4!"
+  m_text: "\uCD08\uAE30 \uCE74\uB4DC\uB97C \uC9C0\uAE09\uBC1B\uC73C\uC138\uC694!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
   m_sharedMaterial: {fileID: -1657904361312498901, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
@@ -3542,7 +3542,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -1663494.2}
+  m_AnchoredPosition: {x: 0, y: -1805533.9}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &347282249
@@ -5321,7 +5321,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2126212525}
         m_TargetAssemblyTypeName: UICardPanel, Assembly-CSharp
-        m_MethodName: OpenFromCanvas
+        m_MethodName: EnablePanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5336,7 +5336,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 2126212525}
         m_TargetAssemblyTypeName: UICardPanel, Assembly-CSharp
-        m_MethodName: CloseFromCanvas
+        m_MethodName: DisablePanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -5355,10 +5355,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 579454188}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a34f223af3f07945bbe23d472e0877a, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b8208f4f4f446bdb61593d2b5f6f1ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   uiCardPanel: {fileID: 2126212525}
+  commonCardCount: 2
+  uncommonCardCount: 1
+  uniqueCardCount: 1
 --- !u!1 &582889332
 GameObject:
   m_ObjectHideFlags: 0
@@ -8937,7 +8940,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00016812516, y: -1722728}
+  m_AnchoredPosition: {x: -0.00016812516, y: -1864767.6}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1053581299
@@ -16359,7 +16362,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC624\uB298\uC758 \uD301"
+  m_text: "\uC2DC\uC791 \uBCF4\uC0C1"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
   m_sharedMaterial: {fileID: -1657904361312498901, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
@@ -19171,7 +19174,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2126212521}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -36480}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -19184,7 +19187,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1658.6, y: 2654.4}
+  m_SizeDelta: {x: 1920, y: 2654.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2126212523
 MonoBehaviour:
@@ -19204,7 +19207,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: -300
+  m_Spacing: -250
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
@@ -19247,7 +19250,7 @@ MonoBehaviour:
   - {fileID: 1328922998}
   cardCount: 4
   cardInterval: 0.5
-  panelCloseDelay: 0.5
+  panelCloseDelay: -1
 --- !u!225 &2126212526
 CanvasGroup:
   m_ObjectHideFlags: 0
