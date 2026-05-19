@@ -47,7 +47,7 @@ public class CardDescPanel : ButtonPanel
     public void SoundPlay(int tier)
     {
         if (soundManager == null) soundManager = SoundManager.Instance;
-        soundManager.SFXPlay("wCardUse", sounds[tier]);
+        soundManager.CardSFXPlay("wCardUse", sounds[tier]);
     }
 
     public void SetCardData(CardAnim card)

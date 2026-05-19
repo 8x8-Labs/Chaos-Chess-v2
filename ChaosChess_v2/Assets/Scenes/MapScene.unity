@@ -1056,6 +1056,10 @@ MonoBehaviour:
   battleStageTwoClip: {fileID: 8300000, guid: 7f468940c865f2d459e94bd8241407c9, type: 3}
   bossStageClip: {fileID: 8300000, guid: af1e69e14ffe23a4a9c773aa0dcc7c68, type: 3}
   sceneBgmFadeDuration: 0.8
+  cardSfxVolume: 1.15
+  cardSfxBgmDuckVolume: 0.45
+  cardSfxBgmDuckFadeDuration: 0.08
+  cardSfxBgmDuckExtraDuration: 0.05
 --- !u!4 &1969752855
 Transform:
   m_ObjectHideFlags: 0

@@ -14,6 +14,14 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip battleStageTwoClip;
     [SerializeField] private AudioClip bossStageClip;
     [SerializeField] private float sceneBgmFadeDuration = 0.8f;
+    [SerializeField] private float cardSfxVolume = 1.15f;
+    [SerializeField] private float cardSfxBgmDuckVolume = 0.45f;
+    [SerializeField] private float cardSfxBgmDuckFadeDuration = 0.08f;
+    [SerializeField] private float cardSfxBgmDuckExtraDuration = 0.05f;
+
+    private Coroutine bgmDuckCoroutine;
+    private float bgmVolumeBeforeDuck = 1f;
+    private bool isBgmDucking;
 
     public static SoundManager Instance => instance;
     private void Awake()
@@ -205,15 +213,76 @@ public class SoundManager : MonoBehaviour
 
     // ── SFX 재생 ──────────────────────────────────────────
 
-    public void SFXPlay(string sfxName, AudioClip clip)
+    public void SFXPlay(string sfxName, AudioClip clip, float volume = 1f)
     {
+        if (clip == null)
+            return;
+
         GameObject go = new GameObject(sfxName + "Sound");
         AudioSource source = go.AddComponent<AudioSource>();
         source.outputAudioMixerGroup = audioMixer.FindMatchingGroups("SFX")[0];
         source.clip = clip;
+        source.volume = volume;
         source.Play();
 
         StartCoroutine(DestroyAfterRealtime(go, clip.length));
+    }
+
+    public void CardSFXPlay(string sfxName, AudioClip clip)
+    {
+        if (clip == null)
+            return;
+
+        SFXPlay(sfxName, clip, cardSfxVolume);
+        DuckBGM(clip.length + cardSfxBgmDuckExtraDuration);
+    }
+
+    private void DuckBGM(float duration)
+    {
+        if (bgmSource == null)
+            return;
+
+        if (!isBgmDucking)
+            bgmVolumeBeforeDuck = bgmSource.volume;
+
+        if (bgmDuckCoroutine != null)
+            StopCoroutine(bgmDuckCoroutine);
+
+        bgmDuckCoroutine = StartCoroutine(DuckBGMCoroutine(duration));
+    }
+
+    private IEnumerator DuckBGMCoroutine(float duration)
+    {
+        isBgmDucking = true;
+
+        float duckedVolume = bgmVolumeBeforeDuck * cardSfxBgmDuckVolume;
+        yield return FadeVolumeCoroutine(bgmSource, bgmSource.volume, duckedVolume, cardSfxBgmDuckFadeDuration);
+
+        yield return new WaitForSecondsRealtime(duration);
+
+        yield return FadeVolumeCoroutine(bgmSource, bgmSource.volume, bgmVolumeBeforeDuck, cardSfxBgmDuckFadeDuration);
+
+        isBgmDucking = false;
+        bgmDuckCoroutine = null;
+    }
+
+    private IEnumerator FadeVolumeCoroutine(AudioSource source, float startVolume, float targetVolume, float duration)
+    {
+        if (duration <= 0f)
+        {
+            source.volume = targetVolume;
+            yield break;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            source.volume = Mathf.Lerp(startVolume, targetVolume, elapsed / duration);
+            yield return null;
+        }
+
+        source.volume = targetVolume;
     }
 
     // ── 볼륨 설정 / 조회 ──────────────────────────────────
