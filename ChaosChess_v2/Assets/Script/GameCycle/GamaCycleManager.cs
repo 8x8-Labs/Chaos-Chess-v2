@@ -1,9 +1,17 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+public enum GameMode
+{
+    Run,
+    Practice
+}
+
 public class GamaCycleManager : MonoBehaviour
 {
     public static GamaCycleManager Instance;
+    public GameMode CurrentMode { get; private set; } = GameMode.Run;
+    public bool IsPracticeMode => CurrentMode == GameMode.Practice;
 
     private void Awake()
     {
@@ -20,15 +28,22 @@ public class GamaCycleManager : MonoBehaviour
 
     public void StartGame()
     {
+        CurrentMode = GameMode.Run;
         PlayerState.Instance?.InitializeRun();
         MapManager.Instance?.Init();
     }
 
     public void StartPractice(PracticeDifficulty difficulty)
     {
+        CurrentMode = GameMode.Practice;
         PlayerState.Instance.InitializeRun();
         GiveAllCards();
         MapManager.Instance.StartPractice(difficulty);
+    }
+
+    public string GetEndGameSceneName()
+    {
+        return IsPracticeMode ? "MainScene" : "RewardScene";
     }
 
     private void GiveAllCards()

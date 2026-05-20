@@ -30,6 +30,8 @@ public class UIButton : Button
 
     [SerializeField] private string nextSceneName;
     [SerializeField] private string practiceSceneName = "MainGameScene";
+    [SerializeField] private string rewardSceneName = "RewardScene";
+    [SerializeField] private string mainSceneName = "MainScene";
 
     protected override void Start()
     {
@@ -89,6 +91,9 @@ public class UIButton : Button
             case ButtonType.GoScene:
                 SceneManager.LoadScene(nextSceneName);
                 break;
+            case ButtonType.EndGame:
+                LoadEndGameScene();
+                break;
             case ButtonType.ClosePopup:
                 disablePanel.DisablePanel(); break;
             case ButtonType.OpenPopup:
@@ -108,6 +113,11 @@ public class UIButton : Button
     {
         GamaCycleManager.Instance.StartPractice(practiceDifficulty);
         SceneManager.LoadScene(practiceSceneName);
+    }
+
+    private void LoadEndGameScene()
+    {
+        SceneManager.LoadScene(GamaCycleManager.Instance.IsPracticeMode ? mainSceneName : rewardSceneName);
     }
 
     private void changeCanvas() => StartCoroutine(changeCanvasCoroutine());
@@ -140,6 +150,7 @@ public enum ButtonType
     Submit,         // 데이터 확인, 아이템 구매 등 서버/데이터 연동
     GameStart,      // 게임 시작 준비 후 캔버스 전환
     PracticeStart,  // 연습 모드 시작
+    EndGame,        // 게임 종료 후 흐름 이동
     GoMain,
     Quit            // 게임 종료
 }

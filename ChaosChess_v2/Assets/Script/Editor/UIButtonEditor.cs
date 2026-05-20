@@ -20,6 +20,8 @@ public class UIButtonEditor : ButtonEditor
     SerializedProperty nextSceneNameProp;
     SerializedProperty practiceDifficultyProp;
     SerializedProperty practiceSceneNameProp;
+    SerializedProperty rewardSceneNameProp;
+    SerializedProperty mainSceneNameProp;
 
     //[SerializeField] private bool isStartAnimation = false;
     //[SerializeField] private bool isEndAnimation = false;
@@ -41,6 +43,8 @@ public class UIButtonEditor : ButtonEditor
         nextSceneNameProp = serializedObject.FindProperty("nextSceneName");
         practiceDifficultyProp = serializedObject.FindProperty("practiceDifficulty");
         practiceSceneNameProp = serializedObject.FindProperty("practiceSceneName");
+        rewardSceneNameProp = serializedObject.FindProperty("rewardSceneName");
+        mainSceneNameProp = serializedObject.FindProperty("mainSceneName");
     }
 
     public override void OnInspectorGUI()
@@ -106,6 +110,11 @@ public class UIButtonEditor : ButtonEditor
             case ButtonType.PracticeStart:
                 EditorGUILayout.PropertyField(practiceDifficultyProp, new GUIContent("Practice Difficulty"));
                 EditorGUILayout.PropertyField(practiceSceneNameProp, new GUIContent("Practice Scene Name"));
+                break;
+            case ButtonType.EndGame:
+                EditorGUILayout.HelpBox("현재 모드가 연습이면 MainScene, 아니면 RewardScene으로 이동합니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(rewardSceneNameProp, new GUIContent("Reward Scene Name"));
+                EditorGUILayout.PropertyField(mainSceneNameProp, new GUIContent("Main Scene Name"));
                 break;
 
             case ButtonType.Submit:
