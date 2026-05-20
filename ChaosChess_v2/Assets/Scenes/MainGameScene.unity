@@ -1553,11 +1553,15 @@ MonoBehaviour:
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 5
+  buttonType: 9
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: RewardScene
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!114 &284765918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2251,10 +2255,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 6
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!114 &475878341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5996,10 +6004,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 6
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &1036672674
 GameObject:
   m_ObjectHideFlags: 0
@@ -6555,10 +6567,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 0
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &1175012889
 GameObject:
   m_ObjectHideFlags: 0
@@ -6699,10 +6715,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 0
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &1190515892
 GameObject:
   m_ObjectHideFlags: 0
@@ -8816,10 +8836,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 0
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &1528017333
 GameObject:
   m_ObjectHideFlags: 0
@@ -9402,10 +9426,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 6
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!114 &1567853228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10523,10 +10551,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 0
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &1776266815
 GameObject:
   m_ObjectHideFlags: 0
@@ -10667,10 +10699,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 0
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &1784817159
 GameObject:
   m_ObjectHideFlags: 0
@@ -11362,10 +11398,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 0
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!114 &1869951118
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11544,10 +11584,14 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 0
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &1920602517
 GameObject:
   m_ObjectHideFlags: 0
@@ -11840,10 +11884,14 @@ MonoBehaviour:
   disablePanel: {fileID: 1399380572}
   enablePanel: {fileID: 0}
   buttonType: 4
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  mainSceneName: MainScene
 --- !u!1 &2004262543
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,6 +7,7 @@ public class CardRandomizerManager : MonoBehaviour
     public static CardRandomizerManager Instance;
 
     [SerializeField] private List<GameObject> allCards;
+    public IReadOnlyList<GameObject> AllCards => allCards;
 
     private void Awake()
     {
