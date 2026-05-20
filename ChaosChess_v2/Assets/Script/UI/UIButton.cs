@@ -19,6 +19,7 @@ public class UIButton : Button
     [SerializeField] private ButtonPanel enablePanel;           // 활성화 할(보이게 할 캔버스) 오브젝트
 
     [SerializeField] private ButtonType buttonType;
+    [SerializeField] private PracticeDifficulty practiceDifficulty = PracticeDifficulty.Normal;
 
     private IUIAnimation uIAnimation;
     private SoundManager soundManager;
@@ -28,6 +29,7 @@ public class UIButton : Button
     [SerializeField] private bool isEndAnimation = false;
 
     [SerializeField] private string nextSceneName;
+    [SerializeField] private string practiceSceneName = "MainGameScene";
 
     protected override void Start()
     {
@@ -95,8 +97,17 @@ public class UIButton : Button
                 GamaCycleManager.Instance?.StartGame();
                 changeCanvas();
                 break;
+            case ButtonType.PracticeStart:
+                StartPracticeMode();
+                break;
 
         }
+    }
+
+    private void StartPracticeMode()
+    {
+        GamaCycleManager.Instance.StartPractice(practiceDifficulty);
+        SceneManager.LoadScene(practiceSceneName);
     }
 
     private void changeCanvas() => StartCoroutine(changeCanvasCoroutine());
@@ -128,6 +139,7 @@ public enum ButtonType
     GoScene,        // 다른 씬으로 이동
     Submit,         // 데이터 확인, 아이템 구매 등 서버/데이터 연동
     GameStart,      // 게임 시작 준비 후 캔버스 전환
+    PracticeStart,  // 연습 모드 시작
     GoMain,
     Quit            // 게임 종료
 }

@@ -588,10 +588,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 1
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!114 &66704781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1674,7 +1676,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 181743022}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa677fe4b4e77e41aaed25b343ed467, type: 3}
   m_Name: 
@@ -1713,15 +1715,17 @@ MonoBehaviour:
       m_Calls: []
   clickSound: {fileID: 0}
   hoverSound: {fileID: 0}
-  disableCanvas: {fileID: 1843443124}
+  disableCanvas: {fileID: 1953392893}
   enableCanvas: {fileID: 1953392893}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 5
+  buttonType: 8
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 181743027}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: LoadingScene
+  practiceSceneName: MainGameScene
 --- !u!114 &181743027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3542,7 +3546,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -1823709.5}
+  m_AnchoredPosition: {x: 0, y: -1904750.1}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &347282249
@@ -4847,10 +4851,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 1
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 540341616}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!114 &540341616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6041,10 +6047,83 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 1265722157}
   buttonType: 3
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+--- !u!1 &632452314
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 632452316}
+  - component: {fileID: 632452315}
+  m_Layer: 0
+  m_Name: MapManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &632452315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632452314}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e38f164062bdc146aa5fa7648e9f5e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  totalFloors: 6
+  currentFloor: 0
+  maps: []
+  DefaultFEN: 'k7/aaaaaaaR/8/8/8/8/8/7K w - - 0 1 '
+  Boss1FEN:
+  - rnbqkbnr/pppppppp/2pppp2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/pppnnppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/bppppppb/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/bppppppb/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbskbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  Boss2FEN:
+  - ynbqkbny/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rnbqkbnr/ppbnnbpp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - 8/8/pppppppp/rnbqkbnr/pppppppp/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - pppqkppp/pppppppp/pppppppp/pppppppp/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  - rzzqkzzr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  easyPracticeELO: 1000
+  normalPracticeELO: 1500
+  hardPracticeELO: 1800
+  easyPracticeFEN: 1nb1kbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  normalPracticeFEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  hardPracticeFEN: rnbqkbnr/pppppppp/2pppp2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  curMap:
+    ELO: 0
+    FEN: 
+    isCleared: 0
+    floor: 0
+--- !u!4 &632452316
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632452314}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 738.545, y: 1217.2856, z: -21.134129}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &638385090
 GameObject:
   m_ObjectHideFlags: 0
@@ -7342,7 +7421,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 782923670}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa677fe4b4e77e41aaed25b343ed467, type: 3}
   m_Name: 
@@ -7381,15 +7460,17 @@ MonoBehaviour:
       m_Calls: []
   clickSound: {fileID: 0}
   hoverSound: {fileID: 0}
-  disableCanvas: {fileID: 1843443124}
+  disableCanvas: {fileID: 1953392893}
   enableCanvas: {fileID: 1953392893}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 5
+  buttonType: 8
+  practiceDifficulty: 0
   uIAnimationObject: {fileID: 782923674}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: LoadingScene
+  practiceSceneName: MainGameScene
 --- !u!114 &782923674
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8952,7 +9033,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00016812516, y: -1882943.2}
+  m_AnchoredPosition: {x: -0.00016812516, y: -1963983.9}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1053581299
@@ -9770,10 +9851,12 @@ MonoBehaviour:
   disablePanel: {fileID: 1265722157}
   enablePanel: {fileID: 0}
   buttonType: 4
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!1 &1151004693
 GameObject:
   m_ObjectHideFlags: 0
@@ -11041,10 +11124,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 8
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!114 &1331069061
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12318,10 +12403,12 @@ MonoBehaviour:
   disablePanel: {fileID: 1265722157}
   enablePanel: {fileID: 0}
   buttonType: 4
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!1 &1523476366
 GameObject:
   m_ObjectHideFlags: 0
@@ -13726,10 +13813,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 1
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!114 &1667086784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14223,10 +14312,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 5
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: MapScene
+  practiceSceneName: MainGameScene
 --- !u!114 &1708510081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14403,10 +14494,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 7
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 1716661662}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: MainGameScene
+  practiceSceneName: MainGameScene
 --- !u!114 &1716661665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17222,6 +17315,7 @@ GameObject:
   - component: {fileID: 1953392895}
   - component: {fileID: 1953392894}
   - component: {fileID: 1953392893}
+  - component: {fileID: 1953392899}
   m_Layer: 5
   m_Name: ModeCanvas
   m_TagString: Untagged
@@ -17349,6 +17443,19 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1953392899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953392892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e11f6a6524b146bca6e95953db5653de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  practiceSceneName: MainGameScene
 --- !u!1 &1957980552
 GameObject:
   m_ObjectHideFlags: 0
@@ -17441,7 +17548,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1957980552}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9aa677fe4b4e77e41aaed25b343ed467, type: 3}
   m_Name: 
@@ -17480,15 +17587,17 @@ MonoBehaviour:
       m_Calls: []
   clickSound: {fileID: 0}
   hoverSound: {fileID: 0}
-  disableCanvas: {fileID: 1843443124}
+  disableCanvas: {fileID: 1953392893}
   enableCanvas: {fileID: 1953392893}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 5
+  buttonType: 8
+  practiceDifficulty: 2
   uIAnimationObject: {fileID: 1957980557}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: LoadingScene
+  practiceSceneName: MainGameScene
 --- !u!114 &1957980557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17677,10 +17786,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 1
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!1 &1988365156
 GameObject:
   m_ObjectHideFlags: 0
@@ -18551,10 +18662,12 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 1
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 2044119915}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
 --- !u!114 &2044119915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19517,4 +19630,5 @@ SceneRoots:
   - {fileID: 618384895}
   - {fileID: 1786719293}
   - {fileID: 962982684}
+  - {fileID: 632452316}
   - {fileID: 1994363648}

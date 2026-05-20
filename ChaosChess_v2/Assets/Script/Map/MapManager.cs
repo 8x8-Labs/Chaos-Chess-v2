@@ -1,6 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
+
+public enum PracticeDifficulty
+{
+    Easy,
+    Normal,
+    Hard
+}
 
 public class MapManager : MonoBehaviour
 {
@@ -13,6 +19,14 @@ public class MapManager : MonoBehaviour
     public string DefaultFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     public List<string> Boss1FEN = new();
     public List<string> Boss2FEN = new();
+
+    [Header("Practice")]
+    [SerializeField] private int easyPracticeELO = 900;
+    [SerializeField] private int normalPracticeELO = 1200;
+    [SerializeField] private int hardPracticeELO = 1500;
+    [SerializeField] private string easyPracticeFEN;
+    [SerializeField] private string normalPracticeFEN;
+    [SerializeField] private string hardPracticeFEN;
 
     public Map curMap;
 
@@ -55,6 +69,66 @@ public class MapManager : MonoBehaviour
             maps.Add(map);
         }
         curMap = maps[currentFloor];
+    }
+
+    public void StartRun() => Init();
+
+    public void StartPractice(PracticeDifficulty difficulty)
+    {
+        maps.Clear();
+        currentFloor = 0;
+        Map practiceMap = CreatePracticeMap(difficulty);
+
+        maps.Add(practiceMap);
+        curMap = practiceMap;
+    }
+
+    private Map CreatePracticeMap(PracticeDifficulty difficulty)
+    {
+        Map practiceMap = new Map
+        {
+            floor = 0,
+            isCleared = false
+        };
+
+        ApplyPracticeSetting(difficulty, practiceMap);
+        return practiceMap;
+    }
+
+    private int GetPracticeElo(PracticeDifficulty difficulty)
+    {
+        switch (difficulty)
+        {
+            case PracticeDifficulty.Easy:
+                return easyPracticeELO;
+            case PracticeDifficulty.Normal:
+                return normalPracticeELO;
+            case PracticeDifficulty.Hard:
+                return hardPracticeELO;
+            default:
+                return normalPracticeELO;
+        }
+    }
+
+    private string GetPracticeFen(PracticeDifficulty difficulty)
+    {
+        switch (difficulty)
+        {
+            case PracticeDifficulty.Easy:
+                return string.IsNullOrWhiteSpace(easyPracticeFEN) ? DefaultFEN : easyPracticeFEN;
+            case PracticeDifficulty.Normal:
+                return string.IsNullOrWhiteSpace(normalPracticeFEN) ? DefaultFEN : normalPracticeFEN;
+            case PracticeDifficulty.Hard:
+                return string.IsNullOrWhiteSpace(hardPracticeFEN) ? DefaultFEN : hardPracticeFEN;
+            default:
+                return DefaultFEN;
+        }
+    }
+
+    private void ApplyPracticeSetting(PracticeDifficulty difficulty, Map map)
+    {
+        map.ELO = GetPracticeElo(difficulty);
+        map.FEN = GetPracticeFen(difficulty);
     }
 
     public void OnCombatCleared()
