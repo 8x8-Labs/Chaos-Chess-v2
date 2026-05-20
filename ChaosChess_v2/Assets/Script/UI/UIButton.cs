@@ -99,7 +99,7 @@ public class UIButton : Button
             case ButtonType.OpenPopup:
                 enablePanel.EnablePanel(); break;
             case ButtonType.GameStart:
-                GamaCycleManager.Instance?.StartGame();
+                GameCycleManager.Instance?.StartGame();
                 changeCanvas();
                 break;
             case ButtonType.PracticeStart:
@@ -111,13 +111,13 @@ public class UIButton : Button
 
     private void StartPracticeMode()
     {
-        GamaCycleManager.Instance.StartPractice(practiceDifficulty);
+        GameCycleManager.Instance.StartPractice(practiceDifficulty);
         SceneManager.LoadScene(practiceSceneName);
     }
 
     private void LoadEndGameScene()
     {
-        SceneManager.LoadScene(GamaCycleManager.Instance.IsPracticeMode ? mainSceneName : rewardSceneName);
+        SceneManager.LoadScene(GameCycleManager.Instance.IsPracticeMode ? mainSceneName : rewardSceneName);
     }
 
     private void changeCanvas() => StartCoroutine(changeCanvasCoroutine());

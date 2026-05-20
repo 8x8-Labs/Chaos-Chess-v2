@@ -521,7 +521,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
-        if (!GamaCycleManager.Instance.IsPracticeMode)
+        if (!GameCycleManager.Instance.IsPracticeMode)
             MapManager.Instance.OnCombatCleared();
         EndGame();
     }
@@ -531,7 +531,7 @@ public class GameManager : MonoBehaviour
         IsEndGame = true;
 
         UI.ShowEndGame(FinishType);
-        if (!GamaCycleManager.Instance.IsPracticeMode)
+        if (!GameCycleManager.Instance.IsPracticeMode)
             PlayerState.Instance.EndGame(FinishType);
     }
 

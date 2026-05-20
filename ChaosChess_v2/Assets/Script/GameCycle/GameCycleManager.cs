@@ -7,9 +7,9 @@ public enum GameMode
     Practice
 }
 
-public class GamaCycleManager : MonoBehaviour
+public class GameCycleManager : MonoBehaviour
 {
-    public static GamaCycleManager Instance;
+    public static GameCycleManager Instance;
     public GameMode CurrentMode { get; private set; } = GameMode.Run;
     public bool IsPracticeMode => CurrentMode == GameMode.Practice;
 
