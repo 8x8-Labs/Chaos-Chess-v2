@@ -493,6 +493,7 @@ public class BoardManager : MonoBehaviour
             eff.OnPieceCaptured();
         }
         Pieces.Remove(piece);
+        Piece.InvokeOnPieceDestroyed(piece);
         Destroy(piece.gameObject);
 
         if (refresh) RefreshMoves();

@@ -30,6 +30,7 @@ public class StagFightEffector : GlobalEffector
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
         List<Piece> pieces = BoardManager.Instance.GetAllPieces();
         foreach (Piece piece in pieces)
         {
@@ -48,6 +49,7 @@ public class StagFightEffector : GlobalEffector
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
         foreach (Piece piece in changed)
         {
             string p = piece.MoveFenOverride?.ToLower();
@@ -56,5 +58,13 @@ public class StagFightEffector : GlobalEffector
         }
         BoardManager.Instance.RefreshMoves();
         Destroy(gameObject);
+    }
+
+    private void HandlePieceDestroyed(Piece piece) => changed.Remove(piece);
+
+    // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
+    private void OnDestroy()
+    {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
     }
 }
