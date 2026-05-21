@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,11 +6,16 @@ using UnityEngine.UI;
 public class CardDescPanel : ButtonPanel
 {
     private GameManager gameManager = GameManager.Instance;
+    private bool tierUIBindingAttempted;
 
     [Header("UI Elements")]
     [SerializeField] private Image cardImage;
     [SerializeField] private TMP_Text cardTitle;
     [SerializeField] private TMP_Text cardDesc;
+    [Header("Tier UI")]
+    [SerializeField] private TMP_Text tierText;
+    [SerializeField] private Image[] tierColorTargets;
+    [SerializeField] private TierStyleSetSO tierStyleSet;
     [SerializeField] private Button executeButton;
     [SerializeField] private GameObject subDesc;
     [SerializeField] private TMP_Text subDescTitle;
@@ -23,6 +27,11 @@ public class CardDescPanel : ButtonPanel
     [SerializeField] private TMP_Text subDescContent;
 
     private CardAnim selectedCard;
+
+    private void Awake()
+    {
+        TryAutoBindTierUI();
+    }
 
     public override void DisablePanel()
     {
@@ -84,9 +93,15 @@ public class CardDescPanel : ButtonPanel
 
     private void UpdateUI(CardDataSO data)
     {
+        if (!tierUIBindingAttempted)
+        {
+            TryAutoBindTierUI();
+        }
+
         cardImage.sprite = data.CardImage;
         cardTitle.text = data.CardName;
         cardDesc.text = data.CardDescription;
+        ApplyTierStyle(data.CardTier);
 
         if (data.NeedAdditionalDescription)
         {
@@ -118,6 +133,99 @@ public class CardDescPanel : ButtonPanel
         else
         {
             subDesc.SetActive(false);
+        }
+    }
+
+    private void TryAutoBindTierUI()
+    {
+        if (tierUIBindingAttempted)
+        {
+            return;
+        }
+
+        tierUIBindingAttempted = true;
+
+        Transform mainSlot = transform.Find("MainSlot");
+        if (mainSlot == null)
+        {
+            return;
+        }
+
+        Transform tierRoot = mainSlot.Find("Tier");
+        Transform lineRoot = mainSlot.Find("Line");
+
+        if (tierText == null && tierRoot != null)
+        {
+            tierText = tierRoot.GetComponentInChildren<TMP_Text>(true);
+        }
+
+        TrySetDefaultColorTargets(tierRoot, lineRoot);
+    }
+
+    private void ApplyTierStyle(Tier tier)
+    {
+        TierStyleData style = tierStyleSet != null ? tierStyleSet.GetStyle(tier) : null;
+        Color targetColor = style != null ? style.color : Color.white;
+
+        ApplyColorToTargets(targetColor);
+
+        if (tierText != null)
+        {
+            tierText.text = style != null ? style.label : "미확인 등급";
+        }
+    }
+
+    private void TrySetDefaultColorTargets(Transform tierRoot, Transform lineRoot)
+    {
+        if (tierColorTargets != null && tierColorTargets.Length > 0)
+        {
+            return;
+        }
+
+        int targetCount = 0;
+        if (tierRoot != null && tierRoot.GetComponent<Image>() != null) targetCount++;
+        if (lineRoot != null && lineRoot.GetComponent<Image>() != null) targetCount++;
+
+        if (targetCount == 0)
+        {
+            return;
+        }
+
+        tierColorTargets = new Image[targetCount];
+        int index = 0;
+
+        if (tierRoot != null)
+        {
+            Image tierImage = tierRoot.GetComponent<Image>();
+            if (tierImage != null)
+            {
+                tierColorTargets[index++] = tierImage;
+            }
+        }
+
+        if (lineRoot != null)
+        {
+            Image line = lineRoot.GetComponent<Image>();
+            if (line != null)
+            {
+                tierColorTargets[index] = line;
+            }
+        }
+    }
+
+    private void ApplyColorToTargets(Color color)
+    {
+        if (tierColorTargets == null)
+        {
+            return;
+        }
+
+        foreach (Image target in tierColorTargets)
+        {
+            if (target != null)
+            {
+                target.color = color;
+            }
         }
     }
 }

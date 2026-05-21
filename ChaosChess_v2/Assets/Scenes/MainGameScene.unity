@@ -8339,6 +8339,11 @@ MonoBehaviour:
   cardImage: {fileID: 1833474856}
   cardTitle: {fileID: 1007872087}
   cardDesc: {fileID: 2106219710}
+  tierText: {fileID: 1624611055}
+  tierColorTargets:
+  - {fileID: 544727301}
+  - {fileID: 1335240342}
+  tierStyleSet: {fileID: 11400000, guid: 1e2e5d548e174d2fa87925015ba2e9a8, type: 2}
   executeButton: {fileID: 1036619226}
   subDesc: {fileID: 1686426949}
   subDescTitle: {fileID: 160654731}

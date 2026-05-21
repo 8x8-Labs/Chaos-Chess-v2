@@ -12,7 +12,6 @@ public class UICardAnim : MonoBehaviour
 
     [SerializeField] private float fadeDuration = 0.1f;
 
-    private Ease disappearEase = Ease.InOutQuad;
     private Image cardSprite;
     private CanvasGroup canvasGroup;
     private RectTransform rt;
@@ -24,16 +23,9 @@ public class UICardAnim : MonoBehaviour
     [SerializeField] private TextMeshProUGUI cardNameText;
     [SerializeField] private Image cardImage;
 
-    private CardData cardData;
-    private UICardDescPanel panel;
-    private PlayerState playerState;
-
     private void Awake()
     {
         cardSprite = GetComponentInChildren<Image>();
-        cardData = GetComponent<CardData>();
-        panel = FindObjectOfType<UICardDescPanel>();
-        playerState = FindObjectOfType<PlayerState>();
         cardSprite.rectTransform.anchoredPosition = new Vector3(0, startYPos, 0);
 
         canvasGroup = GetComponent<CanvasGroup>();
