@@ -47,21 +47,30 @@ public class BlessingEffect : TileEffector
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
+
         // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
-            
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
+
         // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
 
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
+    }
+
+    private void HandlePieceDestroyed(Piece piece)
+    {
+        if (piece == currentPiece) { currentPiece = null; Revert(); }
     }
 
     public override void OnPieceEnter(Piece piece)

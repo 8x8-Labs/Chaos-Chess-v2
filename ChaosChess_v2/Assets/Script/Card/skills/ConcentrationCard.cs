@@ -19,8 +19,8 @@ class ConcentrationEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        if (piece)
-            BoardManager.Instance.ChangePiece(piece.Pos, piece.Color, 's');
+        if (target != null)
+            BoardManager.Instance.ChangePiece(target.Pos, target.Color, 's');
         Destroy(this);
     }
 }
@@ -46,6 +46,6 @@ public class ConcentrationCard : CardData, IPieceCard
         var effector = CreatePieceEffector<ConcentrationEffector>(piece);
         effector.Init(piece);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
+        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, () => { if (effector != null) effector.Revert(); });
     }
 }

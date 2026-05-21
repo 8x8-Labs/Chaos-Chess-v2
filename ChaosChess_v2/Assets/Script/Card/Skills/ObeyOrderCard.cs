@@ -46,6 +46,8 @@ public class ObeyOrderEffect : TileEffector
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
+
         // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
@@ -55,6 +57,8 @@ public class ObeyOrderEffect : TileEffector
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
+
         // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
@@ -64,6 +68,11 @@ public class ObeyOrderEffect : TileEffector
         _state = ObeyState.Idle;
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
+    }
+
+    private void HandlePieceDestroyed(Piece piece)
+    {
+        if (piece == enterPiece) { enterPiece = null; Revert(); }
     }
 
     // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비

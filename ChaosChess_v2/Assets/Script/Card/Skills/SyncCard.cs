@@ -104,6 +104,8 @@ public class SyncChild : TileEffector
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
+
         // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
@@ -113,6 +115,8 @@ public class SyncChild : TileEffector
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
+
         // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
@@ -120,6 +124,11 @@ public class SyncChild : TileEffector
         SynchronizedPiece = null;
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
+    }
+
+    private void HandlePieceDestroyed(Piece piece)
+    {
+        if (piece == SynchronizedPiece) Revert();
     }
 
     /// <summary>동기화 기물을 설정하고 타일 감시를 시작합니다.</summary>

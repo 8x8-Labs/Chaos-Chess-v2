@@ -30,6 +30,7 @@ public class StagFightEffector : GlobalEffector
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
         List<Piece> pieces = BoardManager.Instance.GetAllPieces();
         foreach (Piece piece in pieces)
         {
@@ -48,6 +49,7 @@ public class StagFightEffector : GlobalEffector
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
         foreach (Piece piece in changed)
         {
             string p = piece.MoveFenOverride?.ToLower();
@@ -57,4 +59,6 @@ public class StagFightEffector : GlobalEffector
         BoardManager.Instance.RefreshMoves();
         Destroy(gameObject);
     }
+
+    private void HandlePieceDestroyed(Piece piece) => changed.Remove(piece);
 }

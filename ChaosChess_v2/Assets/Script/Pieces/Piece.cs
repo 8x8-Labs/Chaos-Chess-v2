@@ -11,6 +11,10 @@ public enum PieceColor
 
 public class Piece : MonoBehaviour
 {
+    /// <summary>BoardManager.DestroyPiece()가 호출될 때 파괴되는 기물을 인자로 발화합니다.</summary>
+    public static event Action<Piece> OnPieceDestroyed;
+    internal static void InvokeOnPieceDestroyed(Piece piece) => OnPieceDestroyed?.Invoke(piece);
+
     // 무언갈 잡을때 효과 발동
     private List<Action<Vector3Int>> onCaptureEffects = new();
 
