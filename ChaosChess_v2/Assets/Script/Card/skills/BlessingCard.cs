@@ -73,6 +73,12 @@ public class BlessingEffect : TileEffector
         if (piece == currentPiece) { currentPiece = null; Revert(); }
     }
 
+    // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
+    private void OnDestroy()
+    {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
+    }
+
     public override void OnPieceEnter(Piece piece)
     {
         SchedulePromotion(piece);
