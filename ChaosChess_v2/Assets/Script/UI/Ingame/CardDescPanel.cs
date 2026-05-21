@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class CardDescPanel : ButtonPanel
 {
     private GameManager gameManager = GameManager.Instance;
+    private bool tierUIBindingAttempted;
 
     [Header("UI Elements")]
     [SerializeField] private Image cardImage;
@@ -26,6 +27,11 @@ public class CardDescPanel : ButtonPanel
     [SerializeField] private TMP_Text subDescContent;
 
     private CardAnim selectedCard;
+
+    private void Awake()
+    {
+        TryAutoBindTierUI();
+    }
 
     public override void DisablePanel()
     {
@@ -87,7 +93,10 @@ public class CardDescPanel : ButtonPanel
 
     private void UpdateUI(CardDataSO data)
     {
-        TryAutoBindTierUI();
+        if (!tierUIBindingAttempted)
+        {
+            TryAutoBindTierUI();
+        }
 
         cardImage.sprite = data.CardImage;
         cardTitle.text = data.CardName;
@@ -129,6 +138,13 @@ public class CardDescPanel : ButtonPanel
 
     private void TryAutoBindTierUI()
     {
+        if (tierUIBindingAttempted)
+        {
+            return;
+        }
+
+        tierUIBindingAttempted = true;
+
         Transform mainSlot = transform.Find("MainSlot");
         if (mainSlot == null)
         {
