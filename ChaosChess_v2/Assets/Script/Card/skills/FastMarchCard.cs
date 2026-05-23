@@ -30,7 +30,7 @@ public class FastMarchCardEffector : PieceEffector
 {
     protected override void OnApply()
     {
-        target.MoveFenOverride = "q";
+        target.MoveFenOverride = "f";
         BoardManager.Instance.RefreshMoves();
     }
 
