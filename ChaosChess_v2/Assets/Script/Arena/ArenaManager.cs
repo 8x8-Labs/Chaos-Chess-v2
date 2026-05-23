@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -24,9 +25,16 @@ public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 /// </summary>
 public class ArenaManager : MonoBehaviour
 {
+    private const int MaxPlayerMoveCount = 8;
+
     public static ArenaManager Instance;
+    internal event Action<CardDataSO, int> ArenaStarted;
+    internal event Action<int> ArenaRemainingTurnsChanged;
+    internal event Action ArenaEnded;
+
     /// <summary>투기장 시작 전 저장된(일시정지된) 타일/전역 효과가 존재하는지 여부입니다.</summary>
     public bool AreStoredEffectsSuspended => isArenaActive && suspendedEffects.Count > 0;
+    private int RemainingPlayerMoves => Mathf.Max(0, MaxPlayerMoveCount - playerMoveCount);
 
     // 투기장 참가 기물
     private List<Piece> opponentArenaPieces = new();  // 상대 투기장 기물 (최대 3개)
@@ -59,7 +67,7 @@ public class ArenaManager : MonoBehaviour
     /// 투기장을 시작합니다.
     /// </summary>
     /// <param name="opponents">투기장에 참여할 상대 기물 목록 (최대 3개)</param>
-    public void StartArena(List<Piece> opponents)
+    public void StartArena(List<Piece> opponents, CardDataSO arenaCardSO = null)
     {
         if (isArenaActive) return;
         isArenaActive = true;
@@ -116,6 +124,8 @@ public class ArenaManager : MonoBehaviour
 
         // 반턴 이벤트 구독으로 포획 감지 및 턴 카운트
         gm.OnHalfTurnChanged += OnHalfTurnChanged;
+
+        ArenaStarted?.Invoke(arenaCardSO, RemainingPlayerMoves);
     }
 
     /// <summary>
@@ -142,7 +152,9 @@ public class ArenaManager : MonoBehaviour
         if (!GameManager.Instance.IsPlayerTurn)
         {
             playerMoveCount++;
-            if (playerMoveCount >= 8)
+            ArenaRemainingTurnsChanged?.Invoke(RemainingPlayerMoves);
+
+            if (playerMoveCount >= MaxPlayerMoveCount)
                 EndArena(ArenaResult.Timeout);
         }
     }
@@ -162,6 +174,7 @@ public class ArenaManager : MonoBehaviour
         gm.OnHalfTurnChanged -= OnHalfTurnChanged;
         gm.IsArenaMode = false;
         gm.SetLockedPiece(null);
+        ArenaEnded?.Invoke();
 
         // King 무적 해제 — 메인 게임 복귀 후 King이 정상적으로 포획될 수 있어야 함
         playerKing?.ConsumeInvincibility();

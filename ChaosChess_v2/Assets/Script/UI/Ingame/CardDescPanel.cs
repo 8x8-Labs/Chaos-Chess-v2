@@ -28,8 +28,9 @@ public class CardDescPanel : ButtonPanel
 
     private CardAnim selectedCard;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         TryAutoBindTierUI();
     }
 
