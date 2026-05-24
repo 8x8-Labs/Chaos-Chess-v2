@@ -3,26 +3,21 @@
 public abstract class BuffSO : ScriptableObject, IBuffRuntime
 {
     [TextArea]
-    [SerializeField] private string description;
-    [TextArea]
     [SerializeField] private string buffDescription;
     [TextArea]
     [SerializeField] private string debuffDescription;
 
-    [Header("Buff Side")]
     [SerializeField] private bool hasBuff = true;
     [SerializeField] private int buffValue = 1;
     [SerializeField] private bool useRandomBuffValue = false;
     [SerializeField] private Vector2Int buffRange = new Vector2Int(1, 1);
     [SerializeField] private bool useTensOnly = false;
 
-    [Header("Debuff Side")]
     [SerializeField] private bool hasDebuff = true;
     [SerializeField] private int debuffValue = 1;
     [SerializeField] private bool useRandomDebuffValue = false;
     [SerializeField] private Vector2Int debuffRange = new Vector2Int(1, 1);
 
-    public string Description => description;
     public bool HasBuff => hasBuff;
     public bool HasDebuff => hasDebuff;
 
@@ -85,10 +80,10 @@ public abstract class BuffSO : ScriptableObject, IBuffRuntime
     {
         if (side == BuffSide.Buff)
         {
-            return string.IsNullOrWhiteSpace(buffDescription) ? description : buffDescription;
+            return buffDescription;
         }
 
-        return string.IsNullOrWhiteSpace(debuffDescription) ? description : debuffDescription;
+        return debuffDescription;
     }
 
     private int RollFromRange(Vector2Int range)
