@@ -7,8 +7,21 @@ using UnityEngine;
 /// 나이트, 비숍, 폰에 적용됩니다.
 /// 랜덤한 상대 기물(킹, 퀸, 룩 제외)을 자신의 기물로 변환합니다.
 /// </summary>
-public class GaslightingCard : CardData, ICard
+public class GaslightingCard : CardData, IPieceCard
 {
+    private PieceSelector selector;
+
+    private void Awake()
+    {
+        selector = FindFirstObjectByType<PieceSelector>();
+    }
+
+    public void LoadPieceSelector()
+    {
+        if (selector == null) selector = FindFirstObjectByType<PieceSelector>();
+        selector.EnableSelector(this);
+    }
+
     public void Execute(CardEffectArgs args = null)
     {
         Piece p = GetRandomPiece();

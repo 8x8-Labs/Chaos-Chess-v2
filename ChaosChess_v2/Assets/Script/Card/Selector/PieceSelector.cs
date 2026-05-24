@@ -88,6 +88,8 @@ public class PieceSelector : Selector<Piece>
 
     protected override bool isExecute()
     {
+        if (cardData != null && cardData.DataSO.RequiredPieceCount <= 0)
+            return true;
         return selectedTargets.Count == cardData.DataSO.RequiredPieceCount;
     }
 
@@ -154,7 +156,17 @@ public class PieceSelector : Selector<Piece>
 
         // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
         // 선택자를 비활성화하기
-        if (!isTargetExist()) DisableSelector();
+        if (!isTargetExist())
+        {
+            DisableSelector();
+            return;
+        }
+
+        // 선택 수 요구가 0인 카드는 선택 UI 없이 즉시 실행합니다.
+        if (cardData.DataSO.RequiredPieceCount <= 0)
+        {
+            ExecuteSkill();
+        }
     }
 
     protected override void DisableSelector()
