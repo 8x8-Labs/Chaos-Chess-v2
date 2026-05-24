@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// 정신 집중 - 기물 전용 (전설, 아마존)
@@ -7,23 +5,24 @@ using UnityEngine;
 /// </summary>
 class ConcentrationEffector : PieceEffector
 {
-    Piece piece;
-    public void Init(Piece piece)
-    {
-        this.piece = piece;
-    }
     protected override void OnApply()
     {
-        piece.FenOverride = "a";
+        if (target == null) return;
+
+        target.FenOverride = "a";
+        BoardManager.Instance.RefreshMoves();
     }
 
     protected override void OnRevert()
     {
         if (target != null)
             BoardManager.Instance.ChangePiece(target.Pos, target.Color, 's');
+
+        BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }
 }
+
 public class ConcentrationCard : CardData, IPieceCard
 {
     private PieceSelector selector;
@@ -44,8 +43,6 @@ public class ConcentrationCard : CardData, IPieceCard
         Piece piece = args.Targets[0];
 
         var effector = CreatePieceEffector<ConcentrationEffector>(piece);
-        effector.Init(piece);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, () => { if (effector != null) effector.Revert(); });
     }
 }
