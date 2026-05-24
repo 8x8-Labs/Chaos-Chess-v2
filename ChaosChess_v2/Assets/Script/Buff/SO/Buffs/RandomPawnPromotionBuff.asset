@@ -12,8 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d07d79f445574d4ab034336f8f00e6cd, type: 3}
   m_Name: RandomPawnPromotionBuff
   m_EditorClassIdentifier: 
-  description: "\uB79C\uB364 \uD3F0 \uC2B9\uAE09"
+  description: "\uB79C\uB364 \uD3F0 {value}\uAC1C \uBCC0\uD658"
+  buffDescription: "\uC544\uAD70 \uB79C\uB364 \uD3F0 {value}\uAC1C\uB97C \uB79C\uB364
+    \uAE30\uBB3C\uB85C \uC2B9\uAE09"
+  debuffDescription: "\uC801\uAD70 \uB79C\uB364 \uD3F0 {value}\uAC1C\uB97C \uB79C\uB364
+    \uAE30\uBB3C\uB85C \uC2B9\uAE09"
   hasBuff: 1
   buffValue: 1
+  useRandomBuffValue: 1
+  buffRange: {x: 1, y: 3}
   hasDebuff: 1
   debuffValue: 1
+  useRandomDebuffValue: 1
+  debuffRange: {x: 1, y: 3}
