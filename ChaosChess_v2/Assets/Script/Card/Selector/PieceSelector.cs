@@ -88,8 +88,12 @@ public class PieceSelector : Selector<Piece>
 
     protected override bool isExecute()
     {
-        if (cardData != null && cardData.DataSO.RequiredPieceCount <= 0)
+        if (cardData == null || cardData.DataSO == null)
+            return false;
+
+        if (cardData.DataSO.RequiredPieceCount <= 0)
             return true;
+
         return selectedTargets.Count == cardData.DataSO.RequiredPieceCount;
     }
 
