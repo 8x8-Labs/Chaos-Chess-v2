@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 181601e4be9d4fe189604eb7d42a9458, type: 3}
   m_Name: CardIntervalBuff
   m_EditorClassIdentifier: 
-  description: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value} \uBCC0\uB3D9"
-  buffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value}\uD134 \uB2E8\uCD95"
+  buffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value} \uAC10\uC18C"
   debuffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value}\uD134 \uC99D\uAC00"
   hasBuff: 1
   buffValue: 1
   useRandomBuffValue: 1
   buffRange: {x: 1, y: 3}
+  useTensOnly: 0
   hasDebuff: 1
   debuffValue: 1
   useRandomDebuffValue: 1

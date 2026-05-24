@@ -9,19 +9,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d07d79f445574d4ab034336f8f00e6cd, type: 3}
-  m_Name: RandomPawnPromotionBuff
+  m_Script: {fileID: 11500000, guid: fbd68c62ed9944338d957689ca2d9dfb, type: 3}
+  m_Name: PawnReinforcementBuff
   m_EditorClassIdentifier: 
-  buffDescription: "\uC544\uAD70 \uD3F0 {value}\uAC1C\uB97C \uB79C\uB364 \uAE30\uBB3C\uB85C
-    \uC2B9\uAE09"
-  debuffDescription: "\uC801\uAD70 \uD3F0 {value}\uAC1C\uB97C \uB79C\uB364 \uAE30\uBB3C\uB85C
-    \uC2B9\uAE09"
+  buffDescription: "\uC544\uAD70 \uD3F0 {value}\uAC1C \uCD94\uAC00 \uBC30\uCE58"
+  debuffDescription: "\uC801\uAD70 \uD3F0 {value}\uAC1C \uCD94\uAC00 \uBC30\uCE58"
   hasBuff: 1
   buffValue: 1
   useRandomBuffValue: 1
-  buffRange: {x: 1, y: 3}
+  buffRange: {x: 1, y: 5}
   useTensOnly: 0
   hasDebuff: 1
   debuffValue: 1
   useRandomDebuffValue: 1
-  debuffRange: {x: 1, y: 3}
+  debuffRange: {x: 1, y: 5}

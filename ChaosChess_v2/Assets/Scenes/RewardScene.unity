@@ -320,6 +320,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7df75c4e18c944dea775134d8c829f56, type: 2}
   - {fileID: 11400000, guid: 3c8755b887ac4bae978717ffa52f9fc5, type: 2}
   - {fileID: 11400000, guid: 7cdb9f47f0a94a8e92d35dc67d731e5e, type: 2}
+  - {fileID: 11400000, guid: e6267b0aa2ef4d209690f6c66fd57d39, type: 2}
+  - {fileID: 11400000, guid: 021b1f2fcd5848d8b44dca0f54de185b, type: 2}
   buffPanel: {fileID: 1948879695}
   debuffPanel: {fileID: 761295392}
 --- !u!1 &125163302

@@ -9,19 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d07d79f445574d4ab034336f8f00e6cd, type: 3}
-  m_Name: RandomPawnPromotionBuff
+  m_Script: {fileID: 11500000, guid: 32e6ccd3350d43ad96340e1ca71960b7, type: 3}
+  m_Name: RandomMinorToWallBuff
   m_EditorClassIdentifier: 
-  buffDescription: "\uC544\uAD70 \uD3F0 {value}\uAC1C\uB97C \uB79C\uB364 \uAE30\uBB3C\uB85C
-    \uC2B9\uAE09"
-  debuffDescription: "\uC801\uAD70 \uD3F0 {value}\uAC1C\uB97C \uB79C\uB364 \uAE30\uBB3C\uB85C
-    \uC2B9\uAE09"
+  buffDescription: "\uC801\uAD70 \uB9C8\uC774\uB108 \uAE30\uBB3C {value}\uAC1C\uB97C
+    \uBCBD\uC73C\uB85C \uBCC0\uD658"
+  debuffDescription: "\uC544\uAD70 \uB9C8\uC774\uB108 \uAE30\uBB3C {value}\uAC1C\uB97C
+    \uBCBD\uC73C\uB85C \uBCC0\uD658"
   hasBuff: 1
   buffValue: 1
   useRandomBuffValue: 1
-  buffRange: {x: 1, y: 3}
+  buffRange: {x: 1, y: 2}
   useTensOnly: 0
   hasDebuff: 1
   debuffValue: 1
   useRandomDebuffValue: 1
-  debuffRange: {x: 1, y: 3}
+  debuffRange: {x: 1, y: 2}

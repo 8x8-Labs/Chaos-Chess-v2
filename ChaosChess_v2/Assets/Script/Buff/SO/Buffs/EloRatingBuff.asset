@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82565ff68797c384bac190523aeb4bc9, type: 3}
   m_Name: EloRatingBuff
   m_EditorClassIdentifier: 
-  buffDescription: "\uC0C1\uB300 ELO {value} \uAC10\uC18C"
-  debuffDescription: "\uC0C1\uB300 ELO {value} \uC99D\uAC00"
+  buffDescription: "ELO {value} \uAC10\uC18C"
+  debuffDescription: "ELO {value} \uC99D\uAC00"
   hasBuff: 1
   buffValue: 50
   useRandomBuffValue: 1
