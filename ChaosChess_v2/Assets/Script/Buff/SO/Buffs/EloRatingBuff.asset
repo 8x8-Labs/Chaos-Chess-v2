@@ -12,8 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82565ff68797c384bac190523aeb4bc9, type: 3}
   m_Name: EloRatingBuff
   m_EditorClassIdentifier: 
-  description: "ELO \uBC84\uD504/\uB514\uBC84\uD504 \uD14C\uC2A4\uD2B8"
+  description: "ELO \uAC12 {value} \uBCC0\uB3D9"
+  buffDescription: "\uC0C1\uB300 ELO {value} \uAC10\uC18C"
+  debuffDescription: "\uC0C1\uB300 ELO {value} \uC99D\uAC00"
   hasBuff: 1
   buffValue: 50
+  useRandomBuffValue: 1
+  buffRange: {x: 50, y: 150}
   hasDebuff: 1
   debuffValue: 50
+  useRandomDebuffValue: 1
+  debuffRange: {x: 50, y: 150}

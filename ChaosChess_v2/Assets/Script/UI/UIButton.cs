@@ -31,6 +31,7 @@ public class UIButton : Button
     [SerializeField] private string nextSceneName;
     [SerializeField] private string practiceSceneName = "MainGameScene";
     [SerializeField] private string rewardSceneName = "RewardScene";
+    [SerializeField] private string resultSceneName = "ResultScene";
     [SerializeField] private string mainSceneName = "MainScene";
 
     protected override void Start()
@@ -117,7 +118,16 @@ public class UIButton : Button
 
     private void LoadEndGameScene()
     {
-        SceneManager.LoadScene(GameCycleManager.Instance.IsPracticeMode ? mainSceneName : rewardSceneName);
+        if (GameCycleManager.Instance.IsPracticeMode)
+        {
+            SceneManager.LoadScene(mainSceneName);
+            return;
+        }
+
+        bool isLose = PlayerState.Instance?.CurGameResult == GameResult.BlackWin;
+        bool isFinalFloorClear = MapManager.Instance?.currentFloor >= MapManager.Instance?.totalFloors;
+
+        SceneManager.LoadScene((isLose || isFinalFloorClear) ? resultSceneName : rewardSceneName);
     }
 
     private void changeCanvas() => StartCoroutine(changeCanvasCoroutine());

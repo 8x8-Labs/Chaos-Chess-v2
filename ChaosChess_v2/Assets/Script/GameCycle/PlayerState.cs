@@ -42,6 +42,7 @@ public class PlayerState : MonoBehaviour
 
     public void AddCard(GameObject card) => _cardPool.Add(card);
     public void AddBuff(BuffSO definition, BuffSide side) => _buffs.Add(new BuffPick(definition, side));
+    public void AddBuff(BuffSO definition, BuffSide side, int magnitude) => _buffs.Add(new BuffPick(definition, side, magnitude));
 
     [field: SerializeField] public int WinCount { get; private set; } = 0;
     [field: SerializeField] public int DrawCount { get; private set; } = 0;

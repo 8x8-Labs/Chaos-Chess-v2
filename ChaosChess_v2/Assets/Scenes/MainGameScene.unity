@@ -1561,6 +1561,7 @@ MonoBehaviour:
   nextSceneName: RewardScene
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!114 &284765918
 MonoBehaviour:
@@ -2262,6 +2263,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!114 &475878341
 MonoBehaviour:
@@ -6011,6 +6013,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &1036672674
 GameObject:
@@ -6574,6 +6577,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &1175012889
 GameObject:
@@ -6722,6 +6726,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &1190515892
 GameObject:
@@ -8848,6 +8853,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &1528017333
 GameObject:
@@ -9438,6 +9444,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!114 &1567853228
 MonoBehaviour:
@@ -10563,6 +10570,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &1776266815
 GameObject:
@@ -10711,6 +10719,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &1784817159
 GameObject:
@@ -11410,6 +11419,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!114 &1869951118
 MonoBehaviour:
@@ -11596,6 +11606,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &1920602517
 GameObject:
@@ -11747,6 +11758,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardRandomizer: {fileID: 1036672679}
   _cardPool: []
+  _buffs: []
 --- !u!4 &1957615140
 Transform:
   m_ObjectHideFlags: 0
@@ -11896,6 +11908,7 @@ MonoBehaviour:
   nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
+  resultSceneName: ResultScene
   mainSceneName: MainScene
 --- !u!1 &2004262543
 GameObject:
