@@ -108,7 +108,7 @@ public abstract class BuffSO : ScriptableObject, IBuffRuntime
     {
         int normalized = Mathf.Max(0, value);
         if (!useTensOnly) return normalized;
-        return (normalized / 10) * 10;
+        return Mathf.RoundToInt(normalized / 10f) * 10;
     }
 
     protected abstract void OnApply(Player player, BuffSide side, int magnitude);

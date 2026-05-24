@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [Serializable]
-public struct BuffPick
+public class BuffPick
 {
     [SerializeField] private BuffSO definition;
     [SerializeField] private BuffSide side;
@@ -11,6 +11,8 @@ public struct BuffPick
 
     public BuffSO Definition => definition;
     public BuffSide Side => side;
+    public int AppliedMagnitude => hasAppliedMagnitude ? appliedMagnitude : 0;
+    public bool HasAppliedMagnitude => hasAppliedMagnitude;
 
     public BuffPick(BuffSO definition, BuffSide side)
     {

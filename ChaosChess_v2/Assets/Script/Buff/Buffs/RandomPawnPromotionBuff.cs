@@ -17,9 +17,12 @@ public class RandomPawnPromotionBuff : BuffSO
         List<Pawn> pawns = BoardManager.Instance.GetPiece<Pawn>(color);
         if (pawns == null || pawns.Count == 0) return;
 
-        for (int i = 0; i < magnitude; i++)
+        int count = Mathf.Min(magnitude, pawns.Count);
+        for (int i = 0; i < count; i++)
         {
-            Piece target = pawns[Random.Range(0, pawns.Count)];
+            int randomIndex = Random.Range(0, pawns.Count);
+            Piece target = pawns[randomIndex];
+            pawns.RemoveAt(randomIndex);
             PieceType promoteTo = PromotionTargets[Random.Range(0, PromotionTargets.Length)];
             BoardManager.Instance.ChangePiece(target.Pos, color, ToPromotionChar(promoteTo));
         }

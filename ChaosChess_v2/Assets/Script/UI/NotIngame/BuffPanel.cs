@@ -55,11 +55,11 @@ public class BuffPanel : MonoBehaviour
 
         float start = Mathf.Max(minFontSize, baseFontSize);
         float step = Mathf.Max(1f, fontStep);
+        text.text = content;
 
         for (float size = start; size >= minFontSize; size -= step)
         {
             text.fontSize = size;
-            text.text = content;
             text.ForceMeshUpdate();
             if (!text.isTextOverflowing)
             {
