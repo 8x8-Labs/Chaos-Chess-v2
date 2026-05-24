@@ -22,7 +22,7 @@ MonoBehaviour:
   PieceType: 7
   PieceTargetColor: 1
   PieceLimitTurn: 0
-  RequiredPieceCount: 1
+  RequiredPieceCount: 0
   TileCount: 0
   MaintainTurn: 0
   RestrictTiles: 0
