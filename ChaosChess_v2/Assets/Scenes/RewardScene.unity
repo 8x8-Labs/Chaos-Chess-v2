@@ -267,7 +267,6 @@ GameObject:
   - component: {fileID: 106018955}
   - component: {fileID: 106018956}
   - component: {fileID: 106018958}
-  - component: {fileID: 106018959}
   m_Layer: 0
   m_Name: RewardManager
   m_TagString: Untagged
@@ -316,32 +315,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da1c799c5e793e94689689880fc78171, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buffSO:
-  - {fileID: 11400000, guid: eab9fc0c4351b044bb49fadb4e6ced6e, type: 2}
-  - {fileID: 11400000, guid: a079262bb246d9649b0c15b8fa3db988, type: 2}
-  - {fileID: 11400000, guid: 472cae1f0fd3df34e9c602c3f431aeb0, type: 2}
-  debuffSO:
-  - {fileID: 11400000, guid: 671948a437aa02c4096c92c67df0314c, type: 2}
-  - {fileID: 11400000, guid: 3813ed38ef76d244e99c55de5489fe8a, type: 2}
+  buffPool:
+  - {fileID: 11400000, guid: 8cf7d088d79341c1a7de7f5ca0214273, type: 2}
+  - {fileID: 11400000, guid: 7df75c4e18c944dea775134d8c829f56, type: 2}
+  - {fileID: 11400000, guid: 3c8755b887ac4bae978717ffa52f9fc5, type: 2}
   buffPanel: {fileID: 1948879695}
   debuffPanel: {fileID: 761295392}
---- !u!114 &106018959
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 106018954}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c37912528cfc60f48a4224fbf376b435, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  nextButton: {fileID: 608581823}
-  rewardList: {fileID: 0}
-  rewardObjects: []
-  autoCollectFromRewardList: 1
-  requiredClaimCount: 3
 --- !u!1 &125163302
 GameObject:
   m_ObjectHideFlags: 0

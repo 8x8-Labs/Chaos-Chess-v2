@@ -6,18 +6,20 @@ public class BuffPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
 
     private BuffSO buff;
+    private BuffSide side;
 
-    public void Init(BuffSO randomBuff)
+    public void Init(BuffSO randomBuff, BuffSide randomSide)
     {
         buff = randomBuff;
+        side = randomSide;
 
-        text.text = buff.description;
+        text.text = buff.Description;
     }
 
     public void OnClick()
     {
-        if (PlayerState.Instance != null)
-            PlayerState.Instance.AddBuff(buff);
+        if (PlayerState.Instance != null && buff != null)
+            PlayerState.Instance.AddBuff(buff, side);
 
         gameObject.SetActive(false);
     }

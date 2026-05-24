@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -37,11 +37,11 @@ public class PlayerState : MonoBehaviour
     [SerializeField] private List<GameObject> _cardPool = new();
     public IReadOnlyList<GameObject> CardPool => _cardPool;
 
-    [SerializeField] private List<BuffSO> _buffs = new();
-    public IReadOnlyList<BuffSO> Buffs => _buffs;
+    [SerializeField] private List<BuffPick> _buffs = new();
+    public IReadOnlyList<BuffPick> Buffs => _buffs;
 
     public void AddCard(GameObject card) => _cardPool.Add(card);
-    public void AddBuff(BuffSO buff) => _buffs.Add(buff);
+    public void AddBuff(BuffSO definition, BuffSide side) => _buffs.Add(new BuffPick(definition, side));
 
     [field: SerializeField] public int WinCount { get; private set; } = 0;
     [field: SerializeField] public int DrawCount { get; private set; } = 0;
