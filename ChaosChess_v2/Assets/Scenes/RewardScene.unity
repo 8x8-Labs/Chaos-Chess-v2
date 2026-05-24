@@ -438,7 +438,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1594.3, y: 1270.2}
+  m_SizeDelta: {x: 1594.3, y: 1295.69}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &187754089
 CanvasRenderer:
@@ -495,7 +495,7 @@ MonoBehaviour:
     m_Right: 50
     m_Top: 100
     m_Bottom: 100
-  m_ChildAlignment: 1
+  m_ChildAlignment: 4
   m_Spacing: 50
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
@@ -1526,7 +1526,6 @@ MonoBehaviour:
   minFontSize: 18
   fontStep: 12
   enableWordWrapping: 1
-  maxVisibleLines: 3
 --- !u!1 &804496095
 GameObject:
   m_ObjectHideFlags: 0
@@ -1711,7 +1710,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -80}
+  m_SizeDelta: {x: 0, y: -100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &869469902
 MonoBehaviour:
@@ -1848,7 +1847,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -80}
+  m_SizeDelta: {x: 0, y: -100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1028307722
 MonoBehaviour:
@@ -3123,7 +3122,6 @@ MonoBehaviour:
   minFontSize: 18
   fontStep: 12
   enableWordWrapping: 1
-  maxVisibleLines: 3
 --- !u!1 &2042510123
 GameObject:
   m_ObjectHideFlags: 0
@@ -3159,7 +3157,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -80}
+  m_SizeDelta: {x: 0, y: -100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2042510125
 MonoBehaviour:
