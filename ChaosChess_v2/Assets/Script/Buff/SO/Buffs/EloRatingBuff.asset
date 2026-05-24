@@ -15,11 +15,13 @@ MonoBehaviour:
   buffDescription: "ELO {value} \uAC10\uC18C"
   debuffDescription: "ELO {value} \uC99D\uAC00"
   hasBuff: 1
+  buffWeight: 400
   buffValue: 50
   useRandomBuffValue: 1
   buffRange: {x: 50, y: 150}
   useTensOnly: 1
   hasDebuff: 1
+  debuffWeight: 400
   debuffValue: 50
   useRandomDebuffValue: 1
   debuffRange: {x: 50, y: 150}

@@ -8,11 +8,13 @@ public class BuffSOEditor : Editor
     private SerializedProperty debuffDescription;
 
     private SerializedProperty hasBuff;
+    private SerializedProperty buffWeight;
     private SerializedProperty buffValue;
     private SerializedProperty useRandomBuffValue;
     private SerializedProperty buffRange;
 
     private SerializedProperty hasDebuff;
+    private SerializedProperty debuffWeight;
     private SerializedProperty debuffValue;
     private SerializedProperty useRandomDebuffValue;
     private SerializedProperty debuffRange;
@@ -27,11 +29,13 @@ public class BuffSOEditor : Editor
         debuffDescription = serializedObject.FindProperty("debuffDescription");
 
         hasBuff = serializedObject.FindProperty("hasBuff");
+        buffWeight = serializedObject.FindProperty("buffWeight");
         buffValue = serializedObject.FindProperty("buffValue");
         useRandomBuffValue = serializedObject.FindProperty("useRandomBuffValue");
         buffRange = serializedObject.FindProperty("buffRange");
 
         hasDebuff = serializedObject.FindProperty("hasDebuff");
+        debuffWeight = serializedObject.FindProperty("debuffWeight");
         debuffValue = serializedObject.FindProperty("debuffValue");
         useRandomDebuffValue = serializedObject.FindProperty("useRandomDebuffValue");
         debuffRange = serializedObject.FindProperty("debuffRange");
@@ -73,6 +77,7 @@ public class BuffSOEditor : Editor
 
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(buffDescription, new GUIContent("설명"));
+            EditorGUILayout.PropertyField(buffWeight, new GUIContent("등장 가중치"));
             EditorGUILayout.PropertyField(useRandomBuffValue, new GUIContent("랜덤 값 사용"));
             if (useRandomBuffValue.boolValue)
             {
@@ -95,6 +100,7 @@ public class BuffSOEditor : Editor
 
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(debuffDescription, new GUIContent("설명"));
+            EditorGUILayout.PropertyField(debuffWeight, new GUIContent("등장 가중치"));
             EditorGUILayout.PropertyField(useRandomDebuffValue, new GUIContent("랜덤 값 사용"));
             if (useRandomDebuffValue.boolValue)
             {

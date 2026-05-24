@@ -8,12 +8,14 @@ public abstract class BuffSO : ScriptableObject, IBuffRuntime
     [SerializeField] private string debuffDescription;
 
     [SerializeField] private bool hasBuff = true;
+    [SerializeField] private int buffWeight = 100;
     [SerializeField] private int buffValue = 1;
     [SerializeField] private bool useRandomBuffValue = false;
     [SerializeField] private Vector2Int buffRange = new Vector2Int(1, 1);
     [SerializeField] private bool useTensOnly = false;
 
     [SerializeField] private bool hasDebuff = true;
+    [SerializeField] private int debuffWeight = 100;
     [SerializeField] private int debuffValue = 1;
     [SerializeField] private bool useRandomDebuffValue = false;
     [SerializeField] private Vector2Int debuffRange = new Vector2Int(1, 1);
@@ -24,6 +26,12 @@ public abstract class BuffSO : ScriptableObject, IBuffRuntime
     public bool CanUse(BuffSide side)
     {
         return side == BuffSide.Buff ? hasBuff : hasDebuff;
+    }
+
+    public int GetWeight(BuffSide side)
+    {
+        int weight = side == BuffSide.Buff ? buffWeight : debuffWeight;
+        return Mathf.Max(0, weight);
     }
 
     public bool TryApply(Player player, BuffSide side)

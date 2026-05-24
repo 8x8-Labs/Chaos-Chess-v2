@@ -15,11 +15,13 @@ MonoBehaviour:
   buffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value} \uAC10\uC18C"
   debuffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value}\uD134 \uC99D\uAC00"
   hasBuff: 1
+  buffWeight: 300
   buffValue: 1
   useRandomBuffValue: 1
   buffRange: {x: 1, y: 3}
   useTensOnly: 0
   hasDebuff: 1
+  debuffWeight: 300
   debuffValue: 1
   useRandomDebuffValue: 1
   debuffRange: {x: 1, y: 3}

@@ -29,6 +29,27 @@ public class BuffRewardManager : MonoBehaviour
     {
         List<BuffSO> candidates = buffPool.FindAll(x => x != null && x.CanUse(side));
         if (candidates.Count == 0) return null;
-        return candidates[Random.Range(0, candidates.Count)];
+
+        int totalWeight = 0;
+        foreach (BuffSO candidate in candidates)
+        {
+            totalWeight += candidate.GetWeight(side);
+        }
+
+        if (totalWeight <= 0) return candidates[Random.Range(0, candidates.Count)];
+
+        int roll = Random.Range(0, totalWeight);
+        int accumulated = 0;
+
+        foreach (BuffSO candidate in candidates)
+        {
+            accumulated += candidate.GetWeight(side);
+            if (roll < accumulated)
+            {
+                return candidate;
+            }
+        }
+
+        return candidates[candidates.Count - 1];
     }
 }
