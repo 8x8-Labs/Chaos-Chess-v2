@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82565ff68797c384bac190523aeb4bc9, type: 3}
+  m_Name: EloRatingBuff
+  m_EditorClassIdentifier: 
+  buffDescription: "ELO {value} \uAC10\uC18C"
+  debuffDescription: "ELO {value} \uC99D\uAC00"
+  hasBuff: 1
+  buffWeight: 400
+  buffValue: 50
+  useRandomBuffValue: 1
+  buffRange: {x: 50, y: 150}
+  useTensOnly: 1
+  hasDebuff: 1
+  debuffWeight: 400
+  debuffValue: 50
+  useRandomDebuffValue: 1
+  debuffRange: {x: 50, y: 150}

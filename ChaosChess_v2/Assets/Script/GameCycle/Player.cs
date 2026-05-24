@@ -6,7 +6,7 @@ public class Player : MonoBehaviour
     [SerializeField] private CardRandomizer cardRandomizer;
 
     [SerializeField] private List<GameObject> _cardPool;
-    [SerializeField] private List<IPlayerBuff> _buffs;
+    [SerializeField] private List<BuffPick> _buffs;
 
     private int _cardInterval;
     private int _maxCardCount;
@@ -20,7 +20,7 @@ public class Player : MonoBehaviour
         _maxCardCount = PlayerState.Instance.DefaultMaxCardCount;
 
         _cardPool = new List<GameObject>(PlayerState.Instance.CardPool);
-        _buffs = new List<IPlayerBuff>(PlayerState.Instance.Buffs);
+        _buffs = new List<BuffPick>(PlayerState.Instance.Buffs);
 
         ExecuteBuffs();
         int currentCardCnt = cardRandomizer.CurrentCardCnt;
@@ -34,7 +34,7 @@ public class Player : MonoBehaviour
     {
         foreach (var buff in _buffs)
         {
-            buff.OnApply(this);
+            buff.TryApply(this);
         }
     }
 

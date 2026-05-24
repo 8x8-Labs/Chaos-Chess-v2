@@ -21,6 +21,7 @@ public class UIButtonEditor : ButtonEditor
     SerializedProperty practiceDifficultyProp;
     SerializedProperty practiceSceneNameProp;
     SerializedProperty rewardSceneNameProp;
+    SerializedProperty resultSceneNameProp;
     SerializedProperty mainSceneNameProp;
 
     //[SerializeField] private bool isStartAnimation = false;
@@ -44,6 +45,7 @@ public class UIButtonEditor : ButtonEditor
         practiceDifficultyProp = serializedObject.FindProperty("practiceDifficulty");
         practiceSceneNameProp = serializedObject.FindProperty("practiceSceneName");
         rewardSceneNameProp = serializedObject.FindProperty("rewardSceneName");
+        resultSceneNameProp = serializedObject.FindProperty("resultSceneName");
         mainSceneNameProp = serializedObject.FindProperty("mainSceneName");
     }
 
@@ -112,8 +114,9 @@ public class UIButtonEditor : ButtonEditor
                 EditorGUILayout.PropertyField(practiceSceneNameProp, new GUIContent("Practice Scene Name"));
                 break;
             case ButtonType.EndGame:
-                EditorGUILayout.HelpBox("현재 모드가 연습이면 MainScene, 아니면 RewardScene으로 이동합니다.", MessageType.Info);
+                EditorGUILayout.HelpBox("연습 모드는 MainScene, 일반 모드는 상황에 따라 Reward/Result 씬으로 이동합니다.", MessageType.Info);
                 EditorGUILayout.PropertyField(rewardSceneNameProp, new GUIContent("Reward Scene Name"));
+                EditorGUILayout.PropertyField(resultSceneNameProp, new GUIContent("Result Scene Name"));
                 EditorGUILayout.PropertyField(mainSceneNameProp, new GUIContent("Main Scene Name"));
                 break;
 
