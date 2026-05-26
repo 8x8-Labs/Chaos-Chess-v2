@@ -35,6 +35,9 @@ public class CardAnim : MonoBehaviour
 
     public void EnableCardDataUI()
     {
+        if (CardSelectionState.IsLocked)
+            return;
+
         SoundManager.Instance.SFXPlay("CardClickSFX", clickSFX);
         ClickOnAnimation();
         panel.SetCardData(this);

@@ -153,6 +153,7 @@ public class PieceSelector : Selector<Piece>
 
 
         GameManager.Instance.IsGameInput = false;
+        LockCardSelection(CardSelectionOwner.Piece);
         selectorCanvas.enabled = true;
         selectState = true;
 
@@ -176,6 +177,7 @@ public class PieceSelector : Selector<Piece>
     protected override void DisableSelector()
     {
         GameManager.Instance.IsGameInput = true;
+        UnlockCardSelection(CardSelectionOwner.Piece);
         selectorCanvas.enabled = false;
         selectState = false;
 

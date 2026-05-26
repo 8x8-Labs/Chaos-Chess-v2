@@ -84,6 +84,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         IsEndGame = false;
+        CardSelectionState.Reset();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
 
@@ -160,8 +161,8 @@ public class GameManager : MonoBehaviour
         else
         {
             MoveSelected(pos);
-            boardUI.DeleteSelectTile();
-            boardUI.DeleteValidMoveTiles();
+            boardUI?.DeleteSelectTile();
+            boardUI?.DeleteValidMoveTiles();
         }
     }
 
@@ -344,6 +345,10 @@ public class GameManager : MonoBehaviour
 
         if (BoardManager.Instance.MovePiece(piece, target))
         {
+            BoardManager.Instance.RefreshMoves();
+            boardUI?.DeleteSelectTile();
+            boardUI?.DeleteValidMoveTiles();
+
             // 프로모션이면 여기서 멈춤
             if (!IsGameInput)
                 return;
@@ -410,6 +415,16 @@ public class GameManager : MonoBehaviour
         FairyStockfishBridge.Instance.SetPosition(fen);
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+    }
+
+    /// <summary>
+    /// 보드 강제 재배치 직전 선택/하이라이트/애니메이션 상태를 정리합니다.
+    /// </summary>
+    public void CancelCurrentSelectionForBoardTransition()
+    {
+        selectedPiece = null;
+        boardUI?.DeleteSelectTile();
+        boardUI?.DeleteValidMoveTiles();
     }
 
     public void RequestAIMove()
