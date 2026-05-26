@@ -25,13 +25,16 @@ public class CardDescPanel : ButtonPanel
     [SerializeField] private TMP_Text subDescPieceContent;
     // 규칙 타입
     [SerializeField] private TMP_Text subDescContent;
+    [SerializeField] private SubDescFoldController subDescFoldController;
 
     private CardAnim selectedCard;
+    private Sprite subDescDefaultIconSprite;
 
     protected override void Awake()
     {
         base.Awake();
         TryAutoBindTierUI();
+        CacheSubDescDefaultIcon();
     }
 
     public override void DisablePanel()
@@ -107,11 +110,18 @@ public class CardDescPanel : ButtonPanel
         if (data.NeedAdditionalDescription)
         {
             subDesc.SetActive(true);
+            subDescFoldController?.Hide();
+
             if (subDescTitle != null)
+            {
+                subDescTitle.enabled = true;
                 subDescTitle.text = data.AdditionalDescriptionTitle;
+            }
 
             bool isPiece = data.DescriptionType == AdditionalDescription.Piece;
-            if (subDescPieceImage != null) subDescPieceImage.gameObject.SetActive(isPiece);
+            ApplySubDescIcon(data, isPiece);
+            TMP_Text activeSubDescText = isPiece ? subDescPieceContent : subDescContent;
+
             if (subDescMovementImage != null) subDescMovementImage.gameObject.SetActive(isPiece);
             if (subDescPieceContent != null) subDescPieceContent.gameObject.SetActive(isPiece);
             if (subDescContent != null) subDescContent.gameObject.SetActive(!isPiece);
@@ -119,20 +129,34 @@ public class CardDescPanel : ButtonPanel
             if (isPiece)
             {
                 if (subDescPieceImage != null)
-                    subDescPieceImage.sprite = data.PieceDescImage;
+                {
+                    subDescPieceImage.enabled = true;
+                }
                 if (subDescMovementImage != null)
+                {
+                    subDescMovementImage.enabled = true;
                     subDescMovementImage.sprite = data.MovementImage;
+                }
                 if (subDescPieceContent != null)
+                {
+                    subDescPieceContent.enabled = true;
                     subDescPieceContent.text = data.PieceDescContent;
+                }
             }
             else
             {
                 if (subDescContent != null)
+                {
+                    subDescContent.enabled = true;
                     subDescContent.text = data.AdditionalDescriptionContent;
+                }
             }
+
+            subDescFoldController?.Refresh(activeSubDescText);
         }
         else
         {
+            subDescFoldController?.Hide();
             subDesc.SetActive(false);
         }
     }
@@ -227,6 +251,37 @@ public class CardDescPanel : ButtonPanel
             {
                 target.color = color;
             }
+        }
+    }
+
+    private void ApplySubDescIcon(CardDataSO data, bool isPiece)
+    {
+        if (subDescPieceImage == null)
+        {
+            return;
+        }
+
+        subDescPieceImage.gameObject.SetActive(true);
+        subDescPieceImage.enabled = true;
+
+        Sprite iconSprite = isPiece ? data.PieceDescImage : subDescDefaultIconSprite;
+        if (iconSprite != null)
+        {
+            subDescPieceImage.sprite = iconSprite;
+            return;
+        }
+
+        if (subDescDefaultIconSprite != null)
+        {
+            subDescPieceImage.sprite = subDescDefaultIconSprite;
+        }
+    }
+
+    private void CacheSubDescDefaultIcon()
+    {
+        if (subDescPieceImage != null && subDescDefaultIconSprite == null)
+        {
+            subDescDefaultIconSprite = subDescPieceImage.sprite;
         }
     }
 }
