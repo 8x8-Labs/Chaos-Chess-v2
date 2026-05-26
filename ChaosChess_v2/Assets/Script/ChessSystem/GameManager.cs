@@ -84,6 +84,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         IsEndGame = false;
+        CardSelectionState.Reset();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
 
@@ -160,8 +161,8 @@ public class GameManager : MonoBehaviour
         else
         {
             MoveSelected(pos);
-            boardUI.DeleteSelectTile();
-            boardUI.DeleteValidMoveTiles();
+            boardUI?.DeleteSelectTile();
+            boardUI?.DeleteValidMoveTiles();
         }
     }
 
@@ -345,8 +346,8 @@ public class GameManager : MonoBehaviour
         if (BoardManager.Instance.MovePiece(piece, target))
         {
             BoardManager.Instance.RefreshMoves();
-            boardUI.DeleteSelectTile();
-            boardUI.DeleteValidMoveTiles();
+            boardUI?.DeleteSelectTile();
+            boardUI?.DeleteValidMoveTiles();
 
             // 프로모션이면 여기서 멈춤
             if (!IsGameInput)

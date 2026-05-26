@@ -25,6 +25,11 @@ public static class CardSelectionState
         if (currentSelectionOwner == owner)
             currentSelectionOwner = CardSelectionOwner.None;
     }
+
+    public static void Reset()
+    {
+        currentSelectionOwner = CardSelectionOwner.None;
+    }
 }
 
 public abstract class Selector<T> : MonoBehaviour
