@@ -344,6 +344,8 @@ public class GameManager : MonoBehaviour
 
         if (BoardManager.Instance.MovePiece(piece, target))
         {
+            BoardManager.Instance.RefreshMoves();
+
             // 프로모션이면 여기서 멈춤
             if (!IsGameInput)
                 return;
