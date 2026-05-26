@@ -28,6 +28,13 @@ public class MapManager : MonoBehaviour
     [SerializeField] private string normalPracticeFEN;
     [SerializeField] private string hardPracticeFEN;
 
+    [Header("Graph Map")]
+    public int nodesPerFloorMin = 1;
+    public int nodesPerFloorMax = 3;
+
+    public List<List<Map>> mapGrid = new();
+    public int[] nodesPerFloor;
+    public Map selectedNode;
     public Map curMap;
 
     private void Awake()
@@ -47,28 +54,83 @@ public class MapManager : MonoBehaviour
     public void Init()
     {
         maps.Clear();
+        mapGrid.Clear();
         currentFloor = 0;
 
         int startELO = Random.Range(800, 1200);
 
-        for (int i = 0; i < totalFloors; i++)
-        {
-            string fen = DefaultFEN;
-            if (i == 2 && Boss1FEN.Count > 0)
-                fen = Boss1FEN[Random.Range(0, Boss1FEN.Count)];
-            if (i == 5 && Boss2FEN.Count > 0)
-                fen = Boss2FEN[Random.Range(0, Boss2FEN.Count)];
-            Map map = new Map
-            {
-                ELO = startELO + 150 * i,
-                floor = i,
-                isCleared = false,
-                FEN = fen
-            };
+        nodesPerFloor = new int[totalFloors];
+        for (int i = 0; i < totalFloors - 1; i++)
+            nodesPerFloor[i] = Random.Range(nodesPerFloorMin, nodesPerFloorMax + 1);
+        nodesPerFloor[totalFloors - 1] = 1;
 
-            maps.Add(map);
+        for (int floor = 0; floor < totalFloors; floor++)
+        {
+            mapGrid.Add(new List<Map>());
+            for (int col = 0; col < nodesPerFloor[floor]; col++)
+            {
+                bool isBoss = floor == totalFloors - 1;
+                mapGrid[floor].Add(new Map
+                {
+                    ELO = startELO + 150 * floor,
+                    floor = floor,
+                    column = col,
+                    isCleared = false,
+                    isAccessible = floor == 0,
+                    nodeType = isBoss ? NodeType.Boss
+                               : (Random.value < 0.3f ? NodeType.Elite : NodeType.Normal),
+                    FEN = SelectFEN(floor, isBoss)
+                });
+            }
         }
-        curMap = maps[currentFloor];
+
+        for (int floor = 0; floor < totalFloors - 1; floor++)
+        {
+            int nextCount = nodesPerFloor[floor + 1];
+
+            for (int col = 0; col < nodesPerFloor[floor]; col++)
+            {
+                var node = mapGrid[floor][col];
+                int connections = Random.Range(1, 3);
+                for (int k = 0; k < connections; k++)
+                {
+                    int target = Random.Range(0, nextCount);
+                    if (!node.nextColumns.Contains(target))
+                        node.nextColumns.Add(target);
+                }
+            }
+
+            // 고립 노드 방지: incoming이 없는 노드에 강제 연결 추가
+            var hasIncoming = new bool[nextCount];
+            foreach (var node in mapGrid[floor])
+                foreach (int t in node.nextColumns)
+                    hasIncoming[t] = true;
+
+            for (int t = 0; t < nextCount; t++)
+            {
+                if (!hasIncoming[t])
+                {
+                    int src = Random.Range(0, nodesPerFloor[floor]);
+                    if (!mapGrid[floor][src].nextColumns.Contains(t))
+                        mapGrid[floor][src].nextColumns.Add(t);
+                }
+            }
+        }
+
+        foreach (var row in mapGrid)
+            maps.AddRange(row);
+
+        curMap = mapGrid[0][0];
+    }
+
+    private string SelectFEN(int floor, bool isBoss)
+    {
+        if (isBoss)
+        {
+            if (floor == 2 && Boss1FEN.Count > 0) return Boss1FEN[Random.Range(0, Boss1FEN.Count)];
+            if (floor == 5 && Boss2FEN.Count > 0) return Boss2FEN[Random.Range(0, Boss2FEN.Count)];
+        }
+        return DefaultFEN;
     }
 
     public void StartRun() => Init();
@@ -76,21 +138,16 @@ public class MapManager : MonoBehaviour
     public void StartPractice(PracticeDifficulty difficulty)
     {
         maps.Clear();
+        mapGrid.Clear();
         currentFloor = 0;
         Map practiceMap = CreatePracticeMap(difficulty);
-
         maps.Add(practiceMap);
         curMap = practiceMap;
     }
 
     private Map CreatePracticeMap(PracticeDifficulty difficulty)
     {
-        Map practiceMap = new Map
-        {
-            floor = 0,
-            isCleared = false
-        };
-
+        Map practiceMap = new Map { floor = 0, isCleared = false };
         ApplyPracticeSetting(difficulty, practiceMap);
         return practiceMap;
     }
@@ -99,14 +156,10 @@ public class MapManager : MonoBehaviour
     {
         switch (difficulty)
         {
-            case PracticeDifficulty.Easy:
-                return easyPracticeELO;
-            case PracticeDifficulty.Normal:
-                return normalPracticeELO;
-            case PracticeDifficulty.Hard:
-                return hardPracticeELO;
-            default:
-                return normalPracticeELO;
+            case PracticeDifficulty.Easy: return easyPracticeELO;
+            case PracticeDifficulty.Normal: return normalPracticeELO;
+            case PracticeDifficulty.Hard: return hardPracticeELO;
+            default: return normalPracticeELO;
         }
     }
 
@@ -120,8 +173,7 @@ public class MapManager : MonoBehaviour
                 return string.IsNullOrWhiteSpace(normalPracticeFEN) ? DefaultFEN : normalPracticeFEN;
             case PracticeDifficulty.Hard:
                 return string.IsNullOrWhiteSpace(hardPracticeFEN) ? DefaultFEN : hardPracticeFEN;
-            default:
-                return DefaultFEN;
+            default: return DefaultFEN;
         }
     }
 
@@ -133,12 +185,17 @@ public class MapManager : MonoBehaviour
 
     public void OnCombatCleared()
     {
-        maps[currentFloor].isCleared = true;
+        if (selectedNode == null) return;
 
-        currentFloor++;
+        selectedNode.isCleared = true;
+        currentFloor = selectedNode.floor + 1;
 
-        if (currentFloor >= totalFloors)
-            return;
-        curMap = maps[currentFloor];
+        if (currentFloor < totalFloors)
+        {
+            foreach (int nextCol in selectedNode.nextColumns)
+                mapGrid[currentFloor][nextCol].isAccessible = true;
+
+            curMap = mapGrid[currentFloor][0];
+        }
     }
 }
