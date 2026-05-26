@@ -72,12 +72,14 @@ public class ArenaManager : MonoBehaviour
         if (isArenaActive) return;
         isArenaActive = true;
 
+        GameManager gm = GameManager.Instance;
+        gm.CancelCurrentSelectionForBoardTransition();
+
         opponentArenaPieces = opponents;
         playerMoveCount = 0;
         hiddenPieces.Clear();
 
         BoardManager bm = BoardManager.Instance;
-        GameManager gm = GameManager.Instance;
         var allPiece = bm.GetAllPieces();
 
         // 아레나 시작 시 모든 기물 위치 저장 (Timeout 시 완전 복원에 사용)
@@ -125,6 +127,9 @@ public class ArenaManager : MonoBehaviour
         // 반턴 이벤트 구독으로 포획 감지 및 턴 카운트
         gm.OnHalfTurnChanged += OnHalfTurnChanged;
 
+        // 투기장 보드 최종 상태에서 1회만 동기화
+        gm.SyncPositionToStockfish();
+
         ArenaStarted?.Invoke(arenaCardSO, RemainingPlayerMoves);
     }
 
@@ -169,6 +174,7 @@ public class ArenaManager : MonoBehaviour
         isArenaActive = false;
 
         GameManager gm = GameManager.Instance;
+        gm.CancelCurrentSelectionForBoardTransition();
 
         // 이벤트 구독 해제 및 투기장 모드 비활성화
         gm.OnHalfTurnChanged -= OnHalfTurnChanged;
@@ -209,18 +215,19 @@ public class ArenaManager : MonoBehaviour
         BoardManager.Instance.TileEffectDrawer.RestoreTileEffects(savedTileEffects);
         gm.ResumeQueuedActions();
 
+        // 복원 완료 최종 상태에서 1회만 동기화
+        gm.SyncPositionToStockfish();
+
         switch (result)
         {
             case ArenaResult.PlayerWon:
                 // 상대 투기장 기물은 이미 DestroyPiece()로 제거된 상태이므로 추가 처리 불필요
                 Debug.Log("[Arena] 플레이어 승리 — 상대 투기장 기물 제거됨");
-                gm.SyncPositionToStockfish();
                 // RequestAIMove는 MoveSelected()가 NextTurn() 완료 후 호출 — 여기서 호출 시 GetLegalMoves와 충돌
                 break;
 
             case ArenaResult.Timeout:
                 Debug.Log("[Arena] 8턴 초과 — 무효, 메인 게임 재개");
-                gm.SyncPositionToStockfish();
                 // RequestAIMove는 MoveSelected()가 NextTurn() 완료 후 호출 — 여기서 호출 시 GetLegalMoves와 충돌
                 break;
 
@@ -260,8 +267,6 @@ public class ArenaManager : MonoBehaviour
             suspendedEffects.Add(effector);
             effector.SuspendForArena();
         }
-
-        bm.RefreshMoves();
     }
 
     /// <summary>투기장 전에 저장해 둔 타일/전역 효과를 다시 활성화합니다.</summary>
@@ -276,6 +281,5 @@ public class ArenaManager : MonoBehaviour
         }
 
         suspendedEffects.Clear();
-        BoardManager.Instance.RefreshMoves();
     }
 }
