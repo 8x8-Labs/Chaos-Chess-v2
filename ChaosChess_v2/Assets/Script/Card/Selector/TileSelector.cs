@@ -124,6 +124,7 @@ public class TileSelector : Selector<Vector3Int>
         selectedTargets.Clear();
 
         GameManager.Instance.IsGameInput = false;
+        LockCardSelection(CardSelectionOwner.Tile);
         selectorCanvas.enabled = true;
         selectState = true;
 
@@ -136,6 +137,7 @@ public class TileSelector : Selector<Vector3Int>
     protected override void DisableSelector()
     {
         GameManager.Instance.IsGameInput = true;
+        UnlockCardSelection(CardSelectionOwner.Tile);
         selectorCanvas.enabled = false;
         selectState = false;
 
