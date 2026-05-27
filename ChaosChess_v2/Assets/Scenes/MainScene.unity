@@ -1877,7 +1877,7 @@ MonoBehaviour:
   uIAnimationObject: {fileID: 181743027}
   isStartAnimation: 0
   isEndAnimation: 0
-  nextSceneName: LoadingScene
+  nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
   resultSceneName: ResultScene
@@ -3702,7 +3702,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -2653196}
+  m_AnchoredPosition: {x: 0, y: -2712832.2}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &347282249
@@ -6363,17 +6363,8 @@ MonoBehaviour:
   hardPracticeFEN: rnbqkbnr/pppppppp/2pppp2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   nodesPerFloorMin: 1
   nodesPerFloorMax: 3
+  mapGrid: []
   nodesPerFloor: 
-  selectedNode:
-    ELO: 0
-    FEN: 
-    isCleared: 0
-    floor: 0
-    nodeType: 0
-    column: 0
-    nextColumns: 
-    isAccessible: 0
-    uiPosition: {x: 0, y: 0}
   curMap:
     ELO: 0
     FEN: 
@@ -7757,7 +7748,7 @@ MonoBehaviour:
   uIAnimationObject: {fileID: 782923674}
   isStartAnimation: 0
   isEndAnimation: 0
-  nextSceneName: LoadingScene
+  nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
   resultSceneName: ResultScene
@@ -8393,6 +8384,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 889277574}
   m_CullTransparentMesh: 1
+--- !u!1 &910000000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910000001}
+  - component: {fileID: 910000002}
+  m_Layer: 0
+  m_Name: SceneLoadManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &910000001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &910000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53c5861cc96b6854e985b8993df7c742, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fadeDuration: 0.2
+  loadingDisplayDelay: 0.2
+  overlayPrefab: {fileID: 1000000000000000006, guid: c95bb3f83fc44740b72105a3aa01f584, type: 3}
 --- !u!1 &914143565
 GameObject:
   m_ObjectHideFlags: 0
@@ -9248,7 +9286,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00016812516, y: -2804427.8}
+  m_AnchoredPosition: {x: -0.00016812516, y: -2864064}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1053581299
@@ -17890,7 +17928,7 @@ MonoBehaviour:
   uIAnimationObject: {fileID: 1957980557}
   isStartAnimation: 0
   isEndAnimation: 0
-  nextSceneName: LoadingScene
+  nextSceneName: 
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
   resultSceneName: ResultScene
@@ -20148,3 +20186,4 @@ SceneRoots:
   - {fileID: 962982684}
   - {fileID: 632452316}
   - {fileID: 1994363648}
+  - {fileID: 910000001}

@@ -1,10 +1,12 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneLoadManager : MonoBehaviour
 {
-    private const string LoadingSceneName = "LoadingScene";
+    [SerializeField] private float fadeDuration = 0.18f;
+    [SerializeField] private float loadingDisplayDelay = 0.25f;
 
     private static SceneLoadManager instance;
 
@@ -23,6 +25,8 @@ public class SceneLoadManager : MonoBehaviour
     }
 
     private bool isLoading;
+    [SerializeField] private SceneLoadingOverlayUI overlayPrefab;
+    private SceneLoadingOverlayUI overlayUI;
 
     private void Awake()
     {
@@ -30,6 +34,7 @@ public class SceneLoadManager : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+            CreateLoadingOverlay();
         }
         else
         {
@@ -37,29 +42,18 @@ public class SceneLoadManager : MonoBehaviour
         }
     }
 
-    public void LoadScene(string sceneName) => StartCoroutine(LoadSceneCoroutine(sceneName));
+    public void LoadScene(string sceneName)
+    {
+        if (isLoading)
+            return;
+
+        StartCoroutine(LoadSceneCoroutine(sceneName));
+    }
 
     private IEnumerator LoadSceneCoroutine(string sceneName)
     {
-        if (isLoading)
-            yield break;
-
         isLoading = true;
-
-        Scene activeScene = SceneManager.GetActiveScene();
-
-        if (activeScene.name != LoadingSceneName && sceneName != LoadingSceneName)
-        {
-            AsyncOperation loadingSceneOperation = SceneManager.LoadSceneAsync(LoadingSceneName);
-            if (loadingSceneOperation == null)
-            {
-                isLoading = false;
-                yield break;
-            }
-
-            while (!loadingSceneOperation.isDone)
-                yield return null;
-        }
+        overlayUI?.Initialize();
 
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
         if (operation == null)
@@ -70,24 +64,53 @@ public class SceneLoadManager : MonoBehaviour
 
         operation.allowSceneActivation = false;
 
-        while (operation.progress < 0.9f)
-        {
-            SetProgress(Mathf.Clamp01(operation.progress / 0.9f));
-            yield return null;
-        }
-
-        SetProgress(1f);
+        Tween fadeIn = overlayUI?.FadeTo(1f, fadeDuration);
+        yield return WaitForReadyToActivate(operation, fadeIn);
 
         operation.allowSceneActivation = true;
 
         while (!operation.isDone)
             yield return null;
 
+        Tween fadeOut = overlayUI?.FadeTo(0f, fadeDuration);
+        if (fadeOut != null)
+            yield return fadeOut.WaitForCompletion();
+
+        overlayUI?.SetLoadingContentVisible(false);
         isLoading = false;
     }
 
-    private void SetProgress(float progress)
+    private IEnumerator WaitForReadyToActivate(AsyncOperation operation, Tween fadeTween)
     {
-        LoadingSceneUI.Instance?.SetProgress(progress);
+        float elapsed = 0f;
+        bool isLoadingContentVisible = false;
+
+        while (operation.progress < 0.9f || IsTweenRunning(fadeTween))
+        {
+            elapsed += Time.unscaledDeltaTime;
+
+            if (!isLoadingContentVisible && elapsed >= loadingDisplayDelay)
+            {
+                overlayUI?.SetLoadingContentVisible(true);
+                isLoadingContentVisible = true;
+            }
+
+            overlayUI?.SetProgress(Mathf.Clamp01(operation.progress / 0.9f));
+            yield return null;
+        }
+
+        overlayUI?.SetAlpha(1f);
+        overlayUI?.SetProgress(1f);
+    }
+
+    private bool IsTweenRunning(Tween tween)
+    {
+        return tween != null && tween.IsActive() && !tween.IsComplete();
+    }
+
+    private void CreateLoadingOverlay()
+    {
+        overlayUI = Instantiate(overlayPrefab, transform);
+        overlayUI.Initialize();
     }
 }
