@@ -199,7 +199,11 @@ public class MapManager : MonoBehaviour
     // 전투 승리 후 호출. 클리어 상태 갱신 및 다음 층 노드 접근권 해제.
     public void OnCombatCleared()
     {
-        if (selectedNode == null) return;
+        if (selectedNode == null)
+        {
+            Debug.LogError("OnCombatCleared: selectedNode is null. Check map state.");
+            return;
+        }
 
         selectedNode.isCleared = true;
         currentFloor = selectedNode.floor + 1;
