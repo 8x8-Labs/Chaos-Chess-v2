@@ -12,7 +12,11 @@
       "Bash(find . -name \"*.cs\" -exec grep -l \"CardEffectArgs\" {} \\;)",
       "Bash(grep -l \"OnTurnChanged\\|EventManager\\|OnPieceEnter\" .../*.cs)",
       "Bash(gh pr *)",
-      "Bash(gh api *)"
+      "Bash(gh api *)",
+      "Bash(gh issue *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
