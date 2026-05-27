@@ -15,11 +15,13 @@ public class CardHandLayout : MonoBehaviour
 
     private void Awake()
     {
-        gameManager = GameManager.Instance;
+        gameManager ??= GameManager.Instance;
     }
 
     private void OnEnable()
     {
+        gameManager ??= GameManager.Instance;
+
         if (gameManager != null)
         {
             gameManager.OnPlayerCheckStateChanged += SetInputBlocked;
