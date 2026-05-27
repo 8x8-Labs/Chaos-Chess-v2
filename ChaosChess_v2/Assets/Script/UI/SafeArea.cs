@@ -20,12 +20,18 @@ public class SafeArea : MonoBehaviour
         canvas = GetComponentInParent<Canvas>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        Canvas.willRenderCanvases += OnWillRenderCanvases;
         Apply();
     }
 
-    private void Update()
+    private void OnDisable()
+    {
+        Canvas.willRenderCanvases -= OnWillRenderCanvases;
+    }
+
+    private void OnWillRenderCanvases()
     {
         Vector2 currentSize = new Vector2(Screen.width, Screen.height);
         if (Screen.safeArea != lastSafeArea ||
