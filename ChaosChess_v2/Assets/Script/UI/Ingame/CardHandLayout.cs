@@ -8,8 +8,32 @@ public class CardHandLayout : MonoBehaviour
     [SerializeField] private float overlap = 40f;
     [SerializeField] private float cardY = 0f;
     [SerializeField] private float rearrangeDuration = 0.3f;
+    [SerializeField] private GameObject inputBlockPanel;
 
     private readonly List<RectTransform> _cards = new();
+    private GameManager gameManager;
+
+    private void Awake()
+    {
+        gameManager ??= GameManager.Instance;
+    }
+
+    private void OnEnable()
+    {
+        gameManager ??= GameManager.Instance;
+
+        if (gameManager != null)
+        {
+            gameManager.OnPlayerCheckStateChanged += SetInputBlocked;
+            SetInputBlocked(gameManager.IsPlayerInCheck);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (gameManager != null)
+            gameManager.OnPlayerCheckStateChanged -= SetInputBlocked;
+    }
 
     public void AddCard(RectTransform card)
     {
@@ -24,6 +48,14 @@ public class CardHandLayout : MonoBehaviour
     }
 
     public void RefreshAnimated() => Refresh(animate: true);
+
+    private void SetInputBlocked(bool isBlocked)
+    {
+        if (inputBlockPanel == null)
+            return;
+
+        inputBlockPanel.SetActive(isBlocked);
+    }
 
     private void Refresh(bool animate)
     {
