@@ -3,7 +3,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
 using System.Linq;
-using UnityEngine.SceneManagement;
 
 public class UIButton : Button
 {
@@ -90,7 +89,7 @@ public class UIButton : Button
                     .FirstOrDefault();
                 changeCanvas(); break;
             case ButtonType.GoScene:
-                SceneManager.LoadScene(nextSceneName);
+                SceneLoadManager.Instance.LoadScene(nextSceneName);
                 break;
             case ButtonType.EndGame:
                 LoadEndGameScene();
@@ -113,21 +112,21 @@ public class UIButton : Button
     private void StartPracticeMode()
     {
         GameCycleManager.Instance.StartPractice(practiceDifficulty);
-        SceneManager.LoadScene(practiceSceneName);
+        SceneLoadManager.Instance.LoadScene(practiceSceneName);
     }
 
     private void LoadEndGameScene()
     {
         if (GameCycleManager.Instance.IsPracticeMode)
         {
-            SceneManager.LoadScene(mainSceneName);
+            SceneLoadManager.Instance.LoadScene(mainSceneName);
             return;
         }
 
         bool isLose = PlayerState.Instance?.CurGameResult == GameResult.BlackWin;
         bool isFinalFloorClear = MapManager.Instance?.currentFloor >= MapManager.Instance?.totalFloors;
 
-        SceneManager.LoadScene((isLose || isFinalFloorClear) ? resultSceneName : rewardSceneName);
+        SceneLoadManager.Instance.LoadScene((isLose || isFinalFloorClear) ? resultSceneName : rewardSceneName);
     }
 
     private void changeCanvas() => StartCoroutine(changeCanvasCoroutine());
