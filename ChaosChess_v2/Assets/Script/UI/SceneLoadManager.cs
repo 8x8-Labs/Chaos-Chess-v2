@@ -10,19 +10,7 @@ public class SceneLoadManager : MonoBehaviour
 
     private static SceneLoadManager instance;
 
-    public static SceneLoadManager Instance
-    {
-        get
-        {
-            if (instance == null)
-            {
-                GameObject loader = new GameObject(nameof(SceneLoadManager));
-                loader.AddComponent<SceneLoadManager>();
-            }
-
-            return instance;
-        }
-    }
+    public static SceneLoadManager Instance => instance;
 
     private bool isLoading;
     [SerializeField] private SceneLoadingOverlayUI overlayPrefab;
@@ -44,7 +32,7 @@ public class SceneLoadManager : MonoBehaviour
 
     public void LoadScene(string sceneName)
     {
-        if (isLoading)
+        if (isLoading || string.IsNullOrWhiteSpace(sceneName))
             return;
 
         StartCoroutine(LoadSceneCoroutine(sceneName));
@@ -110,6 +98,9 @@ public class SceneLoadManager : MonoBehaviour
 
     private void CreateLoadingOverlay()
     {
+        if (overlayPrefab == null)
+            return;
+
         overlayUI = Instantiate(overlayPrefab, transform);
         overlayUI.Initialize();
     }

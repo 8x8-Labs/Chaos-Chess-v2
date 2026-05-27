@@ -34,7 +34,9 @@ public class SceneLoadingOverlayUI : MonoBehaviour
             return null;
         }
 
-        SetBlocking(targetAlpha > 0f);
+        if (targetAlpha > 0f)
+            SetBlocking(true);
+
         fadeTween = overlayGroup
             .DOFade(targetAlpha, duration)
             .SetUpdate(true)
