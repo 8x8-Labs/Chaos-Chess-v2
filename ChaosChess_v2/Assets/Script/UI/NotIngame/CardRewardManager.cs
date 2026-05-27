@@ -9,7 +9,7 @@ public class CardRewardManager : MonoBehaviour
 
     private void Start()
     {
-        if (PlayerState.Instance == null)
+        if (PlayerState.Instance == null || CardRandomizerManager.Instance == null)
             return;
 
         int rewardCardCount = ResolveRewardCardCount();

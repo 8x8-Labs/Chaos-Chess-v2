@@ -77,7 +77,7 @@ public class UIButton : Button
     public void OnClicked()
     {
         if (!IsInteractable()) return;
-        if (clickSound != null) soundManager.SFXPlay("UIClick", clickSound);
+        if (soundManager != null && clickSound != null) soundManager.SFXPlay("UIClick", clickSound);
         switch (buttonType)
         {
             case ButtonType.ChangeCanvas:

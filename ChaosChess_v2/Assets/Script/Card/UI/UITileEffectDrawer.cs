@@ -8,18 +8,21 @@ public class UITileEffectDrawer : MonoBehaviour
 
     public void SetTileEffect(Vector3Int pos, TileBase tile)
     {
-        effectTilemap.SetTile(pos, tile);
+        if (effectTilemap != null)
+            effectTilemap.SetTile(pos, tile);
     }
 
     public void ClearTileEffect(Vector3Int pos)
     {
-        effectTilemap.SetTile(pos, null);
+        if (effectTilemap != null)
+            effectTilemap.SetTile(pos, null);
     }
 
     /// <summary>현재 타일 이펙트 맵을 위치-타일 스냅샷으로 저장합니다.</summary>
     public Dictionary<Vector3Int, TileBase> CaptureTileEffects()
     {
         var snapshot = new Dictionary<Vector3Int, TileBase>();
+        if (effectTilemap == null) return snapshot;
 
         foreach (Vector3Int pos in effectTilemap.cellBounds.allPositionsWithin)
         {
@@ -34,6 +37,7 @@ public class UITileEffectDrawer : MonoBehaviour
     /// <summary>저장된 스냅샷 기준으로 타일 이펙트를 복원합니다.</summary>
     public void RestoreTileEffects(Dictionary<Vector3Int, TileBase> snapshot)
     {
+        if (effectTilemap == null) return;
         effectTilemap.ClearAllTiles();
 
         if (snapshot == null)
@@ -48,6 +52,7 @@ public class UITileEffectDrawer : MonoBehaviour
     /// <summary>타일 이펙트 맵을 전체 초기화합니다.</summary>
     public void ClearAllTileEffects()
     {
-        effectTilemap.ClearAllTiles();
+        if (effectTilemap != null)
+            effectTilemap.ClearAllTiles();
     }
 }

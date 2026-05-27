@@ -37,17 +37,20 @@ public class UIResultManager : MonoBehaviour
 
         foreach (GameObject card in cards)
         {
+            if (card == null) continue;
             CardData cardData = card.GetComponent<CardData>();
+            if (cardData == null || cardData.DataSO == null) continue;
 
             GameObject cardObject = Instantiate(cardPrefab, content);
 
             Image img = cardObject.GetComponentInChildren<Image>();
             TextMeshProUGUI text = cardObject.GetComponentInChildren<TextMeshProUGUI>();
 
-            if (cardData.DataSO.CardImage != null)
+            if (img != null && cardData.DataSO.CardImage != null)
                 img.sprite = cardData.DataSO.CardImage;
 
-            text.text = cardData.DataSO.CardName;
+            if (text != null)
+                text.text = cardData.DataSO.CardName;
         }
     }
 }

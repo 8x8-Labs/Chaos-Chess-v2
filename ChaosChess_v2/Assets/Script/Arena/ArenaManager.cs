@@ -88,10 +88,12 @@ public class ArenaManager : MonoBehaviour
         // 캐슬링 권한 저장 — BatchReassign이 King/Rook 복원 시 플래그를 손상시키므로 별도 보존
         bm.UpdateFEN();
         savedCastlingFen = bm.GetFEN().Split(' ')[2];
-        savedTileEffects = bm.TileEffectDrawer.CaptureTileEffects();
+        if (bm.TileEffectDrawer != null)
+            savedTileEffects = bm.TileEffectDrawer.CaptureTileEffects();
         SuspendStoredEffects();
         gm.PauseQueuedActions();
-        bm.TileEffectDrawer.ClearAllTileEffects();
+        if (bm.TileEffectDrawer != null)
+            bm.TileEffectDrawer.ClearAllTileEffects();
 
         // 양쪽 King 참조 저장 — Stockfish 연산에 필요
         playerKing = allPiece.Find(p => p.Color == gm.PlayerColor && p.Type == PieceType.King);
@@ -206,7 +208,8 @@ public class ArenaManager : MonoBehaviour
             if (p != null) BoardManager.Instance.RestorePiece(p);
         hiddenPieces.Clear();
         ResumeStoredEffects();
-        BoardManager.Instance.TileEffectDrawer.RestoreTileEffects(savedTileEffects);
+        if (BoardManager.Instance.TileEffectDrawer != null && savedTileEffects != null)
+            BoardManager.Instance.TileEffectDrawer.RestoreTileEffects(savedTileEffects);
         gm.ResumeQueuedActions();
 
         switch (result)
