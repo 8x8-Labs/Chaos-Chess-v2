@@ -3702,7 +3702,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -2631427}
+  m_AnchoredPosition: {x: 0, y: -2653196}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &347282249
@@ -6361,11 +6361,29 @@ MonoBehaviour:
   easyPracticeFEN: 1nb1kbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   normalPracticeFEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   hardPracticeFEN: rnbqkbnr/pppppppp/2pppp2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  nodesPerFloorMin: 1
+  nodesPerFloorMax: 3
+  nodesPerFloor: 
+  selectedNode:
+    ELO: 0
+    FEN: 
+    isCleared: 0
+    floor: 0
+    nodeType: 0
+    column: 0
+    nextColumns: 
+    isAccessible: 0
+    uiPosition: {x: 0, y: 0}
   curMap:
     ELO: 0
     FEN: 
     isCleared: 0
     floor: 0
+    nodeType: 0
+    column: 0
+    nextColumns: 
+    isAccessible: 0
+    uiPosition: {x: 0, y: 0}
 --- !u!4 &632452316
 Transform:
   m_ObjectHideFlags: 0
@@ -9230,7 +9248,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00016812516, y: -2782658.8}
+  m_AnchoredPosition: {x: -0.00016812516, y: -2804427.8}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1053581299
