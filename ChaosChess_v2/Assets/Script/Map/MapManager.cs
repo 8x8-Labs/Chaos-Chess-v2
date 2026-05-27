@@ -51,19 +51,24 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    // 맵 그래프를 처음부터 새로 생성한다. 런 시작 또는 재시작 시 호출.
     public void Init()
     {
         maps.Clear();
         mapGrid.Clear();
         currentFloor = 0;
 
+        // 런마다 시작 ELO를 랜덤화하여 난이도 변동 부여
         int startELO = Random.Range(800, 1200);
 
+        // ── 1단계: 각 층의 노드 수 결정 ──────────────────────────────────────
         nodesPerFloor = new int[totalFloors];
         for (int i = 0; i < totalFloors - 1; i++)
             nodesPerFloor[i] = Random.Range(nodesPerFloorMin, nodesPerFloorMax + 1);
+        // 마지막 층은 보스 노드 하나로 고정
         nodesPerFloor[totalFloors - 1] = 1;
 
+        // ── 2단계: 노드 생성 ──────────────────────────────────────────────────
         for (int floor = 0; floor < totalFloors; floor++)
         {
             mapGrid.Add(new List<Map>());
@@ -72,11 +77,14 @@ public class MapManager : MonoBehaviour
                 bool isBoss = floor == totalFloors - 1;
                 mapGrid[floor].Add(new Map
                 {
+                    // 층이 높을수록 ELO 150씩 상승 → AI 강도 선형 증가
                     ELO = startELO + 150 * floor,
                     floor = floor,
                     column = col,
                     isCleared = false,
+                    // 0층 노드만 초기에 접근 가능
                     isAccessible = floor == 0,
+                    // 보스층이면 Boss, 30% 확률로 Elite, 나머지는 Normal
                     nodeType = isBoss ? NodeType.Boss
                                : (Random.value < 0.3f ? NodeType.Elite : NodeType.Normal),
                     FEN = SelectFEN(floor, isBoss)
@@ -84,10 +92,12 @@ public class MapManager : MonoBehaviour
             }
         }
 
+        // ── 3단계: 층 간 엣지(연결) 생성 ────────────────────────────────────
         for (int floor = 0; floor < totalFloors - 1; floor++)
         {
             int nextCount = nodesPerFloor[floor + 1];
 
+            // 각 노드에서 다음 층 노드로 1~2개 랜덤 연결
             for (int col = 0; col < nodesPerFloor[floor]; col++)
             {
                 var node = mapGrid[floor][col];
@@ -117,12 +127,15 @@ public class MapManager : MonoBehaviour
             }
         }
 
+        // ── 4단계: 플랫 리스트 동기화 및 초기 위치 설정 ────────────────────
         foreach (var row in mapGrid)
             maps.AddRange(row);
 
         curMap = mapGrid[0][0];
     }
 
+    // 층과 보스 여부에 따라 FEN 문자열을 결정한다.
+    // Boss1FEN / Boss2FEN 리스트가 비어 있으면 DefaultFEN으로 폴백.
     private string SelectFEN(int floor, bool isBoss)
     {
         if (isBoss)
@@ -183,6 +196,7 @@ public class MapManager : MonoBehaviour
         map.FEN = GetPracticeFen(difficulty);
     }
 
+    // 전투 승리 후 호출. 클리어 상태 갱신 및 다음 층 노드 접근권 해제.
     public void OnCombatCleared()
     {
         if (selectedNode == null) return;
@@ -192,6 +206,7 @@ public class MapManager : MonoBehaviour
 
         if (currentFloor < totalFloors)
         {
+            // 클리어한 노드의 nextColumns에 연결된 다음 층 노드만 활성화
             foreach (int nextCol in selectedNode.nextColumns)
                 mapGrid[currentFloor][nextCol].isAccessible = true;
 
