@@ -8,6 +8,12 @@ public enum PracticeDifficulty
     Hard
 }
 
+[System.Serializable]
+public class MapFloor
+{
+    public List<Map> nodes = new();
+}
+
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance;
@@ -28,6 +34,12 @@ public class MapManager : MonoBehaviour
     [SerializeField] private string normalPracticeFEN;
     [SerializeField] private string hardPracticeFEN;
 
+    [Header("Graph Map")]
+    public int nodesPerFloorMin = 1;
+    public int nodesPerFloorMax = 3;
+
+    public List<MapFloor> mapGrid = new();
+    public int[] nodesPerFloor;
     public Map curMap;
 
     private void Awake()
@@ -44,31 +56,99 @@ public class MapManager : MonoBehaviour
         }
     }
 
+    // 맵 그래프를 처음부터 새로 생성한다. 런 시작 또는 재시작 시 호출.
     public void Init()
     {
         maps.Clear();
+        mapGrid.Clear();
         currentFloor = 0;
 
+        // 런마다 시작 ELO를 랜덤화하여 난이도 변동 부여
         int startELO = Random.Range(800, 1200);
 
-        for (int i = 0; i < totalFloors; i++)
-        {
-            string fen = DefaultFEN;
-            if (i == 2 && Boss1FEN.Count > 0)
-                fen = Boss1FEN[Random.Range(0, Boss1FEN.Count)];
-            if (i == 5 && Boss2FEN.Count > 0)
-                fen = Boss2FEN[Random.Range(0, Boss2FEN.Count)];
-            Map map = new Map
-            {
-                ELO = startELO + 150 * i,
-                floor = i,
-                isCleared = false,
-                FEN = fen
-            };
+        // ── 1단계: 각 층의 노드 수 결정 ──────────────────────────────────────
+        nodesPerFloor = new int[totalFloors];
+        for (int i = 0; i < totalFloors - 1; i++)
+            nodesPerFloor[i] = Random.Range(nodesPerFloorMin, nodesPerFloorMax + 1);
+        // 마지막 층은 보스 노드 하나로 고정
+        nodesPerFloor[totalFloors - 1] = 1;
 
-            maps.Add(map);
+        // ── 2단계: 노드 생성 ──────────────────────────────────────────────────
+        for (int floor = 0; floor < totalFloors; floor++)
+        {
+            mapGrid.Add(new MapFloor());
+            for (int col = 0; col < nodesPerFloor[floor]; col++)
+            {
+                bool isBoss = floor == totalFloors - 1;
+                mapGrid[floor].nodes.Add(new Map
+                {
+                    // 층이 높을수록 ELO 150씩 상승 → AI 강도 선형 증가
+                    ELO = startELO + 150 * floor,
+                    floor = floor,
+                    column = col,
+                    isCleared = false,
+                    // 0층 노드만 초기에 접근 가능
+                    isAccessible = floor == 0,
+                    // 보스층이면 Boss, 30% 확률로 Elite, 나머지는 Normal
+                    nodeType = isBoss ? NodeType.Boss
+                               : (Random.value < 0.3f ? NodeType.Elite : NodeType.Normal),
+                    FEN = SelectFEN(floor, isBoss)
+                });
+            }
         }
-        curMap = maps[currentFloor];
+
+        // ── 3단계: 층 간 엣지(연결) 생성 ────────────────────────────────────
+        for (int floor = 0; floor < totalFloors - 1; floor++)
+        {
+            int nextCount = nodesPerFloor[floor + 1];
+
+            // 각 노드에서 다음 층 노드로 1~2개 랜덤 연결
+            for (int col = 0; col < nodesPerFloor[floor]; col++)
+            {
+                var node = mapGrid[floor].nodes[col];
+                int connections = Random.Range(1, 3);
+                for (int k = 0; k < connections; k++)
+                {
+                    int target = Random.Range(0, nextCount);
+                    if (!node.nextColumns.Contains(target))
+                        node.nextColumns.Add(target);
+                }
+            }
+
+            // 고립 노드 방지: incoming이 없는 노드에 강제 연결 추가
+            var hasIncoming = new bool[nextCount];
+            foreach (var node in mapGrid[floor].nodes)
+                foreach (int t in node.nextColumns)
+                    hasIncoming[t] = true;
+
+            for (int t = 0; t < nextCount; t++)
+            {
+                if (!hasIncoming[t])
+                {
+                    int src = Random.Range(0, nodesPerFloor[floor]);
+                    if (!mapGrid[floor].nodes[src].nextColumns.Contains(t))
+                        mapGrid[floor].nodes[src].nextColumns.Add(t);
+                }
+            }
+        }
+
+        // ── 4단계: 플랫 리스트 동기화 및 초기 위치 설정 ────────────────────
+        foreach (var row in mapGrid)
+            maps.AddRange(row.nodes);
+
+        curMap = mapGrid[0].nodes[0];
+    }
+
+    // 층과 보스 여부에 따라 FEN 문자열을 결정한다.
+    // Boss1FEN / Boss2FEN 리스트가 비어 있으면 DefaultFEN으로 폴백.
+    private string SelectFEN(int floor, bool isBoss)
+    {
+        if (isBoss)
+        {
+            if (floor == 2 && Boss1FEN.Count > 0) return Boss1FEN[Random.Range(0, Boss1FEN.Count)];
+            if (floor == 5 && Boss2FEN.Count > 0) return Boss2FEN[Random.Range(0, Boss2FEN.Count)];
+        }
+        return DefaultFEN;
     }
 
     public void StartRun() => Init();
@@ -76,21 +156,16 @@ public class MapManager : MonoBehaviour
     public void StartPractice(PracticeDifficulty difficulty)
     {
         maps.Clear();
+        mapGrid.Clear();
         currentFloor = 0;
         Map practiceMap = CreatePracticeMap(difficulty);
-
         maps.Add(practiceMap);
         curMap = practiceMap;
     }
 
     private Map CreatePracticeMap(PracticeDifficulty difficulty)
     {
-        Map practiceMap = new Map
-        {
-            floor = 0,
-            isCleared = false
-        };
-
+        Map practiceMap = new Map { floor = 0, isCleared = false };
         ApplyPracticeSetting(difficulty, practiceMap);
         return practiceMap;
     }
@@ -99,14 +174,10 @@ public class MapManager : MonoBehaviour
     {
         switch (difficulty)
         {
-            case PracticeDifficulty.Easy:
-                return easyPracticeELO;
-            case PracticeDifficulty.Normal:
-                return normalPracticeELO;
-            case PracticeDifficulty.Hard:
-                return hardPracticeELO;
-            default:
-                return normalPracticeELO;
+            case PracticeDifficulty.Easy: return easyPracticeELO;
+            case PracticeDifficulty.Normal: return normalPracticeELO;
+            case PracticeDifficulty.Hard: return hardPracticeELO;
+            default: return normalPracticeELO;
         }
     }
 
@@ -120,8 +191,7 @@ public class MapManager : MonoBehaviour
                 return string.IsNullOrWhiteSpace(normalPracticeFEN) ? DefaultFEN : normalPracticeFEN;
             case PracticeDifficulty.Hard:
                 return string.IsNullOrWhiteSpace(hardPracticeFEN) ? DefaultFEN : hardPracticeFEN;
-            default:
-                return DefaultFEN;
+            default: return DefaultFEN;
         }
     }
 
@@ -131,14 +201,28 @@ public class MapManager : MonoBehaviour
         map.FEN = GetPracticeFen(difficulty);
     }
 
+    // 전투 승리 후 호출. 클리어 상태 갱신 및 다음 층 노드 접근권 해제.
     public void OnCombatCleared()
     {
-        maps[currentFloor].isCleared = true;
-
-        currentFloor++;
-
-        if (currentFloor >= totalFloors)
+        if (curMap == null)
+        {
+            Debug.LogError("OnCombatCleared: curMap is null. Check map state.");
             return;
-        curMap = maps[currentFloor];
+        }
+
+        curMap.isCleared = true;
+
+        // 같은 층의 다른 노드 접근권 해제 (역주행 방지)
+        foreach (var node in mapGrid[curMap.floor].nodes)
+            node.isAccessible = false;
+
+        currentFloor = curMap.floor + 1;
+
+        if (currentFloor < totalFloors)
+        {
+            // 클리어한 노드의 nextColumns에 연결된 다음 층 노드만 활성화
+            foreach (int nextCol in curMap.nextColumns)
+                mapGrid[currentFloor].nodes[nextCol].isAccessible = true;
+        }
     }
 }

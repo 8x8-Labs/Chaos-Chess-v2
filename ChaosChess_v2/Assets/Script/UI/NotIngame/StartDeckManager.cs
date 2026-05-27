@@ -11,6 +11,7 @@ public class StartDeckManager : MonoBehaviour
     public void Init()
     {
         CardRandomizerManager randomizer = CardRandomizerManager.Instance;
+        if (randomizer == null) return;
 
         List<GameObject> starterCards = new List<GameObject>();
         starterCards.AddRange(randomizer.GetRandomCardsByTier(Tier.Common, commonCardCount));

@@ -48,6 +48,9 @@ public class ButtonPanel : MonoBehaviour
     }
     public void FadeIn()
     {
+        if(canvasGroup == null)
+            canvasGroup = GetComponent<CanvasGroup>();
+
         canvasGroup.blocksRaycasts = false;
         canvasGroup.DOFade(0f, fadeDuration);
     }
