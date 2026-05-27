@@ -8,6 +8,12 @@ public enum PracticeDifficulty
     Hard
 }
 
+[System.Serializable]
+public class MapFloor
+{
+    public List<Map> nodes = new();
+}
+
 public class MapManager : MonoBehaviour
 {
     public static MapManager Instance;
@@ -32,9 +38,8 @@ public class MapManager : MonoBehaviour
     public int nodesPerFloorMin = 1;
     public int nodesPerFloorMax = 3;
 
-    public List<List<Map>> mapGrid = new();
+    public List<MapFloor> mapGrid = new();
     public int[] nodesPerFloor;
-    public Map selectedNode;
     public Map curMap;
 
     private void Awake()
@@ -71,11 +76,11 @@ public class MapManager : MonoBehaviour
         // ── 2단계: 노드 생성 ──────────────────────────────────────────────────
         for (int floor = 0; floor < totalFloors; floor++)
         {
-            mapGrid.Add(new List<Map>());
+            mapGrid.Add(new MapFloor());
             for (int col = 0; col < nodesPerFloor[floor]; col++)
             {
                 bool isBoss = floor == totalFloors - 1;
-                mapGrid[floor].Add(new Map
+                mapGrid[floor].nodes.Add(new Map
                 {
                     // 층이 높을수록 ELO 150씩 상승 → AI 강도 선형 증가
                     ELO = startELO + 150 * floor,
@@ -100,7 +105,7 @@ public class MapManager : MonoBehaviour
             // 각 노드에서 다음 층 노드로 1~2개 랜덤 연결
             for (int col = 0; col < nodesPerFloor[floor]; col++)
             {
-                var node = mapGrid[floor][col];
+                var node = mapGrid[floor].nodes[col];
                 int connections = Random.Range(1, 3);
                 for (int k = 0; k < connections; k++)
                 {
@@ -112,7 +117,7 @@ public class MapManager : MonoBehaviour
 
             // 고립 노드 방지: incoming이 없는 노드에 강제 연결 추가
             var hasIncoming = new bool[nextCount];
-            foreach (var node in mapGrid[floor])
+            foreach (var node in mapGrid[floor].nodes)
                 foreach (int t in node.nextColumns)
                     hasIncoming[t] = true;
 
@@ -121,17 +126,17 @@ public class MapManager : MonoBehaviour
                 if (!hasIncoming[t])
                 {
                     int src = Random.Range(0, nodesPerFloor[floor]);
-                    if (!mapGrid[floor][src].nextColumns.Contains(t))
-                        mapGrid[floor][src].nextColumns.Add(t);
+                    if (!mapGrid[floor].nodes[src].nextColumns.Contains(t))
+                        mapGrid[floor].nodes[src].nextColumns.Add(t);
                 }
             }
         }
 
         // ── 4단계: 플랫 리스트 동기화 및 초기 위치 설정 ────────────────────
         foreach (var row in mapGrid)
-            maps.AddRange(row);
+            maps.AddRange(row.nodes);
 
-        curMap = mapGrid[0][0];
+        curMap = mapGrid[0].nodes[0];
     }
 
     // 층과 보스 여부에 따라 FEN 문자열을 결정한다.
@@ -199,25 +204,25 @@ public class MapManager : MonoBehaviour
     // 전투 승리 후 호출. 클리어 상태 갱신 및 다음 층 노드 접근권 해제.
     public void OnCombatCleared()
     {
-        if (selectedNode == null)
+        if (curMap == null)
         {
-            Debug.LogError("OnCombatCleared: selectedNode is null. Check map state.");
+            Debug.LogError("OnCombatCleared: curMap is null. Check map state.");
             return;
         }
 
-        selectedNode.isCleared = true;
+        curMap.isCleared = true;
 
         // 같은 층의 다른 노드 접근권 해제 (역주행 방지)
-        foreach (var node in mapGrid[selectedNode.floor])
+        foreach (var node in mapGrid[curMap.floor].nodes)
             node.isAccessible = false;
 
-        currentFloor = selectedNode.floor + 1;
+        currentFloor = curMap.floor + 1;
 
         if (currentFloor < totalFloors)
         {
             // 클리어한 노드의 nextColumns에 연결된 다음 층 노드만 활성화
-            foreach (int nextCol in selectedNode.nextColumns)
-                mapGrid[currentFloor][nextCol].isAccessible = true;
+            foreach (int nextCol in curMap.nextColumns)
+                mapGrid[currentFloor].nodes[nextCol].isAccessible = true;
         }
     }
 }

@@ -30,7 +30,6 @@ public class MapNodeButton : MonoBehaviour
     private void OnSelected()
     {
         if (mapData == null) return;
-        MapManager.Instance.selectedNode = mapData;
         MapManager.Instance.curMap = mapData;
     }
 }

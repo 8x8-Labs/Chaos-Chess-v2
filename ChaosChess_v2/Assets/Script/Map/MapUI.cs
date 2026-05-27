@@ -71,7 +71,7 @@ public class MapUI : MonoBehaviour
             int count = manager.nodesPerFloor[floor];
             for (int col = 0; col < count; col++)
             {
-                Map map = manager.mapGrid[floor][col];
+                Map map = manager.mapGrid[floor].nodes[col];
                 if (map.uiPosition == Vector2.zero)
                     map.uiPosition = NodePosition(floor, col, count);
                 Vector2 pos = map.uiPosition;
@@ -94,11 +94,11 @@ public class MapUI : MonoBehaviour
         // ── 층 간 연결선 생성 (노드 뒤에 렌더링되도록 SiblingIndex 0에 삽입) ──
         for (int floor = 0; floor < manager.totalFloors - 1; floor++)
         {
-            foreach (var node in manager.mapGrid[floor])
+            foreach (var node in manager.mapGrid[floor].nodes)
             {
                 foreach (int nextCol in node.nextColumns)
                 {
-                    DrawLine(node.uiPosition, manager.mapGrid[floor + 1][nextCol].uiPosition);
+                    DrawLine(node.uiPosition, manager.mapGrid[floor + 1].nodes[nextCol].uiPosition);
                 }
             }
         }
