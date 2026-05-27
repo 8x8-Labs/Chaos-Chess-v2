@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1718136411191864903}
   - component: {fileID: 2269846491866748538}
   - component: {fileID: 8167930442000452277}
+  - component: {fileID: 1413587000275138169}
   m_Layer: 5
   m_Name: MapButton
   m_TagString: Untagged
@@ -138,6 +139,30 @@ MonoBehaviour:
   rewardSceneName: RewardScene
   resultSceneName: ResultScene
   mainSceneName: MainScene
+--- !u!114 &1413587000275138169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4660915655800250675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c6e7df8b2cc6d942a24307aa9936ce1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapData:
+    ELO: 0
+    FEN: 
+    isCleared: 0
+    floor: 0
+    nodeType: 0
+    column: 0
+    nextColumns: 
+    isAccessible: 0
+    uiPosition: {x: 0, y: 0}
+  bobHeight: 20
+  bobDuration: 1.2
 --- !u!1 &4857247790622094782
 GameObject:
   m_ObjectHideFlags: 0
