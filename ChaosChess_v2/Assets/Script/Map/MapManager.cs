@@ -218,8 +218,6 @@ public class MapManager : MonoBehaviour
             // 클리어한 노드의 nextColumns에 연결된 다음 층 노드만 활성화
             foreach (int nextCol in selectedNode.nextColumns)
                 mapGrid[currentFloor][nextCol].isAccessible = true;
-
-            curMap = mapGrid[currentFloor][0];
         }
     }
 }

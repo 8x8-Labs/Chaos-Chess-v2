@@ -30,10 +30,16 @@ public class MapUI : MonoBehaviour
     {
         Refresh();
 
-        // 스크롤뷰 초기 위치를 맨 아래(0층)로 고정
         Canvas.ForceUpdateCanvases();
         var scrollRect = mapContainer.GetComponentInParent<ScrollRect>();
-        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+        if (scrollRect != null)
+        {
+            var manager = MapManager.Instance;
+            if (manager != null && manager.totalFloors > 1)
+                scrollRect.verticalNormalizedPosition = Mathf.Clamp01((float)manager.currentFloor / (manager.totalFloors - 1));
+            else
+                scrollRect.verticalNormalizedPosition = 0f;
+        }
     }
 
     // 노드 상태만 업데이트한다. 최초 호출 시 BuildMap()으로 오브젝트를 생성한다.
@@ -53,6 +59,9 @@ public class MapUI : MonoBehaviour
     {
         var manager = MapManager.Instance;
         if (manager == null) return;
+
+        foreach (Transform child in mapContainer)
+            Destroy(child.gameObject);
 
         _nodeObjects.Clear();
 
@@ -75,7 +84,7 @@ public class MapUI : MonoBehaviour
 
                 ApplyState(obj, map);
 
-                var nodeBtn = obj.AddComponent<MapNodeButton>();
+                var nodeBtn = obj.GetComponent<MapNodeButton>();
                 nodeBtn.mapData = map;
 
                 _nodeObjects[map] = obj;
@@ -114,33 +123,28 @@ public class MapUI : MonoBehaviour
     // 노드의 클리어/접근 가능/잠금 상태에 따라 버튼 색상과 활성화 여부를 설정
     private void ApplyState(GameObject obj, Map map)
     {
-        var img = obj.GetComponent<Image>();
-        var btn = obj.GetComponent<Button>();
+        if (obj.TryGetComponent<Image>(out var img))
+        {
+            if (map.isCleared)
+                img.color = Color.gray;
+            else if (map.isAccessible)
+                img.color = Color.white;
+            else
+                img.color = new Color(0.3f, 0.3f, 0.3f);
+
+            img.sprite = map.isCleared
+                ? (clearedSprite != null ? clearedSprite : normalSprite)
+                : map.nodeType switch {
+                    NodeType.Elite => eliteSprite,
+                    NodeType.Boss  => bossSprite,
+                    _              => normalSprite
+                };
+        }
+
+        if (obj.TryGetComponent<Button>(out var btn))
+            btn.interactable = !map.isCleared && map.isAccessible;
+
         var tmp = obj.GetComponentInChildren<TextMeshProUGUI>();
-
-        if (map.isCleared)
-        {
-            img.color = Color.gray;
-            btn.interactable = false;
-        }
-        else if (map.isAccessible)
-        {
-            img.color = Color.white;
-            btn.interactable = true;
-        }
-        else
-        {
-            img.color = new Color(0.3f, 0.3f, 0.3f);
-            btn.interactable = false;
-        }
-
-        img.sprite = map.isCleared
-            ? (clearedSprite != null ? clearedSprite : normalSprite)
-            : map.nodeType switch {
-                NodeType.Elite => eliteSprite,
-                NodeType.Boss  => bossSprite,
-                _              => normalSprite
-            };
 
         var effectObj = obj.transform.Find(effectChildName);
         if (effectObj != null)
