@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -22,6 +23,9 @@ public class MapUI : MonoBehaviour
     [SerializeField] private Sprite clearedSprite;
     [SerializeField] private string effectChildName = "Effect";
 
+    private readonly Dictionary<Map, GameObject> _nodeObjects = new();
+    private bool _built = false;
+
     private void Start()
     {
         // VerticalLayoutGroup / ContentSizeFitter는 수동 절대좌표 배치와 충돌하므로 제거
@@ -38,14 +42,25 @@ public class MapUI : MonoBehaviour
         if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
     }
 
-    // 맵 전체를 다시 그린다. MapManager의 데이터를 읽어 버튼과 연결선을 재생성.
+    // 노드 상태만 업데이트한다. 최초 호출 시 BuildMap()으로 오브젝트를 생성한다.
     public void Refresh()
     {
-        foreach (Transform child in mapContainer)
-            Destroy(child.gameObject);
+        if (!_built) BuildMap();
 
         var manager = MapManager.Instance;
         if (manager == null) return;
+
+        foreach (var kvp in _nodeObjects)
+            ApplyState(kvp.Value, kvp.Key);
+    }
+
+    // 노드 버튼과 연결선을 최초 1회 생성하고 캐싱한다.
+    private void BuildMap()
+    {
+        var manager = MapManager.Instance;
+        if (manager == null) return;
+
+        _nodeObjects.Clear();
 
         // ── 노드 버튼 생성 ────────────────────────────────────────────────────
         for (int floor = 0; floor < manager.totalFloors; floor++)
@@ -54,7 +69,6 @@ public class MapUI : MonoBehaviour
             for (int col = 0; col < count; col++)
             {
                 Map map = manager.mapGrid[floor][col];
-                // 최초 1회만 위치를 계산하고 이후 Refresh 시 동일 위치 재사용
                 if (map.uiPosition == Vector2.zero)
                     map.uiPosition = NodePosition(floor, col, count);
                 Vector2 pos = map.uiPosition;
@@ -69,6 +83,8 @@ public class MapUI : MonoBehaviour
 
                 var nodeBtn = obj.AddComponent<MapNodeButton>();
                 nodeBtn.mapData = map;
+
+                _nodeObjects[map] = obj;
             }
         }
 
@@ -87,6 +103,8 @@ public class MapUI : MonoBehaviour
         // 컨텐츠 높이를 실제 노드 범위에 맞게 설정해 ScrollRect 스크롤 범위를 고정
         float contentHeight = (manager.totalFloors - 1) * floorHeight + bottomPadding + topPadding;
         mapContainer.sizeDelta = new Vector2(mapContainer.sizeDelta.x, contentHeight);
+
+        _built = true;
     }
 
     // 층(floor)과 열(col)로부터 화면 좌표를 계산. jitter로 노드 위치를 소폭 흔들어 유기적으로 보이게 함.
