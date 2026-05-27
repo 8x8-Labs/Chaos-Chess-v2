@@ -28,12 +28,6 @@ public class MapUI : MonoBehaviour
 
     private void Start()
     {
-        // VerticalLayoutGroup / ContentSizeFitter는 수동 절대좌표 배치와 충돌하므로 제거
-        var vlg = mapContainer.GetComponent<VerticalLayoutGroup>();
-        if (vlg != null) Destroy(vlg);
-        var csf = mapContainer.GetComponent<ContentSizeFitter>();
-        if (csf != null) Destroy(csf);
-
         Refresh();
 
         // 스크롤뷰 초기 위치를 맨 아래(0층)로 고정

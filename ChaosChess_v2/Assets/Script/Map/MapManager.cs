@@ -206,6 +206,11 @@ public class MapManager : MonoBehaviour
         }
 
         selectedNode.isCleared = true;
+
+        // 같은 층의 다른 노드 접근권 해제 (역주행 방지)
+        foreach (var node in mapGrid[selectedNode.floor])
+            node.isAccessible = false;
+
         currentFloor = selectedNode.floor + 1;
 
         if (currentFloor < totalFloors)
