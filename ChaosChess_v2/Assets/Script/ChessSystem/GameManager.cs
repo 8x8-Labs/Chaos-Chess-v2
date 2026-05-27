@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private int curTurn;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
+    public bool IsPlayerInCheck { get; private set; }
 
     public bool IsGameInput = true;
     public bool IsEndGame { get; private set; } = false;
@@ -37,6 +38,8 @@ public class GameManager : MonoBehaviour
     public event Action<Action, Action> OnTimeReversalRequired;
     /// <summary>아버지의 원수 카드 전용 이벤트 입니다.</summary>
     public event Action<Piece> OnAwakenedPieceSelected;
+    /// <summary>플레이어 체크 상태가 바뀔 때 카드 UI 입력 차단 갱신에 사용됩니다.</summary>
+    public event Action<bool> OnPlayerCheckStateChanged;
 
     public PieceColor turnColor
     {
@@ -453,10 +456,15 @@ public class GameManager : MonoBehaviour
                 ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
                 ResetActions();
             }
+            UpdatePlayerCheckState(false);
             return;
         }
 
-        if (FinishType != GameResult.None) return;
+        if (FinishType != GameResult.None)
+        {
+            UpdatePlayerCheckState(false);
+            return;
+        }
         if (BoardManager.Instance.GetHalfmoveClock() >= 150)
         {
             FinishType = GameResult.Draw;
@@ -466,6 +474,7 @@ public class GameManager : MonoBehaviour
             FinishType = GameResult.Draw;
         }
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
+        UpdatePlayerCheckState(IsPlayerTurn && isCheck);
 
 
         if (moves.Length == 0)
@@ -479,6 +488,15 @@ public class GameManager : MonoBehaviour
         {
             OnCheck();
         }
+    }
+
+    private void UpdatePlayerCheckState(bool isPlayerInCheck)
+    {
+        if (IsPlayerInCheck == isPlayerInCheck)
+            return;
+
+        IsPlayerInCheck = isPlayerInCheck;
+        OnPlayerCheckStateChanged?.Invoke(IsPlayerInCheck);
     }
 
     private void OnCheck()
@@ -560,5 +578,6 @@ public class GameManager : MonoBehaviour
         OnHalfTurnChanged = null;
         OnTimeReversalRequired = null;
         OnAwakenedPieceSelected = null;
+        OnPlayerCheckStateChanged = null;
     }
 }
