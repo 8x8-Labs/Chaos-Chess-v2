@@ -13,8 +13,10 @@ public class SceneLoadManager : MonoBehaviour
     public static SceneLoadManager Instance => instance;
 
     private bool isLoading;
-    [SerializeField] private SceneLoadingOverlayUI overlayPrefab;
-    private SceneLoadingOverlayUI overlayUI;
+    [SerializeField] private SceneLoadingOverlayBase basicOverlay;
+    [SerializeField] private SceneLoadingOverlayBase rainOverlay;
+    private SceneLoadingOverlayBase basicOverlayInstance;
+    private SceneLoadingOverlayBase rainOverlayInstance;
 
     private void Awake()
     {
@@ -38,9 +40,18 @@ public class SceneLoadManager : MonoBehaviour
         StartCoroutine(LoadSceneCoroutine(sceneName));
     }
 
+    private SceneLoadingOverlayBase GetOverlayFor(string sceneName)
+    {
+        if (sceneName == "MapScene" && rainOverlayInstance != null)
+            return rainOverlayInstance;
+
+        return basicOverlayInstance;
+    }
+
     private IEnumerator LoadSceneCoroutine(string sceneName)
     {
         isLoading = true;
+        SceneLoadingOverlayBase overlayUI = GetOverlayFor(sceneName);
         overlayUI?.Initialize();
 
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
@@ -54,7 +65,7 @@ public class SceneLoadManager : MonoBehaviour
 
         yield return null; // DOTween이 같은 프레임 내 Update를 이미 처리했을 경우를 위한 1프레임 대기
         Tween fadeIn = overlayUI?.FadeTo(1f, fadeDuration);
-        yield return WaitForReadyToActivate(operation, fadeIn);
+        yield return WaitForReadyToActivate(overlayUI, operation, fadeIn);
 
         operation.allowSceneActivation = true;
 
@@ -69,7 +80,7 @@ public class SceneLoadManager : MonoBehaviour
         isLoading = false;
     }
 
-    private IEnumerator WaitForReadyToActivate(AsyncOperation operation, Tween fadeTween)
+    private IEnumerator WaitForReadyToActivate(SceneLoadingOverlayBase overlay, AsyncOperation operation, Tween fadeTween)
     {
         float elapsed = 0f;
         bool isLoadingContentVisible = false;
@@ -80,16 +91,16 @@ public class SceneLoadManager : MonoBehaviour
 
             if (!isLoadingContentVisible && elapsed >= loadingDisplayDelay)
             {
-                overlayUI?.SetLoadingContentVisible(true);
+                overlay?.SetLoadingContentVisible(true);
                 isLoadingContentVisible = true;
             }
 
-            overlayUI?.SetProgress(Mathf.Clamp01(operation.progress / 0.9f));
+            overlay?.SetProgress(Mathf.Clamp01(operation.progress / 0.9f));
             yield return null;
         }
 
-        overlayUI?.SetAlpha(1f);
-        overlayUI?.SetProgress(1f);
+        overlay?.SetAlpha(1f);
+        overlay?.SetProgress(1f);
     }
 
     private bool IsTweenRunning(Tween tween)
@@ -99,10 +110,16 @@ public class SceneLoadManager : MonoBehaviour
 
     private void CreateLoadingOverlay()
     {
-        if (overlayPrefab == null)
-            return;
+        if (basicOverlay != null)
+        {
+            basicOverlayInstance = Instantiate(basicOverlay, transform);
+            basicOverlayInstance.Initialize();
+        }
 
-        overlayUI = Instantiate(overlayPrefab, transform);
-        overlayUI.Initialize();
+        if (rainOverlay != null)
+        {
+            rainOverlayInstance = Instantiate(rainOverlay, transform);
+            rainOverlayInstance.Initialize();
+        }
     }
 }
