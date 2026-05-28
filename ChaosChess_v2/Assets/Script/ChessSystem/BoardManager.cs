@@ -290,6 +290,12 @@ public class BoardManager : MonoBehaviour
     // uci로 받은 이동을 적용한다
     public void ApplyUCIMove(string uciMove)
     {
+        if (!IsValidUciMove(uciMove))
+        {
+            Debug.LogWarning($"[AI] Invalid UCI move: {uciMove}");
+            return;
+        }
+
         // "e2e4" → from(4,1), to(4,3) 변환
         Vector3Int from = UCIToGrid(uciMove.Substring(0, 2));
         Vector3Int to = UCIToGrid(uciMove.Substring(2, 2));
@@ -314,6 +320,17 @@ public class BoardManager : MonoBehaviour
             MovePiece(piece, to, promotion);
 
         DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.NextTurn());
+    }
+
+    public bool IsValidUciMove(string move)
+    {
+        if (string.IsNullOrEmpty(move) || move == "none" || move.Length < 4)
+            return false;
+
+        return move[0] >= 'a' && move[0] <= 'h'
+            && move[1] >= '1' && move[1] <= '8'
+            && move[2] >= 'a' && move[2] <= 'h'
+            && move[3] >= '1' && move[3] <= '8';
     }
 
     /// <summary>
