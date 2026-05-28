@@ -16,7 +16,10 @@
       "Bash(gh issue *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Read(//c/Users/llssw/Desktop/My Files/**)",
+      "Read(//c/Users/llssw/Documents/**)",
+      "Read(//c/Users/llssw/**)"
     ]
   }
 }

@@ -1,8 +1,8 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SceneLoadingOverlayUI : MonoBehaviour
+public class SceneLoadingOverlayUI : SceneLoadingOverlayBase
 {
     [SerializeField] private CanvasGroup overlayGroup;
     [SerializeField] private GameObject loadingContent;
@@ -10,17 +10,18 @@ public class SceneLoadingOverlayUI : MonoBehaviour
 
     private Tween fadeTween;
 
-    public float Alpha => overlayGroup != null ? overlayGroup.alpha : 0f;
+    public override float Alpha => overlayGroup != null ? overlayGroup.alpha : 0f;
 
-    public void Initialize()
+    public override void Initialize()
     {
+        fadeTween?.Kill();
         SetProgress(0f);
         SetLoadingContentVisible(false);
         SetAlpha(0f);
         SetBlocking(false);
     }
 
-    public Tween FadeTo(float targetAlpha, float duration)
+    public override Tween FadeTo(float targetAlpha, float duration)
     {
         if (overlayGroup == null)
             return null;
@@ -34,8 +35,7 @@ public class SceneLoadingOverlayUI : MonoBehaviour
             return null;
         }
 
-        if (targetAlpha > 0f)
-            SetBlocking(true);
+        SetBlocking(true);
 
         fadeTween = overlayGroup
             .DOFade(targetAlpha, duration)
@@ -45,7 +45,7 @@ public class SceneLoadingOverlayUI : MonoBehaviour
         return fadeTween;
     }
 
-    public void SetAlpha(float alpha)
+    public override void SetAlpha(float alpha)
     {
         if (overlayGroup == null)
             return;
@@ -62,13 +62,13 @@ public class SceneLoadingOverlayUI : MonoBehaviour
         overlayGroup.interactable = isBlocking;
     }
 
-    public void SetLoadingContentVisible(bool isVisible)
+    public override void SetLoadingContentVisible(bool isVisible)
     {
         if (loadingContent != null)
             loadingContent.SetActive(isVisible);
     }
 
-    public void SetProgress(float progress)
+    public override void SetProgress(float progress)
     {
         if (progressSlider != null)
             progressSlider.value = Mathf.Clamp01(progress);

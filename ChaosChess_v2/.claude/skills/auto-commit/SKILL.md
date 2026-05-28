@@ -116,6 +116,24 @@ fix(UI): 인벤토리 슬롯 정렬 오류 수정
 chore(Build): ProjectSettings 빌드 타겟 변경
 refactor(Manager): 게임 매니저 싱글톤 구조 개선
 ```
+
+**이슈 참조:**
+
+커밋과 연관된 GitHub 이슈가 있으면 커밋 메시지 본문에 반드시 언급한다.
+
+```
+<type>(<scope>): <subject>
+
+Closes #123
+```
+
+| 키워드 | 사용 상황 |
+|--------|-----------|
+| `Closes #N` | 이 커밋으로 이슈가 완전히 해결될 때 |
+| `Related to #N` | 이슈와 연관되지만 완전히 해결되지 않을 때 |
+
+- 이슈 번호는 `gh issue list` 로 확인하거나 사용자가 제공한 번호를 사용한다
+- 연관 이슈가 없으면 본문 생략
  
 ### 4단계: 커밋 계획 확인
  
@@ -145,8 +163,11 @@ refactor(Manager): 게임 매니저 싱글톤 구조 개선
 # 해당 그룹 파일만 stage
 git add <file1> <file2> ...
  
-# 커밋
+# 커밋 (이슈 없음)
 git commit -m "<type>(<scope>): <subject>"
+
+# 커밋 (이슈 있음)
+git commit -m "<type>(<scope>): <subject>" -m "Closes #N"
 ```
  
 각 커밋 후 성공 여부를 확인하고 다음 그룹으로 진행한다.  
