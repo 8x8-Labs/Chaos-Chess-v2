@@ -52,7 +52,11 @@ public class SceneLoadManager : MonoBehaviour
     {
         isLoading = true;
         SceneLoadingOverlayBase overlayUI = GetOverlayFor(sceneName);
-        overlayUI?.Initialize();
+        if (overlayUI != null)
+        {
+            overlayUI.gameObject.SetActive(true);
+            overlayUI.Initialize();
+        }
 
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
         if (operation == null)
@@ -77,6 +81,7 @@ public class SceneLoadManager : MonoBehaviour
             yield return fadeOut.WaitForCompletion();
 
         overlayUI?.SetLoadingContentVisible(false);
+        overlayUI?.gameObject.SetActive(false);
         isLoading = false;
     }
 
@@ -114,12 +119,14 @@ public class SceneLoadManager : MonoBehaviour
         {
             basicOverlayInstance = Instantiate(basicOverlay, transform);
             basicOverlayInstance.Initialize();
+            basicOverlayInstance.gameObject.SetActive(false);
         }
 
         if (rainOverlay != null)
         {
             rainOverlayInstance = Instantiate(rainOverlay, transform);
             rainOverlayInstance.Initialize();
+            rainOverlayInstance.gameObject.SetActive(false);
         }
     }
 }

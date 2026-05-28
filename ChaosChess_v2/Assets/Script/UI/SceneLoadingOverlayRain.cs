@@ -56,14 +56,24 @@ public class SceneLoadingOverlayRain : SceneLoadingOverlayBase
 
         valueTween?.Kill();
 
+        if (targetAlpha > 0f && transitionGraphic != null)
+            transitionGraphic.raycastTarget = true;
+
         if (duration <= 0f)
         {
             SetShaderValue(targetAlpha);
+            if (transitionGraphic != null)
+                transitionGraphic.raycastTarget = targetAlpha > 0f;
             return null;
         }
 
         valueTween = DOVirtual.Float(Alpha, targetAlpha, duration, SetShaderValue)
-            .SetUpdate(true);
+            .SetUpdate(true)
+            .OnComplete(() =>
+            {
+                if (transitionGraphic != null)
+                    transitionGraphic.raycastTarget = targetAlpha > 0f;
+            });
 
         return valueTween;
     }
