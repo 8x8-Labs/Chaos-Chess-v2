@@ -52,6 +52,7 @@ public class SceneLoadManager : MonoBehaviour
 
         operation.allowSceneActivation = false;
 
+        yield return null; // DOTween이 같은 프레임 내 Update를 이미 처리했을 경우를 위한 1프레임 대기
         Tween fadeIn = overlayUI?.FadeTo(1f, fadeDuration);
         yield return WaitForReadyToActivate(operation, fadeIn);
 
