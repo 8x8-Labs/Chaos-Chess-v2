@@ -8510,7 +8510,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fadeDuration: 0.2
   loadingDisplayDelay: 0.2
-  overlayPrefab: {fileID: 1000000000000000006, guid: c95bb3f83fc44740b72105a3aa01f584, type: 3}
+  basicOverlay: {fileID: 1000000000000000006, guid: c95bb3f83fc44740b72105a3aa01f584, type: 3}
+  rainOverlay: {fileID: 4308635123189978070, guid: f70bac25932e1db44b46c7085c4b697b, type: 3}
 --- !u!1 &914143565
 GameObject:
   m_ObjectHideFlags: 0
