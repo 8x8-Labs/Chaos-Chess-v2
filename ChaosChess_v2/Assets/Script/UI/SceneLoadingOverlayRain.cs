@@ -25,6 +25,7 @@ public class SceneLoadingOverlayRain : SceneLoadingOverlayBase
 
     private void OnDestroy()
     {
+        valueTween?.Kill();
         if (materialInstance != null)
             Destroy(materialInstance);
     }
@@ -56,7 +57,7 @@ public class SceneLoadingOverlayRain : SceneLoadingOverlayBase
 
         valueTween?.Kill();
 
-        if (targetAlpha > 0f && transitionGraphic != null)
+        if (transitionGraphic != null)
             transitionGraphic.raycastTarget = true;
 
         if (duration <= 0f)
@@ -82,6 +83,7 @@ public class SceneLoadingOverlayRain : SceneLoadingOverlayBase
 
     private void SetShaderValue(float value)
     {
-        materialInstance?.SetFloat(ValueProperty, value);
+        if (materialInstance != null)
+            materialInstance.SetFloat(ValueProperty, value);
     }
 }
