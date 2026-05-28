@@ -65,6 +65,7 @@ public class FatherEnemyEffector : PieceEffector
     {
         if (!target.IsAwakened) return;
 
+        GameManager.Instance.CancelCurrentSelectionForBoardTransition();
 
         Vector3Int pos = target.Pos;
         PieceColor color = target.Color;
