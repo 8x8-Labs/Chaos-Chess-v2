@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class SoundSetter : MonoBehaviour
@@ -9,10 +10,23 @@ public class SoundSetter : MonoBehaviour
     [SerializeField] private Slider bgmSlider;
     [SerializeField] private Toggle sfxMuteToggle;
     [SerializeField] private Toggle bgmMuteToggle;
+    [SerializeField] private AudioClip sfxPreviewClip;
 
     private void Start()
     {
         soundManager = SoundManager.Instance;
+
+        EventTrigger trigger = sfxSlider.gameObject.GetComponent<EventTrigger>()
+                            ?? sfxSlider.gameObject.AddComponent<EventTrigger>();
+        var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+        entry.callback.AddListener(_ => PlaySFXPreview());
+        trigger.triggers.Add(entry);
+    }
+
+    private void PlaySFXPreview()
+    {
+        if (sfxPreviewClip != null && !soundManager.GetSFXMute())
+            soundManager.SFXPlay("SFXPreview", sfxPreviewClip);
     }
 
     public void EnableSetter()
