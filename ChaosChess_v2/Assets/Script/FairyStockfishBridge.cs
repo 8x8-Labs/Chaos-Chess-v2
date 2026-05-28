@@ -157,8 +157,14 @@ public class FairyStockfishBridge : MonoBehaviour
 
         Thread thread = new Thread(() =>
         {
+            lock (_queueLock)
+            {
+                _outputQueue.Clear();
+            }
+
             SendCommand(command);
-            string bestMove = WaitForBestMove();
+            int timeoutMs = moveTimeMs > 0 ? Mathf.Max(moveTimeMs + 1000, 3000) : 10000;
+            string bestMove = WaitForBestMove(timeoutMs);
             _isThinking = false;
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
@@ -451,6 +457,26 @@ public class FairyStockfishBridge : MonoBehaviour
             }
             Thread.Sleep(10);
         }
+
+        SendCommand("stop");
+        timeout = DateTime.Now.AddMilliseconds(1000);
+        while (DateTime.Now < timeout)
+        {
+            lock (_queueLock)
+            {
+                while (_outputQueue.Count > 0)
+                {
+                    string line = _outputQueue.Dequeue();
+                    if (line.StartsWith("bestmove"))
+                    {
+                        string[] parts = line.Split(' ');
+                        return parts.Length > 1 ? parts[1] : "none";
+                    }
+                }
+            }
+            Thread.Sleep(10);
+        }
+
         return "none";
     }
 #endif

@@ -28,6 +28,8 @@ public class ArenaManager : MonoBehaviour
     private const int MaxPlayerMoveCount = 8;
 
     public static ArenaManager Instance;
+    [SerializeField] private CardHandLayout cardHandLayout;
+
     internal event Action<CardDataSO, int> ArenaStarted;
     internal event Action<int> ArenaRemainingTurnsChanged;
     internal event Action ArenaEnded;
@@ -71,6 +73,7 @@ public class ArenaManager : MonoBehaviour
     {
         if (isArenaActive) return;
         isArenaActive = true;
+        cardHandLayout?.SetArenaInputBlocked(true);
 
         GameManager gm = GameManager.Instance;
         gm.CancelCurrentSelectionForBoardTransition();
@@ -174,6 +177,7 @@ public class ArenaManager : MonoBehaviour
     {
         if (!isArenaActive) return;
         isArenaActive = false;
+        cardHandLayout?.SetArenaInputBlocked(false);
 
         GameManager gm = GameManager.Instance;
         gm.CancelCurrentSelectionForBoardTransition();

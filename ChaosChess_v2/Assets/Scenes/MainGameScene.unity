@@ -810,7 +810,7 @@ GameObject:
   - component: {fileID: 122585168}
   - component: {fileID: 122585167}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: inputBlockImage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12342,6 +12342,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c348ec35ec64034fb16e3079b555922, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cardHandLayout: {fileID: 1422633471}
 --- !u!1 &1952912593
 GameObject:
   m_ObjectHideFlags: 0
