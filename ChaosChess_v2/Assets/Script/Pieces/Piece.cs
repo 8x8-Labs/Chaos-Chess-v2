@@ -215,7 +215,12 @@ public class Piece : MonoBehaviour
 
     public const float MoveDuration = 0.5f;
 
-    public virtual void Move(Vector3Int target, Vector3 WorldPos, bool animate = false)
+    public virtual void Move(Vector3Int target, Vector3 WorldPos)
+    {
+        Move(target, WorldPos, false);
+    }
+
+    public virtual void Move(Vector3Int target, Vector3 WorldPos, bool animate)
     {
         Pos = target;
 
