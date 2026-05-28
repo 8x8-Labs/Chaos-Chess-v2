@@ -386,7 +386,7 @@ public class BoardManager : MonoBehaviour
 
         board[target.x, target.y] = piece;
         Vector3 WorldPos = GridPosToWorldPos(target);
-        piece.Move(target, WorldPos);
+        piece.Move(target, WorldPos, animate: true);
 
         if (isCapture)
             // 잡는 대상의 이벤트 호출
@@ -467,7 +467,7 @@ public class BoardManager : MonoBehaviour
             }
 
             Vector3 WorldPos = GridPosToWorldPos(pos);
-            newPiece.Move(pos, WorldPos);
+            newPiece.Move(pos, WorldPos, animate: false);
 
             Pieces.Add(newPiece);
         }
@@ -892,7 +892,7 @@ public class BoardManager : MonoBehaviour
 
         board[target.x, target.y] = piece;
         Vector3 WorldPos = GridPosToWorldPos(target);
-        piece.Move(target, WorldPos);
+        piece.Move(target, WorldPos, animate: true);
 
         // 프로모션
         if (piece is Pawn)
@@ -935,7 +935,7 @@ public class BoardManager : MonoBehaviour
             Vector3Int target = newPositions[i];
             board[target.x, target.y] = pieces[i];
             Vector3 worldPos = GridPosToWorldPos(target);
-            pieces[i].Move(target, worldPos);
+            pieces[i].Move(target, worldPos, animate: true);
         }
     }
 
