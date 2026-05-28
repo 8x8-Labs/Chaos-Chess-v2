@@ -157,6 +157,11 @@ public class FairyStockfishBridge : MonoBehaviour
 
         Thread thread = new Thread(() =>
         {
+            lock (_queueLock)
+            {
+                _outputQueue.Clear();
+            }
+
             SendCommand(command);
             int timeoutMs = moveTimeMs > 0 ? Mathf.Max(moveTimeMs + 1000, 3000) : 10000;
             string bestMove = WaitForBestMove(timeoutMs);

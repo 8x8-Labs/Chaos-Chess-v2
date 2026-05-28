@@ -465,6 +465,14 @@ public class GameManager : MonoBehaviour
             }
 
             string randomMove = ChooseRandomLegalMove(moves);
+            if (randomMove == "none")
+            {
+                Debug.LogWarning("[AI] No valid legal moves found after filtering. Ending game.");
+                EvaluateGameState(Array.Empty<string>());
+                ApplyGameResult();
+                return;
+            }
+
             BoardManager.Instance.ApplyUCIMove(randomMove);
         });
     }
