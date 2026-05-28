@@ -49,6 +49,8 @@ public class CardHandLayout : MonoBehaviour
 
     public void RefreshAnimated() => Refresh(animate: true);
 
+    public void SetArenaInputBlocked(bool isBlocked) => SetInputBlocked(isBlocked);
+
     private void SetInputBlocked(bool isBlocked)
     {
         if (inputBlockPanel == null)
