@@ -24,10 +24,12 @@ public class GameManager : MonoBehaviour
     public bool IsGameInput = true;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
+    public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
     // 투기장 진행 중 기존 예약 액션(폭탄, 지속효과 해제 등) 소모를 잠시 멈춥니다.
     private bool areQueuedActionsPaused = false;
     private int queuedActionPauseTurn = -1;
+    private int cardIntervalPauseCount = 0;
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
     public event Action OnPlayerTurnStarted;
@@ -339,6 +341,19 @@ public class GameManager : MonoBehaviour
         areQueuedActionsPaused = false;
         queuedActionPauseTurn = -1;
     }
+
+    /// <summary>카드 지급 주기 카운트를 일시 정지합니다.</summary>
+    public void PushCardIntervalPause()
+    {
+        cardIntervalPauseCount++;
+    }
+
+    /// <summary>카드 지급 주기 카운트 일시 정지를 해제합니다.</summary>
+    public void PopCardIntervalPause()
+    {
+        cardIntervalPauseCount = Mathf.Max(0, cardIntervalPauseCount - 1);
+    }
+
     // MoveSelected 안에서 플레이어 수 적용 후:
     private void MoveSelected(Vector3Int target)
     {

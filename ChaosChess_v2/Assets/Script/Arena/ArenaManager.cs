@@ -76,6 +76,7 @@ public class ArenaManager : MonoBehaviour
         cardHandLayout?.SetArenaInputBlocked(true);
 
         GameManager gm = GameManager.Instance;
+        gm.PushCardIntervalPause();
         gm.CancelCurrentSelectionForBoardTransition();
 
         opponentArenaPieces = opponents;
@@ -180,6 +181,7 @@ public class ArenaManager : MonoBehaviour
         cardHandLayout?.SetArenaInputBlocked(false);
 
         GameManager gm = GameManager.Instance;
+        gm.PopCardIntervalPause();
         gm.CancelCurrentSelectionForBoardTransition();
 
         // 이벤트 구독 해제 및 투기장 모드 비활성화
