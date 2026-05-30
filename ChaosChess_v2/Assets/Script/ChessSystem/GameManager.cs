@@ -90,6 +90,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         IsEndGame = false;
+        CardRandomizerManager.Instance?.ClearActiveCards();
         CardSelectionState.Reset();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
@@ -285,7 +286,20 @@ public class GameManager : MonoBehaviour
     /// <param name="act">작동 액션</param>
     public void AppendAction(int x, Action act)
     {
-        recievedActions.Add((curTurn + x * 2, act));
+        CardRandomizerManager.ActiveCardToken activeCardToken =
+            CardRandomizerManager.Instance?.RetainActiveCard();
+
+        recievedActions.Add((curTurn + x * 2, () =>
+        {
+            try
+            {
+                act?.Invoke();
+            }
+            finally
+            {
+                activeCardToken?.Complete();
+            }
+        }));
     }
 
     /// <summary>

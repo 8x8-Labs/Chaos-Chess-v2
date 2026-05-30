@@ -107,7 +107,8 @@ public class PieceSelector : Selector<Piece>
             LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
         
-        skillCard.Execute(args);
+        CardRandomizerManager.Instance?.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
+
         if(cardData != null)
             cardRandomizer?.RemoveCard(cardData.gameObject);
 

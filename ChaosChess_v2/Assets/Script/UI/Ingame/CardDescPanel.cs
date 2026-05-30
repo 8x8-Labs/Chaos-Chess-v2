@@ -81,7 +81,8 @@ public class CardDescPanel : ButtonPanel
             case CardType.Global:
                 cardExecute = () =>
                 {
-                    cardInterface?.Execute();
+                    CardRandomizerManager.Instance?.ExecuteCard(data.DataSO, () => cardInterface?.Execute());
+
                     FindFirstObjectByType<CardRandomizer>()?.RemoveCard(data.gameObject);
                 };
                 break;

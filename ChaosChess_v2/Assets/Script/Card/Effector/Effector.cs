@@ -9,9 +9,12 @@ public abstract class Effector : MonoBehaviour, IEffect
 {
     private int remainingTurns; // -1 = 영구 효과
     private bool useHalfTurn; // 반턴 사용 여부
+    private bool isApplied;
+    private CardRandomizerManager.ActiveCardToken activeCardToken;
     // 투기장 등 특수 모드에서 효과 동작을 잠시 멈출 때 사용합니다.
     private bool isSuspended;
 
+    public CardDataSO CardSO { get; set; }
     public bool IsExpired => remainingTurns == 0;
     public bool IsPermanent => remainingTurns < 0;
     public int RemainingTurns => remainingTurns;
@@ -25,6 +28,11 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과를 대상에 등록합니다. 턴 이벤트를 구독하고 OnApply()를 호출합니다.</summary>
     public void Apply(bool halfTurn = false)
     {
+        if (isApplied) return;
+
+        activeCardToken = CardRandomizerManager.Instance?.RetainActiveCard(CardSO);
+
+        isApplied = true;
         GameManager.Instance.OnTurnChanged += OnTurnChanged;
 
         useHalfTurn = halfTurn;
@@ -38,12 +46,17 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과를 대상에서 제거합니다. 턴 이벤트를 해제하고 OnRevert()를 호출합니다.</summary>
     public void Revert()
     {
+        if (!isApplied) return;
+
+        isApplied = false;
         GameManager.Instance.OnTurnChanged -= OnTurnChanged;
         if (useHalfTurn)
             GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
 
         OnRevert();
         OnEffectReverted();
+        activeCardToken?.Complete();
+        activeCardToken = null;
     }
 
     /// <summary>투기장 동안 효과를 일시 정지합니다.</summary>
@@ -146,8 +159,6 @@ public abstract class PieceEffector : Effector, IPieceEffect
 /// <summary>타일에 부착되는 효과의 기반 추상 클래스</summary>
 public abstract class TileEffector : Effector, ITileEffect
 {
-    public CardDataSO CardSO { get; set; }
-
     public Vector3Int TilePos
     {
         get
@@ -191,8 +202,6 @@ public abstract class GlobalEffector : Effector
     public static event System.Action<GlobalEffector> OnActivated;
     public static event System.Action<GlobalEffector> OnDeactivated;
     public static event System.Action<GlobalEffector> OnTurnTicked;
-
-    public CardDataSO CardSO { get; set; }
 
     protected override void OnEffectApplied() => OnActivated?.Invoke(this);
     protected override void OnEffectReverted() => OnDeactivated?.Invoke(this);
