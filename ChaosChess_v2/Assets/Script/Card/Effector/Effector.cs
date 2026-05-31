@@ -59,6 +59,23 @@ public abstract class Effector : MonoBehaviour, IEffect
         activeCardToken = null;
     }
 
+    protected virtual void OnDestroy()
+    {
+        if (!isApplied) return;
+
+        isApplied = false;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTurnChanged -= OnTurnChanged;
+            if (useHalfTurn)
+                GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
+        }
+
+        activeCardToken?.Complete();
+        activeCardToken = null;
+    }
+
     /// <summary>투기장 동안 효과를 일시 정지합니다.</summary>
     public void SuspendForArena()
     {

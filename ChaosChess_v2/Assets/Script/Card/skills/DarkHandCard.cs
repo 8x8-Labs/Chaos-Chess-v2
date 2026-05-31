@@ -25,7 +25,6 @@ public class DarkHandCard : CardData, IPieceCard
         Piece piece = args.Targets[0];
         var effector = CreatePieceEffector<DarkHandEffector>(piece);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, () => { if (effector != null) effector.Revert(); });
     }
 }
 

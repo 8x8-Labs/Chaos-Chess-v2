@@ -48,13 +48,13 @@ public class DimensionInstabilityEffector : PieceEffector
     public override void OnPieceCaptured()
     {
         Debug.Log(cells.Count);
-        if (cells.Count == 0)
-            return;
-        if (flag)
+        if (flag && cells.Count > 0)
         {
             Vector3Int pos = cells[Random.Range(0, cells.Count)];
             BoardManager.Instance.ChangePiece(pos, target.Color, 'n');
         }
+
+        Revert();
     }
     protected override void OnRevert()
     {

@@ -98,7 +98,7 @@ public class FatherEnemyEffector : PieceEffector
         }
         else
         {
-            OnRevert();
+            Revert();
             fatherEnemyCard.Create(target);
         }
 
@@ -108,6 +108,6 @@ public class FatherEnemyEffector : PieceEffector
     {
         target.IsAwakened = false;
 
-        OnRevert();
+        Revert();
     }
 }
