@@ -72,7 +72,7 @@ public class SceneLoadManager : MonoBehaviour
 
         operation.allowSceneActivation = false;
 
-        yield return WaitForReadyToActivate(overlayUI, operation, null);
+        yield return WaitForReadyToActivate(overlayUI, operation);
 
         operation.allowSceneActivation = true;
 
@@ -88,12 +88,12 @@ public class SceneLoadManager : MonoBehaviour
         isLoading = false;
     }
 
-    private IEnumerator WaitForReadyToActivate(SceneLoadingOverlayBase overlay, AsyncOperation operation, Tween fadeTween)
+    private IEnumerator WaitForReadyToActivate(SceneLoadingOverlayBase overlay, AsyncOperation operation)
     {
         float elapsed = 0f;
         bool isLoadingContentVisible = false;
 
-        while (operation.progress < 0.9f || IsTweenRunning(fadeTween))
+        while (operation.progress < 0.9f)
         {
             elapsed += Time.unscaledDeltaTime;
 
@@ -109,11 +109,6 @@ public class SceneLoadManager : MonoBehaviour
 
         overlay?.SetAlpha(1f);
         overlay?.SetProgress(1f);
-    }
-
-    private bool IsTweenRunning(Tween tween)
-    {
-        return tween != null && tween.IsActive() && !tween.IsComplete();
     }
 
     private void CreateLoadingOverlay()

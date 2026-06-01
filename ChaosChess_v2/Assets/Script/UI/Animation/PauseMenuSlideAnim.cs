@@ -20,6 +20,7 @@ public class PauseMenuSlideAnim : MonoBehaviour, IUIAnimation
 
     public void StartAnimation(float delay)
     {
+        if (target == null) return;
         target.DOKill(true);
         target.anchoredPosition = new Vector2(startOffsetX, target.anchoredPosition.y);
         target.DOAnchorPosX(0f, duration)
@@ -30,6 +31,7 @@ public class PauseMenuSlideAnim : MonoBehaviour, IUIAnimation
 
     public void EndAnimation()
     {
+        if (target == null) return;
         target.DOKill(true);
         target.DOAnchorPosX(startOffsetX, duration)
             .SetEase(endAnimEase)

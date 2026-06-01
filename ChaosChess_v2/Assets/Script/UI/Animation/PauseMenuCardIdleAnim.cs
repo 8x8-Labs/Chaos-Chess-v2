@@ -38,6 +38,8 @@ public class PauseMenuCardIdleAnim : MonoBehaviour
         foreach (var t in tweens) t.Kill();
         tweens.Clear();
 
+        if (cards == null || cards.Count == 0) return;
+
         ApplyRandomSprites();
         CreateTweens();
     }
