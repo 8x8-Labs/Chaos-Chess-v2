@@ -949,7 +949,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 67765594}
   m_Enabled: 1
-  m_Alpha: 0
+  m_Alpha: 1
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -1220,7 +1220,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 83410064}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -6760,12 +6760,12 @@ MonoBehaviour:
   enableCanvas: {fileID: 0}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 0
+  buttonType: 5
   practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
-  nextSceneName: 
+  nextSceneName: MainScene
   practiceSceneName: MainGameScene
   rewardSceneName: RewardScene
   resultSceneName: ResultScene
