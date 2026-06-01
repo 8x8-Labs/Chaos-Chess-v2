@@ -12,6 +12,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
     [SerializeField] private float collapsedSpacing = -200f;
     [SerializeField] private float expandedSpacing = 10f;
     [SerializeField] private float spacingAnimDuration = 0.2f;
+    [SerializeField] private ActiveEffectStatusTextSettings statusTextSettings = new();
 
     private readonly Dictionary<CardDataSO, ActiveEffectCard> cards = new();
     private ActiveEffectCard arenaCard;
@@ -141,7 +142,10 @@ public class ActiveEffectCardDisplay : MonoBehaviour
         if (isArenaCardDisplayed)
             RemoveArenaCard();
 
-        arenaCard = CreateCard(cardSO, "투기장", $"{remainingTurns}턴");
+        arenaCard = CreateCard(
+            cardSO,
+            cardSO?.CardName,
+            statusTextSettings.Format(ActiveEffectStatusType.TurnBased, remainingTurns));
         isArenaCardDisplayed = true;
         RefreshTrayState();
     }
@@ -150,7 +154,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
     {
         if (!isArenaCardDisplayed) return;
 
-        arenaCard.CardUI.RemainTurn.text = $"{remainingTurns}턴";
+        arenaCard.CardUI.RemainTurn.text = statusTextSettings.Format(ActiveEffectStatusType.TurnBased, remainingTurns);
     }
 
     private void HandleArenaEnded()
@@ -180,7 +184,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
                 cardUI.CardImage.sprite = cardSO.CardImage;
 
             cardUI.Title.text = fallbackTitle;
-            cardUI.RemainTurn.text = status ?? "지속 중";
+            cardUI.RemainTurn.text = status ?? statusTextSettings.Format(ActiveEffectStatusType.Active);
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(contentPanel);
@@ -216,20 +220,22 @@ public class ActiveEffectCardDisplay : MonoBehaviour
             .OrderBy(effect => effect.IsPermanent ? int.MaxValue : effect.RemainingTurns)
             .FirstOrDefault();
 
-        string statusText = GetStatusText(representative);
-        if (card.Effects.Count > 1)
-            statusText = $"{statusText} x{card.Effects.Count}";
-
-        card.CardUI.RemainTurn.text = statusText;
+        card.CardUI.RemainTurn.text = GetStatusText(representative);
     }
 
-    private static string GetStatusText(Effector effector)
+    private string GetStatusText(Effector effector)
     {
-        if (effector == null) return "지속 중";
-        if (effector.IsSuspended) return "일시정지";
-        if (effector.IsPermanent) return "지속 중";
+        if (effector == null)
+            return statusTextSettings.Format(ActiveEffectStatusType.Active);
 
-        return $"{effector.RemainingTurns}턴";
+        ActiveEffectStatusType statusType = effector.CardSO != null
+            ? effector.CardSO.StatusDisplayType
+            : ActiveEffectStatusType.Active;
+
+        if (statusType is ActiveEffectStatusType.TurnBased or ActiveEffectStatusType.CountBased)
+            return statusTextSettings.Format(statusType, effector.RemainingTurns);
+
+        return statusTextSettings.Format(statusType);
     }
 
     private sealed class ActiveEffectCard

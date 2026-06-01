@@ -14,6 +14,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     private int remainingTurns; // -1 = 영구 효과
     private bool useHalfTurn; // 반턴 사용 여부
     private bool isApplied;
+    private bool hasNotifiedApplied;
     private CardRandomizerManager.ActiveCardToken activeCardToken;
     // 투기장 등 특수 모드에서 효과 동작을 잠시 멈출 때 사용합니다.
     private bool isSuspended;
@@ -44,6 +45,16 @@ public abstract class Effector : MonoBehaviour, IEffect
             GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
 
         OnApply();
+
+        if (!isApplied) return;
+
+        if (IsExpired)
+        {
+            Revert();
+            return;
+        }
+
+        hasNotifiedApplied = true;
         OnAnyEffectApplied?.Invoke(this);
         OnEffectApplied();
     }
@@ -58,8 +69,13 @@ public abstract class Effector : MonoBehaviour, IEffect
         if (useHalfTurn)
             GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
 
+        bool shouldNotifyReverted = hasNotifiedApplied;
+        hasNotifiedApplied = false;
+
         OnRevert();
-        OnAnyEffectReverted?.Invoke(this);
+        if (shouldNotifyReverted)
+            OnAnyEffectReverted?.Invoke(this);
+
         OnEffectReverted();
         activeCardToken?.Complete();
         activeCardToken = null;
@@ -78,7 +94,10 @@ public abstract class Effector : MonoBehaviour, IEffect
                 GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
         }
 
-        OnAnyEffectReverted?.Invoke(this);
+        if (hasNotifiedApplied)
+            OnAnyEffectReverted?.Invoke(this);
+
+        hasNotifiedApplied = false;
         activeCardToken?.Complete();
         activeCardToken = null;
     }
