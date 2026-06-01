@@ -7,6 +7,10 @@ public interface IArenaPersistentEffect { }
 /// <summary>기물 또는 타일에 효과를 적용하고 관리하는 추상 컴포넌트</summary>
 public abstract class Effector : MonoBehaviour, IEffect
 {
+    public static event System.Action<Effector> OnAnyEffectApplied;
+    public static event System.Action<Effector> OnAnyEffectReverted;
+    public static event System.Action<Effector> OnAnyEffectTurnTicked;
+
     private int remainingTurns; // -1 = 영구 효과
     private bool useHalfTurn; // 반턴 사용 여부
     private bool isApplied;
@@ -40,6 +44,7 @@ public abstract class Effector : MonoBehaviour, IEffect
             GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
 
         OnApply();
+        OnAnyEffectApplied?.Invoke(this);
         OnEffectApplied();
     }
 
@@ -54,6 +59,7 @@ public abstract class Effector : MonoBehaviour, IEffect
             GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
 
         OnRevert();
+        OnAnyEffectReverted?.Invoke(this);
         OnEffectReverted();
         activeCardToken?.Complete();
         activeCardToken = null;
@@ -72,6 +78,7 @@ public abstract class Effector : MonoBehaviour, IEffect
                 GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
         }
 
+        OnAnyEffectReverted?.Invoke(this);
         activeCardToken?.Complete();
         activeCardToken = null;
     }
@@ -91,6 +98,7 @@ public abstract class Effector : MonoBehaviour, IEffect
         isSuspended = true;
         ToggleTileVisual(false);
         OnSuspendForArena();
+        OnAnyEffectTurnTicked?.Invoke(this);
     }
 
     /// <summary>투기장 종료 후 효과를 재개합니다.</summary>
@@ -108,6 +116,8 @@ public abstract class Effector : MonoBehaviour, IEffect
             if (useHalfTurn)
                 GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
         }
+
+        OnAnyEffectTurnTicked?.Invoke(this);
     }
 
     /// <summary>서브클래스에서 훅/버프를 부착합니다.</summary>
@@ -129,6 +139,8 @@ public abstract class Effector : MonoBehaviour, IEffect
         remainingTurns--;
         if (IsExpired)
             Revert();
+        else
+            OnAnyEffectTurnTicked?.Invoke(this);
     }
 
     protected virtual void OnHalfTurnChanged() { }

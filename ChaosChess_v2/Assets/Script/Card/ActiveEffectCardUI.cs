@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CanvasGroup))]
-public class GlobalCardUI : MonoBehaviour
+public class ActiveEffectCardUI : MonoBehaviour
 {
     public Image CardImage;
     public TMP_Text Title;
