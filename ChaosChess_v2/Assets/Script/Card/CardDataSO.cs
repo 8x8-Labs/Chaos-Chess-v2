@@ -61,8 +61,6 @@ public class CardDataSO : ScriptableObject
     public PieceColor GlobalTargetColor;
     public bool HasLimit;
     public int LimitTurn;
-    [Tooltip("활성화 시 전역 상태 카드 UI를 표시합니다.")]
-    public bool ShowStatusCard;
     [Tooltip("상태 카드에 표시할 문구 타입입니다.")]
     public ActiveEffectStatusType StatusDisplayType = ActiveEffectStatusType.Active;
 
