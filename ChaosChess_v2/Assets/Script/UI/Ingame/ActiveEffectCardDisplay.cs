@@ -27,6 +27,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
 
     private void OnEnable()
     {
+        CleanUpDestroyedEffects();
         Effector.OnAnyEffectApplied += HandleEffectApplied;
         Effector.OnAnyEffectReverted += HandleEffectReverted;
         Effector.OnAnyEffectTurnTicked += HandleEffectTurnTicked;
@@ -95,7 +96,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
     private void HandleEffectApplied(Effector effector)
     {
         CardDataSO cardSO = effector.CardSO;
-        if (cardSO == null) return;
+        if (cardSO == null || !cardSO.ShowStatusCard) return;
 
         if (!cards.TryGetValue(cardSO, out ActiveEffectCard card))
         {
@@ -105,6 +106,33 @@ public class ActiveEffectCardDisplay : MonoBehaviour
 
         card.Effects.Add(effector);
         UpdateCard(card);
+        RefreshTrayState();
+    }
+
+    private void CleanUpDestroyedEffects()
+    {
+        List<CardDataSO> keysToRemove = new();
+
+        foreach (KeyValuePair<CardDataSO, ActiveEffectCard> pair in cards)
+        {
+            ActiveEffectCard card = pair.Value;
+            card.Effects.RemoveAll(effect => effect == null);
+            if (card.Effects.Count == 0)
+            {
+                if (card.Root != null)
+                    Destroy(card.Root);
+
+                keysToRemove.Add(pair.Key);
+            }
+            else
+            {
+                UpdateCard(card);
+            }
+        }
+
+        foreach (CardDataSO cardSO in keysToRemove)
+            cards.Remove(cardSO);
+
         RefreshTrayState();
     }
 

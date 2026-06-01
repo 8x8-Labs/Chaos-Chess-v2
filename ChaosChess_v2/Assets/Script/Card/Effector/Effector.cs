@@ -24,6 +24,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     public bool IsPermanent => remainingTurns < 0;
     public int RemainingTurns => remainingTurns;
     public bool IsSuspended => isSuspended;
+    protected bool IsApplied => isApplied;
 
     protected void SetDuration(int turns)
     {
@@ -153,6 +154,7 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     public virtual void OnTurnChanged()
     {
+        if (!isApplied) return;
         if (IsPermanent) return;
 
         remainingTurns--;
@@ -257,7 +259,7 @@ public abstract class GlobalEffector : Effector
     public override void OnTurnChanged()
     {
         base.OnTurnChanged();
-        if (!IsExpired) OnTurnTicked?.Invoke(this);
+        if (IsApplied && !IsExpired) OnTurnTicked?.Invoke(this);
     }
 
     protected PieceType watchType;   // 감시할 기물 타입 (Flags 조합 가능, None = 모든 타입)
