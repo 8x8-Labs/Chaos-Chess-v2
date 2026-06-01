@@ -58,6 +58,11 @@ public class SceneLoadManager : MonoBehaviour
             overlayUI.Initialize();
         }
 
+        yield return null; // 오버레이가 렌더링된 후 페이드 시작
+        Tween fadeIn = overlayUI?.FadeTo(1f, fadeDuration);
+        if (fadeIn != null)
+            yield return fadeIn.WaitForCompletion();
+
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
         if (operation == null)
         {
@@ -67,9 +72,7 @@ public class SceneLoadManager : MonoBehaviour
 
         operation.allowSceneActivation = false;
 
-        yield return null; // DOTween이 같은 프레임 내 Update를 이미 처리했을 경우를 위한 1프레임 대기
-        Tween fadeIn = overlayUI?.FadeTo(1f, fadeDuration);
-        yield return WaitForReadyToActivate(overlayUI, operation, fadeIn);
+        yield return WaitForReadyToActivate(overlayUI, operation);
 
         operation.allowSceneActivation = true;
 
@@ -85,12 +88,12 @@ public class SceneLoadManager : MonoBehaviour
         isLoading = false;
     }
 
-    private IEnumerator WaitForReadyToActivate(SceneLoadingOverlayBase overlay, AsyncOperation operation, Tween fadeTween)
+    private IEnumerator WaitForReadyToActivate(SceneLoadingOverlayBase overlay, AsyncOperation operation)
     {
         float elapsed = 0f;
         bool isLoadingContentVisible = false;
 
-        while (operation.progress < 0.9f || IsTweenRunning(fadeTween))
+        while (operation.progress < 0.9f)
         {
             elapsed += Time.unscaledDeltaTime;
 
@@ -106,11 +109,6 @@ public class SceneLoadManager : MonoBehaviour
 
         overlay?.SetAlpha(1f);
         overlay?.SetProgress(1f);
-    }
-
-    private bool IsTweenRunning(Tween tween)
-    {
-        return tween != null && tween.IsActive() && !tween.IsComplete();
     }
 
     private void CreateLoadingOverlay()
