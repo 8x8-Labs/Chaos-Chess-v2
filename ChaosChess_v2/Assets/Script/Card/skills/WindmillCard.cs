@@ -10,11 +10,13 @@ public class WindmillCard : CardData, ICard
     public void Execute(CardEffectArgs args = null)
     {
         var effector = CreateGlobalEffector<WindmillEffector>();
+        effector.Init(DataSO.PieceType, ApplyType.All, DataSO.PieceLimitTurn);
+
         foreach (Piece piece in BoardManager.Instance.GetAllPieces())
         {
             piece.MoveFenOverride = piece.Type == PieceType.Rook ? "b" : piece.Type == PieceType.Bishop ? "r" : null;
         }
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
+
         effector.Apply();
 
     }

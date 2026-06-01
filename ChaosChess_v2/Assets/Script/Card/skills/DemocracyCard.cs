@@ -31,9 +31,10 @@ public class DemocracyEffect : GlobalEffector
         Destroy(gameObject);
     }
 
-    public void OnDestroy()
+    protected override void OnDestroy()
     {
         Revert();
+        base.OnDestroy();
     }
 
     public void CheckCondition()
@@ -60,7 +61,7 @@ public class DemocracyEffect : GlobalEffector
         if (pawnCount >= 2 * otherCount)
         {
             GameManager.Instance.OnSurrender(GameManager.Instance.EnemyColor);
-            OnRevert();
+            Revert();
         }
     }
 }

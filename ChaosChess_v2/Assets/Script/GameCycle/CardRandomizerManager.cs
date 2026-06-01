@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Action = System.Action;
 using UnityEngine;
 
 public class CardRandomizerManager : MonoBehaviour
@@ -8,6 +9,8 @@ public class CardRandomizerManager : MonoBehaviour
 
     [SerializeField] private List<GameObject> allCards;
     public IReadOnlyList<GameObject> AllCards => allCards;
+    private readonly Dictionary<CardDataSO, int> activeCardCounts = new();
+    private CardDataSO cardExecutionSource;
 
     private void Awake()
     {
@@ -22,6 +25,58 @@ public class CardRandomizerManager : MonoBehaviour
         }
     }
 
+    public void ClearActiveCards()
+    {
+        activeCardCounts.Clear();
+        cardExecutionSource = null;
+    }
+
+    public void ExecuteCard(CardDataSO cardSO, Action action)
+    {
+        if (cardSO == null)
+        {
+            action?.Invoke();
+            return;
+        }
+
+        CardDataSO previousExecutionSource = cardExecutionSource;
+        cardExecutionSource = cardSO;
+        try
+        {
+            action?.Invoke();
+        }
+        finally
+        {
+            cardExecutionSource = previousExecutionSource;
+        }
+    }
+
+    public ActiveCardToken RetainActiveCard(CardDataSO cardSO = null)
+    {
+        cardSO ??= cardExecutionSource;
+        if (cardSO == null) return null;
+
+        activeCardCounts.TryGetValue(cardSO, out int count);
+        activeCardCounts[cardSO] = count + 1;
+
+        return new ActiveCardToken(this, cardSO);
+    }
+
+    private bool IsCardActive(CardDataSO cardSO)
+    {
+        return cardSO != null && activeCardCounts.ContainsKey(cardSO);
+    }
+
+    private void DecrementCount(CardDataSO cardSO)
+    {
+        if (cardSO == null || !activeCardCounts.TryGetValue(cardSO, out int count)) return;
+
+        if (count <= 1)
+            activeCardCounts.Remove(cardSO);
+        else
+            activeCardCounts[cardSO] = count - 1;
+    }
+
     /// <summary>
     /// 특정 풀 내부에서 특정 카드를 제외한 랜덤 카드 선택
     /// </summary>
@@ -29,6 +84,7 @@ public class CardRandomizerManager : MonoBehaviour
     {
         List<GameObject> availableCards = pool
             .Except(excludedCards)
+            .Where(card => !IsCardActive(GetCardSO(card)))
             .ToList();
 
         Shuffle(availableCards);
@@ -45,6 +101,7 @@ public class CardRandomizerManager : MonoBehaviour
     {
         List<GameObject> availableCards = allCards
             .Except(excludedCards)
+            .Where(card => !IsCardActive(GetCardSO(card)))
             .ToList();
 
         Shuffle(availableCards);
@@ -62,7 +119,9 @@ public class CardRandomizerManager : MonoBehaviour
                 CardData data = card.GetComponent<CardData>();
 
                 return data != null &&
-                       data.DataSO.CardTier == tier;
+                       data.DataSO != null &&
+                       data.DataSO.CardTier == tier &&
+                       !IsCardActive(data.DataSO);
             })
             .ToList();
 
@@ -81,6 +140,34 @@ public class CardRandomizerManager : MonoBehaviour
 
             (list[i], list[j]) =
                 (list[j], list[i]);
+        }
+    }
+
+    private CardDataSO GetCardSO(GameObject card)
+    {
+        if (card == null) return null;
+
+        CardData data = card.GetComponent<CardData>();
+        return data != null ? data.DataSO : null;
+    }
+
+    public sealed class ActiveCardToken
+    {
+        private readonly CardRandomizerManager owner;
+        private readonly CardDataSO cardSO;
+        private bool isActive = true;
+
+        public ActiveCardToken(CardRandomizerManager owner, CardDataSO cardSO)
+        {
+            this.owner = owner;
+            this.cardSO = cardSO;
+        }
+
+        public void Complete()
+        {
+            if (!isActive) return;
+            isActive = false;
+            owner.DecrementCount(cardSO);
         }
     }
 }

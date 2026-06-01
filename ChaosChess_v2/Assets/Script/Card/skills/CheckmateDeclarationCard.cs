@@ -30,9 +30,10 @@ public class CheckmateDeclarationEffect : GlobalEffector
         Destroy(gameObject);
     }
 
-    public void OnDestroy()
+    protected override void OnDestroy()
     {
         Revert();
+        base.OnDestroy();
     }
 
     public void PlayerCheck()

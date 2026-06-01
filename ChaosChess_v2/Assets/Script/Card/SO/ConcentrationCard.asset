@@ -31,6 +31,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  StatusDisplayType: 2
   NeedAdditionalDescription: 1
   DescriptionType: 0
   AdditionalDescriptionTitle: "\uC544\uB9C8\uC874 \uD589\uB9C8\uBC95"

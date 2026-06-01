@@ -7,15 +7,24 @@ public interface IArenaPersistentEffect { }
 /// <summary>기물 또는 타일에 효과를 적용하고 관리하는 추상 컴포넌트</summary>
 public abstract class Effector : MonoBehaviour, IEffect
 {
+    public static event System.Action<Effector> OnAnyEffectApplied;
+    public static event System.Action<Effector> OnAnyEffectReverted;
+    public static event System.Action<Effector> OnAnyEffectTurnTicked;
+
     private int remainingTurns; // -1 = 영구 효과
     private bool useHalfTurn; // 반턴 사용 여부
+    private bool isApplied;
+    private bool hasNotifiedApplied;
+    private CardRandomizerManager.ActiveCardToken activeCardToken;
     // 투기장 등 특수 모드에서 효과 동작을 잠시 멈출 때 사용합니다.
     private bool isSuspended;
 
+    public CardDataSO CardSO { get; set; }
     public bool IsExpired => remainingTurns == 0;
     public bool IsPermanent => remainingTurns < 0;
     public int RemainingTurns => remainingTurns;
     public bool IsSuspended => isSuspended;
+    protected bool IsApplied => isApplied;
 
     protected void SetDuration(int turns)
     {
@@ -25,6 +34,11 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과를 대상에 등록합니다. 턴 이벤트를 구독하고 OnApply()를 호출합니다.</summary>
     public void Apply(bool halfTurn = false)
     {
+        if (isApplied) return;
+
+        activeCardToken = CardRandomizerManager.Instance?.RetainActiveCard(CardSO);
+
+        isApplied = true;
         GameManager.Instance.OnTurnChanged += OnTurnChanged;
 
         useHalfTurn = halfTurn;
@@ -32,18 +46,61 @@ public abstract class Effector : MonoBehaviour, IEffect
             GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
 
         OnApply();
+
+        if (!isApplied) return;
+
+        if (IsExpired)
+        {
+            Revert();
+            return;
+        }
+
+        hasNotifiedApplied = true;
+        OnAnyEffectApplied?.Invoke(this);
         OnEffectApplied();
     }
 
     /// <summary>효과를 대상에서 제거합니다. 턴 이벤트를 해제하고 OnRevert()를 호출합니다.</summary>
     public void Revert()
     {
+        if (!isApplied) return;
+
+        isApplied = false;
         GameManager.Instance.OnTurnChanged -= OnTurnChanged;
         if (useHalfTurn)
             GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
 
+        bool shouldNotifyReverted = hasNotifiedApplied;
+        hasNotifiedApplied = false;
+
         OnRevert();
+        if (shouldNotifyReverted)
+            OnAnyEffectReverted?.Invoke(this);
+
         OnEffectReverted();
+        activeCardToken?.Complete();
+        activeCardToken = null;
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (!isApplied) return;
+
+        isApplied = false;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTurnChanged -= OnTurnChanged;
+            if (useHalfTurn)
+                GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
+        }
+
+        if (hasNotifiedApplied)
+            OnAnyEffectReverted?.Invoke(this);
+
+        hasNotifiedApplied = false;
+        activeCardToken?.Complete();
+        activeCardToken = null;
     }
 
     /// <summary>투기장 동안 효과를 일시 정지합니다.</summary>
@@ -61,6 +118,7 @@ public abstract class Effector : MonoBehaviour, IEffect
         isSuspended = true;
         ToggleTileVisual(false);
         OnSuspendForArena();
+        OnAnyEffectTurnTicked?.Invoke(this);
     }
 
     /// <summary>투기장 종료 후 효과를 재개합니다.</summary>
@@ -78,6 +136,8 @@ public abstract class Effector : MonoBehaviour, IEffect
             if (useHalfTurn)
                 GameManager.Instance.OnHalfTurnChanged += OnHalfTurnChanged;
         }
+
+        OnAnyEffectTurnTicked?.Invoke(this);
     }
 
     /// <summary>서브클래스에서 훅/버프를 부착합니다.</summary>
@@ -94,11 +154,14 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     public virtual void OnTurnChanged()
     {
+        if (!isApplied) return;
         if (IsPermanent) return;
 
         remainingTurns--;
         if (IsExpired)
             Revert();
+        else
+            OnAnyEffectTurnTicked?.Invoke(this);
     }
 
     protected virtual void OnHalfTurnChanged() { }
@@ -146,8 +209,6 @@ public abstract class PieceEffector : Effector, IPieceEffect
 /// <summary>타일에 부착되는 효과의 기반 추상 클래스</summary>
 public abstract class TileEffector : Effector, ITileEffect
 {
-    public CardDataSO CardSO { get; set; }
-
     public Vector3Int TilePos
     {
         get
@@ -192,15 +253,13 @@ public abstract class GlobalEffector : Effector
     public static event System.Action<GlobalEffector> OnDeactivated;
     public static event System.Action<GlobalEffector> OnTurnTicked;
 
-    public CardDataSO CardSO { get; set; }
-
     protected override void OnEffectApplied() => OnActivated?.Invoke(this);
     protected override void OnEffectReverted() => OnDeactivated?.Invoke(this);
 
     public override void OnTurnChanged()
     {
         base.OnTurnChanged();
-        if (!IsExpired) OnTurnTicked?.Invoke(this);
+        if (IsApplied && !IsExpired) OnTurnTicked?.Invoke(this);
     }
 
     protected PieceType watchType;   // 감시할 기물 타입 (Flags 조합 가능, None = 모든 타입)

@@ -36,6 +36,7 @@ public class PsilocybinMushroomCard : CardData, ITileCard
         if (piece == null) return;
 
         var effect = CreatePieceEffector<PsilocybinMushroomPieceEffect>(piece);
+        effect.CardSO = null;
         effect.Init(piece, 3);
         effect.Apply();
     }
@@ -70,8 +71,9 @@ public class PsilocybinMushroomTileEffect : TileEffector
         Destroy(gameObject);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
     }
 

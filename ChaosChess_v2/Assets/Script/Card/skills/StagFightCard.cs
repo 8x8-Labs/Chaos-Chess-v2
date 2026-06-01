@@ -63,8 +63,9 @@ public class StagFightEffector : GlobalEffector
     private void HandlePieceDestroyed(Piece piece) => changed.Remove(piece);
 
     // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         Piece.OnPieceDestroyed -= HandlePieceDestroyed;
     }
 }

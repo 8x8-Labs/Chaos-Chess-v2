@@ -23,7 +23,6 @@ public class CaterpillarCard : CardData, IPieceCard
     {
         var effector = CreatePieceEffector<CaterpillarEffector>(args.Targets[0]);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
     }
 }
 

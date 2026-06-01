@@ -10,6 +10,7 @@ public abstract class CardData : MonoBehaviour
     {
         T effector = target.gameObject.AddComponent<T>();
         effector.Init(target, DataSO.PieceLimitTurn);
+        effector.CardSO = DataSO;
         return effector;
     }
 

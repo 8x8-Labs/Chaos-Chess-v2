@@ -30,6 +30,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  StatusDisplayType: 1
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uD658\uAC01 \uBC84\uC12F"
