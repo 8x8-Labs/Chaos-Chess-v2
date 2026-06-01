@@ -490,6 +490,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void SetGameInput(bool enabled)
+    {
+        IsGameInput = enabled;
+    }
+
     private void UpdatePlayerCheckState(bool isPlayerInCheck)
     {
         if (IsPlayerInCheck == isPlayerInCheck)
