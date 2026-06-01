@@ -46,6 +46,8 @@ public class Player : MonoBehaviour
 
     private void HandlePlayerTurnStarted()
     {
+        if (GameManager.Instance.IsCardIntervalPaused) return;
+
         _playerTurnCount++;
         if (_playerTurnCount < _cardInterval || cardRandomizer.CurrentCardCnt >= _maxCardCount) return;
         _playerTurnCount = 0;

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    private const int AiMoveTimeMs = 5000;
+
     public GameResult FinishType { get; set; } = GameResult.None;
 
     public static GameManager Instance;
@@ -23,10 +24,12 @@ public class GameManager : MonoBehaviour
     public bool IsGameInput = true;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
+    public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
     // 투기장 진행 중 기존 예약 액션(폭탄, 지속효과 해제 등) 소모를 잠시 멈춥니다.
     private bool areQueuedActionsPaused = false;
     private int queuedActionPauseTurn = -1;
+    private int cardIntervalPauseCount = 0;
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
     public event Action OnPlayerTurnStarted;
@@ -338,6 +341,19 @@ public class GameManager : MonoBehaviour
         areQueuedActionsPaused = false;
         queuedActionPauseTurn = -1;
     }
+
+    /// <summary>카드 지급 주기 카운트를 일시 정지합니다.</summary>
+    public void PushCardIntervalPause()
+    {
+        cardIntervalPauseCount++;
+    }
+
+    /// <summary>카드 지급 주기 카운트 일시 정지를 해제합니다.</summary>
+    public void PopCardIntervalPause()
+    {
+        cardIntervalPauseCount = Mathf.Max(0, cardIntervalPauseCount - 1);
+    }
+
     // MoveSelected 안에서 플레이어 수 적용 후:
     private void MoveSelected(Vector3Int target)
     {
@@ -437,13 +453,61 @@ public class GameManager : MonoBehaviour
 
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,
-            moveTimeMs: 2000,
+            moveTimeMs: AiMoveTimeMs,
             callback: (uciMove) =>
             {
-                // UCI 수 (예: "e2e4") → Vector3Int 변환 후 BoardManager에 적용
-                BoardManager.Instance.ApplyUCIMove(uciMove);
+                if (BoardManager.Instance.IsValidUciMove(uciMove))
+                {
+                    BoardManager.Instance.ApplyUCIMove(uciMove);
+                    return;
+                }
+
+                Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
+                ApplyFallbackLegalAIMove();
             }
         );
+    }
+
+    private void ApplyFallbackLegalAIMove()
+    {
+        FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
+        {
+            if (moves == null || moves.Length == 0)
+            {
+                EvaluateGameState(Array.Empty<string>());
+                ApplyGameResult();
+                return;
+            }
+
+            string randomMove = ChooseRandomLegalMove(moves);
+            if (randomMove == "none")
+            {
+                Debug.LogWarning("[AI] No valid legal moves found after filtering. Ending game.");
+                EvaluateGameState(Array.Empty<string>());
+                ApplyGameResult();
+                return;
+            }
+
+            BoardManager.Instance.ApplyUCIMove(randomMove);
+        });
+    }
+
+    private string ChooseRandomLegalMove(string[] moves)
+    {
+        List<string> validMoves = new List<string>();
+
+        foreach (string move in moves)
+        {
+            if (!BoardManager.Instance.IsValidUciMove(move))
+                continue;
+
+            validMoves.Add(move);
+        }
+
+        if (validMoves.Count == 0)
+            return "none";
+
+        return validMoves[UnityEngine.Random.Range(0, validMoves.Count)];
     }
 
     private void EvaluateGameState(string[] moves)
