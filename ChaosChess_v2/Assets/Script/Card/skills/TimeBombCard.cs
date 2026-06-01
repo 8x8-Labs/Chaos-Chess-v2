@@ -24,25 +24,37 @@ public class TimeBombCard : CardData, ITileCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Vector3Int> tiles = args.TargetPos;
-
         Vector3Int center = args.TargetPos[0];
+        TimeBombEffector effector = CreateTileEffector<TimeBombEffector>(center);
+        effector.Apply();
+    }
+}
 
-        // 타일 이펙트 추가
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(center, DataSO.EffectTileBase);
+public class TimeBombEffector : TileEffector
+{
+    protected override void OnApply()
+    {
+        if (CardSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, CardSO.EffectTileBase);
 
+        BoardManager.Instance.RegisterTileEffector(tilePos, this);
+    }
 
-        GameManager.Instance.AppendAction(DataSO.MaintainTurn, () =>
-        {
-            Explode(center);
-            
-            // 타일 이펙트 제거
-            if (DataSO.NeedEffectTileBase)
-                BoardManager.Instance.TileEffectDrawer.ClearTileEffect(center);
+    protected override void OnRevert()
+    {
+        if (CardSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
 
-        });
+        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
+        Destroy(gameObject);
+    }
 
+    public override void OnTurnChanged()
+    {
+        if (RemainingTurns <= 1)
+            Explode(tilePos);
+
+        base.OnTurnChanged();
     }
 
     private void Explode(Vector3Int center)
