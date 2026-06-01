@@ -107,7 +107,7 @@ public class CardDataSOEditor : Editor
                 EditorGUILayout.PropertyField(cardTier, new GUIContent("카드 등급"));
                 EditorGUILayout.Space(4);
                 EditorGUILayout.PropertyField(statusDisplayType, new GUIContent("상태 표시 타입"));
-                EditorGUILayout.HelpBox("카드 활성화 시 카드 UI에 표시됩니다.", MessageType.Info);
+                DrawStatusDisplayPreview();
             }
         }
 
@@ -304,6 +304,21 @@ public class CardDataSOEditor : Editor
     void HelpBox(string msg, MessageType type)
     {
         EditorGUILayout.HelpBox(msg, type);
+    }
+
+    void DrawStatusDisplayPreview()
+    {
+        var type = (ActiveEffectStatusType)statusDisplayType.enumValueIndex;
+        string preview = type switch
+        {
+            ActiveEffectStatusType.Active => "활성",
+            ActiveEffectStatusType.Installed => "설치",
+            ActiveEffectStatusType.TurnBased => "3턴",
+            ActiveEffectStatusType.CountBased => "3회",
+            _ => "활성"
+        };
+
+        EditorGUILayout.HelpBox($"카드 활성화 UI 표시 예시: {preview}", MessageType.Info);
     }
 
     string GetTypeSettingLabel(CardType type) => type switch
