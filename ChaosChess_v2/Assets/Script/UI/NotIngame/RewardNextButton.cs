@@ -33,5 +33,6 @@ public class RewardNextButton : MonoBehaviour
             nextButtonCanvasGroup.interactable = canGoNext;
             nextButtonCanvasGroup.blocksRaycasts = canGoNext;
         }
+
     }
 }

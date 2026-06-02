@@ -33,6 +33,18 @@ public class GameCycleManager : MonoBehaviour
         MapManager.Instance?.Init();
     }
 
+    /// <summary>
+    /// 저장된 런을 불러와 이어한다.
+    /// StartGame()과 달리 InitializeRun/Init()을 호출하지 않고
+    /// SaveManager.Load()로 기존 상태를 복원한 뒤 MapScene으로 이동한다.
+    /// </summary>
+    public void ContinueRun()
+    {
+        CurrentMode = GameMode.Run;
+        SaveManager.Instance.Load();
+        SceneLoadManager.Instance.LoadScene("MapScene");
+    }
+
     public void StartPractice(PracticeDifficulty difficulty)
     {
         CurrentMode = GameMode.Practice;
