@@ -42,7 +42,7 @@ public class AimEffector : PieceEffector, IMovementOverrideEffect
 
     protected override void OnRevert()
     {
-        if (target.MoveFenOverride?.ToLower() == "t")
+        if (target != null && target.MoveFenOverride?.ToLower() == "t")
             target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 

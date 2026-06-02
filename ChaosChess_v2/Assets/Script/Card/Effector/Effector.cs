@@ -196,6 +196,8 @@ public abstract class Effector : MonoBehaviour, IEffect
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
 public abstract class PieceEffector : Effector, IPieceEffect
 {
+    private static readonly List<PieceEffector> effectorBuffer = new();
+
     protected Piece target;
 
     public static bool HasActiveMovementOverride(Piece piece)
@@ -203,12 +205,18 @@ public abstract class PieceEffector : Effector, IPieceEffect
         if (piece == null) return false;
         if (piece.MoveFenOverride != null || piece.FenOverride != null) return true;
 
-        foreach (PieceEffector effector in piece.GetComponents<PieceEffector>())
+        effectorBuffer.Clear();
+        piece.GetComponents(effectorBuffer);
+        foreach (PieceEffector effector in effectorBuffer)
         {
             if (effector is IMovementOverrideEffect && !effector.IsSuspended)
+            {
+                effectorBuffer.Clear();
                 return true;
+            }
         }
 
+        effectorBuffer.Clear();
         return false;
     }
 

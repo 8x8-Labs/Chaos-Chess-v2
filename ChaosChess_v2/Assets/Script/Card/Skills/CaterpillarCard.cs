@@ -36,7 +36,7 @@ public class CaterpillarEffector : PieceEffector, IMovementOverrideEffect
 
     protected override void OnRevert()
     {
-        if (target.FenOverride?.ToLower() == "z")
+        if (target != null && target.FenOverride?.ToLower() == "z")
             target.FenOverride = null;
         RefreshMoves();
         Destroy(this);

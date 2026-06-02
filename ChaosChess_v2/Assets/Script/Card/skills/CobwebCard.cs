@@ -158,7 +158,7 @@ public class CobwebPieceEffector : PieceEffector, IMovementOverrideEffect
 
     protected override void OnRevert()
     {
-        if (target.MoveFenOverride?.ToLower() == "a")
+        if (target != null && target.MoveFenOverride?.ToLower() == "a")
             target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);

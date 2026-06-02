@@ -36,7 +36,7 @@ public class FastMarchCardEffector : PieceEffector, IMovementOverrideEffect
 
     protected override void OnRevert()
     {
-        if (target.MoveFenOverride?.ToLower() == "f")
+        if (target != null && target.MoveFenOverride?.ToLower() == "f")
             target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 

@@ -38,7 +38,7 @@ public class AgileEffect : PieceEffector, IMovementOverrideEffect
 
     protected override void OnRevert()
     {
-        if (target.MoveFenOverride?.ToLower() == "u")
+        if (target != null && target.MoveFenOverride?.ToLower() == "u")
             target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);

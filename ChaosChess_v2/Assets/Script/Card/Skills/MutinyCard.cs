@@ -39,7 +39,7 @@ public class MutinyEffect : PieceEffector, IMovementOverrideEffect
 
     protected override void OnRevert()
     {
-        if (target.MoveFenOverride?.ToLower() == "w")
+        if (target != null && target.MoveFenOverride?.ToLower() == "w")
             target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
