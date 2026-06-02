@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RampartCard
   m_EditorClassIdentifier: 
   CardName: "\uC131\uBCBD"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1167870803, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uB450 \uD0C0\uC77C\uC5D0 \uB118\uC5B4\uAC08
     \uC218 \uC5C6\uC73C\uBA70 \uACF5\uACA9 \uC2DC \uD30C\uAD34\uB418\uB294 \uBCBD\uC744
     \uC124\uCE58\uD569\uB2C8\uB2E4."
@@ -25,12 +25,15 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 2
   MaintainTurn: -1
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

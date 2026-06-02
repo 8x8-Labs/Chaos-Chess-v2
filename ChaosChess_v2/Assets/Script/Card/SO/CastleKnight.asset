@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CastleKnight
   m_EditorClassIdentifier: 
   CardName: "\uC131 \uC704\uC758 \uB9D0"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1866654784, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 \uAC00\uC7A5 \uAC00\uAE4C\uC6B4
     \uB8E9\uC758 \uC790\uB9AC\uB85C \uC774\uB3D9\uD574 \uCC48\uC2AC\uB7EC\uB85C \uC2B9\uACA9\uD569\uB2C8\uB2E4."
   Type: 0
@@ -24,12 +24,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FatherEnemyCard
   m_EditorClassIdentifier: 
   CardName: "\uC544\uBC84\uC9C0\uC758 \uC6D0\uC218"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1376287424, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC774 \uAC01\uC131\uD569\uB2C8\uB2E4.
     \uAC01\uC131\uD55C \uD3F0\uC740 \uC774\uD6C4 \uC790\uC2E0\uC758 \uD134\uC744
     \uC18C\uBAA8\uD558\uC5EC \uB098\uC774\uD2B8, \uBE44\uC20D, \uD038 \uC21C\uC73C\uB85C
@@ -26,12 +26,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

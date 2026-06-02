@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ObeyOrderCard
   m_EditorClassIdentifier: 
   CardName: "\uBA85\uB839 \uBCF5\uC885"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1208238303, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC744 \uBA85\uB839 \uCE78\uC73C\uB85C
     \uC9C0\uC815\uD569\uB2C8\uB2E4."
   Type: 1
@@ -32,6 +32,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uBA85\uB839 \uCE78"

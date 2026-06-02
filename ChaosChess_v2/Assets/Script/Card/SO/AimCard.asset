@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AimCard
   m_EditorClassIdentifier: 
   CardName: "\uC870\uC900"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1867378728, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC774\uBC88 \uD134 \uB3D9\uC548 \uD3F0 \uAE30\uBB3C\uC774 \uC804\uBC29
     \uC0AC\uC120\uC73C\uB85C \uCD5C\uB300 1\uCE78 \uC774\uB3D9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.
     (1\uD68C)"
@@ -25,12 +25,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

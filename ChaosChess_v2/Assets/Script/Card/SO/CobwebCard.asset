@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CobwebCard
   m_EditorClassIdentifier: 
   CardName: "\uAC70\uBBF8\uC904"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 9887003, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 \uAC70\uBBF8\uC904\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 1
@@ -23,12 +23,15 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 1
   MaintainTurn: 3
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 1
   LimitTurn: 3
+  ShowStatusCard: 0
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uAC70\uBBF8\uC904"

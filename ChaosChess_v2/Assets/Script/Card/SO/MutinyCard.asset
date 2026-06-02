@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MutinyCard
   m_EditorClassIdentifier: 
   CardName: "\uD558\uADF9\uC0C1"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -549308139, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uC0C1\uB300\uC758 \uD038\uC740 3\uD134 \uB3D9\uC548
     \uC804\uBC18\uD5A5\uC73C\uB85C \uCD5C\uB300 1\uCE78\uB9CC \uC774\uB3D9\uD560
     \uC218 \uC788\uC2B5\uB2C8\uB2E4."
@@ -25,12 +25,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 1
   GlobalTargetColor: 1
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

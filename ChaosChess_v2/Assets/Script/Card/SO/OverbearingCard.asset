@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: OverbearingCard
   m_EditorClassIdentifier: 
   CardName: "\uC704\uC555"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1547573715, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uD134\uC744 \uC18C\uBAA8\uD574 \uB4A4\uB85C \uC774\uB3D9\uD560
     \uC218 \uC788\uB294 \uC801\uC758 \uBAA8\uB4E0 \uAE30\uBB3C\uC744 1\uCE78 \uD6C4\uD1F4\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 2
@@ -24,12 +24,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

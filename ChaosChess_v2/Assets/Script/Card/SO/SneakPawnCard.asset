@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SneakPawnCard
   m_EditorClassIdentifier: 
   CardName: "\uC554\uC2B5\uC758 \uD3F0"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1651468918, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC774\uBC88 \uD134 \uB3D9\uC548 \uC120\uD0DD\uD55C \uD3F0\uC774
     \uB098\uC774\uD2B8\uC758 \uD589\uB9C8\uBC95\uC744 \uAC00\uC9D1\uB2C8\uB2E4. (1\uD68C)"
   Type: 0
@@ -32,6 +32,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GiantCard
   m_EditorClassIdentifier: 
   CardName: "\uAC70\uB300\uD654"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -2116945493, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 \uC774\uB3D9\uD560 \uC2DC
     \uC774\uB3D9\uD55C \uC704\uCE58\uC5D0\uC11C 1\uCE78 \uBC18\uACBD\uC758 \uAE30\uBB3C\uB4E4\uC744
     1\uD134 \uB3D9\uC548 \uC6C0\uC9C1\uC774\uC9C0 \uBABB\uD558\uAC8C \uBB34\uB825\uD654\uC2DC\uD0B5\uB2C8\uB2E4."
@@ -25,12 +25,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

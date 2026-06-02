@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TransmigrationCard
   m_EditorClassIdentifier: 
   CardName: "\uC724\uD68C"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 543498064, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uD504\uB85C\uBAA8\uC158\uD55C \uC0C1\uB300 \uD3F0\uC758 \uC704\uCE58\uC640
     \uD615\uD0DC\uB97C \uCC98\uC74C \uC0C1\uD0DC\uB85C \uB418\uB3CC\uB9BD\uB2C8\uB2E4."
   Type: 0
@@ -32,6 +32,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

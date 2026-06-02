@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DesperadoCard
   m_EditorClassIdentifier: 
   CardName: "\uB370\uC2A4\uD398\uB77C\uB3C4"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -1662158825, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 \uC774\uBC88 \uD134 \uB3D9\uC548
     2\uBC88 \uD589\uB3D9\uD560 \uC218 \uC788\uC9C0\uB9CC, \uC774\uD6C4 \uD30C\uAD34\uB429\uB2C8\uB2E4."
   Type: 0
@@ -24,12 +24,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 
