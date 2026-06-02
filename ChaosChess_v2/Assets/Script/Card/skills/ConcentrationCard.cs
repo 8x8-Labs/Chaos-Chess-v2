@@ -3,7 +3,7 @@
 /// 정신 집중 - 기물 전용 (전설, 아마존)
 /// 선택 기물은 일정 수치 동안 상호작용할 수 없고, 이후 아마존으로 승격됩니다.
 /// </summary>
-class ConcentrationEffector : PieceEffector
+class ConcentrationEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {

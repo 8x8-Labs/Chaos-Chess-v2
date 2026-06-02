@@ -13,6 +13,7 @@ public static class CardSelectionState
 {
     private static CardSelectionOwner currentSelectionOwner = CardSelectionOwner.None;
     public static bool IsLocked => currentSelectionOwner != CardSelectionOwner.None;
+    public static CardSelectionOwner CurrentOwner => currentSelectionOwner;
 
     public static void Lock(CardSelectionOwner owner)
     {

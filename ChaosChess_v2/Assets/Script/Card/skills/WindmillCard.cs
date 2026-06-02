@@ -11,30 +11,41 @@ public class WindmillCard : CardData, ICard
     {
         var effector = CreateGlobalEffector<WindmillEffector>();
         effector.Init(DataSO.PieceType, ApplyType.All, DataSO.PieceLimitTurn);
-
-        foreach (Piece piece in BoardManager.Instance.GetAllPieces())
-        {
-            piece.MoveFenOverride = piece.Type == PieceType.Rook ? "b" : piece.Type == PieceType.Bishop ? "r" : null;
-        }
-
         effector.Apply();
 
     }
 }
 public class WindmillEffector : GlobalEffector
 {
+    private readonly List<Piece> changed = new();
+
     protected override void OnApply()
     {
+        foreach (Piece piece in BoardManager.Instance.GetAllPieces())
+        {
+            if (PieceEffector.HasActiveMovementOverride(piece))
+                continue;
+
+            string overrideFen = piece.Type == PieceType.Rook ? "b" : piece.Type == PieceType.Bishop ? "r" : null;
+            if (overrideFen == null)
+                continue;
+
+            piece.MoveFenOverride = overrideFen;
+            changed.Add(piece);
+        }
+
         BoardManager.Instance.RefreshMoves();
     }
 
     protected override void OnRevert()
     {
-        foreach (Piece piece in BoardManager.Instance.GetAllPieces())
+        foreach (Piece piece in changed)
         {
-            if (piece.Type == PieceType.Bishop || piece.Type == PieceType.Rook)
+            string p = piece != null ? piece.MoveFenOverride?.ToLower() : null;
+            if (p == "b" || p == "r")
                 piece.MoveFenOverride = null;
         }
+        changed.Clear();
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

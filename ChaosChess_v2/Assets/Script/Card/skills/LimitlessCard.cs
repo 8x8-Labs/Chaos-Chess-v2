@@ -40,6 +40,7 @@ public class LimitlessCard : CardData, IPieceCard
         Vector3Int pos = center.Pos;
 
         var controller = new LimitlessFieldController(pieceEff);
+        pieceEff.SetController(controller);
 
         for (int dx = -1; dx <= 1; dx++)
         {
@@ -64,8 +65,15 @@ public class LimitlessCard : CardData, IPieceCard
     }
 }
 
-public class LimitlessPieceEffector : PieceEffector
+public class LimitlessPieceEffector : PieceEffector, IMovementOverrideEffect
 {
+    private LimitlessFieldController controller;
+
+    public void SetController(LimitlessFieldController controller)
+    {
+        this.controller = controller;
+    }
+
     protected override void OnApply()
     {
         target.FenOverride = "a";
@@ -74,9 +82,20 @@ public class LimitlessPieceEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.FenOverride = null;
+        if (target != null && target.FenOverride?.ToLower() == "a")
+            target.FenOverride = null;
+
+        if (controller != null && !controller.IsBroken)
+            controller.Break(skipPieceEffector: true);
+
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
+    }
+
+    public override void OnPieceCaptured()
+    {
+        if (controller != null && !controller.IsBroken)
+            controller.Break(skipPieceEffector: true);
     }
 }
 
@@ -89,13 +108,14 @@ public class LimitlessFieldController
     private LimitlessPieceEffector pieceEff;
 
     private bool broken = false;
+    public bool IsBroken => broken;
 
     public LimitlessFieldController(LimitlessPieceEffector pieceEff)
     {
         this.pieceEff = pieceEff;
     }
 
-    public void Break()
+    public void Break(bool skipPieceEffector = false)
     {
         if (broken) return;
         broken = true;
@@ -109,7 +129,7 @@ public class LimitlessFieldController
         tiles.Clear();
 
         // 2. 기물 효과 제거
-        if (pieceEff != null)
+        if (!skipPieceEffector && pieceEff != null)
             pieceEff.Revert();
     }
 

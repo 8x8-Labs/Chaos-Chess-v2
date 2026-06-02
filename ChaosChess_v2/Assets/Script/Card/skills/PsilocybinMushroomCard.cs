@@ -27,17 +27,6 @@ public class PsilocybinMushroomCard : CardData, ITileCard
 
         effect.DataSO = DataSO;
 
-        effect.SetOwner(this);
-        effect.Apply();
-    }
-
-    public void ApplyPieceEffect(Piece piece)
-    {
-        if (piece == null) return;
-
-        var effect = CreatePieceEffector<PsilocybinMushroomPieceEffect>(piece);
-        effect.CardSO = null;
-        effect.Init(piece, 3);
         effect.Apply();
     }
 }
@@ -45,13 +34,6 @@ public class PsilocybinMushroomCard : CardData, ITileCard
 public class PsilocybinMushroomTileEffect : TileEffector
 {
     public CardDataSO DataSO;
-
-    private PsilocybinMushroomCard owner;
-
-    public void SetOwner(PsilocybinMushroomCard card)
-    {
-        owner = card;
-    }
 
     protected override void OnApply()
     {
@@ -79,15 +61,19 @@ public class PsilocybinMushroomTileEffect : TileEffector
 
     public override void OnPieceEnter(Piece piece)
     {
-        if (piece == null || owner == null) return;
+        if (piece == null) return;
+        if (PieceEffector.HasActiveMovementOverride(piece)) return;
 
-        owner.ApplyPieceEffect(piece);
+        var effect = piece.gameObject.AddComponent<PsilocybinMushroomPieceEffect>();
+        effect.CardSO = null;
+        effect.Init(piece, 3);
+        effect.Apply();
 
         Revert();
     }
 }
 
-public class PsilocybinMushroomPieceEffect : PieceEffector
+public class PsilocybinMushroomPieceEffect : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -97,7 +83,8 @@ public class PsilocybinMushroomPieceEffect : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "w")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 
         Destroy(this);

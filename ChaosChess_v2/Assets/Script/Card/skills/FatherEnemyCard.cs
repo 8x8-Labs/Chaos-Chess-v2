@@ -29,15 +29,12 @@ public class FatherEnemyCard : CardData, IPieceCard
     public void Create(Piece piece)
     {
         var effector = CreatePieceEffector<FatherEnemyEffector>(piece);
-        effector.fatherEnemyCard = this;
         effector.Apply();
     }
 }
 
 public class FatherEnemyEffector : PieceEffector
 {
-    public FatherEnemyCard fatherEnemyCard;
-
     private void OnPieceSelected(Piece piece)
     {
         if (piece != target) return;
@@ -99,9 +96,19 @@ public class FatherEnemyEffector : PieceEffector
         else
         {
             Revert();
-            fatherEnemyCard.Create(target);
+            ApplyAwakening(target);
         }
 
+    }
+
+    private void ApplyAwakening(Piece piece)
+    {
+        if (piece == null) return;
+
+        var effector = piece.gameObject.AddComponent<FatherEnemyEffector>();
+        effector.CardSO = CardSO;
+        effector.Init(piece, CardSO != null ? CardSO.PieceLimitTurn : RemainingTurns);
+        effector.Apply();
     }
 
     private void FinishAwakening()

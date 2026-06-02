@@ -96,7 +96,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
     private void HandleEffectApplied(Effector effector)
     {
         CardDataSO cardSO = effector.CardSO;
-        if (cardSO == null || !cardSO.ShowStatusCard) return;
+        if (cardSO == null) return;
 
         if (!cards.TryGetValue(cardSO, out ActiveEffectCard card))
         {

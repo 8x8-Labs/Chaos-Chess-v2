@@ -30,7 +30,6 @@ public class CardDataSOEditor : Editor
     SerializedProperty targetColor;
     SerializedProperty hasLimit;
     SerializedProperty limitTurn;
-    SerializedProperty showStatusCard;
     SerializedProperty statusDisplayType;
 
     // 부가 정보
@@ -75,7 +74,6 @@ public class CardDataSOEditor : Editor
         targetColor = serializedObject.FindProperty("GlobalTargetColor");
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
-        showStatusCard = serializedObject.FindProperty("ShowStatusCard");
         statusDisplayType = serializedObject.FindProperty("StatusDisplayType");
 
         needAdditionalDescription = serializedObject.FindProperty("NeedAdditionalDescription");

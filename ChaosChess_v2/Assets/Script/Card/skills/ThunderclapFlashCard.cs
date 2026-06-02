@@ -29,7 +29,7 @@ public class ThunderclapFlashCard : CardData, IPieceCard
     }
 }
 
-public class ThunderclapFlashEffector : PieceEffector
+public class ThunderclapFlashEffector : PieceEffector, IMovementOverrideEffect
 {
     public Vector3Int targetPos;
     
@@ -59,7 +59,8 @@ public class ThunderclapFlashEffector : PieceEffector
             BoardManager.Instance.DestroyPiece(pos);
         }
 
-        target.MoveFenOverride = null;
+        if (target.MoveFenOverride?.ToLower() == "m")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 
         Destroy(this);

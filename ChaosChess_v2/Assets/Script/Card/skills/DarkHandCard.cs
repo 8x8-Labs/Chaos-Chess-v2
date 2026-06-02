@@ -28,7 +28,7 @@ public class DarkHandCard : CardData, IPieceCard
     }
 }
 
-public class DarkHandEffector : PieceEffector
+public class DarkHandEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -38,7 +38,8 @@ public class DarkHandEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        if (target != null) target.FenOverride = null;
+        if (target != null && target.FenOverride?.ToLower() == "a")
+            target.FenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

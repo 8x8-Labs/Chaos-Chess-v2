@@ -109,7 +109,8 @@ public class PieceSelector : Selector<Piece>
         
         CardRandomizerManager.Instance?.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
 
-        if(cardData != null)
+        bool switchedSelector = CardSelectionState.CurrentOwner != CardSelectionOwner.Piece;
+        if(cardData != null && !switchedSelector)
             cardRandomizer?.RemoveCard(cardData.gameObject);
 
         DisableSelector();
@@ -193,6 +194,9 @@ public class PieceSelector : Selector<Piece>
     /// <summary>해당 기물에 일시정지되지 않은 PieceEffector가 하나라도 있는지 확인합니다.</summary>
     private bool HasActivePieceEffector(Piece piece)
     {
+        if (PieceEffector.HasActiveMovementOverride(piece))
+            return true;
+
         pieceEffectorBuffer.Clear();
         piece.GetComponents(pieceEffectorBuffer);
         foreach (PieceEffector effector in pieceEffectorBuffer)

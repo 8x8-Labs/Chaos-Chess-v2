@@ -20,6 +20,8 @@ public class SneakPawnCard : CardData, IPieceCard
     public void Execute(CardEffectArgs args = null)
     {
         Piece piece = args.Targets[0];
+        if (PieceEffector.HasActiveMovementOverride(piece)) return;
+
         piece.MoveFenOverride = "e";
         BoardManager.Instance.RefreshMoves();
 
@@ -30,6 +32,11 @@ public class SneakPawnCard : CardData, IPieceCard
     }
     public void ResetMoveFen(Piece piece)
     {
+        if (piece == null) return;
+
+        string p = piece.MoveFenOverride?.ToLower();
+        if (p != "e") return;
+
         piece.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
     }

@@ -4,6 +4,9 @@ using UnityEngine;
 /// <summary>투기장 진입 시에도 일시정지하지 않고 유지할 효과 마커입니다.</summary>
 public interface IArenaPersistentEffect { }
 
+/// <summary>기물의 행마/표현 override를 점유하는 효과 마커입니다.</summary>
+public interface IMovementOverrideEffect { }
+
 /// <summary>기물 또는 타일에 효과를 적용하고 관리하는 추상 컴포넌트</summary>
 public abstract class Effector : MonoBehaviour, IEffect
 {
@@ -193,7 +196,29 @@ public abstract class Effector : MonoBehaviour, IEffect
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
 public abstract class PieceEffector : Effector, IPieceEffect
 {
+    private static readonly List<PieceEffector> effectorBuffer = new();
+
     protected Piece target;
+
+    public static bool HasActiveMovementOverride(Piece piece)
+    {
+        if (piece == null) return false;
+        if (piece.MoveFenOverride != null || piece.FenOverride != null) return true;
+
+        effectorBuffer.Clear();
+        piece.GetComponents(effectorBuffer);
+        foreach (PieceEffector effector in effectorBuffer)
+        {
+            if (effector is IMovementOverrideEffect && !effector.IsSuspended)
+            {
+                effectorBuffer.Clear();
+                return true;
+            }
+        }
+
+        effectorBuffer.Clear();
+        return false;
+    }
 
     public void Init(Piece piece, int duration = -1)
     {

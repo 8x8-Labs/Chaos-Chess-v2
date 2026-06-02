@@ -18,7 +18,8 @@ public class AimCard : CardData, IPieceCard
     }
     public void ResetMoveFen(Piece piece)
     {
-        piece.MoveFenOverride = null;
+        if (piece != null && piece.MoveFenOverride?.ToLower() == "t")
+            piece.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
     }
 
@@ -31,7 +32,7 @@ public class AimCard : CardData, IPieceCard
     }
 }
 
-public class AimEffector : PieceEffector
+public class AimEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -41,7 +42,8 @@ public class AimEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "t")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 
         Destroy(this);
