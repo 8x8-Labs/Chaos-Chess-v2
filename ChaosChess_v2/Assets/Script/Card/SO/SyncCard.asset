@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SyncCard
   m_EditorClassIdentifier: 
   CardName: "\uB3D9\uAE30\uD654"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1781304025, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uB3D9\uAE30\uD654 \uCE78\uC5D0 \uB4E4\uC5B4\uAC00\uBA74 \uBC18\uB300
     \uD589\uC758 \uAE30\uBB3C\uC774 \uB3D9\uAE30\uD654\uB41C \uAE30\uBB3C\uACFC \uD568\uAED8
     \uC6C0\uC9C1\uC774\uBA70, \r\n\uC774 \uD6A8\uACFC\uB294 1\uD134 \uB3D9\uC548\uB9CC
@@ -37,6 +37,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   StatusDisplayType: 1
   NeedAdditionalDescription: 1
   DescriptionType: 1

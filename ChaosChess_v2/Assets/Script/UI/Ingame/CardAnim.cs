@@ -24,7 +24,13 @@ public class CardAnim : MonoBehaviour
         cardSprite = GetComponentInChildren<Image>();
         cardData = GetComponent<CardData>();
         panel = FindObjectOfType<CardDescPanel>();
+        ApplyCardSprite();
         CardAnimation();
+    }
+
+    private void ApplyCardSprite()
+    {
+        cardSprite.sprite = cardData?.DataSO?.CardImage;
     }
 
     private void CardAnimation()

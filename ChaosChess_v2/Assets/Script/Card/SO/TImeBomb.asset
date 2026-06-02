@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TimeBomb
   m_EditorClassIdentifier: 
   CardName: "\uC2DC\uD55C\uD3ED\uD0C4"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -516176455, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 \uC2DC\uD55C\uD3ED\uD0C4\uC744
     \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1

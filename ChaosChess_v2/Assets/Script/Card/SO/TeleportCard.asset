@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TeleportCard
   m_EditorClassIdentifier: 
   CardName: "\uD154\uB808\uD3EC\uD2B8"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1024795268, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC744 \uC6D0\uD558\uB294 \uBE44\uC5B4\uC788\uB294
     \uCE78\uC73C\uB85C \uC774\uB3D9\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 0
@@ -32,6 +32,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

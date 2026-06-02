@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LimitlessCard
   m_EditorClassIdentifier: 
   CardName: "\uBB34\uD558\uD55C"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 2063513820, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC740 \uC6C0\uC9C1\uC77C \uC218
     \uC5C6\uC73C\uBA70 \uBC18\uACBD 1\uCE78 \uB0B4\uB85C \uC5B4\uB5A0\uD55C \uAE30\uBB3C\uB3C4
     \uC811\uADFC/\uC774\uB3D9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \uAE30\uBB3C\uC774
@@ -27,12 +27,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

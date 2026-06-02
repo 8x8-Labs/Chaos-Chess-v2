@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ATMineCard
   m_EditorClassIdentifier: 
   CardName: "\uB300\uC804\uCC28\uC9C0\uB8B0"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -600370867, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 \uB300\uC804\uCC28\uC9C0\uB8B0\uB97C
     \uC124\uCE58\uD569\uB2C8\uB2E4. \uC774\uD6C4 5\uC810 \uC774\uC0C1\uC758 \uAC00\uCE58\uB97C
     \uAC00\uC9C4 \uAE30\uBB3C\uC758 \uC774\uB3D9\uACBD\uB85C\uC5D0 \uB300\uC804\uCC28\uC9C0\uB8B0\uAC00
@@ -36,6 +36,7 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   StatusDisplayType: 1
   NeedAdditionalDescription: 0
   DescriptionType: 0

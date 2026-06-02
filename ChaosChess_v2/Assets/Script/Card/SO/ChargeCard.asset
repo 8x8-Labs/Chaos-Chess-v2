@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ChargeCard
   m_EditorClassIdentifier: 
   CardName: "\uB3CC\uACA9"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -1436772907, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC804\uC9C4\uD560 \uC218 \uC788\uB294 \uC2DC\uC804\uC790\uC758
     \uBAA8\uB4E0 \uD3F0\uC774 \uC55E\uC73C\uB85C 1\uCE78 \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 2
@@ -24,12 +24,15 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 1
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

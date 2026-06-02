@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ReviveCard
   m_EditorClassIdentifier: 
   CardName: "\uBD80\uD65C"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 752889656, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uD134\uC744 \uC18C\uBAA8\uD574\uC11C \uC790\uC2E0\uC758 \uC8FD\uC740
     \uAE30\uBB3C \uC911 \uAC00\uC7A5 \uAC00\uCE58\uAC00 \uB192\uC740 \uAE30\uBB3C\uC744
     \uC120\uD0DD\uD55C \uD0C0\uC77C\uC5D0\uC11C \uBD80\uD65C\uC2DC\uD0B5\uB2C8\uB2E4.\n\uB9CC\uC57D

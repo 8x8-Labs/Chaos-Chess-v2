@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WindmillCard
   m_EditorClassIdentifier: 
   CardName: "\uD48D\uCC28"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 530676739, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "2\uD134 \uB3D9\uC548 \uB8E9\uC740 \uBE44\uC20D\uC758 \uD589\uB9C8\uBC95\uB300\uB85C,
     \uBE44\uC20D\uC740 \uB8E9\uC758 \uD589\uB9C8\uBC95\uB300\uB85C \uC6C0\uC9C1\uC785\uB2C8\uB2E4."
   Type: 2
@@ -24,12 +24,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0

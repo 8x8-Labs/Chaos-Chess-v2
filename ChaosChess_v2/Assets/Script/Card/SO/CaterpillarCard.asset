@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CaterpillarCard
   m_EditorClassIdentifier: 
   CardName: "\uBB34\uD55C\uADA4\uB3C4"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1604764601, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 2\uD134 \uB3D9\uC548
     \uB098\uC774\uD2B8\uB77C\uC774\uB354\uC758 \uD589\uB9C8\uBC95\uB300\uB85C \uC774\uB3D9\uD560
     \uC218 \uC788\uC2B5\uB2C8\uB2E4."
@@ -25,12 +25,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 1
   DescriptionType: 0

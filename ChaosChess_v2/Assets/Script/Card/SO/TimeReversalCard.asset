@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TimeReversalCard
   m_EditorClassIdentifier: 
   CardName: "\uC2DC\uAC04 \uC5ED\uD589"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 73324365, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uD604\uC7AC \uD310\uC758 \uC0C1\uD0DC\uB97C \uC800\uC7A5\uD569\uB2C8\uB2E4.
     8\uD134 \uD6C4 \uC774 \uC0C1\uD0DC\uB85C \uB3CC\uC544\uC62C\uC9C0 \uACB0\uC815\uD560
     \uC218 \uC788\uC2B5\uB2C8\uB2E4."

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FastMarchCard
   m_EditorClassIdentifier: 
   CardName: "\uC2E0\uC18D\uD589\uAD70"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -1706169764, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC774 1\uD68C \uC804\uBC29\uC73C\uB85C
     2\uCE78 \uC774\uB3D9\uD560 \uC218 \uC788\uAC8C \uB429\uB2C8\uB2E4."
   Type: 0
@@ -24,12 +24,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0

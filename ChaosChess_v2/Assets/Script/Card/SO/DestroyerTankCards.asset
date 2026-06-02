@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DestroyerTankCards
   m_EditorClassIdentifier: 
   CardName: "\uD30C\uAD34\uC804\uCC28"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1302843077, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC774\uBC88 \uD134 \uB3D9\uC548 \uC544\uAD70\uC758 \uD3F0\uC774
     \uC0C1\uB300 \uAE30\uBB3C\uC744 \uC7A1\uB294\uB2E4\uBA74, \uADF8 \uD3F0\uC740
     \uB2E4\uC2DC \uD589\uB3D9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uC774 \uD6A8\uACFC\uB294
@@ -26,12 +26,15 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 1
   LimitTurn: 1
+  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0

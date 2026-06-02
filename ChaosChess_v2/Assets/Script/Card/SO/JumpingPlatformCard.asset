@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: JumpingPlatformCard
   m_EditorClassIdentifier: 
   CardName: "\uC810\uD504\uB300"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 1737697133, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 \uC810\uD504\uB300\uB97C \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 0
@@ -23,12 +23,15 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 1
   MaintainTurn: -1
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   StatusDisplayType: 1
   NeedAdditionalDescription: 1
   DescriptionType: 1

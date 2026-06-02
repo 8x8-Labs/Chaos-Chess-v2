@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PositionSwapCard
   m_EditorClassIdentifier: 
   CardName: "\uC785\uC7A5 \uBC18\uC804"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -883256997, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC790\uC2E0\uC758 \uAE30\uBB3C \uC804\uCCB4\uC640 \uC0C1\uB300\uBC29\uC758
     \uAE30\uBB3C \uC804\uCCB4\uB97C \uAD50\uD658\uD569\uB2C8\uB2E4.\n\uC801\uC6A9
     \uC911\uC778 \uCE74\uB4DC \uD6A8\uACFC\uB294 \uCD08\uAE30\uD654\uD569\uB2C8\uB2E4."
@@ -25,12 +25,15 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

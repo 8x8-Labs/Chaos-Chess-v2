@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ArenaCard
   m_EditorClassIdentifier: 
   CardName: "\uD22C\uAE30\uC7A5"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -1063908585, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC2DC\uC804\uC790\uC758 \uAE30\uBB3C \uC804\uCCB4\uC640 \uC0C1\uB300\uBC29\uC758
     \uAE30\uBB3C 4\uAE30\uAC00 \uD22C\uAE30\uC7A5\uC73C\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 2

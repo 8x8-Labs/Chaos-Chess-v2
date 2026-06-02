@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DimensionInstabilityCard
   m_EditorClassIdentifier: 
   CardName: "\uCC28\uC6D0 \uBD88\uC548"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 961421765, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 \uC774\uB3D9\uD560
     \uB54C \uAC00\uC0C1\uC758 \uB098\uC774\uD2B8\uAC00 \uC774\uB3D9\uD569\uB2C8\uB2E4.
     \uB098\uC774\uD2B8\uAC00 \uC7A1\uD790 \uC2DC \uAC00\uC0C1\uC758 \uB098\uC774\uD2B8\uC758

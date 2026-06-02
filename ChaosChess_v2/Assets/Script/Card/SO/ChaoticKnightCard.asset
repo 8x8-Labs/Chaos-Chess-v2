@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ChaoticKnightCard
   m_EditorClassIdentifier: 
   CardName: "\uD63C\uB780\uC758 \uB098\uC774\uD2B8"
-  CardImage: {fileID: 0}
+  CardImage: {fileID: -2027574454, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 \uBE44\uC5B4\uC788\uB294
     \uC8FC\uBCC0 5x5 \uCE78 \uC911 \uB79C\uB364\uD55C \uCE78\uC73C\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 0
@@ -24,12 +24,15 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 
