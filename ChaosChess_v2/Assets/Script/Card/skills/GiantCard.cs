@@ -47,7 +47,11 @@ public class GiantEffector : PieceEffector
                 Piece target = BoardManager.Instance.GetPiece(pos);
                 if (target != null)
                 {
+                    if (PieceEffector.HasActiveMovementOverride(target))
+                        continue;
+
                     GiantStunEffector stun = target.gameObject.AddComponent<GiantStunEffector>();
+                    stun.CardSO = null;
                     stun.Init(target, 1);
                     stun.Apply();
                 }
@@ -63,7 +67,7 @@ public class GiantEffector : PieceEffector
 
 }
 
-public class GiantStunEffector : PieceEffector
+public class GiantStunEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -73,7 +77,8 @@ public class GiantStunEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

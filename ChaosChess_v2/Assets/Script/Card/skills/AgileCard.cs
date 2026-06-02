@@ -28,7 +28,7 @@ public class AgileCard : CardData, IPieceCard
     }
 }
 
-public class AgileEffect : PieceEffector
+public class AgileEffect : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -38,7 +38,8 @@ public class AgileEffect : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target.MoveFenOverride?.ToLower() == "u")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

@@ -20,13 +20,16 @@ public class MutinyCard : CardData, ICard
 
         foreach(Queen p in queens)
         {
+            if (PieceEffector.HasActiveMovementOverride(p))
+                continue;
+
             MutinyEffect effect = CreatePieceEffector<MutinyEffect>(p);
             effect.Apply();
         }
     }
 }
 
-public class MutinyEffect : PieceEffector
+public class MutinyEffect : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -36,7 +39,8 @@ public class MutinyEffect : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target.MoveFenOverride?.ToLower() == "w")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

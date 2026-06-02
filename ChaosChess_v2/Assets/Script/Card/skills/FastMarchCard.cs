@@ -26,7 +26,7 @@ public class FastMarchCard : CardData, IPieceCard
     }
 }
 
-public class FastMarchCardEffector : PieceEffector
+public class FastMarchCardEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -36,7 +36,8 @@ public class FastMarchCardEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target.MoveFenOverride?.ToLower() == "f")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 
         Destroy(this);

@@ -26,7 +26,7 @@ public class CaterpillarCard : CardData, IPieceCard
     }
 }
 
-public class CaterpillarEffector : PieceEffector
+public class CaterpillarEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -36,7 +36,8 @@ public class CaterpillarEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.FenOverride = null;
+        if (target.FenOverride?.ToLower() == "z")
+            target.FenOverride = null;
         RefreshMoves();
         Destroy(this);
     }

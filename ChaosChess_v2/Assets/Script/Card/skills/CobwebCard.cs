@@ -28,16 +28,8 @@ public class CobwebCard : CardData, ITileCard
 
         CobwebEffector effect = CreateGlobalEffector<CobwebEffector>();
         effect.TilePos = pos;
-        effect.cobwebCard = this;
         effect.DataSO = DataSO;
         effect.Apply();
-    }
-
-    public void OnStuckWrap(Piece piece)
-    {
-        CobwebPieceEffector pieceEffect = piece.gameObject.AddComponent<CobwebPieceEffector>();
-        pieceEffect.Init(piece, DataSO.LimitTurn);
-        pieceEffect.Apply();
     }
 }
 
@@ -48,7 +40,6 @@ public class CobwebEffector : GlobalEffector
     private bool isTriggered = false;
 
     public Vector3Int TilePos;
-    public CobwebCard cobwebCard;
 
     protected override void OnApply()
     {
@@ -82,9 +73,12 @@ public class CobwebEffector : GlobalEffector
             cur += dir;
             if (cur == TilePos)
             {
+                if (PieceEffector.HasActiveMovementOverride(piece))
+                    return true;
+
                 isTriggered = true;
                 BoardManager.Instance.ForceTeleport(piece, TilePos, '\0', false);
-                cobwebCard.OnStuckWrap(piece);
+                ApplyStuckEffect(piece);
                 BoardManager.Instance.RefreshMoves();
                 Revert();
                 return false;
@@ -138,13 +132,23 @@ public class CobwebEffector : GlobalEffector
         return Vector3Int.zero;
     }
 
+    private void ApplyStuckEffect(Piece piece)
+    {
+        if (piece == null) return;
+
+        CobwebPieceEffector pieceEffect = piece.gameObject.AddComponent<CobwebPieceEffector>();
+        pieceEffect.CardSO = null;
+        pieceEffect.Init(piece, DataSO.LimitTurn);
+        pieceEffect.Apply();
+    }
+
     protected override IEnumerable<Vector3Int> GetVisualPositions()
     {
         yield return TilePos;
     }
 }
 
-public class CobwebPieceEffector : PieceEffector
+public class CobwebPieceEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -154,7 +158,8 @@ public class CobwebPieceEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }
