@@ -33,6 +33,7 @@ MonoBehaviour:
   HasLimit: 0
   LimitTurn: 0
   ShowStatusCard: 0
+  StatusDisplayType: 2
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uC2DC\uD55C\uD3ED\uD0C4"

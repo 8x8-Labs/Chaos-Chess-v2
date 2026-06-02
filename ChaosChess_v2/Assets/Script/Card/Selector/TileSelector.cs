@@ -99,7 +99,8 @@ public class TileSelector : Selector<Vector3Int>
             LimitTurn = cardData.DataSO.MaintainTurn
         };
 
-        skillCard.Execute(args);
+        CardRandomizerManager.Instance?.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
+
         if (cardData != null)
             cardRandomizer?.RemoveCard(cardData.gameObject);
 

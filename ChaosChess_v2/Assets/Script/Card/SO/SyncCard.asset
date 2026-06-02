@@ -38,6 +38,7 @@ MonoBehaviour:
   HasLimit: 0
   LimitTurn: 0
   ShowStatusCard: 0
+  StatusDisplayType: 1
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uB3D9\uAE30\uD654"

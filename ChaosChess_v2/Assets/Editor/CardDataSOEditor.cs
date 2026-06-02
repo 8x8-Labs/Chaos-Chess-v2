@@ -31,6 +31,7 @@ public class CardDataSOEditor : Editor
     SerializedProperty hasLimit;
     SerializedProperty limitTurn;
     SerializedProperty showStatusCard;
+    SerializedProperty statusDisplayType;
 
     // 부가 정보
     SerializedProperty needAdditionalDescription;
@@ -75,6 +76,7 @@ public class CardDataSOEditor : Editor
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
         showStatusCard = serializedObject.FindProperty("ShowStatusCard");
+        statusDisplayType = serializedObject.FindProperty("StatusDisplayType");
 
         needAdditionalDescription = serializedObject.FindProperty("NeedAdditionalDescription");
         descriptionType = serializedObject.FindProperty("DescriptionType");
@@ -103,6 +105,9 @@ public class CardDataSOEditor : Editor
                 EditorGUILayout.Space(4);
                 EditorGUILayout.PropertyField(cardType, new GUIContent("카드 타입"));
                 EditorGUILayout.PropertyField(cardTier, new GUIContent("카드 등급"));
+                EditorGUILayout.Space(4);
+                EditorGUILayout.PropertyField(statusDisplayType, new GUIContent("상태 표시 타입"));
+                DrawStatusDisplayPreview();
             }
         }
 
@@ -279,13 +284,6 @@ public class CardDataSOEditor : Editor
             EditorGUILayout.PropertyField(limitTurn, new GUIContent("제한 턴 수"));
             EditorGUI.indentLevel--;
         }
-
-        EditorGUILayout.Space(4);
-        EditorGUILayout.PropertyField(showStatusCard, new GUIContent("상태 카드 UI 표시"));
-        if (showStatusCard.boolValue)
-        {
-            EditorGUILayout.HelpBox("활성화 시 카드가 사용되면 전역 상태 카드 UI에 표시됩니다.", MessageType.Info);
-        }
     }
 
     // ── UI 헬퍼 ─────────────────────────────────────────
@@ -306,6 +304,21 @@ public class CardDataSOEditor : Editor
     void HelpBox(string msg, MessageType type)
     {
         EditorGUILayout.HelpBox(msg, type);
+    }
+
+    void DrawStatusDisplayPreview()
+    {
+        var type = (ActiveEffectStatusType)statusDisplayType.enumValueIndex;
+        string preview = type switch
+        {
+            ActiveEffectStatusType.Active => "활성",
+            ActiveEffectStatusType.Installed => "설치",
+            ActiveEffectStatusType.TurnBased => "3턴",
+            ActiveEffectStatusType.CountBased => "3회",
+            _ => "활성"
+        };
+
+        EditorGUILayout.HelpBox($"카드 활성화 UI 표시 예시: {preview}", MessageType.Info);
     }
 
     string GetTypeSettingLabel(CardType type) => type switch

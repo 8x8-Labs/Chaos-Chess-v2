@@ -22,5 +22,6 @@ MonoBehaviour:
   MaintainTurn: 0
   HasLimit: 1
   LimitTurn: 3
+  StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0

@@ -149,8 +149,9 @@ GameObject:
   - component: {fileID: 3992419890002561409}
   - component: {fileID: 2824029012252746536}
   - component: {fileID: 3826822027687767876}
+  - component: {fileID: 4224020811791984471}
   m_Layer: 5
-  m_Name: GlobalCardExample
+  m_Name: ActiveEffectCardExample
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -174,7 +175,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0.000011444}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 272.7, y: 363.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3992419890002561409
@@ -230,6 +231,20 @@ MonoBehaviour:
   CardImage: {fileID: 2824029012252746536}
   Title: {fileID: 6593412539966820060}
   RemainTurn: {fileID: 1659419122709035966}
+  animationDuration: 0.2
+  yOffset: 160
+--- !u!225 &4224020811791984471
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2543569183586122757}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &5827232136568932596
 GameObject:
   m_ObjectHideFlags: 0

@@ -28,6 +28,7 @@ public class BlessingCard : CardData, ITileCard
         GameObject obj = new GameObject("BlessingEffect");
         BlessingEffect effect = obj.AddComponent<BlessingEffect>();
 
+        effect.CardSO = DataSO;
         effect.DataSO = DataSO;
         
         effect.Init(pos);
@@ -74,8 +75,9 @@ public class BlessingEffect : TileEffector
     }
 
     // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         Piece.OnPieceDestroyed -= HandlePieceDestroyed;
     }
 

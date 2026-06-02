@@ -53,6 +53,7 @@ public class LimitlessCard : CardData, IPieceCard
                 GameObject obj = new GameObject("LimitlessTile");
                 var eff = obj.AddComponent<LimitlessTileEffector>();
 
+                eff.CardSO = pieceEff.CardSO;
                 eff.Init(tile, -1);
                 eff.SetController(controller);
                 eff.Apply();

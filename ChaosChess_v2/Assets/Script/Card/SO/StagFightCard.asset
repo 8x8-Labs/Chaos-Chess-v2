@@ -33,6 +33,7 @@ MonoBehaviour:
   HasLimit: 1
   LimitTurn: 3
   ShowStatusCard: 1
+  StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

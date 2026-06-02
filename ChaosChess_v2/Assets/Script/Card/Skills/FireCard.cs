@@ -81,8 +81,9 @@ public class FireEffect : TileEffector
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         Piece.OnPieceDestroyed -= HandlePieceDestroyed;
         boardManager.UnregisterTileEffector(tilePos, this);
     }

@@ -32,6 +32,7 @@ MonoBehaviour:
   HasLimit: 1
   LimitTurn: 3
   ShowStatusCard: 0
+  StatusDisplayType: 1
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uAC70\uBBF8\uC904"

@@ -28,6 +28,7 @@ public class SyncCard : CardData, ITileCard
 
         SyncChild child = CreateTileEffector<SyncChild>(oppo);
         SyncEffect parent = CreateTileEffector<SyncEffect>(pos);
+        child.CardSO = null;
 
         child.DataSO = DataSO;
         parent.DataSO = DataSO;
@@ -59,7 +60,11 @@ public class SyncEffect : TileEffector
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
 
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
-        if (child != null) child.Revert(); // 미활성 상태에서 소멸 시 child도 정리
+        if (child != null)
+        {
+            child.Revert();
+            Destroy(child.gameObject);
+        }
         Destroy(gameObject);
     }
 
@@ -92,6 +97,8 @@ public class SyncEffect : TileEffector
         follower.syncTilePos = tilePos;
         follower.Init(piece, -1);
         follower.Apply();
+
+        Revert();
     }
 }
 
@@ -132,8 +139,9 @@ public class SyncChild : TileEffector
     }
 
     // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         Piece.OnPieceDestroyed -= HandlePieceDestroyed;
     }
 
