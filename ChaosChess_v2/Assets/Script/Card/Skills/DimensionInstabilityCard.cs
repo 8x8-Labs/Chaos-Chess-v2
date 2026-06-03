@@ -85,7 +85,10 @@ public class DimensionInstabilityEffector : PieceEffector
 
             Vector3Int candidate = new Vector3Int(origin.x + x, origin.y + y, origin.z);
 
-            if (BoardManager.Instance.IsInside(candidate) && BoardManager.Instance.IsEmpty(candidate))
+            if (!BoardManager.Instance.IsInside(candidate)) continue;
+
+            Piece piece = BoardManager.Instance.GetPiece(candidate);
+            if (piece == null || piece.Color != target.Color)
             {
                 result.Add(candidate);
             }

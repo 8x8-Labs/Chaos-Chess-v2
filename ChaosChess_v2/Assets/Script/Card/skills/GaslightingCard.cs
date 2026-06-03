@@ -41,6 +41,8 @@ public class GaslightingCard : CardData, IPieceCard
             .Where(p => p.Color == GameManager.Instance.EnemyColor &&
             (DataSO.PieceType & p.Type) != 0).ToList();
 
+        if (pieces.Count == 0) return null;
+
         int rand = Random.Range(0, pieces.Count);
         return pieces[rand];
     }
