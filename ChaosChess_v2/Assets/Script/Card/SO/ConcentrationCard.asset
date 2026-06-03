@@ -33,12 +33,11 @@ MonoBehaviour:
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 1
   DescriptionType: 0
   AdditionalDescriptionTitle: "\uC544\uB9C8\uC874 \uD589\uB9C8\uBC95"
-  PieceDescImage: {fileID: 0}
-  MovementImage: {fileID: 0}
+  PieceDescImage: {fileID: -4919676682383813925, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  MovementImage: {fileID: -1542743459, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
   PieceDescContent: 
   AdditionalDescriptionContent: 
