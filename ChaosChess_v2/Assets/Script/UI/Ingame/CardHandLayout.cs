@@ -12,27 +12,24 @@ public class CardHandLayout : MonoBehaviour
 
     private readonly List<RectTransform> _cards = new();
     private GameManager gameManager;
-
-    private void Awake()
-    {
-        gameManager ??= GameManager.Instance;
-    }
+    private bool isSubscribed;
 
     private void OnEnable()
     {
-        gameManager ??= GameManager.Instance;
+        SubscribeGameManager();
+    }
 
-        if (gameManager != null)
-        {
-            gameManager.OnPlayerCheckStateChanged += SetInputBlocked;
-            SetInputBlocked(gameManager.IsPlayerInCheck);
-        }
+    private void Start()
+    {
+        SubscribeGameManager();
     }
 
     private void OnDisable()
     {
-        if (gameManager != null)
+        if (isSubscribed && gameManager != null)
             gameManager.OnPlayerCheckStateChanged -= SetInputBlocked;
+
+        isSubscribed = false;
     }
 
     public void AddCard(RectTransform card)
@@ -51,12 +48,29 @@ public class CardHandLayout : MonoBehaviour
 
     public void SetArenaInputBlocked(bool isBlocked) => SetInputBlocked(isBlocked);
 
+    private void SubscribeGameManager()
+    {
+        if (isSubscribed)
+            return;
+
+        gameManager = GameManager.Instance;
+        if (gameManager == null)
+            return;
+
+        gameManager.OnPlayerCheckStateChanged += SetInputBlocked;
+        isSubscribed = true;
+        SetInputBlocked(gameManager.IsPlayerInCheck);
+    }
+
     private void SetInputBlocked(bool isBlocked)
     {
         if (inputBlockPanel == null)
             return;
 
         inputBlockPanel.SetActive(isBlocked);
+
+        if (isBlocked)
+            inputBlockPanel.transform.SetAsLastSibling();
     }
 
     private void Refresh(bool animate)
@@ -86,5 +100,8 @@ public class CardHandLayout : MonoBehaviour
     {
         for (int i = _cards.Count - 1; i >= 0; i--)
             _cards[i].SetAsLastSibling();
+
+        if (inputBlockPanel != null && inputBlockPanel.activeSelf)
+            inputBlockPanel.transform.SetAsLastSibling();
     }
 }

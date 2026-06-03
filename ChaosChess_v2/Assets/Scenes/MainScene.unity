@@ -10892,10 +10892,10 @@ MonoBehaviour:
   clickSound: {fileID: 8300000, guid: 73c23dc03cc8d344c9d868976325c4b4, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 1843443124}
-  enableCanvas: {fileID: 1843443124}
+  enableCanvas: {fileID: 568138795}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 8
+  buttonType: 1
   practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
