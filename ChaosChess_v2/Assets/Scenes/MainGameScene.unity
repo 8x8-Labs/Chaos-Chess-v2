@@ -3949,6 +3949,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioMixer: {fileID: 24100000, guid: 9783473a218a7b74b837c6277fa570c7, type: 2}
   bgmSource: {fileID: 507959204}
+  sceneBgmMappings:
+  - sceneName: MainScene
+    bgmClip: {fileID: 8300000, guid: 747f40fb6e16c7d4388be48e6a771cce, type: 3}
+  - sceneName: MapScene
+    bgmClip: {fileID: 8300000, guid: 747f40fb6e16c7d4388be48e6a771cce, type: 3}
+  - sceneName: RewardScene
+    bgmClip: {fileID: 8300000, guid: 747f40fb6e16c7d4388be48e6a771cce, type: 3}
+  - sceneName: ResultScene
+    bgmClip: {fileID: 8300000, guid: 747f40fb6e16c7d4388be48e6a771cce, type: 3}
+  - sceneName: MainGameScene
+    bgmClip: {fileID: 8300000, guid: 7f468940c865f2d459e94bd8241407c9, type: 3}
+  sceneBgmFadeDuration: 0.8
 --- !u!82 &507959204
 AudioSource:
   m_ObjectHideFlags: 0

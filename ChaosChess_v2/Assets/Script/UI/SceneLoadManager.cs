@@ -51,6 +51,9 @@ public class SceneLoadManager : MonoBehaviour
     private IEnumerator LoadSceneCoroutine(string sceneName)
     {
         isLoading = true;
+
+        SoundManager.Instance?.BeginSceneTransitionFadeOut(sceneName);
+
         SceneLoadingOverlayBase overlayUI = GetOverlayFor(sceneName);
         if (overlayUI != null)
         {
@@ -78,6 +81,8 @@ public class SceneLoadManager : MonoBehaviour
 
         while (!operation.isDone)
             yield return null;
+
+        SoundManager.Instance?.ApplySceneBGM(sceneName);
 
         Tween fadeOut = overlayUI?.FadeTo(0f, fadeDuration);
         if (fadeOut != null)
