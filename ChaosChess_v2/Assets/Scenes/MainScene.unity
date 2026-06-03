@@ -11556,7 +11556,7 @@ MonoBehaviour:
   enableCanvas: {fileID: 1843443124}
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
-  buttonType: 8
+  buttonType: 10
   practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
