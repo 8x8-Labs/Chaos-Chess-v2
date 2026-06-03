@@ -42,7 +42,7 @@ public class GameCycleManager : MonoBehaviour
     {
         CurrentMode = GameMode.Run;
         SaveManager.Instance.Load();
-        SceneLoadManager.Instance.LoadScene("MapScene");
+        SceneLoadManager.Instance.LoadScene(SaveManager.Instance.GetSavedScene());
     }
 
     public void StartPractice(PracticeDifficulty difficulty)

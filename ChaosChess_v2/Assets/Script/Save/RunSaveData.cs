@@ -63,4 +63,5 @@ public class RunSaveData
     public int curMapColumn;                    // curMap 위치 (column 인덱스)
     public int[] nodesPerFloor;                 // 층별 노드 수 배열
     public List<MapFloorSaveData> mapGrid = new();
+    public string savedScene;                    // 저장 시점의 활성 씬 이름 (비어 있으면 "MapScene" 사용)
 }

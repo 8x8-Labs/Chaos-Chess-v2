@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 런(Run) 상태의 저장/불러오기/삭제를 담당하는 매니저.
@@ -19,6 +20,12 @@ public class SaveManager : MonoBehaviour
 
     // Path.Combine으로 경로 구분자 차이(Windows \, Android/iOS /)를 자동 처리한다
     private string SavePath => Path.Combine(Application.persistentDataPath, "run_save.json");
+
+    private string _loadedSavedScene = "MapScene";
+
+    /// <summary>Load() 이후 복원된 저장 씬 이름을 반환한다. 저장 파일에 없으면 "MapScene".</summary>
+    public string GetSavedScene() =>
+        string.IsNullOrWhiteSpace(_loadedSavedScene) ? "MapScene" : _loadedSavedScene;
 
     private void Awake()
     {
@@ -131,6 +138,7 @@ public class SaveManager : MonoBehaviour
         data.curMapFloor = mm.curMap?.floor ?? 0;
         data.curMapColumn = mm.curMap?.column ?? 0;
         data.nodesPerFloor = mm.nodesPerFloor;
+        data.savedScene = SceneManager.GetActiveScene().name;
 
         data.mapGrid = new List<MapFloorSaveData>();
         foreach (MapFloor floor in mm.mapGrid)
@@ -220,6 +228,7 @@ public class SaveManager : MonoBehaviour
         if (mm == null) return;
 
         mm.LoadFromSaveData(data);
+        _loadedSavedScene = string.IsNullOrWhiteSpace(data.savedScene) ? "MapScene" : data.savedScene;
     }
 
     private void ReadGameCycleState(RunSaveData data)
