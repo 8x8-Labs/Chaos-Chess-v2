@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -6,13 +7,19 @@ using UnityEngine.Audio;
 
 public class SoundManager : MonoBehaviour
 {
+    [System.Serializable]
+    private class SceneBgmMapping
+    {
+        public string sceneName;
+        public AudioClip bgmClip;
+    }
+
     private const float DefaultSceneBgmFadeDuration = 0.8f;
     private static SoundManager instance;
 
     public AudioMixer audioMixer;
     [SerializeField] private AudioSource bgmSource;
-    [SerializeField] private AudioClip titleBgmClip;
-    [SerializeField] private AudioClip battleBgmClip;
+    [SerializeField] private List<SceneBgmMapping> sceneBgmMappings = new();
     [SerializeField] private float sceneBgmFadeDuration = 0.8f;
 
     private Tween bgmFadeTween;
@@ -28,14 +35,6 @@ public class SoundManager : MonoBehaviour
         }
         else
         {
-            AudioClip sceneBgmClip = bgmSource != null ? bgmSource.clip : null;
-            bgmSource?.Stop();
-
-            if (sceneBgmClip != null)
-            {
-                instance.SwitchBGM(sceneBgmClip, instance.SceneBgmFadeDuration, false);
-            }
-
             Destroy(gameObject);
         }
     }
@@ -163,18 +162,13 @@ public class SoundManager : MonoBehaviour
 
     private AudioClip GetSceneBGM(string sceneName)
     {
-        switch (sceneName)
+        foreach (SceneBgmMapping mapping in sceneBgmMappings)
         {
-            case "MainScene":
-            case "MapScene":
-            case "RewardScene":
-            case "ResultScene":
-                return titleBgmClip;
-            case "MainGameScene":
-                return battleBgmClip;
-            default:
-                return null;
+            if (mapping.sceneName == sceneName)
+                return mapping.bgmClip;
         }
+
+        return null;
     }
 
     // ── BGM 페이드 (내부 bgmSource 사용) ─────────────────
