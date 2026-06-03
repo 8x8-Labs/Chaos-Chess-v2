@@ -8,7 +8,7 @@ public class ContinueButtonController : MonoBehaviour
 {
     [SerializeField] private GameObject continueButtonObject;
 
-    private void Start()
+    private void Awake()
     {
         if (continueButtonObject == null) return;
         continueButtonObject.SetActive(SaveManager.Instance != null && SaveManager.Instance.HasSaveData());

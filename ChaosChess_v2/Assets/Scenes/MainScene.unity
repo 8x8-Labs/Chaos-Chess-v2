@@ -12019,34 +12019,10 @@ MonoBehaviour:
   duration: 0.75
   OnAnimationStart:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: StartGameUIAnim, Assembly-CSharp
-        m_MethodName: Play
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   OnAnimationEnd:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: StartGameUIAnim, Assembly-CSharp
-        m_MethodName: Stop
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   startAnimEase: 15
   endAnimEase: 26
 --- !u!114 &1342107393
@@ -17013,6 +16989,7 @@ MonoBehaviour:
   uiAnimDelay: 0.2
   animationButtons:
   - {fileID: 1716661665}
+  - {fileID: 1342107392}
   - {fileID: 2044119913}
   - {fileID: 540341614}
   OnCanvasEnabled:
