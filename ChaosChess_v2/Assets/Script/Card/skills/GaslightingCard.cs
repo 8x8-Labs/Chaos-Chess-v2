@@ -31,6 +31,8 @@ public class GaslightingCard : CardData, IPieceCard
             pos: p.Pos,
             color: GameManager.Instance.PlayerColor,
             type: p.TypeToChar());
+
+        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
 
     private Piece GetRandomPiece()
