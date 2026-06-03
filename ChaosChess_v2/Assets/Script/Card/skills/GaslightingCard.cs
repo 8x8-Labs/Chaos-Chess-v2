@@ -31,6 +31,8 @@ public class GaslightingCard : CardData, IPieceCard
             pos: p.Pos,
             color: GameManager.Instance.PlayerColor,
             type: p.TypeToChar());
+
+        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
 
     private Piece GetRandomPiece()
@@ -38,6 +40,8 @@ public class GaslightingCard : CardData, IPieceCard
         List<Piece> pieces = BoardManager.Instance.GetAllPieces()
             .Where(p => p.Color == GameManager.Instance.EnemyColor &&
             (DataSO.PieceType & p.Type) != 0).ToList();
+
+        if (pieces.Count == 0) return null;
 
         int rand = Random.Range(0, pieces.Count);
         return pieces[rand];
