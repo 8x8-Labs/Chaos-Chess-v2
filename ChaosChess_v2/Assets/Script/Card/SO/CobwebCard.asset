@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uAC70\uBBF8\uC904"
   CardImage: {fileID: 9887003, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 \uAC70\uBBF8\uC904\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uAC70\uBBF8\uC904</color>\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 1
   PieceType: 0
@@ -39,6 +39,4 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uAE30\uBB3C\uC758 \uC774\uB3D9\uACBD\uB85C\uC5D0
-    \uAC70\uBBF8\uC904\uC774 \uC788\uC73C\uBA74 \uADF8 \uAE30\uBB3C\uC740 3\uD134\uB3D9\uC548
-    \uC774\uB3D9\uD560 \uC218 \uC5C6\uAC8C \uB429\uB2C8\uB2E4"
+  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uAC70\uBBF8\uC904 \uCE78\uC744 \uC9C0\uB098\uAC00\uBA74 <color=#FFD700>3\uD134</color>\uAC04 <color=#FF4444>\uC774\uB3D9\uC774 \uBD09\uC1C4\uB429\uB2C8\uB2E4</color>."
