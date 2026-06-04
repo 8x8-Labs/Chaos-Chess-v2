@@ -40,7 +40,13 @@ public class PlayerState : MonoBehaviour
     [SerializeField] private List<BuffPick> _buffs = new();
     public IReadOnlyList<BuffPick> Buffs => _buffs;
 
-    public void AddCard(GameObject card) => _cardPool.Add(card);
+    public void AddCard(GameObject card)
+    {
+        _cardPool.Add(card);
+        CardData cardData = card != null ? card.GetComponent<CardData>() : null;
+        if (cardData?.DataSO != null && CollectionManager.Instance != null)
+            CollectionManager.Instance.Discover(cardData.DataSO.CardName);
+    }
     public void AddBuff(BuffSO definition, BuffSide side) => _buffs.Add(new BuffPick(definition, side));
     public void AddBuff(BuffSO definition, BuffSide side, int magnitude) => _buffs.Add(new BuffPick(definition, side, magnitude));
 
