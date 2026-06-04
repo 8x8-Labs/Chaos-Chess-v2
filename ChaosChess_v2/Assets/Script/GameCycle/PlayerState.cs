@@ -42,8 +42,9 @@ public class PlayerState : MonoBehaviour
 
     public void AddCard(GameObject card)
     {
+        if (card == null) return;
         _cardPool.Add(card);
-        CardData cardData = card != null ? card.GetComponent<CardData>() : null;
+        CardData cardData = card.GetComponent<CardData>();
         if (cardData?.DataSO != null && CollectionManager.Instance != null)
             CollectionManager.Instance.Discover(cardData.DataSO.CardName);
     }

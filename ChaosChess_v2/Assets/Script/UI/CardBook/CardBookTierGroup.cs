@@ -15,9 +15,13 @@ public class CardBookTierGroup : MonoBehaviour
 
     private UICardData[] cardItems;
 
-    private void Start()
+    private void Awake()
     {
         cardItems = GetComponentsInChildren<UICardData>(true);
+    }
+
+    private void Start()
+    {
         AssignCardData();
     }
 
@@ -28,6 +32,7 @@ public class CardBookTierGroup : MonoBehaviour
         List<CardDataSO> tierCards = new();
         foreach (GameObject cardGO in CardRandomizerManager.Instance.AllCards)
         {
+            if (cardGO == null) continue;
             CardData data = cardGO.GetComponent<CardData>();
             if (data?.DataSO != null && data.DataSO.CardTier == tier)
                 tierCards.Add(data.DataSO);
