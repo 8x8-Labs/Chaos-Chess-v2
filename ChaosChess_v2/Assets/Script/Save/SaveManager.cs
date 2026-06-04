@@ -49,14 +49,21 @@ public class SaveManager : MonoBehaviour
     /// </summary>
     public void Save()
     {
-        RunSaveData data = new RunSaveData();
+        try
+        {
+            RunSaveData data = new RunSaveData();
 
-        WritePlayerState(data);
-        WriteMapState(data);
-        WriteGameCycleState(data);
+            WritePlayerState(data);
+            WriteMapState(data);
+            WriteGameCycleState(data);
 
-        string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(SavePath, json);
+            string json = JsonUtility.ToJson(data, true);
+            File.WriteAllText(SavePath, json);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"SaveManager.Save: 저장 중 오류 발생 - {e.Message}");
+        }
     }
 
     /// <summary>
@@ -71,12 +78,25 @@ public class SaveManager : MonoBehaviour
             return;
         }
 
-        string json = File.ReadAllText(SavePath);
-        RunSaveData data = JsonUtility.FromJson<RunSaveData>(json);
+        try
+        {
+            string json = File.ReadAllText(SavePath);
+            RunSaveData data = JsonUtility.FromJson<RunSaveData>(json);
 
-        ReadPlayerState(data);
-        ReadMapState(data);
-        ReadGameCycleState(data);
+            if (data == null)
+            {
+                Debug.LogError("SaveManager.Load: 저장 데이터가 비어있거나 올바르지 않습니다.");
+                return;
+            }
+
+            ReadPlayerState(data);
+            ReadMapState(data);
+            ReadGameCycleState(data);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"SaveManager.Load: 로드 중 오류 발생 - {e.Message}");
+        }
     }
 
     /// <summary>저장 파일을 삭제한다. 런 종료(패배/클리어) 시 호출한다.</summary>
@@ -186,7 +206,7 @@ public class SaveManager : MonoBehaviour
         ps.InitializeRun();
         ps.SetWinDrawLose(data.winCount, data.drawCount, data.loseCount);
 
-        if (CardRandomizerManager.Instance != null)
+        if (CardRandomizerManager.Instance != null && data.cardNames != null)
         {
             foreach (string cardName in data.cardNames)
             {
@@ -198,7 +218,7 @@ public class SaveManager : MonoBehaviour
             }
         }
 
-        if (BuffRegistry.Instance != null)
+        if (BuffRegistry.Instance != null && data.buffs != null)
         {
             foreach (BuffSaveData buffData in data.buffs)
             {
@@ -239,8 +259,10 @@ public class SaveManager : MonoBehaviour
     /// <summary>CardRandomizerManager.AllCards에서 CardName이 일치하는 프리팹을 반환한다.</summary>
     private GameObject FindCardByName(string cardName)
     {
+        if (CardRandomizerManager.Instance.AllCards == null) return null;
         foreach (GameObject card in CardRandomizerManager.Instance.AllCards)
         {
+            if (card == null) continue;
             CardData data = card.GetComponent<CardData>();
             if (data?.DataSO != null && data.DataSO.CardName == cardName)
                 return card;
