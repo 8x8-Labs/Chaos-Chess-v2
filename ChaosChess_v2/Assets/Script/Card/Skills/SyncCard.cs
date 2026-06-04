@@ -8,6 +8,7 @@ using UnityEngine;
 /// </summary>
 public class SyncCard : CardData, ITileCard
 {
+    [SerializeField] private SyncLinkLineSettings linkLineSettings = SyncLinkLineSettings.Default;
     private TileSelector selector;
 
     private void Awake()
@@ -31,6 +32,7 @@ public class SyncCard : CardData, ITileCard
         child.CardSO = null;
 
         child.DataSO = DataSO;
+        parent.LinkLineSettings = linkLineSettings;
         parent.DataSO = DataSO;
 
         parent.child = child;
@@ -41,14 +43,23 @@ public class SyncCard : CardData, ITileCard
 public class SyncEffect : TileEffector
 {
     public CardDataSO DataSO;
+    public SyncLinkLineSettings LinkLineSettings;
 
     public SyncChild child;
+    private SyncLinkLine syncLine;
 
     protected override void OnApply()
     {
         // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
+        {
             BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+            if (child != null)
+                BoardManager.Instance.TileEffectDrawer.SetTileEffect(child.TilePos, DataSO.EffectTileBase);
+        }
+
+        if (LinkLineSettings.Enabled && child != null)
+            syncLine = SyncLinkLine.Create(transform, tilePos, child.TilePos, LinkLineSettings);
 
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
@@ -57,8 +68,13 @@ public class SyncEffect : TileEffector
     {
         // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
+        {
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+            if (child != null)
+                BoardManager.Instance.TileEffectDrawer.ClearTileEffect(child.TilePos);
+        }
 
+        DestroySyncLine();
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         if (child != null)
         {
@@ -93,12 +109,25 @@ public class SyncEffect : TileEffector
         follower.DataSO = DataSO;
 
         follower.syncChild = activatedChild;
-        follower.syncEffect = this;
         follower.syncTilePos = tilePos;
         follower.Init(piece, -1);
-        follower.Apply();
 
         Revert();
+        follower.Apply();
+    }
+
+    private void DestroySyncLine()
+    {
+        if (syncLine != null)
+            Destroy(syncLine.gameObject);
+
+        syncLine = null;
+    }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        DestroySyncLine();
     }
 }
 
@@ -190,7 +219,6 @@ public class SyncFollower : PieceEffector
     public CardDataSO DataSO;
 
     public SyncChild syncChild;
-    public SyncEffect syncEffect;
     public Vector3Int syncTilePos;
     private bool isReady; // 동기화 칸 입장 이동은 무시, 다음 이동부터 적용
 
@@ -222,15 +250,90 @@ public class SyncFollower : PieceEffector
 
         if (syncChild != null)
             syncChild.MirrorMove(syncTilePos, dest);
-        if (syncEffect != null)
-            syncEffect.Revert(); // 동기화 발동 후 SyncEffect 타일 제거
         Revert();
     }
 
     public override void OnPieceCaptured()
     {
         if (syncChild != null) syncChild.Revert();
-        if (syncEffect != null) syncEffect.Revert();
         Revert();
     }
+}
+
+public class SyncLinkLine : MonoBehaviour
+{
+    private Material lineMaterial;
+
+    public static SyncLinkLine Create(Transform parent, Vector3Int from, Vector3Int to, SyncLinkLineSettings settings)
+    {
+        GameObject lineObject = new GameObject("SyncLinkLine");
+        lineObject.transform.SetParent(parent, false);
+
+        SyncLinkLine line = lineObject.AddComponent<SyncLinkLine>();
+        line.Init(from, to, settings);
+        return line;
+    }
+
+    private void Init(Vector3Int from, Vector3Int to, SyncLinkLineSettings settings)
+    {
+        LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.useWorldSpace = true;
+        lineRenderer.positionCount = 2;
+        lineRenderer.startWidth = settings.Width;
+        lineRenderer.endWidth = settings.Width;
+        lineRenderer.numCapVertices = 4;
+        lineRenderer.sortingOrder = settings.SortingOrder;
+
+        lineMaterial = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.material = lineMaterial;
+        lineRenderer.startColor = settings.Color;
+        lineRenderer.endColor = settings.Color;
+
+        Vector3 start = BoardManager.Instance.GridPosToWorldPos(from);
+        Vector3 end = BoardManager.Instance.GridPosToWorldPos(to);
+        Vector3 direction = end - start;
+        float distance = direction.magnitude;
+
+        if (distance > 0f)
+        {
+            Vector3 cellOffset = BoardManager.Instance.GridPosToWorldPos(from + Vector3Int.right) - start;
+            float halfCell = cellOffset.magnitude * 0.5f;
+            Vector3 edgeOffset = direction.normalized * Mathf.Min(halfCell, distance * 0.5f);
+
+            start += edgeOffset;
+            end -= edgeOffset;
+        }
+
+        start.z = settings.Z;
+        end.z = settings.Z;
+
+        lineRenderer.SetPosition(0, start);
+        lineRenderer.SetPosition(1, end);
+    }
+
+    private void OnDestroy()
+    {
+        if (lineMaterial != null)
+            Destroy(lineMaterial);
+    }
+}
+
+[System.Serializable]
+public struct SyncLinkLineSettings
+{
+    public bool Enabled;
+    public Color Color;
+    [Range(0.01f, 0.2f)]
+    public float Width;
+    public int SortingOrder;
+    public float Z;
+
+    public static SyncLinkLineSettings Default => new SyncLinkLineSettings
+    {
+        Enabled = true,
+        Color = new Color(0.35f, 0.85f, 1f, 0.85f),
+        Width = 0.045f,
+        SortingOrder = -1,
+        Z = -0.1f
+    };
 }
