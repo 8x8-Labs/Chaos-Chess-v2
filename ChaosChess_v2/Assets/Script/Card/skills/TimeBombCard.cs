@@ -34,16 +34,14 @@ public class TimeBombEffector : TileEffector
 {
     protected override void OnApply()
     {
-        if (CardSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, CardSO.EffectTileBase);
+        ShowTileEffect();
 
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
-        if (CardSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+        ClearTileEffect();
 
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);

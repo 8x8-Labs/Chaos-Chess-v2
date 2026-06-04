@@ -175,14 +175,18 @@ public abstract class Effector : MonoBehaviour, IEffect
     {
         CardDataSO dataSO = VisualDataSO;
 
+        bool hasAnimationFrames = dataSO != null
+            && dataSO.EffectTileAnimationFrames != null
+            && dataSO.EffectTileAnimationFrames.Length > 0;
+
         TileBase tileBase = GetVisualTileBase();
-        if (dataSO == null || !dataSO.NeedEffectTileBase || tileBase == null)
+        if (dataSO == null || !dataSO.NeedEffectTileBase || (tileBase == null && !hasAnimationFrames))
             return;
 
         foreach (Vector3Int pos in GetVisualPositions())
         {
             if (enabled)
-                BoardManager.Instance?.TileEffectDrawer?.SetTileEffect(pos, tileBase);
+                BoardManager.Instance?.TileEffectDrawer?.SetTileEffect(pos, dataSO, GetVisualEffectTileIndex(), RemainingTurns);
             else
                 BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(pos);
         }
@@ -196,6 +200,9 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     /// <summary>타일 연출에 사용할 타일베이스입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
     protected virtual TileBase GetVisualTileBase() => VisualDataSO?.EffectTileBase;
+
+    /// <summary>선택 순서별 타일 연출 인덱스입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
+    protected virtual int GetVisualEffectTileIndex() => 0;
 }
 
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
@@ -260,6 +267,14 @@ public abstract class TileEffector : Effector, ITileEffect
     public virtual void OnPieceExit(Piece piece) { }
     public virtual bool CanPieceEnter(Piece piece, Vector3Int from, Vector3Int to) { return true; }
 
+    public override void OnTurnChanged()
+    {
+        base.OnTurnChanged();
+
+        if (IsApplied && !IsExpired)
+            RefreshTileEffectTurnAnimation();
+    }
+
     protected override void OnSuspendForArena()
     {
         BoardManager.Instance?.UnregisterTileEffector(tilePos, this);
@@ -280,6 +295,35 @@ public abstract class TileEffector : Effector, ITileEffect
     protected TileBase EffectTileBase => CardSO?.GetEffectTileBase(effectTileIndex);
 
     protected override TileBase GetVisualTileBase() => EffectTileBase;
+    protected override int GetVisualEffectTileIndex() => effectTileIndex;
+
+    protected void ShowTileEffect(CardDataSO dataSO = null)
+    {
+        CardDataSO visualData = dataSO != null ? dataSO : CardSO;
+        if (visualData == null || !visualData.NeedEffectTileBase)
+            return;
+
+        BoardManager.Instance?.TileEffectDrawer?.SetTileEffect(
+            tilePos,
+            visualData,
+            effectTileIndex,
+            RemainingTurns);
+    }
+
+    protected void ClearTileEffect()
+    {
+        BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(tilePos);
+    }
+
+    protected void RefreshTileEffectTurnAnimation(CardDataSO dataSO = null, int customRemainingTurns = -1)
+    {
+        CardDataSO visualData = dataSO != null ? dataSO : CardSO;
+        if (visualData == null || visualData.EffectTileAnimationMode != TileEffectAnimationMode.Turn)
+            return;
+
+        int turns = customRemainingTurns >= 0 ? customRemainingTurns : RemainingTurns;
+        BoardManager.Instance?.TileEffectDrawer?.TickTurnAnimation(tilePos, turns);
+    }
 }
 
 /// <summary>특정 타입의 기물이 행동(이동/잡기)했을 때 반응하는 전역 효과의 기반 추상 클래스</summary>

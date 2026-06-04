@@ -1,6 +1,13 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+public enum TileEffectAnimationMode
+{
+    None,
+    Time,
+    Turn
+}
+
 [CreateAssetMenu(fileName = "Card Data", menuName = "Card/Card Data")]
 public class CardDataSO : ScriptableObject
 {
@@ -50,6 +57,11 @@ public class CardDataSO : ScriptableObject
     /// 선택 순서별로 표시할 타일베이스 목록입니다.
     /// </summary>
     public TileBase[] EffectTileBases;
+    public TileEffectAnimationMode EffectTileAnimationMode = TileEffectAnimationMode.None;
+    [Min(0.01f)]
+    public float EffectTileFrameInterval = 0.2f;
+    [Tooltip("시간 기반 애니메이션 프레임 또는 턴 기반 상태 프레임입니다.")]
+    public TileBase[] EffectTileAnimationFrames;
 
     public TileBase GetEffectTileBase(int index)
     {
@@ -63,6 +75,17 @@ public class CardDataSO : ScriptableObject
             return EffectTileBases[index];
 
         return EffectTileBases[0] != null ? EffectTileBases[0] : EffectTileBase;
+    }
+
+    public TileBase GetEffectTileAnimationFrame(int frameIndex, int effectTileIndex = 0)
+    {
+        if (EffectTileAnimationFrames == null || EffectTileAnimationFrames.Length == 0)
+            return GetEffectTileBase(effectTileIndex);
+
+        int safeIndex = Mathf.Clamp(frameIndex, 0, EffectTileAnimationFrames.Length - 1);
+        return EffectTileAnimationFrames[safeIndex] != null
+            ? EffectTileAnimationFrames[safeIndex]
+            : GetEffectTileBase(effectTileIndex);
     }
     /// <summary>
     /// 활성화 시 BlockedTiles 배열 기준으로 선택 불가 타일을 지정합니다.

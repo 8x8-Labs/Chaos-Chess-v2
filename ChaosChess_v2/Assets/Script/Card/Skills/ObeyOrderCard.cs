@@ -216,7 +216,7 @@ public class ObeyOrderEffect : TileEffector
 
         visualTilePos = pos;
         hasVisualTile = true;
-        BoardManager.Instance.TileEffectDrawer.SetTileEffect(visualTilePos, DataSO.EffectTileBase);
+        BoardManager.Instance.TileEffectDrawer.SetTileEffect(visualTilePos, DataSO, 0, RemainingTurns);
     }
 
     private void ClearVisualTile()

@@ -50,12 +50,11 @@ public class SyncEffect : TileEffector
 
     protected override void OnApply()
     {
-        // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
         {
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO, 0, RemainingTurns);
             if (child != null)
-                BoardManager.Instance.TileEffectDrawer.SetTileEffect(child.TilePos, DataSO.EffectTileBase);
+                BoardManager.Instance.TileEffectDrawer.SetTileEffect(child.TilePos, DataSO, 0, child.RemainingTurns);
         }
 
         if (LinkLineSettings.Enabled && child != null)
@@ -142,9 +141,7 @@ public class SyncChild : TileEffector
     {
         Piece.OnPieceDestroyed += HandlePieceDestroyed;
 
-        // 타일 이펙트 추가
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+        ShowTileEffect(DataSO);
 
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
@@ -224,9 +221,8 @@ public class SyncFollower : PieceEffector
 
     protected override void OnApply()
     {
-        // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(syncTilePos, DataSO.EffectTileBase);
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(syncTilePos, DataSO, 0, RemainingTurns);
 
         isReady = false;
     }
