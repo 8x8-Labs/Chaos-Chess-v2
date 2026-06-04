@@ -25,6 +25,14 @@ MonoBehaviour:
   MaintainTurn: 3
   NeedEffectTileBase: 1
   EffectTileBase: {fileID: 11400000, guid: 22fb84878390e6941b631e2b2faa1ef9, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 2
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames:
+  - {fileID: 11400000, guid: 22fb84878390e6941b631e2b2faa1ef9, type: 2}
+  - {fileID: 11400000, guid: e31b6f0c00b9d6249b9d20ee3a9cf7ec, type: 2}
+  - {fileID: 11400000, guid: 475a875d917caec449047f70d8fc11fb, type: 2}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
