@@ -216,25 +216,30 @@ public class MapManager : MonoBehaviour
         nodesPerFloor = data.nodesPerFloor;
 
         // MapNodeSaveData → Map 객체로 역변환하여 mapGrid 재구성
-        foreach (MapFloorSaveData floorData in data.mapGrid)
+        if (data.mapGrid != null)
         {
-            MapFloor floor = new MapFloor();
-            foreach (MapNodeSaveData nodeData in floorData.nodes)
+            foreach (MapFloorSaveData floorData in data.mapGrid)
             {
-                floor.nodes.Add(new Map
+                if (floorData?.nodes == null) continue;
+                MapFloor floor = new MapFloor();
+                foreach (MapNodeSaveData nodeData in floorData.nodes)
                 {
-                    ELO = nodeData.elo,
-                    FEN = nodeData.fen,
-                    isCleared = nodeData.isCleared,
-                    floor = nodeData.floor,
-                    column = nodeData.column,
-                    nextColumns = new System.Collections.Generic.List<int>(nodeData.nextColumns),
-                    isAccessible = nodeData.isAccessible,
-                    uiPosition = new UnityEngine.Vector2(nodeData.uiPositionX, nodeData.uiPositionY),
-                    nodeType = (NodeType)nodeData.nodeType
-                });
+                    if (nodeData == null) continue;
+                    floor.nodes.Add(new Map
+                    {
+                        ELO = nodeData.elo,
+                        FEN = nodeData.fen,
+                        isCleared = nodeData.isCleared,
+                        floor = nodeData.floor,
+                        column = nodeData.column,
+                        nextColumns = new System.Collections.Generic.List<int>(nodeData.nextColumns),
+                        isAccessible = nodeData.isAccessible,
+                        uiPosition = new UnityEngine.Vector2(nodeData.uiPositionX, nodeData.uiPositionY),
+                        nodeType = (NodeType)nodeData.nodeType
+                    });
+                }
+                mapGrid.Add(floor);
             }
-            mapGrid.Add(floor);
         }
 
         // 플랫 리스트 동기화 (Init()과 동일한 마지막 단계)
@@ -242,7 +247,8 @@ public class MapManager : MonoBehaviour
             maps.AddRange(floor.nodes);
 
         // curMap 복원: 저장된 floor/column 좌표로 참조 재연결
-        if (data.curMapFloor < mapGrid.Count && data.curMapColumn < mapGrid[data.curMapFloor].nodes.Count)
+        if (data.curMapFloor >= 0 && data.curMapFloor < mapGrid.Count &&
+            data.curMapColumn >= 0 && data.curMapColumn < mapGrid[data.curMapFloor].nodes.Count)
             curMap = mapGrid[data.curMapFloor].nodes[data.curMapColumn];
         else if (maps.Count > 0)
             curMap = maps[0];
