@@ -59,9 +59,12 @@ public class ButtonCanvas : ButtonParent
     public void FadeOut()
     {
         canvasGroup.DOFade(1f, fadeDuration);
+        int animIndex = 0;
         for (int i = 0; i < animationButtons.Count; i++)
         {
-            animationButtons[i].StartAnimation(i * uiAnimDelay);
+            if (!animationButtons[i].gameObject.activeInHierarchy) continue;
+            animationButtons[i].StartAnimation(animIndex * uiAnimDelay);
+            animIndex++;
         }
     }
     public void FadeIn()

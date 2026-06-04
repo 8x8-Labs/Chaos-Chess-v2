@@ -80,4 +80,15 @@ public class PlayerState : MonoBehaviour
 
         curGameResult = GameResult.None;
     }
+
+    /// <summary>
+    /// 저장 데이터에서 불러온 승/무/패 횟수를 직접 설정한다.
+    /// InitializeRun()은 무조건 0으로 초기화하므로, 로드 시에는 이 메서드로 덮어쓴다.
+    /// </summary>
+    public void SetWinDrawLose(int win, int draw, int lose)
+    {
+        WinCount = win;
+        DrawCount = draw;
+        LoseCount = lose;
+    }
 }

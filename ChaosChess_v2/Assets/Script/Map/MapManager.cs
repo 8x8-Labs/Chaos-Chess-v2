@@ -201,6 +201,59 @@ public class MapManager : MonoBehaviour
         map.FEN = GetPracticeFen(difficulty);
     }
 
+    /// <summary>
+    /// 저장 데이터에서 맵 그래프를 복원한다. Init()의 랜덤 생성과 별개로 동작한다.
+    ///
+    /// curMap은 씬 재생성 시 객체 참조가 끊기므로 floor/column 좌표로 저장했다가
+    /// mapGrid 재구성 후 좌표로 참조를 재연결한다.
+    /// </summary>
+    public void LoadFromSaveData(RunSaveData data)
+    {
+        maps.Clear();
+        mapGrid.Clear();
+
+        currentFloor = data.currentFloor;
+        nodesPerFloor = data.nodesPerFloor;
+
+        // MapNodeSaveData → Map 객체로 역변환하여 mapGrid 재구성
+        if (data.mapGrid != null)
+        {
+            foreach (MapFloorSaveData floorData in data.mapGrid)
+            {
+                if (floorData?.nodes == null) continue;
+                MapFloor floor = new MapFloor();
+                foreach (MapNodeSaveData nodeData in floorData.nodes)
+                {
+                    if (nodeData == null) continue;
+                    floor.nodes.Add(new Map
+                    {
+                        ELO = nodeData.elo,
+                        FEN = nodeData.fen,
+                        isCleared = nodeData.isCleared,
+                        floor = nodeData.floor,
+                        column = nodeData.column,
+                        nextColumns = new System.Collections.Generic.List<int>(nodeData.nextColumns),
+                        isAccessible = nodeData.isAccessible,
+                        uiPosition = new UnityEngine.Vector2(nodeData.uiPositionX, nodeData.uiPositionY),
+                        nodeType = (NodeType)nodeData.nodeType
+                    });
+                }
+                mapGrid.Add(floor);
+            }
+        }
+
+        // 플랫 리스트 동기화 (Init()과 동일한 마지막 단계)
+        foreach (MapFloor floor in mapGrid)
+            maps.AddRange(floor.nodes);
+
+        // curMap 복원: 저장된 floor/column 좌표로 참조 재연결
+        if (data.curMapFloor >= 0 && data.curMapFloor < mapGrid.Count &&
+            data.curMapColumn >= 0 && data.curMapColumn < mapGrid[data.curMapFloor].nodes.Count)
+            curMap = mapGrid[data.curMapFloor].nodes[data.curMapColumn];
+        else if (maps.Count > 0)
+            curMap = maps[0];
+    }
+
     // 전투 승리 후 호출. 클리어 상태 갱신 및 다음 층 노드 접근권 해제.
     public void OnCombatCleared()
     {

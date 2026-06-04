@@ -102,6 +102,10 @@ public class UIButton : Button
                 GameCycleManager.Instance?.StartGame();
                 changeCanvas();
                 break;
+            case ButtonType.ContinueRun:
+                // GameStart와 달리 씬 전환을 ContinueRun() 내부에서 처리하므로 changeCanvas() 불필요
+                GameCycleManager.Instance?.ContinueRun();
+                break;
             case ButtonType.PracticeStart:
                 StartPracticeMode();
                 break;
@@ -125,6 +129,11 @@ public class UIButton : Button
 
         bool isLose = PlayerState.Instance?.CurGameResult == GameResult.BlackWin;
         bool isFinalFloorClear = MapManager.Instance?.currentFloor >= MapManager.Instance?.totalFloors;
+
+        // 런이 완전 종료(패배 또는 보스 클리어)되는 경우에만 저장 파일을 삭제한다.
+        // 보상 씬으로 가는 경우(전투 승리 중간)는 저장을 유지한다.
+        if (isLose || isFinalFloorClear)
+            SaveManager.Instance?.DeleteSave();
 
         SceneLoadManager.Instance.LoadScene((isLose || isFinalFloorClear) ? resultSceneName : rewardSceneName);
     }
@@ -161,5 +170,6 @@ public enum ButtonType
     PracticeStart,  // 연습 모드 시작
     EndGame,        // 게임 종료 후 흐름 이동
     GoMain,
-    Quit            // 게임 종료
+    Quit,           // 게임 종료
+    ContinueRun,    // 저장된 런 이어하기
 }
