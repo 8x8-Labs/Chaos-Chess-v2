@@ -3942,7 +3942,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 237120361}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -23433,6 +23433,7 @@ GameObject:
   - component: {fileID: 1342107394}
   - component: {fileID: 1342107393}
   - component: {fileID: 1342107392}
+  - component: {fileID: 1342107396}
   - component: {fileID: 1342107390}
   m_Layer: 5
   m_Name: button
@@ -23600,6 +23601,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1342107388}
   m_CullTransparentMesh: 1
+--- !u!114 &1342107396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1342107388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 164f11c1f8755d84b9f0bfea375cdbfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  floatingObjects:
+  - {fileID: 267397522}
+  - {fileID: 1245038430}
+  - {fileID: 929095624}
+  centerPiece: {fileID: 351573880}
+  floatAmount: 10
+  floatDuration: 1.4
+  rotateAngle: 6
+  rotateDuration: 2
+  pieceFloatAmount: 14
+  pieceFloatDuration: 1.2
 --- !u!1 &1350866422
 GameObject:
   m_ObjectHideFlags: 0
