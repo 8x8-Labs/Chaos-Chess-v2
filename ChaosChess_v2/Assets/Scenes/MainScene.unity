@@ -8595,6 +8595,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tier: 2
+  scrollRect: {fileID: 474269093}
 --- !u!1 &487723791
 GameObject:
   m_ObjectHideFlags: 0
@@ -12346,6 +12347,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tier: 3
+  scrollRect: {fileID: 640521181}
 --- !u!1 &649316407
 GameObject:
   m_ObjectHideFlags: 0
@@ -14436,6 +14438,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tier: 0
+  scrollRect: {fileID: 783734754}
 --- !u!1 &785263500
 GameObject:
   m_ObjectHideFlags: 0
@@ -33327,6 +33330,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tier: 4
+  scrollRect: {fileID: 1776570128}
 --- !u!1 &1786719292
 GameObject:
   m_ObjectHideFlags: 0
@@ -40843,6 +40847,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tier: 1
+  scrollRect: {fileID: 2137046363}
 --- !u!1 &2143267901
 GameObject:
   m_ObjectHideFlags: 0

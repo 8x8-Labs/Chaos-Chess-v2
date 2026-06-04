@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardBookTierGroup : MonoBehaviour
 {
     [SerializeField] private Tier tier;
+    [SerializeField] private ScrollRect scrollRect;
 
     private CardDescriptionUI descriptionUI;
 
@@ -37,6 +39,12 @@ public class CardBookTierGroup : MonoBehaviour
             if (i < tierCards.Count)
                 cardItems[i].Init(tierCards[i], descriptionUI);
         }
+    }
+
+    public void ResetScroll()
+    {
+        if (scrollRect != null)
+            scrollRect.horizontalNormalizedPosition = 0f;
     }
 
     public void RefreshStates()

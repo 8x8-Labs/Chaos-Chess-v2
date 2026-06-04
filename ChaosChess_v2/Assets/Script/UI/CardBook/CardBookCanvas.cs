@@ -23,6 +23,9 @@ public class CardBookCanvas : ButtonCanvas
         if (tierGroups == null) return;
 
         foreach (CardBookTierGroup group in tierGroups)
+        {
             group?.RefreshStates();
+            group?.ResetScroll();
+        }
     }
 }
