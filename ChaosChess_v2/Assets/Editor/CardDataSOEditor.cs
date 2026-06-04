@@ -22,6 +22,8 @@ public class CardDataSOEditor : Editor
     SerializedProperty maintainTurn;
     SerializedProperty needEffectTileBase;
     SerializedProperty effectTileBase;
+    SerializedProperty useMultipleEffectTileBases;
+    SerializedProperty effectTileBases;
     SerializedProperty restrictTiles;
     SerializedProperty blockedTiles;
 
@@ -67,6 +69,8 @@ public class CardDataSOEditor : Editor
         maintainTurn = serializedObject.FindProperty("MaintainTurn");
         needEffectTileBase = serializedObject.FindProperty("NeedEffectTileBase");
         effectTileBase = serializedObject.FindProperty("EffectTileBase");
+        useMultipleEffectTileBases = serializedObject.FindProperty("UseMultipleEffectTileBases");
+        effectTileBases = serializedObject.FindProperty("EffectTileBases");
         restrictTiles = serializedObject.FindProperty("RestrictTiles");
         blockedTiles = serializedObject.FindProperty("BlockedTiles");
 
@@ -209,7 +213,11 @@ public class CardDataSOEditor : Editor
         EditorGUILayout.PropertyField(needEffectTileBase, new GUIContent("이펙트 타일 필요"));
         if (needEffectTileBase.boolValue)
         {
-            EditorGUILayout.PropertyField(effectTileBase, new GUIContent("타일 베이스"));
+            EditorGUILayout.PropertyField(useMultipleEffectTileBases, new GUIContent("다중 타일 베이스 사용"));
+            if (useMultipleEffectTileBases.boolValue)
+                EditorGUILayout.PropertyField(effectTileBases, new GUIContent("타일 베이스 목록"), true);
+            else
+                EditorGUILayout.PropertyField(effectTileBase, new GUIContent("타일 베이스"));
         }
 
         EditorGUILayout.Space(4);

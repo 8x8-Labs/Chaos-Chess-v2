@@ -43,14 +43,15 @@ public class ObeyOrderEffect : TileEffector
 
     private ObeyState _state = ObeyState.Idle;
     private readonly List<TileEffector> _childEffects = new List<TileEffector>();
+    private Vector3Int visualTilePos;
+    private bool hasVisualTile;
 
     protected override void OnApply()
     {
         Piece.OnPieceDestroyed += HandlePieceDestroyed;
 
         // 타일 이펙트 추가
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+        SetVisualTile(tilePos);
 
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
@@ -60,8 +61,7 @@ public class ObeyOrderEffect : TileEffector
         Piece.OnPieceDestroyed -= HandlePieceDestroyed;
 
         // 타일 이펙트 제거
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+        ClearVisualTile();
 
         UnsubscribeFromTurnEvent();
         CleanupChildEffects();
@@ -156,6 +156,8 @@ public class ObeyOrderEffect : TileEffector
         Vector3Int destPos = moves[Random.Range(0, moves.Count)];
         Debug.Log("[ObeyOrder] 다음 위치 : " + destPos);
 
+        SetVisualTile(destPos);
+
         GameObject destHost = new GameObject($"ObeyDestEffect_{destPos}");
         ObeyDestEffect destEffect = destHost.AddComponent<ObeyDestEffect>();
         destEffect.Init(destPos, -1);
@@ -202,6 +204,28 @@ public class ObeyOrderEffect : TileEffector
             if (e != null) e.Revert();
         }
         _childEffects.Clear();
+    }
+
+    private void SetVisualTile(Vector3Int pos)
+    {
+        if (!DataSO.NeedEffectTileBase)
+            return;
+
+        if (hasVisualTile && visualTilePos != pos)
+            BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(visualTilePos);
+
+        visualTilePos = pos;
+        hasVisualTile = true;
+        BoardManager.Instance.TileEffectDrawer.SetTileEffect(visualTilePos, DataSO.EffectTileBase);
+    }
+
+    private void ClearVisualTile()
+    {
+        if (!DataSO.NeedEffectTileBase || !hasVisualTile)
+            return;
+
+        BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(visualTilePos);
+        hasVisualTile = false;
     }
 }
 

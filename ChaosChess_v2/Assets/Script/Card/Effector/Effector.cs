@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 /// <summary>투기장 진입 시에도 일시정지하지 않고 유지할 효과 마커입니다.</summary>
 public interface IArenaPersistentEffect { }
@@ -174,13 +175,14 @@ public abstract class Effector : MonoBehaviour, IEffect
     {
         CardDataSO dataSO = VisualDataSO;
 
-        if (dataSO == null || !dataSO.NeedEffectTileBase || dataSO.EffectTileBase == null)
+        TileBase tileBase = GetVisualTileBase();
+        if (dataSO == null || !dataSO.NeedEffectTileBase || tileBase == null)
             return;
 
         foreach (Vector3Int pos in GetVisualPositions())
         {
             if (enabled)
-                BoardManager.Instance?.TileEffectDrawer?.SetTileEffect(pos, dataSO.EffectTileBase);
+                BoardManager.Instance?.TileEffectDrawer?.SetTileEffect(pos, tileBase);
             else
                 BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(pos);
         }
@@ -191,6 +193,9 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     /// <summary>타일 연출에 사용할 좌표 목록입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
     protected virtual IEnumerable<Vector3Int> GetVisualPositions() { yield break; }
+
+    /// <summary>타일 연출에 사용할 타일베이스입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
+    protected virtual TileBase GetVisualTileBase() => VisualDataSO?.EffectTileBase;
 }
 
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
@@ -242,10 +247,12 @@ public abstract class TileEffector : Effector, ITileEffect
         }
     }
     protected Vector3Int tilePos;
+    protected int effectTileIndex;
 
-    public void Init(Vector3Int pos, int duration = -1)
+    public void Init(Vector3Int pos, int duration = -1, int effectTileIndex = 0)
     {
         tilePos = pos;
+        this.effectTileIndex = effectTileIndex;
         SetDuration(duration);
     }
 
@@ -269,6 +276,10 @@ public abstract class TileEffector : Effector, ITileEffect
     {
         yield return tilePos;
     }
+
+    protected TileBase EffectTileBase => CardSO?.GetEffectTileBase(effectTileIndex);
+
+    protected override TileBase GetVisualTileBase() => EffectTileBase;
 }
 
 /// <summary>특정 타입의 기물이 행동(이동/잡기)했을 때 반응하는 전역 효과의 기반 추상 클래스</summary>
