@@ -18,7 +18,7 @@ public class UICardData : MonoBehaviour
     private void Awake()
     {
         cardTitle = GetComponentInChildren<TMP_Text>(true);
-        cardImage = System.Array.Find(GetComponentsInChildren<Image>(true), img => img.gameObject != gameObject);
+        cardImage = GetComponentInChildren<Image>(true);
         button = GetComponent<UIButton>();
         button?.onClick.AddListener(ClickEvent);
     }
