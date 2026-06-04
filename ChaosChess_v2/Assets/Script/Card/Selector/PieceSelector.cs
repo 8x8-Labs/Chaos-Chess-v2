@@ -50,11 +50,7 @@ public class PieceSelector : Selector<Piece>
             // 널 체크
             if (p != null)
             {
-                // 기물 타입과 색상 체크
-                if (CanSelectPiece(p))
-                {
-                    SelectTarget(p);
-                }
+                SelectTarget(p);
             }
         }
     }
