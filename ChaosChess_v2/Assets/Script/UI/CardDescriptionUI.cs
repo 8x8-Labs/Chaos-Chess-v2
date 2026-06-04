@@ -199,10 +199,16 @@ public class CardDescriptionUI : ButtonPanel
             return;
         }
 
+        if (!isPiece)
+        {
+            subDescPieceImage.gameObject.SetActive(false);
+            return;
+        }
+
         subDescPieceImage.gameObject.SetActive(true);
         subDescPieceImage.enabled = true;
 
-        Sprite iconSprite = isPiece ? data.PieceDescImage : subDescDefaultIconSprite;
+        Sprite iconSprite = data.PieceDescImage;
         if (iconSprite != null)
         {
             subDescPieceImage.sprite = iconSprite;
