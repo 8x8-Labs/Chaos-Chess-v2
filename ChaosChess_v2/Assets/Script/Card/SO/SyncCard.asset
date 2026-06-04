@@ -23,15 +23,14 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 1
   MaintainTurn: -1
-  NeedEffectTileBase: 0
-  EffectTileBase: {fileID: 0}
+  NeedEffectTileBase: 1
+  EffectTileBase: {fileID: 11400000, guid: 9013a349e5045a7439489227f7a8b746, type: 2}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
   StatusDisplayType: 1
   NeedAdditionalDescription: 1
   DescriptionType: 1
