@@ -21,11 +21,18 @@ public class SaveManager : MonoBehaviour
     // Path.Combine으로 경로 구분자 차이(Windows \, Android/iOS /)를 자동 처리한다
     private string SavePath => Path.Combine(Application.persistentDataPath, "run_save.json");
 
-    private string _loadedSavedScene = "MapScene";
+    /// <summary>
+    /// Load() 후 역직렬화된 데이터를 보관한다.
+    /// 씬 전환 완료 후 ApplyLoadedData()에서 실제 복원에 사용되며, 적용 후 null로 초기화된다.
+    /// </summary>
+    public RunSaveData CurrentRunData { get; private set; }
 
     /// <summary>Load() 이후 복원된 저장 씬 이름을 반환한다. 저장 파일에 없으면 "MapScene".</summary>
-    public string GetSavedScene() =>
-        string.IsNullOrWhiteSpace(_loadedSavedScene) ? "MapScene" : _loadedSavedScene;
+    public string GetSavedScene()
+    {
+        string scene = CurrentRunData?.savedScene;
+        return string.IsNullOrWhiteSpace(scene) ? "MapScene" : scene;
+    }
 
     private void Awake()
     {
@@ -67,8 +74,8 @@ public class SaveManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 저장 파일을 읽어 런 상태를 복원한다.
-    /// PlayerState, MapManager, GameCycleManager 순으로 적용한다.
+    /// 저장 파일을 읽어 CurrentRunData에 캐싱한다.
+    /// 실제 복원은 씬 로드 완료 후 ApplyLoadedData()에서 수행한다.
     /// </summary>
     public void Load()
     {
@@ -81,22 +88,29 @@ public class SaveManager : MonoBehaviour
         try
         {
             string json = File.ReadAllText(SavePath);
-            RunSaveData data = JsonUtility.FromJson<RunSaveData>(json);
+            CurrentRunData = JsonUtility.FromJson<RunSaveData>(json);
 
-            if (data == null)
-            {
+            if (CurrentRunData == null)
                 Debug.LogError("SaveManager.Load: 저장 데이터가 비어있거나 올바르지 않습니다.");
-                return;
-            }
-
-            ReadPlayerState(data);
-            ReadMapState(data);
-            ReadGameCycleState(data);
         }
         catch (System.Exception e)
         {
             Debug.LogError($"SaveManager.Load: 로드 중 오류 발생 - {e.Message}");
         }
+    }
+
+    /// <summary>
+    /// 씬 로드 완료 후 호출한다. CurrentRunData를 각 매니저에 실제로 적용한다.
+    /// GameCycleManager.ContinueRun()의 sceneLoaded 콜백에서 호출된다.
+    /// </summary>
+    public void ApplyLoadedData()
+    {
+        if (CurrentRunData == null) return;
+
+        ReadPlayerState(CurrentRunData);
+        ReadMapState(CurrentRunData);
+        ReadGameCycleState(CurrentRunData);
+        CurrentRunData = null;
     }
 
     /// <summary>저장 파일을 삭제한다. 런 종료(패배/클리어) 시 호출한다.</summary>
@@ -248,7 +262,6 @@ public class SaveManager : MonoBehaviour
         if (mm == null) return;
 
         mm.LoadFromSaveData(data);
-        _loadedSavedScene = string.IsNullOrWhiteSpace(data.savedScene) ? "MapScene" : data.savedScene;
     }
 
     private void ReadGameCycleState(RunSaveData data)
