@@ -69,13 +69,13 @@ public class SyncEffect : TileEffector
         // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
         {
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+            BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(tilePos);
             if (child != null)
-                BoardManager.Instance.TileEffectDrawer.ClearTileEffect(child.TilePos);
+                BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(child.TilePos);
         }
 
         DestroySyncLine();
-        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
+        BoardManager.Instance?.UnregisterTileEffector(tilePos, this);
         if (child != null)
         {
             child.Revert();
@@ -155,10 +155,10 @@ public class SyncChild : TileEffector
 
         // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+            BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(tilePos);
 
         SynchronizedPiece = null;
-        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
+        BoardManager.Instance?.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
 
@@ -235,7 +235,7 @@ public class SyncFollower : PieceEffector
     {
         // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(syncTilePos);
+            BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(syncTilePos);
 
         Destroy(this);
     }
@@ -284,8 +284,17 @@ public class SyncLinkLine : MonoBehaviour
         lineRenderer.numCapVertices = 4;
         lineRenderer.sortingOrder = settings.SortingOrder;
 
-        lineMaterial = new Material(Shader.Find("Sprites/Default"));
-        lineRenderer.material = lineMaterial;
+        Shader shader = settings.LineShader != null ? settings.LineShader : Shader.Find("Sprites/Default");
+        if (shader != null)
+        {
+            lineMaterial = new Material(shader);
+            lineRenderer.material = lineMaterial;
+        }
+        else
+        {
+            Debug.LogError("SyncLinkLine: line shader is missing.");
+        }
+
         lineRenderer.startColor = settings.Color;
         lineRenderer.endColor = settings.Color;
 
@@ -327,6 +336,7 @@ public struct SyncLinkLineSettings
     public float Width;
     public int SortingOrder;
     public float Z;
+    public Shader LineShader;
 
     public static SyncLinkLineSettings Default => new SyncLinkLineSettings
     {
@@ -334,6 +344,7 @@ public struct SyncLinkLineSettings
         Color = new Color(0.35f, 0.85f, 1f, 0.85f),
         Width = 0.045f,
         SortingOrder = -1,
-        Z = -0.1f
+        Z = -0.1f,
+        LineShader = null
     };
 }

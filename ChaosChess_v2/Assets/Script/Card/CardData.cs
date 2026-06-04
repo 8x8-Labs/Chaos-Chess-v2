@@ -27,6 +27,9 @@ public abstract class CardData : MonoBehaviour
     protected List<T> CreateTileEffectors<T>(IList<Vector3Int> positions) where T : TileEffector
     {
         List<T> effectors = new List<T>();
+        if (positions == null)
+            return effectors;
+
         for (int i = 0; i < positions.Count; i++)
         {
             effectors.Add(CreateTileEffector<T>(positions[i], i));

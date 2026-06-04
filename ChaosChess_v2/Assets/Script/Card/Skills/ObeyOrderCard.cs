@@ -212,7 +212,7 @@ public class ObeyOrderEffect : TileEffector
             return;
 
         if (hasVisualTile && visualTilePos != pos)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(visualTilePos);
+            BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(visualTilePos);
 
         visualTilePos = pos;
         hasVisualTile = true;
@@ -224,7 +224,7 @@ public class ObeyOrderEffect : TileEffector
         if (!DataSO.NeedEffectTileBase || !hasVisualTile)
             return;
 
-        BoardManager.Instance.TileEffectDrawer.ClearTileEffect(visualTilePos);
+        BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(visualTilePos);
         hasVisualTile = false;
     }
 }
