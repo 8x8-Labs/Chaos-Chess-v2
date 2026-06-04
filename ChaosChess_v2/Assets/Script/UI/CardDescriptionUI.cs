@@ -45,19 +45,21 @@ public class CardDescriptionUI : ButtonPanel
 
     private void UpdateUI(CardDataSO data)
     {
+        if (data == null) return;
+
         if (!tierUIBindingAttempted)
         {
             TryAutoBindTierUI();
         }
 
-        cardImage.sprite = data.CardImage;
-        cardTitle.text = data.CardName;
-        cardDesc.text = data.CardDescription;
+        if (cardImage != null) cardImage.sprite = data.CardImage;
+        if (cardTitle != null) cardTitle.text = data.CardName;
+        if (cardDesc != null) cardDesc.text = data.CardDescription;
         ApplyTierStyle(data.CardTier);
 
         if (data.NeedAdditionalDescription)
         {
-            subDesc.SetActive(true);
+            if (subDesc != null) subDesc.SetActive(true);
             subDescFoldController?.Hide();
 
             if (subDescTitle != null)
@@ -105,7 +107,7 @@ public class CardDescriptionUI : ButtonPanel
         else
         {
             subDescFoldController?.Hide();
-            subDesc.SetActive(false);
+            if (subDesc != null) subDesc.SetActive(false);
         }
     }
 
@@ -155,9 +157,12 @@ public class CardDescriptionUI : ButtonPanel
             return;
         }
 
+        Image tierImage = tierRoot != null ? tierRoot.GetComponent<Image>() : null;
+        Image lineImage = lineRoot != null ? lineRoot.GetComponent<Image>() : null;
+
         int targetCount = 0;
-        if (tierRoot != null && tierRoot.GetComponent<Image>() != null) targetCount++;
-        if (lineRoot != null && lineRoot.GetComponent<Image>() != null) targetCount++;
+        if (tierImage != null) targetCount++;
+        if (lineImage != null) targetCount++;
 
         if (targetCount == 0)
         {
@@ -167,23 +172,8 @@ public class CardDescriptionUI : ButtonPanel
         tierColorTargets = new Image[targetCount];
         int index = 0;
 
-        if (tierRoot != null)
-        {
-            Image tierImage = tierRoot.GetComponent<Image>();
-            if (tierImage != null)
-            {
-                tierColorTargets[index++] = tierImage;
-            }
-        }
-
-        if (lineRoot != null)
-        {
-            Image line = lineRoot.GetComponent<Image>();
-            if (line != null)
-            {
-                tierColorTargets[index] = line;
-            }
-        }
+        if (tierImage != null) tierColorTargets[index++] = tierImage;
+        if (lineImage != null) tierColorTargets[index] = lineImage;
     }
 
     private void ApplyColorToTargets(Color color)
