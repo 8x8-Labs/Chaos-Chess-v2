@@ -91,6 +91,8 @@ public class CardDescPanel : ButtonPanel
 
         executeButton.onClick.AddListener(() =>
             {
+                if (gameManager == null) gameManager = GameManager.Instance;
+                gameManager?.CancelCurrentSelectionForBoardTransition();
                 DisablePanel();
                 cardExecute?.Invoke();
             }
