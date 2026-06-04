@@ -76,7 +76,7 @@ public class FireEffect : TileEffector
             }
         }
 
-        RefreshTileEffectTurnAnimation(DataSO);
+        RefreshTileEffectTurnAnimation(DataSO, 2 - deathTurn);
     }
 
     protected override void OnDestroy()

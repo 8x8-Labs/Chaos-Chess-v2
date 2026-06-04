@@ -315,13 +315,14 @@ public abstract class TileEffector : Effector, ITileEffect
         BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(tilePos);
     }
 
-    protected void RefreshTileEffectTurnAnimation(CardDataSO dataSO = null)
+    protected void RefreshTileEffectTurnAnimation(CardDataSO dataSO = null, int customRemainingTurns = -1)
     {
         CardDataSO visualData = dataSO != null ? dataSO : CardSO;
         if (visualData == null || visualData.EffectTileAnimationMode != TileEffectAnimationMode.Turn)
             return;
 
-        BoardManager.Instance?.TileEffectDrawer?.TickTurnAnimation(tilePos, RemainingTurns);
+        int turns = customRemainingTurns >= 0 ? customRemainingTurns : RemainingTurns;
+        BoardManager.Instance?.TileEffectDrawer?.TickTurnAnimation(tilePos, turns);
     }
 }
 

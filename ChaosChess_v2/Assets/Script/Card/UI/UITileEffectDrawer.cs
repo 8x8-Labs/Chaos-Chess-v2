@@ -41,11 +41,9 @@ public class UITileEffectDrawer : MonoBehaviour
             if (state.Elapsed < frameInterval)
                 continue;
 
-            while (state.Elapsed >= frameInterval)
-            {
-                state.Elapsed -= frameInterval;
-                AdvanceFrame(pair.Key, state);
-            }
+            int framesToAdvance = Mathf.FloorToInt(state.Elapsed / frameInterval);
+            state.Elapsed %= frameInterval;
+            AdvanceFrame(pair.Key, state, framesToAdvance);
         }
     }
 
@@ -156,7 +154,7 @@ public class UITileEffectDrawer : MonoBehaviour
         return Mathf.Clamp(elapsedTurns, 0, frameCount - 1);
     }
 
-    private void AdvanceFrame(Vector3Int pos, TileEffectAnimationState state)
+    private void AdvanceFrame(Vector3Int pos, TileEffectAnimationState state, int framesToAdvance = 1)
     {
         CardDataSO dataSO = state.DataSO;
         int frameCount = dataSO.EffectTileAnimationFrames != null
@@ -166,11 +164,7 @@ public class UITileEffectDrawer : MonoBehaviour
         if (frameCount <= 0)
             return;
 
-        int nextFrame = state.FrameIndex + 1;
-        if (nextFrame >= frameCount)
-            nextFrame = 0;
-
-        state.FrameIndex = nextFrame;
+        state.FrameIndex = (state.FrameIndex + framesToAdvance) % frameCount;
         effectTilemap.SetTile(pos, dataSO.GetEffectTileAnimationFrame(state.FrameIndex, state.EffectTileIndex));
     }
 }
