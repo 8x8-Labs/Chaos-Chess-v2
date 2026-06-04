@@ -43,16 +43,14 @@ public class CobwebEffector : GlobalEffector
 
     protected override void OnApply()
     {
-        // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(TilePos, DataSO.EffectTileBase);
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(TilePos, DataSO, 0, RemainingTurns);
 
         BoardManager.Instance.RegisterGlobalEffector(this);
     }
 
     protected override void OnRevert()
     {
-        // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(TilePos);
 

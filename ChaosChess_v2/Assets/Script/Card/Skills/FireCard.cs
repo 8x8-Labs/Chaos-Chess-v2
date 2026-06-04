@@ -36,9 +36,7 @@ public class FireEffect : TileEffector
     {
         Piece.OnPieceDestroyed += HandlePieceDestroyed;
 
-        // 타일 이펙트 추가
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+        ShowTileEffect(DataSO);
 
         boardManager.RegisterTileEffector(tilePos, this);
     }
@@ -47,9 +45,7 @@ public class FireEffect : TileEffector
     {
         Piece.OnPieceDestroyed -= HandlePieceDestroyed;
 
-        // 타일 이펙트 제거
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+        ClearTileEffect();
 
         Destroy(gameObject);
     }
@@ -79,6 +75,8 @@ public class FireEffect : TileEffector
                 Revert();
             }
         }
+
+        RefreshTileEffectTurnAnimation(DataSO);
     }
 
     protected override void OnDestroy()
