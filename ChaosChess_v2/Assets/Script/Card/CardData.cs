@@ -15,13 +15,24 @@ public abstract class CardData : MonoBehaviour
     }
 
     /// <summary>DataSO의 타일 설정을 기반으로 TileEffector를 생성합니다. 새 GameObject에 부착됩니다.</summary>
-    protected T CreateTileEffector<T>(Vector3Int pos) where T : TileEffector
+    protected T CreateTileEffector<T>(Vector3Int pos, int effectTileIndex = 0) where T : TileEffector
     {
         GameObject host = new GameObject($"TileEffect_{pos}");
         T effector = host.AddComponent<T>();
-        effector.Init(pos, DataSO.MaintainTurn);
+        effector.Init(pos, DataSO.MaintainTurn, effectTileIndex);
         effector.CardSO = DataSO;
         return effector;
+    }
+
+    protected List<T> CreateTileEffectors<T>(IList<Vector3Int> positions) where T : TileEffector
+    {
+        List<T> effectors = new List<T>();
+        for (int i = 0; i < positions.Count; i++)
+        {
+            effectors.Add(CreateTileEffector<T>(positions[i], i));
+        }
+
+        return effectors;
     }
 
     /// <summary>DataSO의 전역 설정을 기반으로 GlobalEffector를 생성합니다. 새 GameObject에 부착됩니다.</summary>

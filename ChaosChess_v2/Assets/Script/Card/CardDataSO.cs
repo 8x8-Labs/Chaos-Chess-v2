@@ -39,9 +39,31 @@ public class CardDataSO : ScriptableObject
     /// </summary>
     public bool NeedEffectTileBase;
     /// <summary>
-    /// 효과가 적용된 타일에 표시할 타일베이스
+    /// 효과가 적용된 타일에 표시할 기본 타일베이스
     /// </summary>
     public TileBase EffectTileBase;
+    /// <summary>
+    /// 선택 순서별로 다른 타일베이스를 사용할지 여부
+    /// </summary>
+    public bool UseMultipleEffectTileBases;
+    /// <summary>
+    /// 선택 순서별로 표시할 타일베이스 목록입니다.
+    /// </summary>
+    public TileBase[] EffectTileBases;
+
+    public TileBase GetEffectTileBase(int index)
+    {
+        if (!UseMultipleEffectTileBases)
+            return EffectTileBase;
+
+        if (EffectTileBases == null || EffectTileBases.Length == 0)
+            return EffectTileBase;
+
+        if (index >= 0 && index < EffectTileBases.Length && EffectTileBases[index] != null)
+            return EffectTileBases[index];
+
+        return EffectTileBases[0] != null ? EffectTileBases[0] : EffectTileBase;
+    }
     /// <summary>
     /// 활성화 시 BlockedTiles 배열 기준으로 선택 불가 타일을 지정합니다.
     /// </summary>
