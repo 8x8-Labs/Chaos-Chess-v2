@@ -14,9 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC131\uBCBD"
   CardImage: {fileID: 1167870803, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uB450 \uD0C0\uC77C\uC5D0 \uB118\uC5B4\uAC08
-    \uC218 \uC5C6\uC73C\uBA70 \uACF5\uACA9 \uC2DC \uD30C\uAD34\uB418\uB294 \uBCBD\uC744
-    \uC124\uCE58\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C <color=#FFD700>2\uCE78</color>\uC5D0 <color=#4499FF>\uC131\uBCBD</color>\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 0
   PieceType: 0
@@ -35,10 +33,10 @@ MonoBehaviour:
   LimitTurn: 0
   ShowStatusCard: 0
   StatusDisplayType: 1
-  NeedAdditionalDescription: 0
-  DescriptionType: 0
-  AdditionalDescriptionTitle: 
+  NeedAdditionalDescription: 1
+  DescriptionType: 1
+  AdditionalDescriptionTitle: "\uC131\uBCBD"
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: 
+  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uD1B5\uACFC\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \uACF5\uACA9\uBC1B\uC73C\uBA74 <color=#FF4444>\uD30C\uAD34\uB429\uB2C8\uB2E4</color>."

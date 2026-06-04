@@ -14,10 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC544\uBC84\uC9C0\uC758 \uC6D0\uC218"
   CardImage: {fileID: 1376287424, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC774 \uAC01\uC131\uD569\uB2C8\uB2E4.
-    \uAC01\uC131\uD55C \uD3F0\uC740 \uC774\uD6C4 \uC790\uC2E0\uC758 \uD134\uC744
-    \uC18C\uBAA8\uD558\uC5EC \uB098\uC774\uD2B8, \uBE44\uC20D, \uD038 \uC21C\uC73C\uB85C
-    \uC2B9\uACA9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC744 <color=#4499FF>\uAC01\uC131</color>\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 0
   CardTier: 2
   PieceType: 1
@@ -35,10 +32,10 @@ MonoBehaviour:
   HasLimit: 0
   LimitTurn: 0
   ShowStatusCard: 0
-  NeedAdditionalDescription: 0
-  DescriptionType: 0
-  AdditionalDescriptionTitle: 
+  NeedAdditionalDescription: 1
+  DescriptionType: 1
+  AdditionalDescriptionTitle: "\uAC01\uC131"
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: 
+  AdditionalDescriptionContent: "\uAC01\uC131\uD55C \uD3F0\uC740 \uC790\uC2E0\uC758 \uD134\uC744 \uC18C\uBAA8\uD574 <color=#00CC44>\uB2E8\uACC4\uC801\uC73C\uB85C \uC2B9\uACA9</color>\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uB098\uC774\uD2B8 \u2192 \uBE44\uC20D \u2192 \uD038"

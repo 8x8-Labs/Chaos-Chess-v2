@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC2E0\uC18D\uD589\uAD70"
   CardImage: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  CardDescription: "\uC774\uBC88 \uD134\uC5D0 \uC120\uD0DD\uD55C \uD3F0\uC774 \uC55E\uC73C\uB85C
-    2\uCE78 \uC804\uC9C4\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4. (1\uD68C)"
+  CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC774 \uC774\uBC88 \uD134\uC5D0 <color=#4499FF>\uC55E\uC73C\uB85C 2\uCE78 \uC804\uC9C4</color>\uD569\uB2C8\uB2E4. (1\uD68C)"
   Type: 0
   CardTier: 0
   PieceType: -1
