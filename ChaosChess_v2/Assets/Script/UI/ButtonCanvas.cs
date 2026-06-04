@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -23,7 +23,7 @@ public class ButtonCanvas : ButtonParent
     private ScrollRect scrollRect;
     private Canvas canvas;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         // Debug.Log($"{gameObject.name}에 있는 캔버스 그룹 오브젝트: {canvasGroup.gameObject.name}");
