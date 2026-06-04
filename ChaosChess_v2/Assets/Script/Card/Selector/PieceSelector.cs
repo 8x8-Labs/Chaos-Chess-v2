@@ -10,6 +10,7 @@ public class PieceSelector : Selector<Piece>
     // GetComponents(List<T>) 재사용 버퍼로 선택 시점 GC 할당을 줄입니다.
     private readonly List<PieceEffector> pieceEffectorBuffer = new();
     private IPieceCard skillCard;
+    private IPieceTargetFilter targetFilter;
     private bool executable => isExecute();
 
     public override void DeselectFirstTarget()
@@ -50,8 +51,7 @@ public class PieceSelector : Selector<Piece>
             if (p != null)
             {
                 // 기물 타입과 색상 체크
-                if((p.Type & cardData.DataSO.PieceType) != 0 &&
-                    p.Color == cardData.DataSO.PieceTargetColor)
+                if (CanSelectPiece(p))
                 {
                     SelectTarget(p);
                 }
@@ -62,6 +62,12 @@ public class PieceSelector : Selector<Piece>
     public override void SelectTarget(Piece Target)
     {
         if (!selectState) return;
+
+        if (!CanSelectPiece(Target))
+        {
+            Target.NotSelect();
+            return;
+        }
 
         if (HasActivePieceEffector(Target))
         {
@@ -122,8 +128,7 @@ public class PieceSelector : Selector<Piece>
 
         // 1. 현재 기물 검사
         List<Piece> pieces = bm.GetAllPieces()
-            .Where(p => (p.Type & cardData.DataSO.PieceType) != 0 &&
-                    p.Color == cardData.DataSO.PieceTargetColor)
+            .Where(CanSelectPiece)
             .ToList();
 
         if (pieces.Count == 0)
@@ -150,6 +155,7 @@ public class PieceSelector : Selector<Piece>
     {
         cardData = data;
         skillCard = cardData.GetComponent<IPieceCard>();
+        targetFilter = cardData.GetComponent<IPieceTargetFilter>();
         selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
@@ -185,10 +191,25 @@ public class PieceSelector : Selector<Piece>
 
         cardData = null;
         skillCard = null;
+        targetFilter = null;
         foreach(Piece p in selectedTargets) p.OnDeselect();
         selectedTargets.Clear();
         selectorUI.DisableButtonState();
 
+    }
+
+    private bool CanSelectPiece(Piece piece)
+    {
+        if (piece == null || cardData == null || cardData.DataSO == null)
+            return false;
+
+        if ((piece.Type & cardData.DataSO.PieceType) == 0)
+            return false;
+
+        if (piece.Color != cardData.DataSO.PieceTargetColor)
+            return false;
+
+        return targetFilter == null || targetFilter.CanSelectPiece(piece);
     }
 
     /// <summary>해당 기물에 일시정지되지 않은 PieceEffector가 하나라도 있는지 확인합니다.</summary>
