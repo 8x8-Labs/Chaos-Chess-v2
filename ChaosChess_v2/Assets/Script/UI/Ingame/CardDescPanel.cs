@@ -26,6 +26,7 @@ public class CardDescPanel : ButtonPanel
     // 규칙 타입
     [SerializeField] private TMP_Text subDescContent;
     [SerializeField] private SubDescFoldController subDescFoldController;
+    [SerializeField] private CardTargetUI targetUI;
 
     private CardAnim selectedCard;
     private Sprite subDescDefaultIconSprite;
@@ -107,6 +108,7 @@ public class CardDescPanel : ButtonPanel
         cardTitle.text = data.CardName;
         cardDesc.text = data.CardDescription;
         ApplyTierStyle(data.CardTier);
+        targetUI?.SetData(data);
 
         if (data.NeedAdditionalDescription)
         {

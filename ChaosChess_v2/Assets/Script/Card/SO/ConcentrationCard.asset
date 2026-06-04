@@ -37,5 +37,5 @@ MonoBehaviour:
   AdditionalDescriptionTitle: "\uC544\uB9C8\uC874 \uD589\uB9C8\uBC95"
   PieceDescImage: {fileID: -4919676682383813925, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   MovementImage: {fileID: -1542743459, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
-  PieceDescContent: 
-  AdditionalDescriptionContent: 
+  PieceDescContent: 퀸과 나이트의 행마법을 합친 기물입니다. 직선·대각선으로 멀리 이동하거나 나이트처럼 도약할 수 있습니다.
+  AdditionalDescriptionContent:

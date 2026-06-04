@@ -37,5 +37,5 @@ MonoBehaviour:
   AdditionalDescriptionTitle: "\uB098\uC774\uD2B8\uB77C\uC774\uB354"
   PieceDescImage: {fileID: 7305455733785292759, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   MovementImage: {fileID: -1915148324, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
-  PieceDescContent: 
-  AdditionalDescriptionContent: 
+  PieceDescContent: 나이트의 이동 패턴을 같은 방향으로 계속 반복해 이동할 수 있습니다. 경로 위에 기물이 있으면 이동이 차단됩니다.
+  AdditionalDescriptionContent:
