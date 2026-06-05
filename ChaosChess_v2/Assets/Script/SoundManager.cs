@@ -19,6 +19,8 @@ public class SoundManager : MonoBehaviour
 
     public AudioMixer audioMixer;
     [SerializeField] private AudioSource bgmSource;
+    [SerializeField] private AudioClip[] cardUseSFXByTier;
+    [SerializeField] private float cardUseSFXVolume = 1f;
     [SerializeField] private List<SceneBgmMapping> sceneBgmMappings = new();
     [SerializeField] private float sceneBgmFadeDuration = 0.8f;
 
@@ -242,13 +244,37 @@ public class SoundManager : MonoBehaviour
 
     public void SFXPlay(string sfxName, AudioClip clip)
     {
+        SFXPlay(sfxName, clip, 1f);
+    }
+
+    public void SFXPlay(string sfxName, AudioClip clip, float volume)
+    {
         GameObject go = new GameObject(sfxName + "Sound");
         AudioSource source = go.AddComponent<AudioSource>();
         source.outputAudioMixerGroup = audioMixer.FindMatchingGroups("SFX")[0];
         source.clip = clip;
+        source.volume = volume;
         source.Play();
 
         StartCoroutine(DestroyAfterRealtime(go, clip.length));
+    }
+
+    public void PlayCardUseSFX(Tier tier)
+    {
+        AudioClip clip = GetCardUseSFX(tier);
+        if (clip == null)
+            return;
+
+        SFXPlay("CardUseSFX", clip, cardUseSFXVolume);
+    }
+
+    private AudioClip GetCardUseSFX(Tier tier)
+    {
+        int index = (int)tier;
+        if (cardUseSFXByTier == null || index < 0 || index >= cardUseSFXByTier.Length)
+            return null;
+
+        return cardUseSFXByTier[index];
     }
 
     // ── 볼륨 설정 / 조회 ──────────────────────────────────
