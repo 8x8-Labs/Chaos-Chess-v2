@@ -33,9 +33,12 @@ public class CardRandomizerManager : MonoBehaviour
 
     public void ExecuteCard(CardDataSO cardSO, Action action)
     {
+        if (action == null)
+            return;
+
         if (cardSO == null)
         {
-            action?.Invoke();
+            action.Invoke();
             return;
         }
 
@@ -43,10 +46,10 @@ public class CardRandomizerManager : MonoBehaviour
         cardExecutionSource = cardSO;
         try
         {
-            if (action == null)
-                return;
-
-            SoundManager.Instance?.PlayCardUseSFX(cardSO.CardTier);
+            if (cardSO != null)
+            {
+                SoundManager.Instance?.PlayCardUseSFX(cardSO.CardTier);
+            }
             action.Invoke();
         }
         finally
