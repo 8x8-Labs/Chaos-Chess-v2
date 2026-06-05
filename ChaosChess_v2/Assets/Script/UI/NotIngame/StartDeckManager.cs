@@ -45,13 +45,14 @@ public class StartDeckManager : MonoBehaviour
     private void DealStarterCards()
     {
         CardRandomizerManager randomizer = CardRandomizerManager.Instance;
-        if (randomizer == null) return;
+        PlayerState playerState = PlayerState.Instance;
+        if (randomizer == null || playerState == null) return;
 
         List<GameObject> starterCards = GenerateStarterCards(randomizer);
 
         foreach (var card in starterCards)
         {
-            PlayerState.Instance?.AddCard(card);
+            playerState.AddCard(card);
         }
 
         currentStarterCards.Clear();
