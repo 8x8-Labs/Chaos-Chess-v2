@@ -33910,6 +33910,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioMixer: {fileID: 24100000, guid: 9783473a218a7b74b837c6277fa570c7, type: 2}
   bgmSource: {fileID: 1786719295}
+  cardUseSFXByTier:
+  - {fileID: 8300000, guid: 0b09ede618a36314aaab7d3bf11badb0, type: 3}
+  - {fileID: 8300000, guid: 1cf3ed3292697da44978dad6597160d6, type: 3}
+  - {fileID: 8300000, guid: 54662b7ebb371bd47b277ac88aed2494, type: 3}
+  - {fileID: 8300000, guid: afa57af7752db1c42bc14cfe9eb8bd8d, type: 3}
+  - {fileID: 8300000, guid: 55f42d989eddf15408ab4ac93aff8425, type: 3}
+  cardUseSFXVolume: 3
   sceneBgmMappings:
   - sceneName: MainScene
     bgmClip: {fileID: 8300000, guid: 747f40fb6e16c7d4388be48e6a771cce, type: 3}

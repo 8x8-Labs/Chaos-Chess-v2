@@ -43,7 +43,11 @@ public class CardRandomizerManager : MonoBehaviour
         cardExecutionSource = cardSO;
         try
         {
-            action?.Invoke();
+            if (action == null)
+                return;
+
+            SoundManager.Instance?.PlayCardUseSFX(cardSO.CardTier);
+            action.Invoke();
         }
         finally
         {
