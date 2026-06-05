@@ -113,15 +113,6 @@ public class CardRandomizerManager : MonoBehaviour
 
     public List<GameObject> GetRandomCardsByTier(Tier tier, int count)
     {
-        return GetRandomCardsByTier(tier, count, null);
-    }
-
-    public List<GameObject> GetRandomCardsByTier(Tier tier, int count, IEnumerable<GameObject> excludedCards)
-    {
-        HashSet<GameObject> excludedSet = excludedCards != null
-            ? new HashSet<GameObject>(excludedCards)
-            : new HashSet<GameObject>();
-
         List<GameObject> availableCards = allCards
             .Where(card =>
             {
@@ -130,7 +121,6 @@ public class CardRandomizerManager : MonoBehaviour
                 return data != null &&
                        data.DataSO != null &&
                        data.DataSO.CardTier == tier &&
-                       !excludedSet.Contains(card) &&
                        !IsCardActive(data.DataSO);
             })
             .ToList();

@@ -31,24 +31,23 @@ public class StartDeckManager : MonoBehaviour
         CacheRerollButton();
         SetRerollButtonInteractable(false);
         RemoveCurrentStarterCards();
-        DealStarterCards(null);
+        DealStarterCards();
     }
 
     public void Reroll()
     {
         SetRerollButtonInteractable(false);
-        List<GameObject> previousCards = new List<GameObject>(currentStarterCards);
         RemoveCurrentStarterCards();
-        DealStarterCards(previousCards);
+        DealStarterCards();
         uiCardPanel?.RefreshCards(rerollCardInterval, rerollAnimationDurationMultiplier);
     }
 
-    private void DealStarterCards(List<GameObject> excludedCards)
+    private void DealStarterCards()
     {
         CardRandomizerManager randomizer = CardRandomizerManager.Instance;
         if (randomizer == null) return;
 
-        List<GameObject> starterCards = GenerateStarterCards(randomizer, excludedCards);
+        List<GameObject> starterCards = GenerateStarterCards(randomizer);
 
         foreach (var card in starterCards)
         {
@@ -60,12 +59,12 @@ public class StartDeckManager : MonoBehaviour
         uiCardPanel.SetCards(starterCards);
     }
 
-    private List<GameObject> GenerateStarterCards(CardRandomizerManager randomizer, List<GameObject> excludedCards)
+    private List<GameObject> GenerateStarterCards(CardRandomizerManager randomizer)
     {
         List<GameObject> starterCards = new List<GameObject>();
-        AddCardsByTier(starterCards, randomizer, Tier.Common, commonCardCount, excludedCards);
-        AddCardsByTier(starterCards, randomizer, Tier.Uncommon, uncommonCardCount, excludedCards);
-        AddCardsByTier(starterCards, randomizer, Tier.Unique, uniqueCardCount, excludedCards);
+        AddCardsByTier(starterCards, randomizer, Tier.Common, commonCardCount);
+        AddCardsByTier(starterCards, randomizer, Tier.Uncommon, uncommonCardCount);
+        AddCardsByTier(starterCards, randomizer, Tier.Unique, uniqueCardCount);
         return starterCards;
     }
 
@@ -73,18 +72,11 @@ public class StartDeckManager : MonoBehaviour
         List<GameObject> destination,
         CardRandomizerManager randomizer,
         Tier tier,
-        int count,
-        List<GameObject> excludedCards)
+        int count)
     {
         if (count <= 0) return;
 
-        List<GameObject> pickedCards = randomizer.GetRandomCardsByTier(tier, count, excludedCards);
-        if (pickedCards.Count < count && excludedCards != null && excludedCards.Count > 0)
-        {
-            pickedCards.AddRange(randomizer.GetRandomCardsByTier(tier, count - pickedCards.Count, pickedCards));
-        }
-
-        destination.AddRange(pickedCards);
+        destination.AddRange(randomizer.GetRandomCardsByTier(tier, count));
     }
 
     private void RemoveCurrentStarterCards()
