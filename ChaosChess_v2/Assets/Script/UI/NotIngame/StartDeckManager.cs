@@ -6,7 +6,7 @@ public class StartDeckManager : MonoBehaviour
 {
     [SerializeField] private UICardPanel uiCardPanel;
     [SerializeField] private Button rerollButton;
-    [SerializeField] private int commonCardCount = 2;
+    [SerializeField] private int commonCardCount = 4;
     [SerializeField] private int uncommonCardCount = 2;
     [SerializeField] private int uniqueCardCount = 1;
     [SerializeField] private float rerollCardInterval = 0.12f;
