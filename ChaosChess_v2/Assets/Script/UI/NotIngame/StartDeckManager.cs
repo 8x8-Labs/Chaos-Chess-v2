@@ -107,14 +107,13 @@ public class StartDeckManager : MonoBehaviour
     {
         if (rerollButton != null) return;
 
-        Button[] buttons = GetComponentsInChildren<Button>(true);
-        foreach (Button button in buttons)
+        StartDeckRerollButton marker = GetComponentInChildren<StartDeckRerollButton>(true);
+        if (marker != null)
         {
-            if (button.name == "RerollButton")
-            {
-                rerollButton = button;
-                return;
-            }
+            rerollButton = marker.Button;
+            return;
         }
+
+        Debug.LogWarning($"{nameof(StartDeckManager)}에 {nameof(rerollButton)} 참조가 연결되지 않았습니다.", this);
     }
 }
