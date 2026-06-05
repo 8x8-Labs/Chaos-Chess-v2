@@ -761,8 +761,8 @@ MonoBehaviour:
   - {fileID: 393153870}
   - {fileID: 1319088933}
   cardCount: 3
-  cardInterval: 0.2
-  panelCloseDelay: 0.5
+  cardInterval: 0.3
+  panelCloseDelay: 0.7
 --- !u!1 &393153868
 GameObject:
   m_ObjectHideFlags: 0
