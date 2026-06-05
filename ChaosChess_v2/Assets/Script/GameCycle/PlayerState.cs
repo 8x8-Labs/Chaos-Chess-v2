@@ -48,6 +48,13 @@ public class PlayerState : MonoBehaviour
         if (cardData?.DataSO != null && CollectionManager.Instance != null)
             CollectionManager.Instance.Discover(cardData.DataSO.CardName);
     }
+
+    public bool RemoveCard(GameObject card)
+    {
+        if (card == null) return false;
+        return _cardPool.Remove(card);
+    }
+
     public void AddBuff(BuffSO definition, BuffSide side) => _buffs.Add(new BuffPick(definition, side));
     public void AddBuff(BuffSO definition, BuffSide side, int magnitude) => _buffs.Add(new BuffPick(definition, side, magnitude));
 

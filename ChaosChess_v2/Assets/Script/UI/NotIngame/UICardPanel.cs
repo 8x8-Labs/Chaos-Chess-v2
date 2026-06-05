@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System;
 using DG.Tweening;
 using UnityEngine;
 
 public class UICardPanel : ButtonPanel
 {
+    public event Action CardSequenceCompleted;
+
     public UICardAnim[] anims;
     public int cardCount;
 
@@ -31,6 +34,18 @@ public class UICardPanel : ButtonPanel
         base.DisablePanel();
     }
 
+    public void RefreshCards()
+    {
+        PrepareCards();
+        PlayCardSequence();
+    }
+
+    public void RefreshCards(float intervalOverride, float animationDurationMultiplier)
+    {
+        PrepareCards();
+        PlayCardSequence(intervalOverride, animationDurationMultiplier);
+    }
+
     private void PrepareCards()
     {
         cardCount = cards.Count;
@@ -48,21 +63,31 @@ public class UICardPanel : ButtonPanel
         }
     }
 
-    private void PlayCardSequence()
+    private void PlayCardSequence(float intervalOverride = -1f, float animationDurationMultiplier = 1f)
     {
         cardSequence?.Kill();
         cardSequence = DOTween.Sequence();
 
-        for (int i = 0; i < cardCount; i++)
+        int count = Mathf.Min(cardCount, anims.Length);
+        float interval = intervalOverride >= 0f ? intervalOverride : cardInterval;
+        float lastAnimationDuration = 0f;
+
+        for (int i = 0; i < count; i++)
         {
             int index = i;
             cardSequence.AppendCallback(() =>
             {
                 anims[index].gameObject.SetActive(true);
-                anims[index].CardAnimation();
+                anims[index].CardAnimation(animationDurationMultiplier);
             });
-            cardSequence.AppendInterval(cardInterval);
+
+            lastAnimationDuration = Mathf.Max(0f, anims[index].Duration * animationDurationMultiplier);
+            if (i < count - 1)
+                cardSequence.AppendInterval(interval);
         }
+
+        cardSequence.AppendInterval(lastAnimationDuration);
+        cardSequence.AppendCallback(() => CardSequenceCompleted?.Invoke());
 
         if (panelCloseDelay >= 0f)
         {
