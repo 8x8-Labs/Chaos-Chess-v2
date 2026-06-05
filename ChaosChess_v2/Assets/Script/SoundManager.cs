@@ -20,7 +20,7 @@ public class SoundManager : MonoBehaviour
     public AudioMixer audioMixer;
     [SerializeField] private AudioSource bgmSource;
     [SerializeField] private AudioClip[] cardUseSFXByTier;
-    [SerializeField] private float cardUseSFXVolume = 1.5f;
+    [SerializeField] private float cardUseSFXVolume = 1f;
     [SerializeField] private List<SceneBgmMapping> sceneBgmMappings = new();
     [SerializeField] private float sceneBgmFadeDuration = 0.8f;
 
