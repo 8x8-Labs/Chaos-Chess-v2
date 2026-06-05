@@ -56,7 +56,7 @@ public class StartDeckManager : MonoBehaviour
 
         currentStarterCards.Clear();
         currentStarterCards.AddRange(starterCards);
-        uiCardPanel.SetCards(starterCards);
+        uiCardPanel?.SetCards(starterCards);
     }
 
     private List<GameObject> GenerateStarterCards(CardRandomizerManager randomizer)

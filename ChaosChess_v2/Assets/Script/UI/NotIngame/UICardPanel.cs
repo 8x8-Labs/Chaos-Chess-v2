@@ -50,15 +50,20 @@ public class UICardPanel : ButtonPanel
     {
         cardCount = cards.Count;
         UICardAnim[] uiCards = anims;
+        if (uiCards == null) return;
 
         for (int i = 0; i < uiCards.Length; i++)
         {
+            if (uiCards[i] == null) continue;
+
             uiCards[i].gameObject.SetActive(false);
         }
 
         int count = Mathf.Min(cardCount, uiCards.Length);
         for (int i = 0; i < count; i++)
         {
+            if (uiCards[i] == null) continue;
+
             uiCards[i].CardPreFab = cards[i];
         }
     }
@@ -67,6 +72,11 @@ public class UICardPanel : ButtonPanel
     {
         cardSequence?.Kill();
         cardSequence = DOTween.Sequence();
+        if (anims == null)
+        {
+            cardSequence.AppendCallback(() => CardSequenceCompleted?.Invoke());
+            return;
+        }
 
         int count = Mathf.Min(cardCount, anims.Length);
         float interval = intervalOverride >= 0f ? intervalOverride : cardInterval;
@@ -74,14 +84,16 @@ public class UICardPanel : ButtonPanel
 
         for (int i = 0; i < count; i++)
         {
-            int index = i;
+            UICardAnim anim = anims[i];
+            if (anim == null) continue;
+
             cardSequence.AppendCallback(() =>
             {
-                anims[index].gameObject.SetActive(true);
-                anims[index].CardAnimation(animationDurationMultiplier);
+                anim.gameObject.SetActive(true);
+                anim.CardAnimation(animationDurationMultiplier);
             });
 
-            lastAnimationDuration = Mathf.Max(0f, anims[index].Duration * animationDurationMultiplier);
+            lastAnimationDuration = Mathf.Max(0f, anim.Duration * animationDurationMultiplier);
             if (i < count - 1)
                 cardSequence.AppendInterval(interval);
         }
