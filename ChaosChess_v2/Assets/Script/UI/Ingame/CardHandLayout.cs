@@ -28,7 +28,7 @@ public class CardHandLayout : MonoBehaviour
     {
         if (isSubscribed && gameManager != null)
         {
-            gameManager.OnPlayerCheckStateChanged -= SetInputBlocked;
+            gameManager.OnPlayerCheckStateChanged -= UpdateTurnInputBlocked;
             gameManager.OnHalfTurnChanged -= UpdateTurnInputBlocked;
         }
 
@@ -60,14 +60,19 @@ public class CardHandLayout : MonoBehaviour
         if (gameManager == null)
             return;
 
-        gameManager.OnPlayerCheckStateChanged += SetInputBlocked;
+        gameManager.OnPlayerCheckStateChanged += UpdateTurnInputBlocked;
         gameManager.OnHalfTurnChanged += UpdateTurnInputBlocked;
         isSubscribed = true;
         UpdateTurnInputBlocked();
     }
 
+    private void UpdateTurnInputBlocked(bool _) => UpdateTurnInputBlocked();
+
     private void UpdateTurnInputBlocked()
     {
+        if (gameManager.IsArenaMode)
+            return;
+
         SetInputBlocked(gameManager.IsPlayerInCheck || !gameManager.IsPlayerTurn);
     }
 
