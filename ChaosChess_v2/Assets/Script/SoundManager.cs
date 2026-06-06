@@ -157,23 +157,23 @@ public class SoundManager : MonoBehaviour
         return bgmSource != null && sceneBgmClip != null && bgmSource.clip != sceneBgmClip;
     }
 
-    public Tween BeginSceneTransitionFadeOut(string sceneName, bool forceFade = false, float duration = -1f)
+    public Tween BeginSceneTransitionFadeOut(string sceneName, bool forceFade = false, float? duration = null)
     {
         if (!forceFade && !ShouldTransitionBGM(sceneName))
             return null;
 
-        return BgFadeOut(duration >= 0f ? duration : SceneBgmFadeDuration);
+        return BgFadeOut(duration ?? SceneBgmFadeDuration);
     }
 
-    public void ApplySceneBGM(string sceneName, bool restart = false, float duration = -1f)
+    public void ApplySceneBGM(string sceneName, bool restart = false, float? duration = null)
     {
         AudioClip sceneBgmClip = GetSceneBGM(sceneName);
         if (bgmSource == null || sceneBgmClip == null)
             return;
 
-        float fadeDuration = duration >= 0f ? duration : SceneBgmFadeDuration;
+        float fadeDuration = duration ?? SceneBgmFadeDuration;
 
-        if (bgmSource != null && bgmSource.clip == sceneBgmClip && !restart)
+        if (bgmSource.clip == sceneBgmClip && !restart)
         {
             if (!bgmSource.isPlaying)
                 bgmSource.Play();
