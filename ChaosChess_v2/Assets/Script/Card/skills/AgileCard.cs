@@ -24,7 +24,7 @@ public class AgileCard : CardData, IPieceCard
         Piece pawn = args.Targets[0];
         AgileEffect effect = CreatePieceEffector<AgileEffect>(pawn);
 
-        effect.Apply();
+        effect.Apply(true);
     }
 }
 
@@ -45,6 +45,11 @@ public class AgileEffect : PieceEffector, IMovementOverrideEffect
     }
 
     public override void OnPieceCapture()
+    {
+        Revert();
+    }
+
+    protected override void OnHalfTurnChanged()
     {
         Revert();
     }
