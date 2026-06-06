@@ -1821,6 +1821,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 14408963}
+    - target: {fileID: 8982855325810294302, guid: c01b6ebfca71c7043bfc6817e00d3d62, type: 3}
+      propertyPath: m_SortingOrder
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 9022815844583981565, guid: c01b6ebfca71c7043bfc6817e00d3d62, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -10925,6 +10929,7 @@ GameObject:
   - component: {fileID: 1555374388}
   - component: {fileID: 1555374390}
   - component: {fileID: 1555374389}
+  - component: {fileID: 1555374391}
   m_Layer: 5
   m_Name: Title
   m_TagString: Untagged
@@ -10991,6 +10996,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1555374387}
   m_CullTransparentMesh: 1
+--- !u!114 &1555374391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1555374387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f466259814a19b24aa6678fba237e654, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  titleText: {fileID: 1297219911}
 --- !u!1 &1559194562
 GameObject:
   m_ObjectHideFlags: 0

@@ -5367,7 +5367,7 @@ MonoBehaviour:
   OnPanelDisabled:
     m_PersistentCalls:
       m_Calls: []
-  cardImage: {fileID: 0}
+  cardImage: {fileID: 1229444639}
   cardTitle: {fileID: 1515000885}
   cardDesc: {fileID: 1515000884}
   tierText: {fileID: 1515000883}
@@ -10106,6 +10106,7 @@ MonoBehaviour:
   curMap:
     ELO: 0
     FEN: 
+    MapName: 
     isCleared: 0
     floor: 0
     nodeType: 0
@@ -13676,7 +13677,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uCD08\uBCF4\uC790\uB4E4\uC5D0\uAC8C \uC801\uB2F9\uD55C \uB09C\uC774\uB3C4\uC785\uB2C8\uB2E4."
+  m_text: "\uD63C\uB3C8\uC758 \uCCB4\uC2A4\uAC00 \uC5B4\uC0C9\uD55C \uBD84\uB4E4\uC744
+    \uC704\uD55C \uB09C\uC774\uB3C4\uC785\uB2C8\uB2E4. \uAE30\uBB3C \uC77C\uBD80\uB97C
+    \uC81C\uC678\uD55C \uC0C1\uD0DC\uC5D0\uC11C \uC2DC\uC791\uD569\uB2C8\uB2E4."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
   m_sharedMaterial: {fileID: -1657904361312498901, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
@@ -13703,14 +13706,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
-  m_fontSizeBase: 72
+  m_fontSize: 60
+  m_fontSizeBase: 60
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -13742,7 +13745,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 40, y: 0, z: 40, w: 25}
+  m_margin: {x: 60, y: 0, z: 20, w: 25}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -17954,6 +17957,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1214863450}
   m_CullTransparentMesh: 1
+--- !u!114 &1229444639 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1820375749345794204, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}
+  m_PrefabInstance: {fileID: 1515000871}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1235526627
 GameObject:
   m_ObjectHideFlags: 0
@@ -27834,7 +27848,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC801\uB2F9\uD55C \uB09C\uC774\uB3C4\uB97C \uAC00\uC9C0\uACE0 \uC788\uC2B5\uB2C8\uB2E4."
+  m_text: "\uD63C\uB3C8\uC758 \uCCB4\uC2A4\uC5D0 \uC775\uC219\uD574\uC9C4 \uBD84\uB4E4\uC744
+    \uC704\uD55C \uB09C\uC774\uB3C4\uC785\uB2C8\uB2E4. \uC77C\uBC18\uC801\uC778 \uCCB4\uC2A4\uD310
+    \uC0C1\uD0DC\uC5D0\uC11C \uC2DC\uC791\uD569\uB2C8\uB2E4."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
   m_sharedMaterial: {fileID: -1657904361312498901, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
@@ -27861,14 +27877,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
-  m_fontSizeBase: 72
+  m_fontSize: 60
+  m_fontSizeBase: 60
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -27900,7 +27916,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 40, y: 0, z: 40, w: 25}
+  m_margin: {x: 60, y: 0, z: 20, w: 25}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -29338,7 +29354,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC5B4\uB835\uC2B5\uB2C8\uB2E4."
+  m_text: "\uC2A4\uD0AC \uCE74\uB4DC\uB97C \uC644\uBCBD\uD558\uAC8C \uC751\uC6A9\uD560
+    \uC218 \uC788\uB294 \uBD84\uB4E4\uC744 \uC704\uD55C \uB09C\uC774\uB3C4\uC785\uB2C8\uB2E4.
+    \uB3C4\uC804\uC744 \uC990\uACA8\uBCF4\uC138\uC694."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
   m_sharedMaterial: {fileID: -1657904361312498901, guid: 87276d374b71e2b4daaad50165516f5b, type: 2}
@@ -29365,14 +29383,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
-  m_fontSizeBase: 72
+  m_fontSize: 60
+  m_fontSizeBase: 60
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -29404,7 +29422,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 40, y: 0, z: 40, w: 25}
+  m_margin: {x: 60, y: 0, z: 20, w: 25}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
