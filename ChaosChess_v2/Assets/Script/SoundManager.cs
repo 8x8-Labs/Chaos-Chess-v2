@@ -62,6 +62,18 @@ public class SoundManager : MonoBehaviour
 
         MuteBGM(GetBGMMute());
         MuteSFX(GetSFXMute());
+        PlayInitialBGM();
+    }
+
+    private void PlayInitialBGM()
+    {
+        if (bgmSource == null || bgmSource.clip == null || bgmSource.isPlaying)
+            return;
+
+        bgmSource.loop = true;
+        bgmSource.volume = 0f;
+        bgmSource.Play();
+        BgFadeIn(SceneBgmFadeDuration);
     }
 
     // ── BGM 재생 제어 ──────────────────────────────────────
