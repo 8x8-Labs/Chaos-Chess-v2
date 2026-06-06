@@ -4,6 +4,15 @@ using UnityEngine;
 
 public class CardRewardManager : MonoBehaviour
 {
+    private static readonly Tier[] AllTiers =
+    {
+        Tier.Common,
+        Tier.Uncommon,
+        Tier.Unique,
+        Tier.Rare,
+        Tier.Legendary
+    };
+
     [SerializeField] private UICardPanel uiCardPanel;
     [SerializeField] private TextMeshProUGUI cardRewardText;
 
@@ -44,14 +53,7 @@ public class CardRewardManager : MonoBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            List<Tier> availableTiers = new List<Tier>
-            {
-                Tier.Common,
-                Tier.Uncommon,
-                Tier.Unique,
-                Tier.Rare,
-                Tier.Legendary
-            };
+            List<Tier> availableTiers = new List<Tier>(AllTiers);
 
             while (availableTiers.Count > 0)
             {
