@@ -74,17 +74,12 @@ public class ContinueButtonUIAnim : MonoBehaviour
                 .SetLoops(-1, LoopType.Yoyo)
         );
 
-        float startAngle = rt.localEulerAngles.z;
         tweens.Add(
-            DOTween.To(
-                () => rt.localEulerAngles.z,
-                angle => rt.localEulerAngles = new Vector3(0f, 0f, angle),
-                startAngle + rotateAngle,
-                rotateDuration
-            )
-            .SetEase(Ease.InOutSine)
-            .SetDelay(delay)
-            .SetLoops(-1, LoopType.Yoyo)
+            rt.DOLocalRotate(new Vector3(0f, 0f, rotateAngle), rotateDuration)
+                .SetRelative(true)
+                .SetEase(Ease.InOutSine)
+                .SetDelay(delay)
+                .SetLoops(-1, LoopType.Yoyo)
         );
     }
 

@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using UnityEditor.SpeedTree.Importer;
-using UnityEditor.Experimental.GraphView;
 
 public enum PracticeDifficulty
 {

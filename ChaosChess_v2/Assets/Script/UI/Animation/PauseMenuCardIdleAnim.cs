@@ -38,7 +38,7 @@ public class PauseMenuCardIdleAnim : MonoBehaviour
     {
         var result = new List<Sprite>();
 
-        if (PlayerState.Instance == null) return result;
+        if (PlayerState.Instance == null || PlayerState.Instance.CardPool == null) return result;
 
         var pool = new List<GameObject>(PlayerState.Instance.CardPool);
 

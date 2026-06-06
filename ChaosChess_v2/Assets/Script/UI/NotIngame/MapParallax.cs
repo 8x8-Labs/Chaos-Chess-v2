@@ -17,7 +17,7 @@ public class MapParallax : MonoBehaviour
         for (int i = 0; i < bgLayers.Length; i++)
             _originPositions[i] = bgLayers[i].anchoredPosition;
 
-        scrollRect.onValueChanged.AddListener(OnScroll);
+        scrollRect?.onValueChanged.AddListener(OnScroll);
         StartCoroutine(InitScrollRange());
     }
 
@@ -27,6 +27,8 @@ public class MapParallax : MonoBehaviour
         yield return null;
         Canvas.ForceUpdateCanvases();
 
+        if(scrollRect == null) yield break;
+
         float contentHeight = scrollRect.content.rect.height;
         float viewportHeight = scrollRect.viewport != null
             ? scrollRect.viewport.rect.height
@@ -35,7 +37,7 @@ public class MapParallax : MonoBehaviour
         OnScroll(scrollRect.normalizedPosition);
     }
 
-    private void OnDestroy() => scrollRect.onValueChanged.RemoveListener(OnScroll);
+    private void OnDestroy() => scrollRect?.onValueChanged.RemoveListener(OnScroll);
 
     private void OnScroll(Vector2 normalizedPos)
     {
