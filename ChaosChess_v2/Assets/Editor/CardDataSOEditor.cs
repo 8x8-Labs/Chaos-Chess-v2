@@ -22,6 +22,11 @@ public class CardDataSOEditor : Editor
     SerializedProperty maintainTurn;
     SerializedProperty needEffectTileBase;
     SerializedProperty effectTileBase;
+    SerializedProperty useMultipleEffectTileBases;
+    SerializedProperty effectTileBases;
+    SerializedProperty effectTileAnimationMode;
+    SerializedProperty effectTileFrameInterval;
+    SerializedProperty effectTileAnimationFrames;
     SerializedProperty restrictTiles;
     SerializedProperty blockedTiles;
 
@@ -49,6 +54,7 @@ public class CardDataSOEditor : Editor
     // 스타일 캐시
     GUIStyle headerStyle;
     GUIStyle sectionBoxStyle;
+    GUIStyle subSectionBoxStyle;
 
     void OnEnable()
     {
@@ -67,6 +73,11 @@ public class CardDataSOEditor : Editor
         maintainTurn = serializedObject.FindProperty("MaintainTurn");
         needEffectTileBase = serializedObject.FindProperty("NeedEffectTileBase");
         effectTileBase = serializedObject.FindProperty("EffectTileBase");
+        useMultipleEffectTileBases = serializedObject.FindProperty("UseMultipleEffectTileBases");
+        effectTileBases = serializedObject.FindProperty("EffectTileBases");
+        effectTileAnimationMode = serializedObject.FindProperty("EffectTileAnimationMode");
+        effectTileFrameInterval = serializedObject.FindProperty("EffectTileFrameInterval");
+        effectTileAnimationFrames = serializedObject.FindProperty("EffectTileAnimationFrames");
         restrictTiles = serializedObject.FindProperty("RestrictTiles");
         blockedTiles = serializedObject.FindProperty("BlockedTiles");
 
@@ -205,12 +216,7 @@ public class CardDataSOEditor : Editor
             EditorGUILayout.HelpBox("-1 : 제한 없이 계속 유지됩니다.", MessageType.Warning);
         }
 
-        EditorGUILayout.Space(4);
-        EditorGUILayout.PropertyField(needEffectTileBase, new GUIContent("이펙트 타일 필요"));
-        if (needEffectTileBase.boolValue)
-        {
-            EditorGUILayout.PropertyField(effectTileBase, new GUIContent("타일 베이스"));
-        }
+        DrawTileEffectFields();
 
         EditorGUILayout.Space(4);
         EditorGUILayout.PropertyField(restrictTiles, new GUIContent("타일 제한 사용"));
@@ -224,6 +230,71 @@ public class CardDataSOEditor : Editor
             EditorGUILayout.LabelField("선택 불가 타일 설정 (체크 = 선택 불가)", EditorStyles.boldLabel);
             EditorGUILayout.Space(2);
             DrawTileGrid();
+        }
+    }
+
+    void DrawTileEffectFields()
+    {
+        EditorGUILayout.Space(6);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("이펙트 타일 설정", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(needEffectTileBase, new GUIContent("이펙트 타일 사용"));
+
+            if (!needEffectTileBase.boolValue)
+                return;
+
+            DrawTileEffectAnimationFields();
+            if ((TileEffectAnimationMode)effectTileAnimationMode.enumValueIndex == TileEffectAnimationMode.None)
+                DrawTileEffectBaseFields();
+        }
+    }
+
+    void DrawTileEffectBaseFields()
+    {
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("타일 베이스", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(useMultipleEffectTileBases, new GUIContent("다중 타일 베이스 사용"));
+            if (useMultipleEffectTileBases.boolValue)
+                EditorGUILayout.PropertyField(effectTileBases, new GUIContent("타일 베이스 목록"), true);
+            else
+                EditorGUILayout.PropertyField(effectTileBase, new GUIContent("타일 베이스"));
+        }
+    }
+
+    void DrawTileEffectAnimationFields()
+    {
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("애니메이션", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(effectTileAnimationMode, new GUIContent("애니메이션 방식"));
+
+            var mode = (TileEffectAnimationMode)effectTileAnimationMode.enumValueIndex;
+            if (mode == TileEffectAnimationMode.None)
+            {
+                EditorGUILayout.HelpBox("애니메이션을 사용하지 않으면 아래 타일 베이스가 표시됩니다.", MessageType.None);
+                return;
+            }
+
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(effectTileAnimationFrames, new GUIContent("프레임"), true);
+
+            if (mode == TileEffectAnimationMode.Time)
+            {
+                EditorGUILayout.PropertyField(effectTileFrameInterval, new GUIContent("프레임 간격(초)"));
+            }
+            else if (mode == TileEffectAnimationMode.Turn)
+            {
+                EditorGUILayout.HelpBox("0번 프레임 = 시작, 1번 프레임 = 1턴 경과", MessageType.None);
+            }
+
+            if (effectTileAnimationFrames.arraySize == 0)
+                EditorGUILayout.HelpBox("프레임이 비어 있으면 기본 타일 베이스가 표시됩니다.", MessageType.Warning);
+
+            EditorGUI.indentLevel--;
         }
     }
 
@@ -345,6 +416,15 @@ public class CardDataSOEditor : Editor
             sectionBoxStyle = new GUIStyle(GUI.skin.box)
             {
                 padding = new RectOffset(10, 10, 8, 8),
+            };
+        }
+
+        if (subSectionBoxStyle == null)
+        {
+            subSectionBoxStyle = new GUIStyle(EditorStyles.helpBox)
+            {
+                padding = new RectOffset(8, 8, 6, 6),
+                margin = new RectOffset(0, 0, 4, 4),
             };
         }
     }

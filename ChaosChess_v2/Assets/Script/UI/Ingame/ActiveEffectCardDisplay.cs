@@ -98,15 +98,20 @@ public class ActiveEffectCardDisplay : MonoBehaviour
         CardDataSO cardSO = effector.CardSO;
         if (cardSO == null) return;
 
+        bool isNewCard = false;
         if (!cards.TryGetValue(cardSO, out ActiveEffectCard card))
         {
             card = CreateCard(cardSO);
             cards.Add(cardSO, card);
+            isNewCard = true;
         }
 
         card.Effects.Add(effector);
         UpdateCard(card);
         RefreshTrayState();
+
+        if (isNewCard)
+            card.CardUI?.PlayAppearAnimation();
     }
 
     private void CleanUpDestroyedEffects()
@@ -144,10 +149,26 @@ public class ActiveEffectCardDisplay : MonoBehaviour
         if (!cards.TryGetValue(cardSO, out ActiveEffectCard card)) return;
 
         card.Effects.Remove(effector);
+        Debug.Log($"[ActiveEffectUI] {cardSO.CardName} 제거, 남은 효과: {card.Effects.Count}");
+
         if (card.Effects.Count == 0)
         {
-            Destroy(card.Root);
             cards.Remove(cardSO);
+            if (card.CardUI != null)
+            {
+                card.CardUI.PlayDisappearAnimation(() =>
+                {
+                    Destroy(card.Root);
+                    RefreshTrayState();
+                });
+            }
+            else
+            {
+                Destroy(card.Root);
+                RefreshTrayState();
+            }
+
+            return;
         }
         else
         {
@@ -176,6 +197,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
             statusTextSettings.Format(ActiveEffectStatusType.TurnBased, remainingTurns));
         isArenaCardDisplayed = true;
         RefreshTrayState();
+        arenaCard.CardUI?.PlayAppearAnimation();
     }
 
     private void HandleArenaRemainingTurnsChanged(int remainingTurns)
@@ -190,12 +212,25 @@ public class ActiveEffectCardDisplay : MonoBehaviour
         if (!isArenaCardDisplayed) return;
 
         RemoveArenaCard();
-        RefreshTrayState();
     }
 
     private void RemoveArenaCard()
     {
-        Destroy(arenaCard.Root);
+        GameObject root = arenaCard.Root;
+        if (arenaCard.CardUI != null)
+        {
+            arenaCard.CardUI.PlayDisappearAnimation(() =>
+            {
+                Destroy(root);
+                RefreshTrayState();
+            });
+        }
+        else
+        {
+            Destroy(root);
+            RefreshTrayState();
+        }
+
         arenaCard = null;
         isArenaCardDisplayed = false;
     }
@@ -211,7 +246,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
             if (cardSO != null)
                 cardUI.CardImage.sprite = cardSO.CardImage;
 
-            cardUI.Title.text = fallbackTitle;
+            cardUI.Title.text = fallbackTitle ?? cardSO?.CardName;
             cardUI.RemainTurn.text = status ?? statusTextSettings.Format(ActiveEffectStatusType.Active);
         }
 

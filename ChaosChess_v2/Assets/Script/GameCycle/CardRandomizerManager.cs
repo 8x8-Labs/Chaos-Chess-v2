@@ -33,9 +33,12 @@ public class CardRandomizerManager : MonoBehaviour
 
     public void ExecuteCard(CardDataSO cardSO, Action action)
     {
+        if (action == null)
+            return;
+
         if (cardSO == null)
         {
-            action?.Invoke();
+            action.Invoke();
             return;
         }
 
@@ -43,7 +46,11 @@ public class CardRandomizerManager : MonoBehaviour
         cardExecutionSource = cardSO;
         try
         {
-            action?.Invoke();
+            if (cardSO != null)
+            {
+                SoundManager.Instance?.PlayCardUseSFX(cardSO.CardTier);
+            }
+            action.Invoke();
         }
         finally
         {
@@ -130,6 +137,36 @@ public class CardRandomizerManager : MonoBehaviour
         return availableCards
             .Take(Mathf.Min(count, availableCards.Count))
             .ToList();
+    }
+
+    public bool TryGetRandomCardByTier(
+        Tier tier,
+        HashSet<GameObject> excludedCards,
+        out GameObject selectedCard)
+    {
+        selectedCard = null;
+        int candidateCount = 0;
+
+        foreach (GameObject card in allCards)
+        {
+            if (card == null || excludedCards.Contains(card))
+                continue;
+
+            CardData data = card.GetComponent<CardData>();
+            if (data == null ||
+                data.DataSO == null ||
+                data.DataSO.CardTier != tier ||
+                IsCardActive(data.DataSO))
+            {
+                continue;
+            }
+
+            candidateCount++;
+            if (Random.Range(0, candidateCount) == 0)
+                selectedCard = card;
+        }
+
+        return selectedCard != null;
     }
 
     private void Shuffle(List<GameObject> list)

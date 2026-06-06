@@ -16,6 +16,7 @@ public class UICardAnim : MonoBehaviour
     private CanvasGroup canvasGroup;
     private RectTransform rt;
     private float originalWidth;
+    public float Duration => duration;
 
     [SerializeField] private GameObject cardPrefab;
     public GameObject CardPreFab { get { return cardPrefab; } set { cardPrefab = value; } }
@@ -40,12 +41,23 @@ public class UICardAnim : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void CardAnimation()
+    public void CardAnimation(float durationMultiplier = 1f)
     {
+        float adjustedDuration = Mathf.Max(0.01f, duration * durationMultiplier);
+        float adjustedFadeDuration = Mathf.Max(0.01f, fadeDuration * durationMultiplier);
+
+        rt.DOKill();
+        canvasGroup.DOKill();
+        cardSprite.rectTransform.DOKill();
+
+        rt.sizeDelta = new Vector2(0f, rt.sizeDelta.y);
+        canvasGroup.alpha = 0f;
+        cardSprite.rectTransform.anchoredPosition = new Vector3(0, startYPos, 0);
+
         DOTween.Sequence()
-            .Append(rt.DOSizeDelta(new Vector2(originalWidth, rt.sizeDelta.y), fadeDuration).SetEase(enableEase))
-            .Join(canvasGroup.DOFade(1f, fadeDuration).SetEase(enableEase))
-            .Join(cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(enableEase));
+            .Append(rt.DOSizeDelta(new Vector2(originalWidth, rt.sizeDelta.y), adjustedFadeDuration).SetEase(enableEase))
+            .Join(canvasGroup.DOFade(1f, adjustedFadeDuration).SetEase(enableEase))
+            .Join(cardSprite.rectTransform.DOAnchorPosY(0f, adjustedDuration).SetEase(enableEase));
 
         if (cardPrefab != null)
         {

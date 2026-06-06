@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class SceneLoadManager : MonoBehaviour
 {
     [SerializeField] private float fadeDuration = 0.18f;
+    [SerializeField] private float bgmFadeDuration = 0.8f;
     [SerializeField] private float loadingDisplayDelay = 0.25f;
 
     private static SceneLoadManager instance;
@@ -52,7 +53,17 @@ public class SceneLoadManager : MonoBehaviour
     {
         isLoading = true;
 
-        SoundManager.Instance?.BeginSceneTransitionFadeOut(sceneName);
+        SoundManager soundManager = SoundManager.Instance;
+        bool forceBgmFade = SceneManager.GetActiveScene().name == "ResultScene" && sceneName == "MainScene";
+        bool transitionBgm = soundManager != null &&
+                             (forceBgmFade || soundManager.ShouldTransitionBGM(sceneName));
+        Tween bgmFadeOut = soundManager?.BeginSceneTransitionFadeOut(
+            sceneName,
+            forceBgmFade,
+            bgmFadeDuration);
+
+        if (transitionBgm)
+            yield return null;
 
         SceneLoadingOverlayBase overlayUI = GetOverlayFor(sceneName);
         if (overlayUI != null)
@@ -65,6 +76,9 @@ public class SceneLoadManager : MonoBehaviour
         Tween fadeIn = overlayUI?.FadeTo(1f, fadeDuration);
         if (fadeIn != null)
             yield return fadeIn.WaitForCompletion();
+
+        if (bgmFadeOut != null && bgmFadeOut.IsActive() && !bgmFadeOut.IsComplete())
+            yield return bgmFadeOut.WaitForCompletion();
 
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
         if (operation == null)
@@ -82,7 +96,10 @@ public class SceneLoadManager : MonoBehaviour
         while (!operation.isDone)
             yield return null;
 
-        SoundManager.Instance?.ApplySceneBGM(sceneName);
+        soundManager?.ApplySceneBGM(sceneName, forceBgmFade, bgmFadeDuration);
+
+        if (transitionBgm)
+            yield return null;
 
         Tween fadeOut = overlayUI?.FadeTo(0f, fadeDuration);
         if (fadeOut != null)

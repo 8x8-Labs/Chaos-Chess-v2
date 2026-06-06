@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using System;
 using DG.Tweening;
 using UnityEngine;
 
 public class UICardPanel : ButtonPanel
 {
+    public event Action CardSequenceCompleted;
+
     public UICardAnim[] anims;
     public int cardCount;
 
@@ -31,38 +34,72 @@ public class UICardPanel : ButtonPanel
         base.DisablePanel();
     }
 
+    public void RefreshCards()
+    {
+        PrepareCards();
+        PlayCardSequence();
+    }
+
+    public void RefreshCards(float intervalOverride, float animationDurationMultiplier)
+    {
+        PrepareCards();
+        PlayCardSequence(intervalOverride, animationDurationMultiplier);
+    }
+
     private void PrepareCards()
     {
         cardCount = cards.Count;
         UICardAnim[] uiCards = anims;
+        if (uiCards == null) return;
 
         for (int i = 0; i < uiCards.Length; i++)
         {
+            if (uiCards[i] == null) continue;
+
             uiCards[i].gameObject.SetActive(false);
         }
 
         int count = Mathf.Min(cardCount, uiCards.Length);
         for (int i = 0; i < count; i++)
         {
+            if (uiCards[i] == null) continue;
+
             uiCards[i].CardPreFab = cards[i];
         }
     }
 
-    private void PlayCardSequence()
+    private void PlayCardSequence(float intervalOverride = -1f, float animationDurationMultiplier = 1f)
     {
         cardSequence?.Kill();
         cardSequence = DOTween.Sequence();
-
-        for (int i = 0; i < cardCount; i++)
+        if (anims == null)
         {
-            int index = i;
+            cardSequence.AppendCallback(() => CardSequenceCompleted?.Invoke());
+            return;
+        }
+
+        int count = Mathf.Min(cardCount, anims.Length);
+        float interval = intervalOverride >= 0f ? intervalOverride : cardInterval;
+        float lastAnimationDuration = 0f;
+
+        for (int i = 0; i < count; i++)
+        {
+            UICardAnim anim = anims[i];
+            if (anim == null) continue;
+
             cardSequence.AppendCallback(() =>
             {
-                anims[index].gameObject.SetActive(true);
-                anims[index].CardAnimation();
+                anim.gameObject.SetActive(true);
+                anim.CardAnimation(animationDurationMultiplier);
             });
-            cardSequence.AppendInterval(cardInterval);
+
+            lastAnimationDuration = Mathf.Max(0f, anim.Duration * animationDurationMultiplier);
+            if (i < count - 1)
+                cardSequence.AppendInterval(interval);
         }
+
+        cardSequence.AppendInterval(lastAnimationDuration);
+        cardSequence.AppendCallback(() => CardSequenceCompleted?.Invoke());
 
         if (panelCloseDelay >= 0f)
         {

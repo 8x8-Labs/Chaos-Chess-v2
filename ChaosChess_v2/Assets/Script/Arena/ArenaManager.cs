@@ -178,7 +178,6 @@ public class ArenaManager : MonoBehaviour
     {
         if (!isArenaActive) return;
         isArenaActive = false;
-        cardHandLayout?.SetArenaInputBlocked(false);
 
         GameManager gm = GameManager.Instance;
         gm.PopCardIntervalPause();
@@ -187,6 +186,7 @@ public class ArenaManager : MonoBehaviour
         // 이벤트 구독 해제 및 투기장 모드 비활성화
         gm.OnHalfTurnChanged -= OnHalfTurnChanged;
         gm.IsArenaMode = false;
+        cardHandLayout?.SetArenaInputBlocked(false);
         gm.SetLockedPiece(null);
         ArenaEnded?.Invoke();
 

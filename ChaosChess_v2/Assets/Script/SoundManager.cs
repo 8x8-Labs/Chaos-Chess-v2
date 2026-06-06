@@ -19,6 +19,8 @@ public class SoundManager : MonoBehaviour
 
     public AudioMixer audioMixer;
     [SerializeField] private AudioSource bgmSource;
+    [SerializeField] private AudioClip[] cardUseSFXByTier;
+    [SerializeField] private float cardUseSFXVolume = 1f;
     [SerializeField] private List<SceneBgmMapping> sceneBgmMappings = new();
     [SerializeField] private float sceneBgmFadeDuration = 0.8f;
 
@@ -60,6 +62,18 @@ public class SoundManager : MonoBehaviour
 
         MuteBGM(GetBGMMute());
         MuteSFX(GetSFXMute());
+        PlayInitialBGM();
+    }
+
+    private void PlayInitialBGM()
+    {
+        if (bgmSource == null || bgmSource.clip == null || bgmSource.isPlaying)
+            return;
+
+        bgmSource.loop = true;
+        bgmSource.volume = 0f;
+        bgmSource.Play();
+        BgFadeIn(SceneBgmFadeDuration);
     }
 
     // ── BGM 재생 제어 ──────────────────────────────────────
@@ -143,21 +157,45 @@ public class SoundManager : MonoBehaviour
         return bgmSource != null && sceneBgmClip != null && bgmSource.clip != sceneBgmClip;
     }
 
-    public void BeginSceneTransitionFadeOut(string sceneName)
+    public Tween BeginSceneTransitionFadeOut(string sceneName, bool forceFade = false, float? duration = null)
     {
-        if (!ShouldTransitionBGM(sceneName))
-            return;
+        if (!forceFade && !ShouldTransitionBGM(sceneName))
+            return null;
 
-        BgFadeOut(SceneBgmFadeDuration);
+        return BgFadeOut(duration ?? SceneBgmFadeDuration);
     }
 
-    public void ApplySceneBGM(string sceneName)
+    public void ApplySceneBGM(string sceneName, bool restart = false, float? duration = null)
     {
         AudioClip sceneBgmClip = GetSceneBGM(sceneName);
-        if (sceneBgmClip == null)
+        if (bgmSource == null || sceneBgmClip == null)
             return;
 
-        SwitchBGM(sceneBgmClip, SceneBgmFadeDuration, false);
+        float fadeDuration = duration ?? SceneBgmFadeDuration;
+
+        if (bgmSource.clip == sceneBgmClip && !restart)
+        {
+            if (!bgmSource.isPlaying)
+                bgmSource.Play();
+
+            BgFadeIn(fadeDuration);
+            return;
+        }
+
+        if (restart)
+        {
+            bgmFadeTween?.Kill();
+            bgmSource.Stop();
+            bgmSource.clip = sceneBgmClip;
+            bgmSource.loop = true;
+            bgmSource.time = 0f;
+            bgmSource.volume = 0f;
+            bgmSource.Play();
+            BgFadeIn(fadeDuration);
+            return;
+        }
+
+        SwitchBGM(sceneBgmClip, fadeDuration, false);
     }
 
     private AudioClip GetSceneBGM(string sceneName)
@@ -182,13 +220,14 @@ public class SoundManager : MonoBehaviour
         bgmFadeTween = bgmSource.DOFade(1f, Mathf.Max(0f, duration)).SetUpdate(true);
     }
 
-    public void BgFadeOut(float duration = 0.8f)
+    public Tween BgFadeOut(float duration = 0.8f)
     {
         if (bgmSource == null)
-            return;
+            return null;
 
         bgmFadeTween?.Kill();
         bgmFadeTween = bgmSource.DOFade(0f, Mathf.Max(0f, duration)).SetUpdate(true);
+        return bgmFadeTween;
     }
 
     // ── BGM 페이드 (외부 AudioSource 사용, 기존 오버로드 유지) ──
@@ -242,13 +281,37 @@ public class SoundManager : MonoBehaviour
 
     public void SFXPlay(string sfxName, AudioClip clip)
     {
+        SFXPlay(sfxName, clip, 1f);
+    }
+
+    public void SFXPlay(string sfxName, AudioClip clip, float volume)
+    {
         GameObject go = new GameObject(sfxName + "Sound");
         AudioSource source = go.AddComponent<AudioSource>();
         source.outputAudioMixerGroup = audioMixer.FindMatchingGroups("SFX")[0];
         source.clip = clip;
+        source.volume = volume;
         source.Play();
 
         StartCoroutine(DestroyAfterRealtime(go, clip.length));
+    }
+
+    public void PlayCardUseSFX(Tier tier)
+    {
+        AudioClip clip = GetCardUseSFX(tier);
+        if (clip == null)
+            return;
+
+        SFXPlay("CardUseSFX", clip, cardUseSFXVolume);
+    }
+
+    private AudioClip GetCardUseSFX(Tier tier)
+    {
+        int index = (int)tier;
+        if (cardUseSFXByTier == null || index < 0 || index >= cardUseSFXByTier.Length)
+            return null;
+
+        return cardUseSFXByTier[index];
     }
 
     // ── 볼륨 설정 / 조회 ──────────────────────────────────

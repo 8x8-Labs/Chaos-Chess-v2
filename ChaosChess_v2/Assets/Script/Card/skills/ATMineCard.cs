@@ -47,16 +47,14 @@ public class ATMineEffector : GlobalEffector
     public Vector3Int MinePos;
     protected override void OnApply()
     {
-        // 타일 이펙트 추가
         if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(MinePos, DataSO.EffectTileBase);
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(MinePos, DataSO, 0, RemainingTurns);
 
         BoardManager.Instance.RegisterGlobalEffector(this);
     }
 
     protected override void OnRevert()
     {
-        // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(MinePos);
 

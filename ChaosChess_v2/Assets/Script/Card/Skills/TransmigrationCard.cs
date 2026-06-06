@@ -5,7 +5,7 @@ using UnityEngine;
 /// 윤회 - 기물 전용 (고급)
 /// 프로모션한 상대 폰의 모습과 위치를 되돌립니다.
 /// </summary>
-public class TransmigrationCard : CardData, IPieceCard
+public class TransmigrationCard : CardData, IPieceCard, IPieceTargetFilter
 {
     private PieceSelector selector;
 
@@ -18,6 +18,11 @@ public class TransmigrationCard : CardData, IPieceCard
     {
         if (selector == null) selector = FindFirstObjectByType<PieceSelector>();
         selector.EnableSelector(this);
+    }
+
+    public bool CanSelectPiece(Piece piece)
+    {
+        return piece != null && piece.IsPromotioned;
     }
 
     public void Execute(CardEffectArgs args = null)

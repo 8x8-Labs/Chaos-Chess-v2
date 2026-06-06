@@ -50,9 +50,7 @@ public class BlessingEffect : TileEffector
     {
         Piece.OnPieceDestroyed += HandlePieceDestroyed;
 
-        // 타일 이펙트 추가
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO.EffectTileBase);
+        ShowTileEffect(DataSO);
 
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
@@ -61,9 +59,7 @@ public class BlessingEffect : TileEffector
     {
         Piece.OnPieceDestroyed -= HandlePieceDestroyed;
 
-        // 타일 이펙트 제거
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(tilePos);
+        ClearTileEffect();
 
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
