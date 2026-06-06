@@ -246,7 +246,7 @@ public class ActiveEffectCardDisplay : MonoBehaviour
             if (cardSO != null)
                 cardUI.CardImage.sprite = cardSO.CardImage;
 
-            cardUI.Title.text = fallbackTitle;
+            cardUI.Title.text = fallbackTitle ?? cardSO?.CardName;
             cardUI.RemainTurn.text = status ?? statusTextSettings.Format(ActiveEffectStatusType.Active);
         }
 
