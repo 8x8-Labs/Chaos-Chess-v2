@@ -149,6 +149,8 @@ public class ActiveEffectCardDisplay : MonoBehaviour
         if (!cards.TryGetValue(cardSO, out ActiveEffectCard card)) return;
 
         card.Effects.Remove(effector);
+        Debug.Log($"[ActiveEffectUI] {cardSO.CardName} 제거, 남은 효과: {card.Effects.Count}");
+
         if (card.Effects.Count == 0)
         {
             cards.Remove(cardSO);
