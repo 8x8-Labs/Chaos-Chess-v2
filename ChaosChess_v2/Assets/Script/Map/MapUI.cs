@@ -144,8 +144,6 @@ public class MapUI : MonoBehaviour
         if (obj.TryGetComponent<Button>(out var btn))
             btn.interactable = !map.isCleared && map.isAccessible;
 
-        var tmp = obj.GetComponentInChildren<TextMeshProUGUI>();
-
         var effectObj = obj.transform.Find(effectChildName);
         if (effectObj != null)
         {
@@ -158,9 +156,6 @@ public class MapUI : MonoBehaviour
                 SetEffectColor(effectObj, effectColor);
             }
         }
-
-        if (tmp != null)
-            tmp.text = $"F{map.floor + 1}\n{map.nodeType}";
     }
 
     private void SetEffectColor(Transform effectObj, Color color)

@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEditor.SpeedTree.Importer;
+using UnityEditor.Experimental.GraphView;
 
 public enum PracticeDifficulty
 {
@@ -92,8 +94,15 @@ public class MapManager : MonoBehaviour
                     // 보스층이면 Boss, 30% 확률로 Elite, 나머지는 Normal
                     nodeType = isBoss ? NodeType.Boss
                                : (Random.value < 0.3f ? NodeType.Elite : NodeType.Normal),
+                    MapName = isBoss ? $"{floor + 1}구간 보스" :
+                                $"{floor + 1}구간 - ",
                     FEN = SelectFEN(floor, isBoss)
                 });
+                if (mapGrid[floor].nodes[col].nodeType == NodeType.Elite)
+                    // 추후 문자열 최적화 시 개선
+                    mapGrid[floor].nodes[col].MapName += "엘리트 노드";
+                else if (mapGrid[floor].nodes[col].nodeType == NodeType.Normal)
+                    mapGrid[floor].nodes[col].MapName += $"{col + 1}노드 ";
             }
         }
 
@@ -165,9 +174,20 @@ public class MapManager : MonoBehaviour
 
     private Map CreatePracticeMap(PracticeDifficulty difficulty)
     {
-        Map practiceMap = new Map { floor = 0, isCleared = false };
+        Map practiceMap = new Map { floor = 0, isCleared = false, MapName = $"연습 모드 - {DifficultyToKorean(difficulty)}" };
         ApplyPracticeSetting(difficulty, practiceMap);
         return practiceMap;
+    }
+
+    private string DifficultyToKorean(PracticeDifficulty difficulty)
+    {
+        return difficulty switch
+        {
+            PracticeDifficulty.Easy => "쉬움",
+            PracticeDifficulty.Normal => "보통",
+            PracticeDifficulty.Hard => "어려움",
+            _ => "알 수 없음"
+        };
     }
 
     private int GetPracticeElo(PracticeDifficulty difficulty)
@@ -229,6 +249,7 @@ public class MapManager : MonoBehaviour
                     {
                         ELO = nodeData.elo,
                         FEN = nodeData.fen,
+                        MapName = nodeData.mapName,
                         isCleared = nodeData.isCleared,
                         floor = nodeData.floor,
                         column = nodeData.column,
