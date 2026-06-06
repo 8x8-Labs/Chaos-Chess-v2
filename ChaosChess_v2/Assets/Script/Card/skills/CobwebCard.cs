@@ -27,8 +27,7 @@ public class CobwebCard : CardData, ITileCard
         Vector3Int pos = args.TargetPos[0];
 
         CobwebEffector effect = CreateGlobalEffector<CobwebEffector>();
-        effect.TilePos = pos;
-        effect.DataSO = DataSO;
+        effect.InitCobweb(pos, DataSO);
         effect.Apply();
     }
 }
@@ -40,6 +39,13 @@ public class CobwebEffector : GlobalEffector
     private bool isTriggered = false;
 
     public Vector3Int TilePos;
+
+    public void InitCobweb(Vector3Int tilePos, CardDataSO dataSO)
+    {
+        TilePos = tilePos;
+        DataSO = dataSO;
+        SetDuration(-1);
+    }
 
     protected override void OnApply()
     {
