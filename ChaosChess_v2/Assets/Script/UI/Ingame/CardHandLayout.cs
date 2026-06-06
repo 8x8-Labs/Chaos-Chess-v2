@@ -49,7 +49,13 @@ public class CardHandLayout : MonoBehaviour
 
     public void RefreshAnimated() => Refresh(animate: true);
 
-    public void SetArenaInputBlocked(bool isBlocked) => SetInputBlocked(isBlocked);
+    public void SetArenaInputBlocked(bool isBlocked)
+    {
+        SetInputBlocked(isBlocked);
+
+        if (!isBlocked)
+            UpdateTurnInputBlocked();
+    }
 
     private void SubscribeGameManager()
     {
