@@ -139,6 +139,36 @@ public class CardRandomizerManager : MonoBehaviour
             .ToList();
     }
 
+    public bool TryGetRandomCardByTier(
+        Tier tier,
+        HashSet<GameObject> excludedCards,
+        out GameObject selectedCard)
+    {
+        selectedCard = null;
+        int candidateCount = 0;
+
+        foreach (GameObject card in allCards)
+        {
+            if (card == null || excludedCards.Contains(card))
+                continue;
+
+            CardData data = card.GetComponent<CardData>();
+            if (data == null ||
+                data.DataSO == null ||
+                data.DataSO.CardTier != tier ||
+                IsCardActive(data.DataSO))
+            {
+                continue;
+            }
+
+            candidateCount++;
+            if (Random.Range(0, candidateCount) == 0)
+                selectedCard = card;
+        }
+
+        return selectedCard != null;
+    }
+
     private void Shuffle(List<GameObject> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
