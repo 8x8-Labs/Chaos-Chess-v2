@@ -34,8 +34,6 @@ public class CobwebCard : CardData, ITileCard
 
 public class CobwebEffector : GlobalEffector
 {
-    public CardDataSO DataSO;
-
     private bool isTriggered = false;
 
     public Vector3Int TilePos;
@@ -43,21 +41,21 @@ public class CobwebEffector : GlobalEffector
     public void InitCobweb(Vector3Int tilePos, CardDataSO dataSO)
     {
         TilePos = tilePos;
-        DataSO = dataSO;
+        CardSO = dataSO;
         SetDuration(-1);
     }
 
     protected override void OnApply()
     {
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(TilePos, DataSO, 0, RemainingTurns);
+        if (CardSO.NeedEffectTileBase)
+            BoardManager.Instance.TileEffectDrawer.SetTileEffect(TilePos, CardSO, 0, RemainingTurns);
 
         BoardManager.Instance.RegisterGlobalEffector(this);
     }
 
     protected override void OnRevert()
     {
-        if (DataSO.NeedEffectTileBase)
+        if (CardSO.NeedEffectTileBase)
             BoardManager.Instance.TileEffectDrawer.ClearTileEffect(TilePos);
 
         BoardManager.Instance.UnregisterGlobalEffector(this);
@@ -142,7 +140,7 @@ public class CobwebEffector : GlobalEffector
 
         CobwebPieceEffector pieceEffect = piece.gameObject.AddComponent<CobwebPieceEffector>();
         pieceEffect.CardSO = null;
-        pieceEffect.Init(piece, DataSO.LimitTurn);
+        pieceEffect.Init(piece, CardSO.LimitTurn);
         pieceEffect.Apply();
     }
 
