@@ -25,6 +25,7 @@ public class MapNodeSaveData
 {
     public int elo;
     public string fen;
+    public string mapName;
     public bool isCleared;
     public int floor;
     public int column;

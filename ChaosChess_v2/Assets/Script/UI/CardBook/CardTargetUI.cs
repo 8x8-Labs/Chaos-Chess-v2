@@ -28,7 +28,7 @@ public class CardTargetUI : MonoBehaviour
         switch (data.Type)
         {
             case CardType.Piece:
-                ShowLabel("적용 기물");
+                ShowLabel("적용 대상");
                 ShowPieceIcons(data);
                 break;
             case CardType.Tile:

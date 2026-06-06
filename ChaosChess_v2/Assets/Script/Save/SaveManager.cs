@@ -184,6 +184,7 @@ public class SaveManager : MonoBehaviour
                 {
                     elo = node.ELO,
                     fen = node.FEN,
+                    mapName = node.MapName,
                     isCleared = node.isCleared,
                     floor = node.floor,
                     column = node.column,

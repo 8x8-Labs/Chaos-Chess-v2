@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
@@ -6,7 +6,6 @@ using DG.Tweening;
 public class PauseMenuCardIdleAnim : MonoBehaviour
 {
     [SerializeField] private List<Image> cards;
-    [SerializeField] private List<Sprite> cardSprites;
 
     [Header("Float")]
     [SerializeField] private float floatAmount = 12f;
@@ -27,10 +26,35 @@ public class PauseMenuCardIdleAnim : MonoBehaviour
     [SerializeField] private float tiltDurationX = 2.8f;
 
     private List<Tween> tweens = new List<Tween>();
+    private List<Sprite> cardSprites;
 
     private void Start()
     {
+        cardSprites = GetRandomCardSprites(3);
         Play();
+    }
+
+    private List<Sprite> GetRandomCardSprites(int count)
+    {
+        var result = new List<Sprite>();
+
+        if (PlayerState.Instance == null || PlayerState.Instance.CardPool == null) return result;
+
+        var pool = new List<GameObject>(PlayerState.Instance.CardPool);
+
+        while (result.Count < count && pool.Count > 0)
+        {
+            int idx = Random.Range(0, pool.Count);
+            GameObject cardObj = pool[idx];
+            pool.RemoveAt(idx);
+
+            CardData cardData = cardObj != null ? cardObj.GetComponent<CardData>() : null;
+            Sprite sprite = cardData?.DataSO?.CardImage;
+            if (sprite != null)
+                result.Add(sprite);
+        }
+
+        return result;
     }
 
     public void Play()
