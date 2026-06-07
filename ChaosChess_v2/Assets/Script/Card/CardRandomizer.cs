@@ -52,9 +52,9 @@ public class CardRandomizer : MonoBehaviour
             GameObject instance =
                 Instantiate(cardPrefab, content);
 
-            yield return new WaitForSeconds(delay);
-
             _activeCards[instance] = cardPrefab;
+
+            yield return new WaitForSeconds(delay);
         }
     }
 

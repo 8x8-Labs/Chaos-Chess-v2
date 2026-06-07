@@ -53,7 +53,7 @@ public class UICardPanel : ButtonPanel
         UICardAnim[] uiCards = anims;
         if (uiCards == null) return;
 
-        if(uiCards.Length > 3)
+        if(uiCards.Length > 3 && uiCards[3] != null)
         {
             uiCards[3].transform.parent.gameObject.SetActive(cardCount > 3);
         }
