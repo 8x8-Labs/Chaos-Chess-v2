@@ -52,59 +52,7 @@ public class ATMineEffector : TileEffector, IPiecePathEffect
     public void OnPieceTraverse(Piece piece, Vector3Int from, Vector3Int to)
     {
         if ((TargetPieceTypes & piece.Type) == 0) return;
-
-        int dx = to.x - from.x;
-        int dy = to.y - from.y;
-
-        int adx = Mathf.Abs(dx);
-        int ady = Mathf.Abs(dy);
-
-        Vector3Int dir;
-
-        if (dx == 0 || dy == 0 || adx == ady)
-        {
-            dir = new Vector3Int(
-                Mathf.Clamp(dx, -1, 1),
-                Mathf.Clamp(dy, -1, 1),
-                0
-            );
-        }
-        else if (adx != ady && dx != 0 && dy != 0)
-        {
-            if (adx > ady)
-            {
-                dir = new Vector3Int(
-                    dx / adx * 2,
-                    dy / ady * 1,
-                    0
-                );
-            }
-            else
-            {
-                dir = new Vector3Int(
-                    dx / adx * 1,
-                    dy / ady * 2,
-                    0
-                );
-            }
-        }
-        else
-        {
-            return;
-        }
-
-        Vector3Int curPos = from;
-
-        while (curPos != to)
-        {
-            curPos += dir;
-
-            if (curPos == tilePos)
-            {
-                Explode();
-                return;
-            }
-        }
+        Explode();
     }
 
     private void Explode()
