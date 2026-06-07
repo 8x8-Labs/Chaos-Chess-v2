@@ -38,7 +38,9 @@ public class CardRandomizer : MonoBehaviour
 
         if (randomCards.Count == 0)
             return;
-        
+
+        currentCardCnt += randomCards.Count;
+
         // 코루틴으로 카드 딜레이 스폰 기능 부여
         StartCoroutine(SpawnCard(randomCards, spawnDelay));
     }
@@ -47,8 +49,6 @@ public class CardRandomizer : MonoBehaviour
     {
         foreach (GameObject cardPrefab in list)
         {
-            currentCardCnt++;
-
             GameObject instance =
                 Instantiate(cardPrefab, content);
 
