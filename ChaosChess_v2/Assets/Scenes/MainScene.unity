@@ -20530,7 +20530,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 8300000, guid: e1a84ab5827257b42a802c0d89ba6464, type: 3}
+  clickSound: {fileID: 8300000, guid: 45860c078577f8c4295d9857d42b12e0, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 1843443124}
   enableCanvas: {fileID: 579454195}
@@ -32572,7 +32572,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 8255726d21b60f04ab97544f04672785, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 568138795}
   enableCanvas: {fileID: 1843443124}
