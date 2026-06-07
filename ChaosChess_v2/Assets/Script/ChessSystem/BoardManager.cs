@@ -713,16 +713,24 @@ public class BoardManager : MonoBehaviour
             }
         }
 
-        foreach (TileEffector effector in GetAllTileEffectors())
+        Vector3Int pathStep = GetPathStep(from, to);
+        for (Vector3Int pos = from + pathStep; pos != to + pathStep; pos += pathStep)
         {
-            if (effector == null || effector.IsSuspended)
+            if (!tileEffectors.TryGetValue(pos, out var pathEffectors))
                 continue;
 
-            if (effector is IPiecePathBlocker pathBlocker
-                && !pathBlocker.CanPieceTraverse(piece, from, to))
+            for (int i = pathEffectors.Count - 1; i >= 0; i--)
             {
-                Debug.Log($"이동 경로 차단: {effector.GetType().Name}");
-                return false;
+                TileEffector effector = pathEffectors[i];
+                if (effector == null || effector.IsSuspended)
+                    continue;
+
+                if (effector is IPiecePathBlocker pathBlocker
+                    && !pathBlocker.CanPieceTraverse(piece, from, to))
+                {
+                    Debug.Log($"이동 경로 차단: {effector.GetType().Name}");
+                    return false;
+                }
             }
         }
 
@@ -820,14 +828,46 @@ public class BoardManager : MonoBehaviour
 
     private void TriggerTilePathEffects(Piece piece, Vector3Int from, Vector3Int to)
     {
-        foreach (TileEffector effector in GetAllTileEffectors())
+        Vector3Int pathStep = GetPathStep(from, to);
+        for (Vector3Int pos = from + pathStep; pos != to + pathStep; pos += pathStep)
         {
-            if (effector == null || effector.IsSuspended)
+            if (!tileEffectors.TryGetValue(pos, out var pathEffectors))
                 continue;
 
-            if (effector is IPiecePathEffect pathEffect)
-                pathEffect.OnPieceTraverse(piece, from, to);
+            for (int i = pathEffectors.Count - 1; i >= 0; i--)
+            {
+                TileEffector effector = pathEffectors[i];
+                if (effector == null || effector.IsSuspended)
+                    continue;
+
+                if (effector is IPiecePathEffect pathEffect)
+                    pathEffect.OnPieceTraverse(piece, from, to);
+            }
         }
+    }
+
+    private static Vector3Int GetPathStep(Vector3Int from, Vector3Int to)
+    {
+        int dx = to.x - from.x;
+        int dy = to.y - from.y;
+        int divisor = GreatestCommonDivisor(Mathf.Abs(dx), Mathf.Abs(dy));
+
+        if (divisor == 0)
+            return Vector3Int.zero;
+
+        return new Vector3Int(dx / divisor, dy / divisor, 0);
+    }
+
+    private static int GreatestCommonDivisor(int a, int b)
+    {
+        while (b != 0)
+        {
+            int remainder = a % b;
+            a = b;
+            b = remainder;
+        }
+
+        return a;
     }
 
     private void TriggerTileEnter(Vector3Int pos, Piece piece)
