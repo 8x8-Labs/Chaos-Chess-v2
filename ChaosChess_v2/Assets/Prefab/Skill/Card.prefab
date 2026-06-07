@@ -109,10 +109,15 @@ MonoBehaviour:
   disablePanel: {fileID: 0}
   enablePanel: {fileID: 0}
   buttonType: 6
+  practiceDifficulty: 1
   uIAnimationObject: {fileID: 0}
   isStartAnimation: 0
   isEndAnimation: 0
   nextSceneName: 
+  practiceSceneName: MainGameScene
+  rewardSceneName: RewardScene
+  resultSceneName: ResultScene
+  mainSceneName: MainScene
 --- !u!114 &7974248356846721742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,5 +211,6 @@ MonoBehaviour:
   clickYDuration: 0.3
   duration: 0.7
   clickSFX: {fileID: 8300000, guid: 472aa3d34b095fa468cc44b3fa88ae6e, type: 3}
+  appearSFX: {fileID: 8300000, guid: 4e19aa566ec97a84591ea9d796858992, type: 3}
   enableEase: 12
   disableEase: 4

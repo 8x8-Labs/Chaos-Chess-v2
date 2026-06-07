@@ -9,6 +9,7 @@ public class CardAnim : MonoBehaviour
     [SerializeField] private float clickYDuration = 0.3f;
     [SerializeField] private float duration;
     [SerializeField] private AudioClip clickSFX;
+    [SerializeField] private AudioClip appearSFX;
     [SerializeField] private Ease enableEase;
     [SerializeField] private Ease disableEase;
 
@@ -35,6 +36,9 @@ public class CardAnim : MonoBehaviour
 
     private void CardAnimation()
     {
+        if (SoundManager.Instance != null && appearSFX != null)
+            SoundManager.Instance.SFXPlay("CardAppear", appearSFX);
+
         cardSprite.rectTransform.anchoredPosition = new Vector3(0, startYPos, 0);
         cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(enableEase);
     }
