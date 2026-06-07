@@ -25,13 +25,17 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  NeedTargetColor: 0
+  NeedTargetColor: 1
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0
