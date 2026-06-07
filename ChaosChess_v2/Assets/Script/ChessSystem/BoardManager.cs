@@ -227,6 +227,14 @@ public class BoardManager : MonoBehaviour
         CheckKingExistence();
     }
 
+    /// <summary>중간 보드 상태를 평가하지 않고 현재 기물 배치를 FEN 상태로 교체합니다.</summary>
+    public void ReplacePositionFromFen(string fen)
+    {
+        DestroyPieces(GetAllPieces(), false);
+        LoadFEN(fen);
+        RefreshMoves();
+    }
+
     /// <summary> 모든 기물들이 이동 가능한 위치를 업데이트 합니다 </summary>
     public void UpdatePiecesCanMovePos(string[] moves)
     {
