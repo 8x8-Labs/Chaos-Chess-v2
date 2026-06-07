@@ -441,6 +441,7 @@ public class BoardManager : MonoBehaviour
         }
 
         TriggerGlobalEffectors(piece, target, isCapture);
+        TriggerTilePathEffects(piece, from, target);
         TriggerTileEnter(target, piece);
 
         foreach (var eff in piece.GetComponents<IPieceEffect>())
@@ -709,6 +710,16 @@ public class BoardManager : MonoBehaviour
                 return false;
         }
 
+        foreach (TileEffector effector in GetAllTileEffectors())
+        {
+            if (effector == null || effector.IsSuspended)
+                continue;
+
+            if (effector is IPiecePathBlocker pathBlocker
+                && !pathBlocker.CanPieceTraverse(piece, from, to))
+                return false;
+        }
+
         if (!tileEffectors.TryGetValue(to, out var list)) return true;
         foreach (var effector in list)
         {
@@ -796,6 +807,18 @@ public class BoardManager : MonoBehaviour
             }
         }
         return new List<TileEffector>(result);
+    }
+
+    private void TriggerTilePathEffects(Piece piece, Vector3Int from, Vector3Int to)
+    {
+        foreach (TileEffector effector in GetAllTileEffectors())
+        {
+            if (effector == null || effector.IsSuspended)
+                continue;
+
+            if (effector is IPiecePathEffect pathEffect)
+                pathEffect.OnPieceTraverse(piece, from, to);
+        }
     }
 
     private void TriggerTileEnter(Vector3Int pos, Piece piece)

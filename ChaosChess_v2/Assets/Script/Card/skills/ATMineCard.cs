@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -26,48 +25,33 @@ public class ATMineCard : CardData, ITileCard
     {
         Vector3Int pos = args.TargetPos[0];
 
-        ATMineEffector effect = CreateGlobalEffector<ATMineEffector>();
-        effect.MinePos = pos;
-
-        PieceType targetPiecesType = (
-            PieceType.Rook | PieceType.Queen | PieceType.King | // 일반 기물
-            PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider // 커스텀 기물
-        );
-
-        effect.DataSO = DataSO;
-        effect.Init(targetPiecesType);
+        ATMineEffector effect = CreateTileEffector<ATMineEffector>(pos);
         effect.Apply();
     }
 }
 
-public class ATMineEffector : GlobalEffector
+public class ATMineEffector : TileEffector, IPiecePathEffect
 {
-    public CardDataSO DataSO;
+    private const PieceType TargetPieceTypes =
+        PieceType.Rook | PieceType.Queen | PieceType.King |
+        PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider;
 
-    public Vector3Int MinePos;
     protected override void OnApply()
     {
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(MinePos, DataSO, 0, RemainingTurns);
-
-        BoardManager.Instance.RegisterGlobalEffector(this);
+        ShowTileEffect();
+        BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(MinePos);
-
-        BoardManager.Instance.UnregisterGlobalEffector(this);
+        ClearTileEffect();
+        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
 
-    public override void OnPieceAct(Piece piece, Vector3Int dest)
+    public void OnPieceTraverse(Piece piece, Vector3Int from, Vector3Int to)
     {
-        if (!IsWatching(piece)) return;
-
-        Vector3Int from = piece.PrevPos;
-        Vector3Int to = dest;
+        if ((TargetPieceTypes & piece.Type) == 0) return;
 
         int dx = to.x - from.x;
         int dy = to.y - from.y;
@@ -115,7 +99,7 @@ public class ATMineEffector : GlobalEffector
         {
             curPos += dir;
 
-            if (curPos == MinePos)
+            if (curPos == tilePos)
             {
                 Explode();
                 return;
@@ -130,7 +114,7 @@ public class ATMineEffector : GlobalEffector
         {
             for (int y = -1; y <= 1; y++)
             {
-                Vector3Int checkPos = MinePos + new Vector3Int(x, y, 0);
+                Vector3Int checkPos = tilePos + new Vector3Int(x, y, 0);
 
                 Piece target = BoardManager.Instance.GetPiece(checkPos);
                 if (target == null) continue;
@@ -143,10 +127,5 @@ public class ATMineEffector : GlobalEffector
             BoardManager.Instance.RefreshMoves();
 
         Revert();
-    }
-
-    protected override IEnumerable<Vector3Int> GetVisualPositions()
-    {
-        yield return MinePos;
     }
 }
