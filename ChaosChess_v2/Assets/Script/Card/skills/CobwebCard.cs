@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 /// <summary>
 /// 거미줄 - 타일전용
@@ -26,43 +25,35 @@ public class CobwebCard : CardData, ITileCard
     {
         Vector3Int pos = args.TargetPos[0];
 
-        CobwebEffector effect = CreateGlobalEffector<CobwebEffector>();
-        effect.InitCobweb(pos, DataSO);
+        CobwebEffector effect = CreateTileEffector<CobwebEffector>(pos);
+        effect.SetUntilTriggered();
         effect.Apply();
     }
 }
 
-public class CobwebEffector : GlobalEffector
+public class CobwebEffector : TileEffector, IPiecePathBlocker
 {
     private bool isTriggered = false;
 
-    public Vector3Int TilePos;
-
-    public void InitCobweb(Vector3Int tilePos, CardDataSO dataSO)
+    public void SetUntilTriggered()
     {
-        TilePos = tilePos;
-        CardSO = dataSO;
         SetDuration(-1);
     }
 
     protected override void OnApply()
     {
-        if (CardSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(TilePos, CardSO, 0, RemainingTurns);
-
-        BoardManager.Instance.RegisterGlobalEffector(this);
+        ShowTileEffect();
+        BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
-        if (CardSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.ClearTileEffect(TilePos);
-
-        BoardManager.Instance.UnregisterGlobalEffector(this);
+        ClearTileEffect();
+        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
 
-    public override bool CanPieceAct(Piece piece, Vector3Int from, Vector3Int to)
+    public bool CanPieceTraverse(Piece piece, Vector3Int from, Vector3Int to)
     {
         if (isTriggered) return true;
         if (piece is King) return true;
@@ -73,13 +64,13 @@ public class CobwebEffector : GlobalEffector
         while (cur != to)
         {
             cur += dir;
-            if (cur == TilePos)
+            if (cur == tilePos)
             {
                 if (PieceEffector.HasActiveMovementOverride(piece))
                     return true;
 
                 isTriggered = true;
-                BoardManager.Instance.ForceTeleport(piece, TilePos, '\0', false);
+                BoardManager.Instance.ForceTeleport(piece, tilePos, '\0', false);
                 ApplyStuckEffect(piece);
                 BoardManager.Instance.RefreshMoves();
                 Revert();
@@ -142,11 +133,6 @@ public class CobwebEffector : GlobalEffector
         pieceEffect.CardSO = null;
         pieceEffect.Init(piece, CardSO.LimitTurn);
         pieceEffect.Apply();
-    }
-
-    protected override IEnumerable<Vector3Int> GetVisualPositions()
-    {
-        yield return TilePos;
     }
 }
 
