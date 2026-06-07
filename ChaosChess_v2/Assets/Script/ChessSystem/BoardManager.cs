@@ -707,7 +707,10 @@ public class BoardManager : MonoBehaviour
                 continue;
 
             if (!effector.CanPieceAct(piece, from, to))
+            {
+                Debug.Log($"이동 차단: {effector.GetType().Name}");
                 return false;
+            }
         }
 
         foreach (TileEffector effector in GetAllTileEffectors())
@@ -717,7 +720,10 @@ public class BoardManager : MonoBehaviour
 
             if (effector is IPiecePathBlocker pathBlocker
                 && !pathBlocker.CanPieceTraverse(piece, from, to))
+            {
+                Debug.Log($"이동 경로 차단: {effector.GetType().Name}");
                 return false;
+            }
         }
 
         if (!tileEffectors.TryGetValue(to, out var list)) return true;
@@ -728,7 +734,10 @@ public class BoardManager : MonoBehaviour
                 continue;
 
             if (!effector.CanPieceEnter(piece, from, to))
+            {
+                Debug.Log($"타일 진입 차단: {effector.GetType().Name}");
                 return false;
+            }
         }
 
         return true;
