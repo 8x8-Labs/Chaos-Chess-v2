@@ -18,3 +18,13 @@ public interface ITileEffect : IEffect
     void OnPieceExit(Piece piece);
     bool CanPieceEnter(Piece piece, Vector3Int from, Vector3Int to);
 }
+
+public interface IPiecePathEffect
+{
+    void OnPieceTraverse(Piece piece, Vector3Int from, Vector3Int to);
+}
+
+public interface IPiecePathBlocker
+{
+    bool CanPieceTraverse(Piece piece, Vector3Int from, Vector3Int to);
+}

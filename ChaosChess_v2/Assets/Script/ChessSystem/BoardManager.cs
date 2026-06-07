@@ -227,6 +227,14 @@ public class BoardManager : MonoBehaviour
         CheckKingExistence();
     }
 
+    /// <summary>중간 보드 상태를 평가하지 않고 현재 기물 배치를 FEN 상태로 교체합니다.</summary>
+    public void ReplacePositionFromFen(string fen)
+    {
+        DestroyPieces(GetAllPieces(), false);
+        LoadFEN(fen);
+        RefreshMoves();
+    }
+
     /// <summary> 모든 기물들이 이동 가능한 위치를 업데이트 합니다 </summary>
     public void UpdatePiecesCanMovePos(string[] moves)
     {
@@ -433,6 +441,7 @@ public class BoardManager : MonoBehaviour
         }
 
         TriggerGlobalEffectors(piece, target, isCapture);
+        TriggerTilePathEffects(piece, from, target);
         TriggerTileEnter(target, piece);
 
         foreach (var eff in piece.GetComponents<IPieceEffect>())
@@ -698,7 +707,31 @@ public class BoardManager : MonoBehaviour
                 continue;
 
             if (!effector.CanPieceAct(piece, from, to))
+            {
+                Debug.Log($"이동 차단: {effector.GetType().Name}");
                 return false;
+            }
+        }
+
+        Vector3Int pathStep = GetPathStep(from, to);
+        for (Vector3Int pos = from + pathStep; pos != to + pathStep; pos += pathStep)
+        {
+            if (!tileEffectors.TryGetValue(pos, out var pathEffectors))
+                continue;
+
+            for (int i = pathEffectors.Count - 1; i >= 0; i--)
+            {
+                TileEffector effector = pathEffectors[i];
+                if (effector == null || effector.IsSuspended)
+                    continue;
+
+                if (effector is IPiecePathBlocker pathBlocker
+                    && !pathBlocker.CanPieceTraverse(piece, from, to))
+                {
+                    Debug.Log($"이동 경로 차단: {effector.GetType().Name}");
+                    return false;
+                }
+            }
         }
 
         if (!tileEffectors.TryGetValue(to, out var list)) return true;
@@ -709,7 +742,10 @@ public class BoardManager : MonoBehaviour
                 continue;
 
             if (!effector.CanPieceEnter(piece, from, to))
+            {
+                Debug.Log($"타일 진입 차단: {effector.GetType().Name}");
                 return false;
+            }
         }
 
         return true;
@@ -788,6 +824,50 @@ public class BoardManager : MonoBehaviour
             }
         }
         return new List<TileEffector>(result);
+    }
+
+    private void TriggerTilePathEffects(Piece piece, Vector3Int from, Vector3Int to)
+    {
+        Vector3Int pathStep = GetPathStep(from, to);
+        for (Vector3Int pos = from + pathStep; pos != to + pathStep; pos += pathStep)
+        {
+            if (!tileEffectors.TryGetValue(pos, out var pathEffectors))
+                continue;
+
+            for (int i = pathEffectors.Count - 1; i >= 0; i--)
+            {
+                TileEffector effector = pathEffectors[i];
+                if (effector == null || effector.IsSuspended)
+                    continue;
+
+                if (effector is IPiecePathEffect pathEffect)
+                    pathEffect.OnPieceTraverse(piece, from, to);
+            }
+        }
+    }
+
+    private static Vector3Int GetPathStep(Vector3Int from, Vector3Int to)
+    {
+        int dx = to.x - from.x;
+        int dy = to.y - from.y;
+        int divisor = GreatestCommonDivisor(Mathf.Abs(dx), Mathf.Abs(dy));
+
+        if (divisor == 0)
+            return Vector3Int.zero;
+
+        return new Vector3Int(dx / divisor, dy / divisor, 0);
+    }
+
+    private static int GreatestCommonDivisor(int a, int b)
+    {
+        while (b != 0)
+        {
+            int remainder = a % b;
+            a = b;
+            b = remainder;
+        }
+
+        return a;
     }
 
     private void TriggerTileEnter(Vector3Int pos, Piece piece)

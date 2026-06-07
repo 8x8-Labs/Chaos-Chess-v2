@@ -15,10 +15,8 @@ public class PositionSwapCard : CardData, ICard
 
         string flipped = FlipFEN(fen);
 
-        bm.DestroyPieces(bm.GetAllPieces(), false);
-        bm.LoadFEN(flipped);
         bm.ClearAllTileEffectors();
-        bm.RefreshMoves();
+        bm.ReplacePositionFromFen(flipped);
 
         GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
