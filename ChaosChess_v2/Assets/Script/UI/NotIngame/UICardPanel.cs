@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 using DG.Tweening;
 using UnityEngine;
@@ -10,6 +10,7 @@ public class UICardPanel : ButtonPanel
     public UICardAnim[] anims;
     public int cardCount;
 
+    [SerializeField] private AudioClip cardAnimSound;
     [SerializeField] private float cardInterval = 0.2f;
     [SerializeField] private float panelCloseDelay = 0.5f;
 
@@ -52,6 +53,11 @@ public class UICardPanel : ButtonPanel
         UICardAnim[] uiCards = anims;
         if (uiCards == null) return;
 
+        if(uiCards.Length > 3 && uiCards[3] != null)
+        {
+            uiCards[3].transform.parent.gameObject.SetActive(cardCount > 3);
+        }
+
         for (int i = 0; i < uiCards.Length; i++)
         {
             if (uiCards[i] == null) continue;
@@ -91,6 +97,8 @@ public class UICardPanel : ButtonPanel
             {
                 anim.gameObject.SetActive(true);
                 anim.CardAnimation(animationDurationMultiplier);
+                if(SoundManager.Instance != null && cardAnimSound != null)
+                    SoundManager.Instance.SFXPlay("CardAppear", cardAnimSound);
             });
 
             lastAnimationDuration = Mathf.Max(0f, anim.Duration * animationDurationMultiplier);

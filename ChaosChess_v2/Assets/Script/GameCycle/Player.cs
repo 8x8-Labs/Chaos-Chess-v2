@@ -24,10 +24,9 @@ public class Player : MonoBehaviour
 
         ExecuteBuffs();
         int currentCardCnt = cardRandomizer.CurrentCardCnt;
-        for (int i = 0; i < _maxCardCount - currentCardCnt; i++)
-        {
-            cardRandomizer.GenerateCard(_cardPool);
-        }
+        int spawnCount = _maxCardCount - currentCardCnt;
+        if (spawnCount > 0)
+            cardRandomizer.GenerateCard(_cardPool, spawnCount);
     }
 
     private void ExecuteBuffs()

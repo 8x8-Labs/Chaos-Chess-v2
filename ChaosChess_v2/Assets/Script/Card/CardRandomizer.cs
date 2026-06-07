@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class CardRandomizer : MonoBehaviour
 {
     [SerializeField] private Transform content;
+    [SerializeField] private float spawnDelay = 0.2f;
 
     private int currentCardCnt = 0;
     public int CurrentCardCnt => currentCardCnt;
@@ -37,16 +39,25 @@ public class CardRandomizer : MonoBehaviour
         if (randomCards.Count == 0)
             return;
 
-        foreach (GameObject cardPrefab in randomCards)
-        {
-            currentCardCnt++;
+        currentCardCnt += randomCards.Count;
 
+        // 코루틴으로 카드 딜레이 스폰 기능 부여
+        StartCoroutine(SpawnCard(randomCards, spawnDelay));
+    }
+
+    private IEnumerator SpawnCard(List<GameObject> list, float delay)
+    {
+        foreach (GameObject cardPrefab in list)
+        {
             GameObject instance =
                 Instantiate(cardPrefab, content);
 
             _activeCards[instance] = cardPrefab;
+
+            yield return new WaitForSeconds(delay);
         }
     }
+
     public void RemoveCard(GameObject card)
     {
         card.GetComponent<CardAnim>().DestroyCard();
