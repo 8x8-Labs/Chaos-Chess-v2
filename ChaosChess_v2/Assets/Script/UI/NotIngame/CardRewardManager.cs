@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -123,7 +123,10 @@ public class CardRewardManager : MonoBehaviour
     private int ResolveRewardCardCount()
     {
         if (PlayerState.Instance.CurGameResult == GameResult.WhiteWin)
-            return 3;
+        {
+            bool isEliteClear = MapManager.Instance?.curMap?.nodeType == NodeType.Elite;
+            return isEliteClear ? 6 : 3;
+        }
 
         if (PlayerState.Instance.CurGameResult == GameResult.Draw)
             return 1;

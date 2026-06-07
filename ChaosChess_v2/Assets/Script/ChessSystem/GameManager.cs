@@ -125,12 +125,41 @@ public class GameManager : MonoBehaviour
 
             string fen = MapManager.Instance.curMap.FEN;
             BoardManager.Instance.LoadFEN(fen);
+
+            if (MapManager.Instance.curMap.nodeType == NodeType.Elite)
+                ApplyEliteTransformation();
         }
         else
         {
             FairyStockfishBridge.Instance.SetElo(1000);
 
             BoardManager.Instance.LoadFEN();
+        }
+    }
+
+    /// <summary>
+    /// 엘리트 노드 진입 시 적 기물 일부를 변형 기물(Amazon/Chancellor/KnightRider)로 교체한다.
+    /// </summary>
+    private void ApplyEliteTransformation()
+    {
+        List<Piece> candidates = new List<Piece>();
+        candidates.AddRange(BoardManager.Instance.GetPiece<Knight>(EnemyColor));
+        candidates.AddRange(BoardManager.Instance.GetPiece<Bishop>(EnemyColor));
+        candidates.AddRange(BoardManager.Instance.GetPiece<Rook>(EnemyColor));
+        candidates.AddRange(BoardManager.Instance.GetPiece<Queen>(EnemyColor));
+        if (candidates.Count == 0) return;
+
+        char[] variantChars = { 's', 'y', 'z' }; // Amazon, Chancellor, KnightRider
+
+        int count = Mathf.Min(UnityEngine.Random.Range(1, 3), candidates.Count);
+        for (int i = 0; i < count; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, candidates.Count);
+            Piece target = candidates[randomIndex];
+            candidates.RemoveAt(randomIndex);
+
+            char variantChar = variantChars[UnityEngine.Random.Range(0, variantChars.Length)];
+            BoardManager.Instance.ChangePiece(target.Pos, EnemyColor, variantChar);
         }
     }
 
