@@ -16,8 +16,10 @@ public class CardAnim : MonoBehaviour
     private Ease disappearEase = Ease.InOutQuad;
     private Ease clickEase = Ease.OutCirc;
     private Image cardSprite;
+    private RectTransform rt;
+    private float originalWidth;
 
-    public CardData cardData { get; private set; } 
+    public CardData cardData { get; private set; }
     private CardDescPanel panel;
 
     private void Awake()
@@ -25,6 +27,11 @@ public class CardAnim : MonoBehaviour
         cardSprite = GetComponentInChildren<Image>();
         cardData = GetComponent<CardData>();
         panel = FindObjectOfType<CardDescPanel>();
+
+        rt = GetComponent<RectTransform>();
+        originalWidth = rt.sizeDelta.x;
+        rt.sizeDelta = new Vector2(0f, rt.sizeDelta.y);
+
         ApplyCardSprite();
         CardAnimation();
     }
@@ -40,7 +47,10 @@ public class CardAnim : MonoBehaviour
             SoundManager.Instance.SFXPlay("CardAppear", appearSFX);
 
         cardSprite.rectTransform.anchoredPosition = new Vector3(0, startYPos, 0);
-        cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(enableEase);
+
+        DOTween.Sequence()
+            .Join(rt.DOSizeDelta(new Vector2(originalWidth, rt.sizeDelta.y), duration).SetEase(enableEase))
+            .Join(cardSprite.rectTransform.DOAnchorPosY(0f, duration).SetEase(enableEase));
     }
 
     public void EnableCardDataUI()
@@ -65,7 +75,6 @@ public class CardAnim : MonoBehaviour
 
     public void DestroyCard()
     {
-        var rt = GetComponent<RectTransform>();
         cardSprite.rectTransform.DOAnchorPosY(startYPos, duration / 2f)
             .SetEase(disableEase)
             .OnComplete(

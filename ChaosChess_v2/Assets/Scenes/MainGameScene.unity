@@ -7208,6 +7208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   content: {fileID: 232779361}
+  spawnDelay: 0.2
 --- !u!114 &1036672680
 MonoBehaviour:
   m_ObjectHideFlags: 0
