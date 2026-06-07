@@ -10,7 +10,10 @@ public class WindmillCard : CardData, ICard
     public void Execute(CardEffectArgs args = null)
     {
         var effector = CreateGlobalEffector<WindmillEffector>();
-        effector.Init(DataSO.PieceType, ApplyType.All, DataSO.PieceLimitTurn);
+        ApplyType casterColor = GameManager.Instance.turnColor == PieceColor.White
+            ? ApplyType.White
+            : ApplyType.Black;
+        effector.Init(DataSO.PieceType, casterColor, DataSO.PieceLimitTurn);
         effector.Apply();
 
     }
@@ -23,6 +26,9 @@ public class WindmillEffector : GlobalEffector
     {
         foreach (Piece piece in BoardManager.Instance.GetAllPieces())
         {
+            if (!IsWatching(piece))
+                continue;
+
             if (PieceEffector.HasActiveMovementOverride(piece))
                 continue;
 
