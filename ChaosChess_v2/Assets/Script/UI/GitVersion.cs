@@ -8,8 +8,26 @@ using UnityEngine;
 // 해석 로직을 한곳에 모은다. 에디터 전용 — 빌드된 런타임에는 포함되지 않는다.
 public static class GitVersion
 {
+    // 해석 결과를 도메인 리로드 단위로 캐싱한다.
+    // VersionLabel은 [ExecuteAlways]라 OnValidate/OnEnable 등으로 Refresh가 잦은데,
+    // 그때마다 git 프로세스를 띄우면 에디터가 버벅인다(미설치 환경에선 매번 예외).
+    // static은 스크립트 리컴파일(도메인 리로드) 시 자동 초기화되므로,
+    // 버전이 바뀔 만한 시점(리컴파일)마다 자연히 다시 해석된다.
+    private static bool _resolved;
+    private static string _cached;
+
     // 예: 태그 v0.3.1 위 → "0.3.1", 태그 이후 2커밋 → "0.3.1+2.g1a2b3c"
     public static string Resolve()
+    {
+        if (_resolved)
+            return _cached;
+
+        _cached = ResolveFromGit();
+        _resolved = true;
+        return _cached;
+    }
+
+    private static string ResolveFromGit()
     {
         string raw = RunGit("describe --tags --always --dirty");
         if (string.IsNullOrEmpty(raw))
