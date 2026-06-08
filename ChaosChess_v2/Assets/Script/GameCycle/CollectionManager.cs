@@ -57,6 +57,8 @@ public class CollectionManager : MonoBehaviour
 
             foreach (string name in data.discoveredCardNames)
                 _discovered.Add(name);
+
+            Debug.Log($"CollectionManager: 로드된 카드 목록 ({_discovered.Count}개) - {string.Join(", ", _discovered)}");
         }
         catch (System.Exception e)
         {
