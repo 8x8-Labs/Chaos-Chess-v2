@@ -28,6 +28,9 @@ public class MapUI : MonoBehaviour
     private readonly Dictionary<Map, GameObject> _nodeObjects = new();
     private readonly Dictionary<Map, EffectVisual> _effectVisuals = new();
     private bool _built = false;
+    // 연결선 전용 컨테이너. mapContainer의 첫 자식으로 두어 노드 버튼보다 먼저 렌더링되게 하고,
+    // 매 라인마다 SetSiblingIndex(0)을 호출해 계층을 재정렬하는 비용을 없앤다.
+    private RectTransform _lineContainer;
 
     // 노드 이펙트 자식의 Image/ParticleSystem 참조를 인스턴스화 시점에 캐싱해 둔다.
     private readonly struct EffectVisual
@@ -83,6 +86,16 @@ public class MapUI : MonoBehaviour
 
         _nodeObjects.Clear();
         _effectVisuals.Clear();
+
+        // 연결선 컨테이너를 가장 첫 자식으로 생성해 mapContainer 전체에 꽉 채운다.
+        var lineContainerObj = new GameObject("LineContainer", typeof(RectTransform));
+        _lineContainer = lineContainerObj.GetComponent<RectTransform>();
+        _lineContainer.SetParent(mapContainer, false);
+        _lineContainer.SetSiblingIndex(0);
+        _lineContainer.anchorMin = Vector2.zero;
+        _lineContainer.anchorMax = Vector2.one;
+        _lineContainer.offsetMin = Vector2.zero;
+        _lineContainer.offsetMax = Vector2.zero;
 
         // ── 노드 버튼 생성 ────────────────────────────────────────────────────
         for (int floor = 0; floor < manager.totalFloors; floor++)
@@ -200,9 +213,7 @@ public class MapUI : MonoBehaviour
     // Image를 길쭉한 RectTransform으로 회전시켜 두 점 사이의 연결선을 그린다.
     private void DrawLine(Vector2 from, Vector2 to)
     {
-        GameObject lineObj = Instantiate(linePrefab, mapContainer);
-        // 노드 버튼보다 먼저 렌더링되도록 가장 뒤로 이동
-        lineObj.transform.SetSiblingIndex(0);
+        GameObject lineObj = Instantiate(linePrefab, _lineContainer);
 
         var img = lineObj.GetComponent<Image>();
         img.color = new Color(0.6f, 0.6f, 0.6f, 0.6f);
