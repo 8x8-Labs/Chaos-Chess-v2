@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "BuffSystem/Definitions/PawnReinforcement")]
 public class PawnReinforcementBuff : BuffSO
 {
+    private static readonly int[] CenterFirstFiles = { 3, 4, 2, 5, 1, 6, 0, 7 };
+
     protected override void OnApply(Player player, BuffSide side, int magnitude)
     {
         if (BoardManager.Instance == null || magnitude <= 0) return;
@@ -27,11 +29,7 @@ public class PawnReinforcementBuff : BuffSO
         int spawnCount = Mathf.Min(count, candidates.Count);
         for (int i = 0; i < spawnCount; i++)
         {
-            int randomIndex = Random.Range(0, candidates.Count);
-            Vector3Int pos = candidates[randomIndex];
-            candidates.RemoveAt(randomIndex);
-
-            board.ChangePiece(pos, color, 'p');
+            board.ChangePiece(candidates[i], color, 'p');
         }
     }
 
@@ -62,7 +60,7 @@ public class PawnReinforcementBuff : BuffSO
     private static void TryCollectRankEmpty(int y, List<Vector3Int> result)
     {
         BoardManager board = BoardManager.Instance;
-        for (int x = 0; x < 8; x++)
+        foreach (int x in CenterFirstFiles)
         {
             Vector3Int pos = new Vector3Int(x, y, 0);
             if (board.IsEmpty(pos))
