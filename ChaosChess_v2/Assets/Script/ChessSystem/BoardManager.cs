@@ -230,7 +230,7 @@ public class BoardManager : MonoBehaviour
     /// <summary>중간 보드 상태를 평가하지 않고 현재 기물 배치를 FEN 상태로 교체합니다.</summary>
     public void ReplacePositionFromFen(string fen)
     {
-        DestroyPieces(GetAllPieces(), false);
+        DestroyPieces(new List<Piece>(Pieces), false);
         LoadFEN(fen);
         RefreshMoves();
     }
@@ -896,10 +896,10 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>
+    /// <summary>보드 위 모든 기물 목록을 반환합니다. 내부 리스트를 직접 반환하므로 호출 측에서 변형(Add/Remove/Sort/Clear 등)하지 마세요.</summary>
     public List<Piece> GetAllPieces()
     {
-        return new List<Piece>(Pieces);
+        return Pieces;
     }
 
     /// <summary>보드 위 특정 기물을 전부 반환합니다.</summary>
