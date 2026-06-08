@@ -131,8 +131,12 @@ public class TileSelector : Selector<Vector3Int>
 
         gameSelectTilemap.ClearAllTiles();
 
-        effectPos = new HashSet<Vector3Int>(FindObjectsOfType<TileEffector>()
-            .Select(t => t.TilePos));
+        effectPos ??= new HashSet<Vector3Int>();
+        effectPos.Clear();
+        foreach (TileEffector effector in boardManager.GetAllTileEffectors())
+        {
+            effectPos.Add(effector.TilePos);
+        }
     }
 
     protected override void DisableSelector()
