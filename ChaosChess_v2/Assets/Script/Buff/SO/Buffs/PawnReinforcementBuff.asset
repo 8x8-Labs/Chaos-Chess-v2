@@ -18,10 +18,10 @@ MonoBehaviour:
   buffWeight: 50
   buffValue: 1
   useRandomBuffValue: 1
-  buffRange: {x: 1, y: 5}
+  buffRange: {x: 1, y: 4}
   useTensOnly: 0
   hasDebuff: 1
-  debuffWeight: 50
+  debuffWeight: 30
   debuffValue: 1
   useRandomDebuffValue: 1
-  debuffRange: {x: 1, y: 5}
+  debuffRange: {x: 1, y: 4}

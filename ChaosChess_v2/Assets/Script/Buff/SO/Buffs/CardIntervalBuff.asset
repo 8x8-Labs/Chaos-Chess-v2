@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 181601e4be9d4fe189604eb7d42a9458, type: 3}
   m_Name: CardIntervalBuff
   m_EditorClassIdentifier: 
-  buffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value} \uAC10\uC18C"
+  buffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value}\uD134 \uAC10\uC18C"
   debuffDescription: "\uCE74\uB4DC \uD68D\uB4DD \uC8FC\uAE30 {value}\uD134 \uC99D\uAC00"
   hasBuff: 1
   buffWeight: 300
