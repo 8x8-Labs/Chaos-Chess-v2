@@ -252,12 +252,21 @@ public class BoardManager : MonoBehaviour
 
         foreach (string move in moves)
         {
-            if (UCIToGrid(move.Substring(0, 2)) != from)
+            Vector3Int moveFrom = UCIToGrid(move.Substring(0, 2));
+            if (moveFrom != from)
             {
-                from = UCIToGrid(move.Substring(0, 2));
+                from = moveFrom;
                 fromPiece = GetPiece(from);
             }
             to = UCIToGrid(move.Substring(2, 2));
+
+            // FEN(엔진) 상태와 유니티 보드가 어긋나, 출발칸에 기물이 없는 합법 수를
+            // Stockfish가 보고하는 경우가 있다. 이때 NRE로 턴이 끊기지 않도록 건너뛴다.
+            if (fromPiece == null)
+            {
+                Debug.LogWarning($"[Desync] 합법 수 '{move}'의 출발칸 {from}에 유니티 기물이 없어 건너뜀");
+                continue;
+            }
 
             fromPiece.AddCanMovePos(to);
         }
