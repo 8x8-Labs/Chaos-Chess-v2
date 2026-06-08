@@ -122,28 +122,21 @@ public class PieceSelector : Selector<Piece>
     {
         BoardManager bm = BoardManager.Instance;
 
-        // 1. 현재 기물 검사
-        List<Piece> pieces = bm.GetAllPieces()
-            .Where(CanSelectPiece)
-            .ToList();
-
-        if (pieces.Count == 0)
+        // 선택 가능한 기물을 순회하며, 효과가 전혀 없거나 전부 투기장 일시정지 상태인 기물을 찾으면 즉시 대상 가능으로 봅니다.
+        bool anySelectable = false;
+        foreach (Piece piece in bm.GetAllPieces())
         {
-            Debug.Log("기물이 존재하지 않습니다!");
-            return false; 
-        } 
+            if (!CanSelectPiece(piece)) continue;
+            anySelectable = true;
 
-        // 2. 기물 중 효과 적용 중인지 검사
-        foreach(Piece piece in pieces)
-        {
-            // 효과가 전혀 없거나, 전부 투기장 일시정지 상태이면 대상 가능으로 봅니다.
             if (!HasActivePieceEffector(piece))
-            {
                 return true;
-            }
         }
 
-        // Debug.Log("기물에 효과가 모두 적용되었습니다!");
+        if (!anySelectable)
+            Debug.Log("기물이 존재하지 않습니다!");
+
+        // else: 기물에 효과가 모두 적용되었습니다!
         return false;
     }
 
