@@ -281,7 +281,7 @@ public class ArenaManager : MonoBehaviour
     /// <summary>투기장 전에 저장해 둔 타일/전역 효과를 다시 활성화합니다.</summary>
     private void ResumeStoredEffects()
     {
-        foreach (Effector effector in suspendedEffects.ToList())
+        foreach (Effector effector in suspendedEffects)
         {
             if (effector == null)
                 continue;

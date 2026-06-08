@@ -28,22 +28,24 @@ public class CastleKnightCard : CardData, IPieceCard
         Vector3Int p = knight.Pos;
 
         List<Piece> pieces = BoardManager.Instance.GetAllPieces();
-        Vector3Int pos = new();
-        float minv = 1e9f;
-        foreach(Piece piece in pieces)
+        Vector3Int pos = Vector3Int.zero;
+        int minSqrDist = int.MaxValue;
+        bool found = false;
+        foreach (Piece piece in pieces)
         {
             if (piece.Type == PieceType.Rook)
             {
-                if(Vector3Int.Distance(p,piece.Pos) < minv)
+                int sqrDist = (p - piece.Pos).sqrMagnitude;
+                if (sqrDist < minSqrDist)
                 {
-                    minv = Vector3Int.Distance(p, piece.Pos);
+                    minSqrDist = sqrDist;
                     pos = piece.Pos;
+                    found = true;
                 }
-
             }
         }
 
-        if (minv == 1e9f)
+        if (!found)
             return;
         BoardManager.Instance.ChangePiece(pos, knight.Color, 'y');
         BoardManager.Instance.DestroyPiece(knight);

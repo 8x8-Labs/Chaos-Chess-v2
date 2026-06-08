@@ -26,13 +26,10 @@ public class CardRandomizer : MonoBehaviour
     /// </summary>
     public void GenerateCard(List<GameObject> pool, int count = 1)
     {
-        List<GameObject> usedCards =
-            _activeCards.Values.ToList();
-
         List<GameObject> randomCards =
             cardRandomizerManager.GetRandomCardsFromPool(
                 pool,
-                usedCards,
+                _activeCards.Values,
                 count
             );
 

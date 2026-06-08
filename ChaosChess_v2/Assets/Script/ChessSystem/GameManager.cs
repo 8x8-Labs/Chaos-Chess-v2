@@ -537,20 +537,20 @@ public class GameManager : MonoBehaviour
 
     private string ChooseRandomLegalMove(string[] moves)
     {
-        List<string> validMoves = new List<string>();
+        string selectedMove = "none";
+        int count = 0;
 
         foreach (string move in moves)
         {
             if (!BoardManager.Instance.IsValidUciMove(move))
                 continue;
 
-            validMoves.Add(move);
+            count++;
+            if (UnityEngine.Random.Range(0, count) == 0)
+                selectedMove = move;
         }
 
-        if (validMoves.Count == 0)
-            return "none";
-
-        return validMoves[UnityEngine.Random.Range(0, validMoves.Count)];
+        return selectedMove;
     }
 
     private void EvaluateGameState(string[] moves)

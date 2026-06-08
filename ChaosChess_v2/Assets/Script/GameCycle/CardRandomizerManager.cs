@@ -87,7 +87,7 @@ public class CardRandomizerManager : MonoBehaviour
     /// <summary>
     /// 특정 풀 내부에서 특정 카드를 제외한 랜덤 카드 선택
     /// </summary>
-    public List<GameObject> GetRandomCardsFromPool(List<GameObject> pool, List<GameObject> excludedCards, int count)
+    public List<GameObject> GetRandomCardsFromPool(List<GameObject> pool, IEnumerable<GameObject> excludedCards, int count)
     {
         List<GameObject> availableCards = pool
             .Except(excludedCards)
@@ -96,15 +96,16 @@ public class CardRandomizerManager : MonoBehaviour
 
         Shuffle(availableCards);
 
-        return availableCards
-            .Take(Mathf.Min(count, availableCards.Count))
-            .ToList();
+        if (availableCards.Count > count)
+            availableCards.RemoveRange(count, availableCards.Count - count);
+
+        return availableCards;
     }
 
     /// <summary>
     /// 전체 카드 중 특정 카드 제외 후 랜덤 선택
     /// </summary>
-    public List<GameObject> GetRandomCardsFromAll(List<GameObject> excludedCards, int count)
+    public List<GameObject> GetRandomCardsFromAll(IEnumerable<GameObject> excludedCards, int count)
     {
         List<GameObject> availableCards = allCards
             .Except(excludedCards)
@@ -113,9 +114,10 @@ public class CardRandomizerManager : MonoBehaviour
 
         Shuffle(availableCards);
 
-        return availableCards
-            .Take(Mathf.Min(count, availableCards.Count))
-            .ToList();
+        if (availableCards.Count > count)
+            availableCards.RemoveRange(count, availableCards.Count - count);
+
+        return availableCards;
     }
 
     public List<GameObject> GetRandomCardsByTier(Tier tier, int count)
@@ -134,9 +136,10 @@ public class CardRandomizerManager : MonoBehaviour
 
         Shuffle(availableCards);
 
-        return availableCards
-            .Take(Mathf.Min(count, availableCards.Count))
-            .ToList();
+        if (availableCards.Count > count)
+            availableCards.RemoveRange(count, availableCards.Count - count);
+
+        return availableCards;
     }
 
     public bool TryGetRandomCardByTier(

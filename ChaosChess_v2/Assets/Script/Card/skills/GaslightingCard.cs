@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 가스라이팅 - 기물 전용 (희귀)
@@ -37,13 +35,19 @@ public class GaslightingCard : CardData, IPieceCard
 
     private Piece GetRandomPiece()
     {
-        List<Piece> pieces = BoardManager.Instance.GetAllPieces()
-            .Where(p => p.Color == GameManager.Instance.EnemyColor &&
-            (DataSO.PieceType & p.Type) != 0).ToList();
+        Piece selectedPiece = null;
+        int count = 0;
 
-        if (pieces.Count == 0) return null;
+        foreach (Piece p in BoardManager.Instance.GetAllPieces())
+        {
+            if (p.Color == GameManager.Instance.EnemyColor && (DataSO.PieceType & p.Type) != 0)
+            {
+                count++;
+                if (Random.Range(0, count) == 0)
+                    selectedPiece = p;
+            }
+        }
 
-        int rand = Random.Range(0, pieces.Count);
-        return pieces[rand];
+        return selectedPiece;
     }
 }
