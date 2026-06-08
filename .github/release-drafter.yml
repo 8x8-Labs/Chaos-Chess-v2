@@ -1,0 +1,129 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+# develop(draft 누적), release/*(RC 프리릴리스), main(정식 publish) 모두 허용
+branches:
+  - develop
+  - 'release/*'
+  - main
+
+# PR 라벨 → 노트 카테고리(한글 제목). 내부 변경/수정도 라벨만 붙이면 그대로 들어간다.
+categories:
+  - title: '✨ 새로운 기능'
+    labels:
+      - 'feat'
+      - 'feature'
+      - 'enhancement'
+  - title: '🔄 기능 수정'
+    labels:
+      - 'modify'
+  - title: '🐛 버그 수정'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: '♻️ 리팩토링'
+    labels:
+      - 'refactor'
+  - title: '🗑️ 삭제'
+    labels:
+      - 'remove'
+  - title: '📝 문서'
+    labels:
+      - 'docs'
+      - 'documentation'
+  - title: '⚙️ 기타 및 설정'
+    labels:
+      - 'chore'
+      - 'style'
+      - 'performance'
+      - 'test'
+
+exclude-labels:
+  - 'skip-changelog'
+
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: '\<*_&'
+
+# 라벨 → SemVer 증가 규칙 (정식 출시 전이라 0.x 유지)
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking'
+  minor:
+    labels:
+      - 'feat'
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+      - 'modify'
+      - 'refactor'
+      - 'remove'
+      - 'docs'
+      - 'documentation'
+      - 'chore'
+      - 'style'
+      - 'performance'
+      - 'test'
+  default: patch
+
+# PR 제목/브랜치 이름으로 라벨 자동 부여 → 커밋 컨벤션 그대로 라벨에 매핑
+# branch/title은 각각 별도 블록으로 분리 → 둘 중 하나만 만족해도 라벨 부여(OR)
+autolabeler:
+  - label: 'feat'
+    branch:
+      - '/^feature\/.+/'
+  - label: 'feat'
+    title:
+      - '/^feat/i'
+      - '/^add/i'
+      - '/^\[feature\]/i'
+      - '/^\[feat\]/i'
+  - label: 'fix'
+    branch:
+      - '/^fix\/.+/'
+      - '/^bugfix\/.+/'
+  - label: 'fix'
+    title:
+      - '/^fix/i'
+      - '/^\[fix\]/i'
+      - '/^\[bug\]/i'
+  - label: 'modify'
+    title:
+      - '/^modify/i'
+      - '/^\[modify\]/i'
+  - label: 'refactor'
+    branch:
+      - '/^refactor\/.+/'
+  - label: 'refactor'
+    title:
+      - '/^refactor/i'
+      - '/^\[refactor\]/i'
+  - label: 'remove'
+    title:
+      - '/^remove/i'
+      - '/^\[remove\]/i'
+  - label: 'docs'
+    title:
+      - '/^docs/i'
+      - '/^\[docs\]/i'
+      - '/^\[documentation\]/i'
+  - label: 'chore'
+    branch:
+      - '/^chore\/.+/'
+  - label: 'chore'
+    title:
+      - '/^chore/i'
+      - '/^\[chore\]/i'
+
+template: |
+  ## 변경 사항
+
+  $CHANGES
+
+  **전체 변경 내역**: $PREVIOUS_TAG...v$RESOLVED_VERSION
