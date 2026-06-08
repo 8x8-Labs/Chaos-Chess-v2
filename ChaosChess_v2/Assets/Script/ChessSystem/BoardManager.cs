@@ -230,7 +230,10 @@ public class BoardManager : MonoBehaviour
     /// <summary>중간 보드 상태를 평가하지 않고 현재 기물 배치를 FEN 상태로 교체합니다.</summary>
     public void ReplacePositionFromFen(string fen)
     {
-        DestroyPieces(new List<Piece>(Pieces), false);
+        for (int i = Pieces.Count - 1; i >= 0; i--)
+        {
+            DestroyPiece(Pieces[i], false);
+        }
         LoadFEN(fen);
         RefreshMoves();
     }
