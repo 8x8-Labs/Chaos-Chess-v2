@@ -251,7 +251,7 @@ public class MapManager : MonoBehaviour
                         isCleared = nodeData.isCleared,
                         floor = nodeData.floor,
                         column = nodeData.column,
-                        nextColumns = new System.Collections.Generic.List<int>(nodeData.nextColumns),
+                        nextColumns = nodeData.nextColumns != null ? new System.Collections.Generic.List<int>(nodeData.nextColumns) : new System.Collections.Generic.List<int>(),
                         isAccessible = nodeData.isAccessible,
                         uiPosition = new UnityEngine.Vector2(nodeData.uiPositionX, nodeData.uiPositionY),
                         nodeType = (NodeType)nodeData.nodeType

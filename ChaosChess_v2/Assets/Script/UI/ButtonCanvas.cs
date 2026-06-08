@@ -62,7 +62,7 @@ public class ButtonCanvas : ButtonParent
         int animIndex = 0;
         for (int i = 0; i < animationButtons.Count; i++)
         {
-            if (!animationButtons[i].gameObject.activeInHierarchy) continue;
+            if (animationButtons[i] == null || !animationButtons[i].gameObject.activeInHierarchy) continue;
             animationButtons[i].StartAnimation(animIndex * uiAnimDelay);
             animIndex++;
         }
