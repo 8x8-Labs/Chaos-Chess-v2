@@ -10,7 +10,8 @@ public class RookToChancellorBuff : BuffSO
 
         PieceColor targetColor = side == BuffSide.Buff ? PieceColor.White : PieceColor.Black;
         List<Rook> rooks = BoardManager.Instance.GetPiece<Rook>(targetColor);
-        if (rooks == null || rooks.Count == 0) return;
+        rooks.RemoveAll(rook => rook == null);
+        if (rooks.Count == 0) return;
 
         int convertCount = Mathf.Min(magnitude, rooks.Count);
         for (int i = 0; i < convertCount; i++)
