@@ -50,7 +50,10 @@ public class TimeBombEffector : TileEffector
     public override void OnTurnChanged()
     {
         if (RemainingTurns <= 1)
+        {
             Explode(tilePos);
+            return;
+        }
 
         base.OnTurnChanged();
     }
