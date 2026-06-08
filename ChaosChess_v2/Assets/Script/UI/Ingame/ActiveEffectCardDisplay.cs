@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -279,9 +278,18 @@ public class ActiveEffectCardDisplay : MonoBehaviour
     {
         if (card.CardUI == null) return;
 
-        Effector representative = card.Effects
-            .OrderBy(effect => effect.IsPermanent ? int.MaxValue : effect.RemainingTurns)
-            .FirstOrDefault();
+        // 남은 턴이 가장 적은(영구 효과는 가장 큰 키로 취급) 효과를 대표로 선택합니다. 동점 시 먼저 추가된 효과를 유지합니다.
+        Effector representative = null;
+        int representativeRank = int.MaxValue;
+        foreach (Effector effect in card.Effects)
+        {
+            int rank = effect.IsPermanent ? int.MaxValue : effect.RemainingTurns;
+            if (representative == null || rank < representativeRank)
+            {
+                representative = effect;
+                representativeRank = rank;
+            }
+        }
 
         card.CardUI.RemainTurn.text = GetStatusText(representative);
     }
