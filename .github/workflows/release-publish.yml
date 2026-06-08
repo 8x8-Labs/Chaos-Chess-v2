@@ -1,0 +1,25 @@
+name: Release Publish
+
+# develop → main 머지(최종 완료) 시점에 누적된 draft를 정식 릴리스로 publish하고
+# main 커밋에 태그를 확정한다.
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  publish_release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+          commitish: main      # 태그를 main 커밋에 찍는다
+          publish: true        # draft → 정식 릴리스로 전환
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

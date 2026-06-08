@@ -1,0 +1,32 @@
+name: Release Drafter (draft)
+
+# develop에 PR이 머지될 때마다 릴리스 노트 초안(draft)을 갱신한다.
+# 태그는 찍지 않고 draft만 유지한다 → main 머지 시점에 publish.
+on:
+  push:
+    branches:
+      - develop
+  # PR 자동 라벨링(autolabeler)용
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+
+jobs:
+  update_draft:
+    permissions:
+      contents: write        # draft 릴리스 생성/수정
+      pull-requests: write   # autolabeler가 PR에 라벨 부여
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+          commitish: develop   # develop 기준으로 PR 수집
+          # publish 미지정 → draft 상태로만 유지
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

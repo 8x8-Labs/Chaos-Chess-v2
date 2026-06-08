@@ -1,0 +1,28 @@
+name: Release Candidate (prerelease)
+
+# release/x.y.z 브랜치에 버그픽스가 머지될 때마다 RC 프리릴리스를 publish한다.
+# 태그: vX.Y.Z-rc.N  (테스트 빌드용 — 정식 릴리스 아님)
+# 버그를 잡을수록 rc.1 → rc.2 ... 로 올라가고, 검증이 끝나면 main으로 보내 정식 릴리스한다.
+on:
+  push:
+    branches:
+      - 'release/**'
+
+permissions:
+  contents: read
+
+jobs:
+  publish_rc:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v6
+        with:
+          config-name: release-drafter.yml
+          commitish: ${{ github.ref_name }}   # 현재 release/x.y.z 브랜치
+          prerelease: true
+          prerelease-identifier: rc
+          publish: true                        # RC를 프리릴리스로 즉시 publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
