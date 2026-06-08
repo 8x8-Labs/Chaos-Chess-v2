@@ -208,11 +208,18 @@ public class PieceSelector : Selector<Piece>
             return true;
 
         pieceEffectorBuffer.Clear();
-        piece.GetComponents(pieceEffectorBuffer);
-        foreach (PieceEffector effector in pieceEffectorBuffer)
+        try
         {
-            if (effector != null && !effector.IsSuspended)
-                return true;
+            piece.GetComponents(pieceEffectorBuffer);
+            foreach (PieceEffector effector in pieceEffectorBuffer)
+            {
+                if (effector != null && !effector.IsSuspended)
+                    return true;
+            }
+        }
+        finally
+        {
+            pieceEffectorBuffer.Clear();
         }
         return false;
     }

@@ -24,6 +24,8 @@ public class WindmillEffector : GlobalEffector
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
+
         foreach (Piece piece in BoardManager.Instance.GetAllPieces())
         {
             if (!IsWatching(piece))
@@ -45,6 +47,8 @@ public class WindmillEffector : GlobalEffector
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
+
         foreach (Piece piece in changed)
         {
             string p = piece != null ? piece.MoveFenOverride?.ToLower() : null;
@@ -54,5 +58,13 @@ public class WindmillEffector : GlobalEffector
         changed.Clear();
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
+    }
+
+    private void HandlePieceDestroyed(Piece piece) => changed.Remove(piece);
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
     }
 }

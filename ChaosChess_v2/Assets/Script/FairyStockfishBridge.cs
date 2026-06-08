@@ -440,8 +440,8 @@ public class FairyStockfishBridge : MonoBehaviour
 
     private string WaitForBestMove(int timeoutMs = 10000)
     {
-        DateTime timeout = DateTime.Now.AddMilliseconds(timeoutMs);
-        while (DateTime.Now < timeout)
+        DateTime timeout = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < timeout)
         {
             lock (_queueLock)
             {
@@ -459,8 +459,8 @@ public class FairyStockfishBridge : MonoBehaviour
         }
 
         SendCommand("stop");
-        timeout = DateTime.Now.AddMilliseconds(1000);
-        while (DateTime.Now < timeout)
+        timeout = DateTime.UtcNow.AddMilliseconds(1000);
+        while (DateTime.UtcNow < timeout)
         {
             lock (_queueLock)
             {

@@ -218,17 +218,19 @@ public abstract class PieceEffector : Effector, IPieceEffect
         if (piece.MoveFenOverride != null || piece.FenOverride != null) return true;
 
         effectorBuffer.Clear();
-        piece.GetComponents(effectorBuffer);
-        foreach (PieceEffector effector in effectorBuffer)
+        try
         {
-            if (effector is IMovementOverrideEffect && !effector.IsSuspended)
+            piece.GetComponents(effectorBuffer);
+            foreach (PieceEffector effector in effectorBuffer)
             {
-                effectorBuffer.Clear();
-                return true;
+                if (effector is IMovementOverrideEffect && !effector.IsSuspended)
+                    return true;
             }
         }
-
-        effectorBuffer.Clear();
+        finally
+        {
+            effectorBuffer.Clear();
+        }
         return false;
     }
 

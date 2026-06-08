@@ -59,7 +59,7 @@ public class ThunderclapFlashEffector : PieceEffector, IMovementOverrideEffect
             BoardManager.Instance.DestroyPiece(pos);
         }
 
-        if (target.MoveFenOverride?.ToLower() == "m")
+        if (target != null && target.MoveFenOverride?.ToLower() == "m")
             target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 

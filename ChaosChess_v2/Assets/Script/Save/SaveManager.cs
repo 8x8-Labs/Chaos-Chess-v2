@@ -273,7 +273,7 @@ public class SaveManager : MonoBehaviour
     /// <summary>CardRandomizerManager.AllCards에서 CardName이 일치하는 프리팹을 반환한다.</summary>
     private GameObject FindCardByName(string cardName)
     {
-        if (CardRandomizerManager.Instance.AllCards == null) return null;
+        if (CardRandomizerManager.Instance == null || CardRandomizerManager.Instance.AllCards == null) return null;
         foreach (GameObject card in CardRandomizerManager.Instance.AllCards)
         {
             if (card == null) continue;

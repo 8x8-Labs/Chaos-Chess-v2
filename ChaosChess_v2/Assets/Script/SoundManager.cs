@@ -288,7 +288,12 @@ public class SoundManager : MonoBehaviour
     {
         GameObject go = new GameObject(sfxName + "Sound");
         AudioSource source = go.AddComponent<AudioSource>();
-        source.outputAudioMixerGroup = audioMixer.FindMatchingGroups("SFX")[0];
+        if (audioMixer != null)
+        {
+            var groups = audioMixer.FindMatchingGroups("SFX");
+            if (groups != null && groups.Length > 0)
+                source.outputAudioMixerGroup = groups[0];
+        }
         source.clip = clip;
         source.volume = volume;
         source.Play();
