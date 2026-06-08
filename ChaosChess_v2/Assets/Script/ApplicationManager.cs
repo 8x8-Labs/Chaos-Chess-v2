@@ -2,7 +2,7 @@
 
 public class ApplicationManager : MonoBehaviour
 {
-    void Start()
+    void Awake()
     {
         Application.targetFrameRate = 60;
     }
