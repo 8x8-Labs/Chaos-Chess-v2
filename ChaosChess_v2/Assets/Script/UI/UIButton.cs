@@ -2,7 +2,6 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
-using System.Linq;
 
 public class UIButton : Button
 {
@@ -22,6 +21,7 @@ public class UIButton : Button
 
     private IUIAnimation uIAnimation;
     private SoundManager soundManager;
+    private ButtonCanvas mainCanvas;
 
     [SerializeField] private MonoBehaviour uIAnimationObject; // 인스펙터에 노출
     [SerializeField] private bool isStartAnimation = false;
@@ -84,9 +84,18 @@ public class UIButton : Button
             case ButtonType.ChangePanel:
                 changePanel(); break;
             case ButtonType.GoMain:
-                enableCanvas = FindObjectsOfType<ButtonCanvas>()
-                    .Where(canvas => canvas.MainCanvas == true)
-                    .FirstOrDefault();
+                if (mainCanvas == null)
+                {
+                    foreach (ButtonCanvas canvas in FindObjectsOfType<ButtonCanvas>())
+                    {
+                        if (canvas.MainCanvas)
+                        {
+                            mainCanvas = canvas;
+                            break;
+                        }
+                    }
+                }
+                enableCanvas = mainCanvas;
                 changeCanvas(); break;
             case ButtonType.GoScene:
                 SceneLoadManager.Instance.LoadScene(nextSceneName);
