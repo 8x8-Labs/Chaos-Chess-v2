@@ -252,6 +252,11 @@ public class BoardManager : MonoBehaviour
 
         foreach (string move in moves)
         {
+            if (string.IsNullOrEmpty(move) || move.Length < 4)
+            {
+                continue;
+            }
+
             Vector3Int moveFrom = UCIToGrid(move.Substring(0, 2));
             if (moveFrom != from)
             {
