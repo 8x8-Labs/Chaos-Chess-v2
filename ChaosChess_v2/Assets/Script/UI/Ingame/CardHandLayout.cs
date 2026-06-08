@@ -95,6 +95,8 @@ public class CardHandLayout : MonoBehaviour
 
     private void Refresh(bool animate)
     {
+        _cards.RemoveAll(card => card == null);
+
         int n = _cards.Count;
         if (n == 0) return;
 
@@ -104,8 +106,6 @@ public class CardHandLayout : MonoBehaviour
 
         for (int i = 0; i < n; i++)
         {
-            if (_cards[i] == null) continue;
-
             float x = startX + i * overlap;
             _cards[i].DOKill();
             if (animate)

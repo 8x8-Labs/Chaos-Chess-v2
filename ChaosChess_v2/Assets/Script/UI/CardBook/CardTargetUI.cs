@@ -51,19 +51,28 @@ public class CardTargetUI : MonoBehaviour
             Sprite icon = pieceIconSet != null ? pieceIconSet.GetIcon(flag, data.PieceTargetColor) : null;
             if (icon == null) continue;
 
-            pieceIconSlots[slotIndex].sprite = icon;
-            pieceIconSlots[slotIndex].gameObject.SetActive(true);
+            if (pieceIconSlots[slotIndex] != null)
+            {
+                pieceIconSlots[slotIndex].sprite = icon;
+                pieceIconSlots[slotIndex].gameObject.SetActive(true);
+            }
             slotIndex++;
         }
 
         for (int i = slotIndex; i < pieceIconSlots.Length; i++)
-            pieceIconSlots[i].gameObject.SetActive(false);
+        {
+            if (pieceIconSlots[i] != null)
+                pieceIconSlots[i].gameObject.SetActive(false);
+        }
     }
 
     private void ShowLabel(string text)
     {
         foreach (var slot in pieceIconSlots)
-            slot.gameObject.SetActive(false);
+        {
+            if (slot != null)
+                slot.gameObject.SetActive(false);
+        }
 
         if (typeLabel != null)
         {
