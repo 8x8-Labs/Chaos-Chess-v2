@@ -283,6 +283,8 @@ public class ActiveEffectCardDisplay : MonoBehaviour
         int representativeRank = int.MaxValue;
         foreach (Effector effect in card.Effects)
         {
+            if (effect == null) continue;
+
             int rank = effect.IsPermanent ? int.MaxValue : effect.RemainingTurns;
             if (representative == null || rank < representativeRank)
             {
