@@ -99,7 +99,8 @@ public class TileSelector : Selector<Vector3Int>
             LimitTurn = cardData.DataSO.MaintainTurn
         };
 
-        skillCard.Execute(args);
+        CardRandomizerManager.Instance?.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
+
         if (cardData != null)
             cardRandomizer?.RemoveCard(cardData.gameObject);
 
@@ -124,18 +125,24 @@ public class TileSelector : Selector<Vector3Int>
         selectedTargets.Clear();
 
         GameManager.Instance.IsGameInput = false;
+        LockCardSelection(CardSelectionOwner.Tile);
         selectorCanvas.enabled = true;
         selectState = true;
 
         gameSelectTilemap.ClearAllTiles();
 
-        effectPos = new HashSet<Vector3Int>(FindObjectsOfType<TileEffector>()
-            .Select(t => t.TilePos));
+        effectPos ??= new HashSet<Vector3Int>();
+        effectPos.Clear();
+        foreach (TileEffector effector in boardManager.GetAllTileEffectors())
+        {
+            effectPos.Add(effector.TilePos);
+        }
     }
 
     protected override void DisableSelector()
     {
         GameManager.Instance.IsGameInput = true;
+        UnlockCardSelection(CardSelectionOwner.Tile);
         selectorCanvas.enabled = false;
         selectState = false;
 

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
 /// <summary>
@@ -37,7 +34,7 @@ public class GiantEffector : PieceEffector
     }
     int[] dx = { -1, -1, -1, 0, 1, 1, 1, 0 };
     int[] dy = { -1, 0, 1, 1, 1, 0, -1, -1 };
-    List<Piece> changed = new();
+
     public override void OnPieceMove(Vector3Int dest)
     {
         for(int i = 0; i < 8; i++)
@@ -50,21 +47,39 @@ public class GiantEffector : PieceEffector
                 Piece target = BoardManager.Instance.GetPiece(pos);
                 if (target != null)
                 {
-                    changed.Add(target);
-                    target.MoveFenOverride = "a";
+                    if (PieceEffector.HasActiveMovementOverride(target))
+                        continue;
+
+                    GiantStunEffector stun = target.gameObject.AddComponent<GiantStunEffector>();
+                    stun.CardSO = null;
+                    stun.Init(target, 1);
+                    stun.Apply();
                 }
             }
         }
+
+        Revert();
     }
     protected override void OnRevert()
     {
-        if (changed == null)
-            return;
-        foreach(Piece piece in changed)
-        {
-            piece.MoveFenOverride = null;
-        }
         Destroy(this);
     }
 
+}
+
+public class GiantStunEffector : PieceEffector, IMovementOverrideEffect
+{
+    protected override void OnApply()
+    {
+        target.MoveFenOverride = "a";
+        BoardManager.Instance.RefreshMoves();
+    }
+
+    protected override void OnRevert()
+    {
+        if (target != null && target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
+        BoardManager.Instance.RefreshMoves();
+        Destroy(this);
+    }
 }

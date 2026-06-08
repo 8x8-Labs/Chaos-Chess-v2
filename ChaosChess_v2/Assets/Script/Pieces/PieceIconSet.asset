@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42407fbecc4fa424ba057c1038b4c4f5, type: 3}
+  m_Name: PieceIconSet
+  m_EditorClassIdentifier: 
+  icons:
+  - type: 1
+    whiteIcon: {fileID: 6566083228530636619, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    blackIcon: {fileID: -3998123364076545664, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - type: 2
+    whiteIcon: {fileID: -2543634204946242240, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    blackIcon: {fileID: 9097003820534461998, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - type: 4
+    whiteIcon: {fileID: 8601286217340042903, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    blackIcon: {fileID: 6086461264338391611, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - type: 8
+    whiteIcon: {fileID: -7392653503756585687, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    blackIcon: {fileID: -1285550529170834369, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - type: 16
+    whiteIcon: {fileID: -2604665796007036816, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    blackIcon: {fileID: -695501977606394889, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - type: 32
+    whiteIcon: {fileID: 5841647090300243477, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    blackIcon: {fileID: 8280881136048196920, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  - type: 64
+    whiteIcon: {fileID: -5107677499478342438, guid: 5ab4d9c5554412643afbf35f49100d06, type: 3}
+    blackIcon: {fileID: 2868539044483428322, guid: 5ab4d9c5554412643afbf35f49100d06, type: 3}

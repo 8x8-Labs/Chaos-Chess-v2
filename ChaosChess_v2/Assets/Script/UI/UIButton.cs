@@ -2,7 +2,6 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
-using System.Linq;
 
 public class UIButton : Button
 {
@@ -18,31 +17,38 @@ public class UIButton : Button
     [SerializeField] private ButtonPanel enablePanel;           // 활성화 할(보이게 할 캔버스) 오브젝트
 
     [SerializeField] private ButtonType buttonType;
+    [SerializeField] private PracticeDifficulty practiceDifficulty = PracticeDifficulty.Normal;
 
     private IUIAnimation uIAnimation;
     private SoundManager soundManager;
+    private ButtonCanvas mainCanvas;
 
     [SerializeField] private MonoBehaviour uIAnimationObject; // 인스펙터에 노출
     [SerializeField] private bool isStartAnimation = false;
     [SerializeField] private bool isEndAnimation = false;
 
     [SerializeField] private string nextSceneName;
-
+    [SerializeField] private string practiceSceneName = "MainGameScene";
+    [SerializeField] private string rewardSceneName = "RewardScene";
+    [SerializeField] private string resultSceneName = "ResultScene";
+    [SerializeField] private string mainSceneName = "MainScene";
 
     protected override void Start()
     {
-        if(buttonType != ButtonType.ChangeCanvas)
+        if (buttonType != ButtonType.ChangeCanvas)
         {
             disableCanvas = GetComponentInParent<ButtonCanvas>();
         }
-        if(buttonType == ButtonType.ClosePopup && disablePanel == null)
+        if (buttonType == ButtonType.ClosePopup && disablePanel == null)
         {
             disablePanel = GetComponentInParent<ButtonPanel>();
         }
 
-        if(soundManager == null) soundManager = SoundManager.Instance;
+        if (soundManager == null) soundManager = SoundManager.Instance;
         // Debug.Log($"{gameObject.name}의 disableCanvas: {disableCanvas?.name}");
     }
+
+    public void SetNextScene(string nextScene) => nextSceneName = nextScene;
 
 
     public override void OnSelect(BaseEventData eventData)
@@ -69,7 +75,8 @@ public class UIButton : Button
 
     public void OnClicked()
     {
-        if(clickSound != null) soundManager.SFXPlay("UIClick", clickSound);
+        if (!IsInteractable()) return;
+        if (soundManager != null && clickSound != null) soundManager.SFXPlay("UIClick", clickSound);
         switch (buttonType)
         {
             case ButtonType.ChangeCanvas:
@@ -77,18 +84,67 @@ public class UIButton : Button
             case ButtonType.ChangePanel:
                 changePanel(); break;
             case ButtonType.GoMain:
-                enableCanvas = FindObjectsOfType<ButtonCanvas>()
-                    .Where(canvas => canvas.MainCanvas == true)
-                    .FirstOrDefault();
+                if (mainCanvas == null)
+                {
+                    foreach (ButtonCanvas canvas in FindObjectsOfType<ButtonCanvas>())
+                    {
+                        if (canvas.MainCanvas)
+                        {
+                            mainCanvas = canvas;
+                            break;
+                        }
+                    }
+                }
+                enableCanvas = mainCanvas;
                 changeCanvas(); break;
             case ButtonType.GoScene:
-                Debug.Log("씬 이동");
+                SceneLoadManager.Instance.LoadScene(nextSceneName);
+                break;
+            case ButtonType.EndGame:
+                LoadEndGameScene();
                 break;
             case ButtonType.ClosePopup:
                 disablePanel.DisablePanel(); break;
             case ButtonType.OpenPopup:
                 enablePanel.EnablePanel(); break;
+            case ButtonType.GameStart:
+                GameCycleManager.Instance?.StartGame();
+                changeCanvas();
+                break;
+            case ButtonType.ContinueRun:
+                // GameStart와 달리 씬 전환을 ContinueRun() 내부에서 처리하므로 changeCanvas() 불필요
+                GameCycleManager.Instance?.ContinueRun();
+                break;
+            case ButtonType.PracticeStart:
+                StartPracticeMode();
+                break;
+
         }
+    }
+
+    private void StartPracticeMode()
+    {
+        GameCycleManager.Instance.StartPractice(practiceDifficulty);
+        SceneLoadManager.Instance.LoadScene(practiceSceneName);
+    }
+
+    private void LoadEndGameScene()
+    {
+        if (GameCycleManager.Instance.IsPracticeMode)
+        {
+            SceneLoadManager.Instance.LoadScene(mainSceneName);
+            return;
+        }
+
+        bool isLose = PlayerState.Instance?.CurGameResult == GameResult.BlackWin;
+        bool isFinalFloorClear = MapManager.Instance?.currentFloor >= MapManager.Instance?.totalFloors;
+
+        // 런이 완전 종료(패배 또는 보스 클리어)되는 경우에만 저장 파일을 삭제한다.
+        // 보상 씬으로 가는 경우(전투 승리 중간)는 저장을 유지한다.
+        if (isLose || isFinalFloorClear)
+            SaveManager.Instance?.DeleteSave();
+
+        SceneLoadManager.Instance.LoadScene((isLose || isFinalFloorClear) ? resultSceneName : rewardSceneName);
     }
 
     private void changeCanvas() => StartCoroutine(changeCanvasCoroutine());
@@ -119,7 +175,10 @@ public enum ButtonType
     ClosePopup,     // 현재 팝업을 닫음
     GoScene,        // 다른 씬으로 이동
     Submit,         // 데이터 확인, 아이템 구매 등 서버/데이터 연동
-    GameStart,      // 씬 전환 (Scene Load)
+    GameStart,      // 게임 시작 준비 후 캔버스 전환
+    PracticeStart,  // 연습 모드 시작
+    EndGame,        // 게임 종료 후 흐름 이동
     GoMain,
-    Quit            // 게임 종료
+    Quit,           // 게임 종료
+    ContinueRun,    // 저장된 런 이어하기
 }

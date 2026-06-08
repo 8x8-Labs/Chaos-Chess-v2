@@ -11,6 +11,8 @@ public class ArenaCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
+        GameManager.Instance.CancelCurrentSelectionForBoardTransition();
+
         // 상대 King 제외 기물 중 랜덤 3개 선택
         List<Piece> opponents = BoardManager.Instance.GetAllPieces()
             .FindAll(p => p.Color == GameManager.Instance.EnemyColor
@@ -24,6 +26,6 @@ public class ArenaCard : CardData, ICard
         }
 
         List<Piece> arenaOpponents = opponents.GetRange(0, Mathf.Min(3, opponents.Count));
-        ArenaManager.Instance.StartArena(arenaOpponents);
+        ArenaManager.Instance.StartArena(arenaOpponents, DataSO);
     }
 }

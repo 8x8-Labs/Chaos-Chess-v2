@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: DarkHandCard
   m_EditorClassIdentifier: 
   CardName: "\uC5B4\uB460 \uC18D\uC758 \uC190"
-  CardImage: {fileID: 0}
-  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C 1\uAC1C\uB97C 2\uD134\uAC04 \uC6C0\uC9C1\uC77C
-    \uC218 \uC5C6\uB3C4\uB85D \uACE0\uC815\uC2DC\uD0A8\uB2E4."
+  CardImage: {fileID: 2028632354, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C 1\uAE30\uB97C \uC120\uD0DD\uD574 <color=#FFD700>2\uD134</color>\uAC04 <color=#4499FF>\uD589\uB3D9\uC744 \uBD09\uC1C4\uD569\uB2C8\uB2E4</color>."
   Type: 0
   CardTier: 1
   PieceType: 15
@@ -24,11 +23,20 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
+  StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

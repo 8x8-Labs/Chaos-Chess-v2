@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: WindmillCard
   m_EditorClassIdentifier: 
   CardName: "\uD48D\uCC28"
-  CardImage: {fileID: 0}
-  CardDescription: "2\uD134 \uB3D9\uC548 \uB8E9\uC740 \uBE44\uC20D\uC758 \uD589\uB9C8\uBC95\uB300\uB85C,
-    \uBE44\uC20D\uC740 \uB8E9\uC758 \uD589\uB9C8\uBC95\uB300\uB85C \uC6C0\uC9C1\uC785\uB2C8\uB2E4."
-  Type: 0
+  CardImage: {fileID: 530676739, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "<color=#FFD700>2\uD134</color>\uAC04 \uB8E9\uC740 \uBE44\uC20D\uCC98\uB7FC, \uBE44\uC20D\uC740 \uB8E9\uCC98\uB7FC \uC6C0\uC9C1\uC785\uB2C8\uB2E4. (<color=#4499FF>\uD589\uB9C8\uBC95 \uAD50\uD658</color>)"
+  Type: 2
   CardTier: 2
   PieceType: 12
   PieceTargetColor: 0
@@ -24,11 +23,24 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-  NeedTargetColor: 0
+  NeedTargetColor: 1
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

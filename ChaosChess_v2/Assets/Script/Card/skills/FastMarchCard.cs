@@ -26,17 +26,18 @@ public class FastMarchCard : CardData, IPieceCard
     }
 }
 
-public class FastMarchCardEffector : PieceEffector
+public class FastMarchCardEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
-        target.MoveFenOverride = "q";
+        target.MoveFenOverride = "f";
         BoardManager.Instance.RefreshMoves();
     }
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "f")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 
         Destroy(this);

@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: ThunderclapFlashCard
   m_EditorClassIdentifier: 
   CardName: "\uBCBD\uB825\uC77C\uC12C"
-  CardImage: {fileID: 0}
-  CardDescription: "\uC120\uD0DD\uD55C \uB8E9\uC774 \uD55C \uD134 \uB3D9\uC548 \uC9C0\uB098\uAC04
-    \uC790\uB9AC\uC758 \uBAA8\uB4E0 \uAE30\uBB3C(\uBCF8\uC778\uAE30\uBB3C \uD3EC\uD568)\uC774
-    \uC8FD\uC2B5\uB2C8\uB2E4. \u2190 4\uCE78 \uC218 \uC81C\uD55C"
+  CardImage: {fileID: 1927276222, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC120\uD0DD\uD55C \uB8E9\uC774 <color=#4499FF>\uC774\uB3D9\uD558\uBA70 \uC9C0\uB098\uAC04 \uC790\uB9AC\uC758 \uAE30\uBB3C\uC744 \uBAA8\uB450 \uD30C\uAD34</color>\uD569\uB2C8\uB2E4. (\uC774\uBC88 \uD134 \uCD5C\uB300 <color=#FFD700>3\uCE78</color>)"
   Type: 0
   CardTier: 2
   PieceType: 8
@@ -25,11 +23,19 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

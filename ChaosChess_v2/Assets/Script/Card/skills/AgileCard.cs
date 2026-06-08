@@ -24,11 +24,11 @@ public class AgileCard : CardData, IPieceCard
         Piece pawn = args.Targets[0];
         AgileEffect effect = CreatePieceEffector<AgileEffect>(pawn);
 
-        effect.Apply();
+        effect.Apply(true);
     }
 }
 
-public class AgileEffect : PieceEffector
+public class AgileEffect : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -38,12 +38,18 @@ public class AgileEffect : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "u")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }
 
     public override void OnPieceCapture()
+    {
+        Revert();
+    }
+
+    protected override void OnHalfTurnChanged()
     {
         Revert();
     }

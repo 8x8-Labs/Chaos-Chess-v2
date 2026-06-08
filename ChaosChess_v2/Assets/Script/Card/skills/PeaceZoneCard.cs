@@ -24,19 +24,28 @@ public class PeaceZoneCard : CardData, ITileCard
         Vector3Int tile = args.TargetPos[0];
 
         PeaceZoneCardEffect effect = CreateTileEffector<PeaceZoneCardEffect>(tile);
+        
+        effect.DataSO = DataSO;
+
         effect.Apply();
     }
 }
 
 public class PeaceZoneCardEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     protected override void OnApply()
     {
+        ShowTileEffect(DataSO);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        ClearTileEffect();
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }

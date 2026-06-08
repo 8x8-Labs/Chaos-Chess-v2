@@ -25,92 +25,34 @@ public class ATMineCard : CardData, ITileCard
     {
         Vector3Int pos = args.TargetPos[0];
 
-        ATMineEffector effect = CreateGlobalEffector<ATMineEffector>();
-        effect.MinePos = pos;
-
-        PieceType tergetPiecesType = (
-            PieceType.Rook | PieceType.Queen | PieceType.King | // 일반 기물
-            PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider // 커스텀 기물
-        );
-
-        effect.Init(tergetPiecesType);
+        ATMineEffector effect = CreateTileEffector<ATMineEffector>(pos);
         effect.Apply();
     }
 }
 
-public class ATMineEffector : GlobalEffector
+public class ATMineEffector : TileEffector, IPiecePathEffect
 {
-    public Vector3Int MinePos;
+    private const PieceType TargetPieceTypes =
+        PieceType.Rook | PieceType.Queen | PieceType.King |
+        PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider;
+
     protected override void OnApply()
     {
-        BoardManager.Instance.RegisterGlobalEffector(this);
+        ShowTileEffect();
+        BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
-        BoardManager.Instance.UnregisterGlobalEffector(this);
+        ClearTileEffect();
+        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
 
-    public override void OnPieceAct(Piece piece, Vector3Int dest)
+    public void OnPieceTraverse(Piece piece, Vector3Int from, Vector3Int to)
     {
-        if (!IsWatching(piece)) return;
-
-        Vector3Int from = piece.PrevPos;
-        Vector3Int to = dest;
-
-        int dx = to.x - from.x;
-        int dy = to.y - from.y;
-
-        int adx = Mathf.Abs(dx);
-        int ady = Mathf.Abs(dy);
-
-        Vector3Int dir;
-
-        if (dx == 0 || dy == 0 || adx == ady)
-        {
-            dir = new Vector3Int(
-                Mathf.Clamp(dx, -1, 1),
-                Mathf.Clamp(dy, -1, 1),
-                0
-            );
-        }
-        else if (adx != ady && dx != 0 && dy != 0)
-        {
-            if (adx > ady)
-            {
-                dir = new Vector3Int(
-                    dx / adx * 2,
-                    dy / ady * 1,
-                    0
-                );
-            }
-            else
-            {
-                dir = new Vector3Int(
-                    dx / adx * 1,
-                    dy / ady * 2,
-                    0
-                );
-            }
-        }
-        else
-        {
-            return;
-        }
-
-        Vector3Int curPos = from;
-
-        while (curPos != to)
-        {
-            curPos += dir;
-
-            if (curPos == MinePos)
-            {
-                Explode();
-                return;
-            }
-        }
+        if ((TargetPieceTypes & piece.Type) == 0) return;
+        Explode();
     }
 
     private void Explode()
@@ -120,7 +62,7 @@ public class ATMineEffector : GlobalEffector
         {
             for (int y = -1; y <= 1; y++)
             {
-                Vector3Int checkPos = MinePos + new Vector3Int(x, y, 0);
+                Vector3Int checkPos = tilePos + new Vector3Int(x, y, 0);
 
                 Piece target = BoardManager.Instance.GetPiece(checkPos);
                 if (target == null) continue;

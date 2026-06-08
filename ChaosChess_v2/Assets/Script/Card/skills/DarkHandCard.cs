@@ -25,11 +25,10 @@ public class DarkHandCard : CardData, IPieceCard
         Piece piece = args.Targets[0];
         var effector = CreatePieceEffector<DarkHandEffector>(piece);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
     }
 }
 
-public class DarkHandEffector : PieceEffector
+public class DarkHandEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -39,7 +38,8 @@ public class DarkHandEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.FenOverride = null;
+        if (target != null && target.FenOverride?.ToLower() == "a")
+            target.FenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

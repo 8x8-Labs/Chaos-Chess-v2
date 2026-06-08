@@ -13,14 +13,8 @@ MonoBehaviour:
   m_Name: SyncCard
   m_EditorClassIdentifier: 
   CardName: "\uB3D9\uAE30\uD654"
-  CardImage: {fileID: 0}
-  CardDescription: "\uB3D9\uAE30\uD654 \uCE78\uC5D0 \uB4E4\uC5B4\uAC00\uBA74 \uBC18\uB300
-    \uD589\uC758 \uAE30\uBB3C\uC774 \uB3D9\uAE30\uD654\uB41C \uAE30\uBB3C\uACFC \uD568\uAED8
-    \uC6C0\uC9C1\uC774\uBA70, \r\n\uC774 \uD6A8\uACFC\uB294 1\uD134 \uB3D9\uC548\uB9CC
-    \uBC1C\uB3D9\uD558\uACE0 \uBC18\uB300 \uD589\uC5D0 \uAE30\uBB3C\uC774 \uC5C6\uC73C\uBA74
-    \uC0AC\uB77C\uC9D1\uB2C8\uB2E4. \r\n\uB3D9\uAE30\uD654\uB41C \uAE30\uBB3C\uC740
-    \uB2E4\uB978 \uCABD\uC73C\uB85C \uC774\uB3D9\uD560 \uACBD\uC6B0 \uD6A8\uACFC\uAC00
-    \uD574\uC81C\uB429\uB2C8\uB2E4."
+  CardImage: {fileID: 1781304025, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uB3D9\uAE30\uD654 \uC7A5\uCE58</color>\uB97C \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 0
   PieceType: 0
@@ -29,16 +23,19 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 1
   MaintainTurn: -1
+  NeedEffectTileBase: 1
+  EffectTileBase: {fileID: 11400000, guid: 9013a349e5045a7439489227f7a8b746, type: 2}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  StatusDisplayType: 1
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uB3D9\uAE30\uD654"
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: 
+  AdditionalDescriptionContent: "\uB4E4\uC5B4\uC628 \uAE30\uBB3C\uC774 <color=#FFD700>1\uD134</color>\uAC04 \uBC18\uB300 \uD589 \uAC19\uC740 \uC5F4\uC758 \uAE30\uBB3C\uACFC \uD568\uAED8 \uC6C0\uC9C1\uC785\uB2C8\uB2E4. \uBC18\uB300\uD3B8 \uAE30\uBB3C\uC774 \uC5C6\uAC70\uB098 \uB2E4\uB978 \uBC29\uD5A5\uC73C\uB85C \uC774\uB3D9\uD558\uBA74 \uD6A8\uACFC\uAC00 \uD574\uC81C\uB429\uB2C8\uB2E4."

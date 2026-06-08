@@ -13,11 +13,8 @@ MonoBehaviour:
   m_Name: DemocracyCard
   m_EditorClassIdentifier: 
   CardName: "\uBBFC\uC8FC\uC8FC\uC758"
-  CardImage: {fileID: 0}
-  CardDescription: "\uC0C1\uB300 \uD3F0\uC758 \uAC1C\uC218\uAC00 \uC0C1\uB300\uC758
-    \uD3F0\uC744 \uC81C\uC678\uD55C \uAE30\uBB3C\uC758 \uAC1C\uC218\uAC00 \uB450\uBC30
-    \uC774\uC0C1\uC77C\uB54C \uD601\uBA85\uC774 \uC77C\uC5B4\uB098 \uD0B9\uC744 \uB04C\uC5B4\uB0B4\uB9BD\uB2C8\uB2E4.
-    \uBAB0\uB77D\uD55C \uC655\uC740 \uD56D\uBCF5\uC744 \uC120\uC5B8\uD569\uB2C8\uB2E4."
+  CardImage: {fileID: 1700232609, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC0C1\uB300\uC758 \uD3F0 \uC218\uAC00 \uB2E4\uB978 \uAE30\uBB3C \uC218\uC758 <color=#FFD700>2\uBC30 \uC774\uC0C1</color>\uC774 \uB418\uBA74, <color=#4499FF>\uC0C1\uB300\uBC29\uC774 \uAC15\uC81C\uB85C \uD56D\uBCF5\uD569\uB2C8\uB2E4</color>."
   Type: 2
   CardTier: 3
   PieceType: 0
@@ -26,11 +23,20 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 1
   GlobalTargetColor: 1
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 1
+  StatusDisplayType: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

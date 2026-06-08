@@ -121,6 +121,11 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private Transform pieceSpawnTransform;
 
+    /// <summary>타일에 이펙트를 적용하기 위한 클래스 </summary>
+    [SerializeField] private UITileEffectDrawer tileEffectDrawer;
+
+    public UITileEffectDrawer TileEffectDrawer => tileEffectDrawer;
+
     void Awake()
     {
         if (Instance == null)
@@ -222,6 +227,17 @@ public class BoardManager : MonoBehaviour
         CheckKingExistence();
     }
 
+    /// <summary>중간 보드 상태를 평가하지 않고 현재 기물 배치를 FEN 상태로 교체합니다.</summary>
+    public void ReplacePositionFromFen(string fen)
+    {
+        for (int i = Pieces.Count - 1; i >= 0; i--)
+        {
+            DestroyPiece(Pieces[i], false);
+        }
+        LoadFEN(fen);
+        RefreshMoves();
+    }
+
     /// <summary> 모든 기물들이 이동 가능한 위치를 업데이트 합니다 </summary>
     public void UpdatePiecesCanMovePos(string[] moves)
     {
@@ -285,6 +301,12 @@ public class BoardManager : MonoBehaviour
     // uci로 받은 이동을 적용한다
     public void ApplyUCIMove(string uciMove)
     {
+        if (!IsValidUciMove(uciMove))
+        {
+            Debug.LogWarning($"[AI] Invalid UCI move: {uciMove}");
+            return;
+        }
+
         // "e2e4" → from(4,1), to(4,3) 변환
         Vector3Int from = UCIToGrid(uciMove.Substring(0, 2));
         Vector3Int to = UCIToGrid(uciMove.Substring(2, 2));
@@ -309,6 +331,17 @@ public class BoardManager : MonoBehaviour
             MovePiece(piece, to, promotion);
 
         DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.NextTurn());
+    }
+
+    public bool IsValidUciMove(string move)
+    {
+        if (string.IsNullOrEmpty(move) || move == "none" || move.Length < 4)
+            return false;
+
+        return move[0] >= 'a' && move[0] <= 'h'
+            && move[1] >= '1' && move[1] <= '8'
+            && move[2] >= 'a' && move[2] <= 'h'
+            && move[3] >= '1' && move[3] <= '8';
     }
 
     /// <summary>
@@ -381,7 +414,7 @@ public class BoardManager : MonoBehaviour
 
         board[target.x, target.y] = piece;
         Vector3 WorldPos = GridPosToWorldPos(target);
-        piece.Move(target, WorldPos);
+        piece.Move(target, WorldPos, animate: true);
 
         if (isCapture)
             // 잡는 대상의 이벤트 호출
@@ -411,10 +444,13 @@ public class BoardManager : MonoBehaviour
         }
 
         TriggerGlobalEffectors(piece, target, isCapture);
+        TriggerTilePathEffects(piece, from, target);
         TriggerTileEnter(target, piece);
 
         foreach (var eff in piece.GetComponents<IPieceEffect>())
+        {
             eff.OnPieceMove(target);
+        }
 
         return true;
     }
@@ -460,7 +496,7 @@ public class BoardManager : MonoBehaviour
             }
 
             Vector3 WorldPos = GridPosToWorldPos(pos);
-            newPiece.Move(pos, WorldPos);
+            newPiece.Move(pos, WorldPos, animate: false);
 
             Pieces.Add(newPiece);
         }
@@ -481,8 +517,12 @@ public class BoardManager : MonoBehaviour
         if (piece == null) return;
 
         board[piece.Pos.x, piece.Pos.y] = null;
-        piece.GetComponent<IPieceEffect>()?.OnPieceCaptured();
+        foreach (var eff in piece.GetComponents<IPieceEffect>())
+        {
+            eff.OnPieceCaptured();
+        }
         Pieces.Remove(piece);
+        Piece.InvokeOnPieceDestroyed(piece);
         Destroy(piece.gameObject);
 
         if (refresh) RefreshMoves();
@@ -665,15 +705,50 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var effector in globalEffectors)
         {
+            // 저장된(일시정지된) 전역 효과는 판정에서 제외합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             if (!effector.CanPieceAct(piece, from, to))
+            {
+                Debug.Log($"이동 차단: {effector.GetType().Name}");
                 return false;
+            }
+        }
+
+        Vector3Int pathStep = GetPathStep(from, to);
+        for (Vector3Int pos = from + pathStep; pos != to + pathStep; pos += pathStep)
+        {
+            if (!tileEffectors.TryGetValue(pos, out var pathEffectors))
+                continue;
+
+            for (int i = pathEffectors.Count - 1; i >= 0; i--)
+            {
+                TileEffector effector = pathEffectors[i];
+                if (effector == null || effector.IsSuspended)
+                    continue;
+
+                if (effector is IPiecePathBlocker pathBlocker
+                    && !pathBlocker.CanPieceTraverse(piece, from, to))
+                {
+                    Debug.Log($"이동 경로 차단: {effector.GetType().Name}");
+                    return false;
+                }
+            }
         }
 
         if (!tileEffectors.TryGetValue(to, out var list)) return true;
         foreach (var effector in list)
         {
+            // 저장된(일시정지된) 타일 효과는 판정에서 제외합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             if (!effector.CanPieceEnter(piece, from, to))
+            {
+                Debug.Log($"타일 진입 차단: {effector.GetType().Name}");
                 return false;
+            }
         }
 
         return true;
@@ -682,6 +757,12 @@ public class BoardManager : MonoBehaviour
     public void RegisterGlobalEffector(GlobalEffector effector)
     {
         globalEffectors.Add(effector);
+    }
+
+    /// <summary>현재 등록된 전역 이펙터 목록의 스냅샷을 반환합니다.</summary>
+    public List<GlobalEffector> GetGlobalEffectors()
+    {
+        return new List<GlobalEffector>(globalEffectors);
     }
 
     public void UnregisterGlobalEffector(GlobalEffector effector)
@@ -693,6 +774,10 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var effector in new List<GlobalEffector>(globalEffectors))
         {
+            // 저장된(일시정지된) 전역 효과는 발동하지 않습니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceAct(piece, dest);
             if (isCapture)
                 effector.OnPieceCapture(piece, dest);
@@ -729,24 +814,95 @@ public class BoardManager : MonoBehaviour
             list.Remove(effector);
     }
 
+    /// <summary>현재 보드에 등록된 모든 타일 이펙터를 중복 없이 반환합니다.</summary>
+    public List<TileEffector> GetAllTileEffectors()
+    {
+        HashSet<TileEffector> result = new HashSet<TileEffector>();
+        foreach (var pair in tileEffectors)
+        {
+            foreach (TileEffector effector in pair.Value)
+            {
+                if (effector != null)
+                    result.Add(effector);
+            }
+        }
+        return new List<TileEffector>(result);
+    }
+
+    private void TriggerTilePathEffects(Piece piece, Vector3Int from, Vector3Int to)
+    {
+        Vector3Int pathStep = GetPathStep(from, to);
+        for (Vector3Int pos = from + pathStep; pos != to + pathStep; pos += pathStep)
+        {
+            if (!tileEffectors.TryGetValue(pos, out var pathEffectors))
+                continue;
+
+            for (int i = pathEffectors.Count - 1; i >= 0; i--)
+            {
+                TileEffector effector = pathEffectors[i];
+                if (effector == null || effector.IsSuspended)
+                    continue;
+
+                if (effector is IPiecePathEffect pathEffect)
+                    pathEffect.OnPieceTraverse(piece, from, to);
+            }
+        }
+    }
+
+    private static Vector3Int GetPathStep(Vector3Int from, Vector3Int to)
+    {
+        int dx = to.x - from.x;
+        int dy = to.y - from.y;
+        int divisor = GreatestCommonDivisor(Mathf.Abs(dx), Mathf.Abs(dy));
+
+        if (divisor == 0)
+            return Vector3Int.zero;
+
+        return new Vector3Int(dx / divisor, dy / divisor, 0);
+    }
+
+    private static int GreatestCommonDivisor(int a, int b)
+    {
+        while (b != 0)
+        {
+            int remainder = a % b;
+            a = b;
+            b = remainder;
+        }
+
+        return a;
+    }
+
     private void TriggerTileEnter(Vector3Int pos, Piece piece)
     {
         if (!tileEffectors.TryGetValue(pos, out var list)) return;
         foreach (var effector in new List<TileEffector>(list))
+        {
+            // 저장된(일시정지된) 타일 효과는 진입 트리거를 무시합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceEnter(piece);
+        }
     }
 
     private void TriggerTileExit(Vector3Int pos, Piece piece)
     {
         if (!tileEffectors.TryGetValue(pos, out var list)) return;
         foreach (var effector in new List<TileEffector>(list))
+        {
+            // 저장된(일시정지된) 타일 효과는 이탈 트리거를 무시합니다.
+            if (effector == null || effector.IsSuspended)
+                continue;
+
             effector.OnPieceExit(piece);
+        }
     }
 
-    /// <summary>보드 위 모든 기물 목록을 반환합니다.</summary>
+    /// <summary>보드 위 모든 기물 목록을 반환합니다. 내부 리스트를 직접 반환하므로 호출 측에서 변형(Add/Remove/Sort/Clear 등)하지 마세요.</summary>
     public List<Piece> GetAllPieces()
     {
-        return new List<Piece>(Pieces);
+        return Pieces;
     }
 
     /// <summary>보드 위 특정 기물을 전부 반환합니다.</summary>
@@ -763,7 +919,7 @@ public class BoardManager : MonoBehaviour
         return targetPieces;
     }
 
-    private void CheckKingExistence()
+    public void CheckKingExistence()
     {
         bool whiteAlive = HasKing(PieceColor.White);
         bool blackAlive = HasKing(PieceColor.Black);
@@ -779,10 +935,6 @@ public class BoardManager : MonoBehaviour
         else if (!blackAlive)
         {
             GameManager.Instance.FinishType = GameResult.WhiteWin;
-        }
-        else
-        {
-            GameManager.Instance.FinishType = GameResult.None;
         }
     }
 
@@ -805,7 +957,7 @@ public class BoardManager : MonoBehaviour
         {
             if (useTurn)
             {
-                GameManager.Instance.NextTurn();
+                GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
             }
             else
             {
@@ -826,6 +978,7 @@ public class BoardManager : MonoBehaviour
             }
             AppendDeadPiece(targetPiece.Type, targetPiece.Color);
             DestroyPiece(target);
+            CheckKingExistence();
         }
 
         if (piece is King)
@@ -839,7 +992,7 @@ public class BoardManager : MonoBehaviour
 
         board[target.x, target.y] = piece;
         Vector3 WorldPos = GridPosToWorldPos(target);
-        piece.Move(target, WorldPos);
+        piece.Move(target, WorldPos, animate: true);
 
         // 프로모션
         if (piece is Pawn)
@@ -852,7 +1005,7 @@ public class BoardManager : MonoBehaviour
 
         if (useTurn)
         {
-            GameManager.Instance.NextTurn();
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
         }
         else
         {
@@ -882,7 +1035,7 @@ public class BoardManager : MonoBehaviour
             Vector3Int target = newPositions[i];
             board[target.x, target.y] = pieces[i];
             Vector3 worldPos = GridPosToWorldPos(target);
-            pieces[i].Move(target, worldPos);
+            pieces[i].Move(target, worldPos, animate: true);
         }
     }
 

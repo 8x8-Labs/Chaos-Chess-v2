@@ -4,6 +4,7 @@ using UnityEngine;
 public class EndGamePanel : ButtonPanel
 {
     [SerializeField] private TextMeshProUGUI resultText;
+    [SerializeField] private UIButton nextButton;
 
     public void Show(GameResult result)
     {

@@ -12,14 +12,14 @@ public class ButtonPanel : MonoBehaviour
     private bool isDisabled = false;
     private CanvasGroup canvasGroup;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
     }
 
     private void Start()
     {
-        if(!baseEnabled) DisablePanel();
+        if (!baseEnabled) DisablePanel();
     }
 
 
@@ -48,6 +48,9 @@ public class ButtonPanel : MonoBehaviour
     }
     public void FadeIn()
     {
+        if(canvasGroup == null)
+            canvasGroup = GetComponent<CanvasGroup>();
+
         canvasGroup.blocksRaycasts = false;
         canvasGroup.DOFade(0f, fadeDuration);
     }

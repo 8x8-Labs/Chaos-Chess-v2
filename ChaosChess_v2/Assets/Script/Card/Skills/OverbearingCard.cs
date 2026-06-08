@@ -19,7 +19,7 @@ public class OverbearingEffector : GlobalEffector
     protected override void OnApply()
     {
         List<Piece> pieces = BoardManager.Instance.GetAllPieces();
-        foreach(Piece piece in pieces)
+        foreach (Piece piece in pieces)
         {
             Debug.Log(piece.Type);
             if (piece.Color == GameManager.Instance.turnColor)
@@ -35,9 +35,8 @@ public class OverbearingEffector : GlobalEffector
             }
         }
         BoardManager.Instance.RefreshMoves();
-        GameManager.Instance.NextTurn();
-        if (!GameManager.Instance.IsPlayerTurn)
-            GameManager.Instance.RequestAIMove();
+        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+
         Revert();
     }
 

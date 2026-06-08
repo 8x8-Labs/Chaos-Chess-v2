@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: ConcentrationCard
   m_EditorClassIdentifier: 
   CardName: "\uC815\uC2E0 \uC9D1\uC911"
-  CardImage: {fileID: 0}
-  CardDescription: "\uC120\uD0DD \uAE30\uBB3C\uC744 4\uD134 \uB3D9\uC548 \uC0C1\uD638\uC791\uC6A9\uD560
-    \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. 5\uD134\uC9F8\uC5D0 \uC544\uB9C8\uC874\uC73C\uB85C
-    \uC2B9\uACA9\uD569\uB2C8\uB2E4. "
+  CardImage: {fileID: 973310654, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 <color=#FFD700>4\uD134</color>\uAC04 \uC0C1\uD638\uC791\uC6A9 <color=#FF4444>\uBD88\uAC00</color> \uC0C1\uD0DC\uAC00 \uB41C \uB4A4, <color=#4499FF>\uC544\uB9C8\uC874</color>\uC73C\uB85C \uC2B9\uACA9\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 4
   PieceType: 47
@@ -25,11 +23,19 @@ MonoBehaviour:
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  NeedAdditionalDescription: 0
+  StatusDisplayType: 2
+  NeedAdditionalDescription: 1
   DescriptionType: 0
+  AdditionalDescriptionTitle: "\uC544\uB9C8\uC874 \uD589\uB9C8\uBC95"
+  PieceDescImage: {fileID: -4919676682383813925, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+  MovementImage: {fileID: -1542743459, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
+  PieceDescContent: 퀸과 나이트의 행마법을 합친 기물입니다. 직선·대각선으로 멀리 이동하거나 나이트처럼 도약할 수 있습니다.
+  AdditionalDescriptionContent:

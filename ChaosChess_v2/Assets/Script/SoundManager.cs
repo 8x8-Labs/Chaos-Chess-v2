@@ -1,14 +1,31 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Audio;
 
 
 public class SoundManager : MonoBehaviour
 {
+    [System.Serializable]
+    private class SceneBgmMapping
+    {
+        public string sceneName;
+        public AudioClip bgmClip;
+    }
+
+    private const float DefaultSceneBgmFadeDuration = 0.8f;
     private static SoundManager instance;
 
     public AudioMixer audioMixer;
     [SerializeField] private AudioSource bgmSource;
+    [SerializeField] private AudioClip[] cardUseSFXByTier;
+    [SerializeField] private float cardUseSFXVolume = 1f;
+    [SerializeField] private List<SceneBgmMapping> sceneBgmMappings = new();
+    [SerializeField] private float sceneBgmFadeDuration = 0.8f;
+
+    private Tween bgmFadeTween;
+    private float SceneBgmFadeDuration => sceneBgmFadeDuration > 0f ? sceneBgmFadeDuration : DefaultSceneBgmFadeDuration;
 
     public static SoundManager Instance => instance;
     private void Awake()
@@ -45,19 +62,40 @@ public class SoundManager : MonoBehaviour
 
         MuteBGM(GetBGMMute());
         MuteSFX(GetSFXMute());
+        PlayInitialBGM();
+    }
+
+    private void PlayInitialBGM()
+    {
+        if (bgmSource == null || bgmSource.clip == null || bgmSource.isPlaying)
+            return;
+
+        bgmSource.loop = true;
+        bgmSource.volume = 0f;
+        bgmSource.Play();
+        BgFadeIn(SceneBgmFadeDuration);
     }
 
     // ── BGM 재생 제어 ──────────────────────────────────────
 
     public void PlayBGM(AudioClip clip, bool loop = true)
     {
+        if (bgmSource == null || clip == null)
+            return;
+
+        bgmFadeTween?.Kill();
         bgmSource.clip = clip;
         bgmSource.loop = loop;
+        bgmSource.volume = 1f;
         bgmSource.Play();
     }
 
     public void StopBGM()
     {
+        if (bgmSource == null)
+            return;
+
+        bgmFadeTween?.Kill();
         bgmSource.Stop();
     }
 
@@ -76,35 +114,120 @@ public class SoundManager : MonoBehaviour
     /// </summary>
     public void SwitchBGM(AudioClip newClip, float duration = 0.8f)
     {
-        StartCoroutine(SwitchBGMCoroutine(newClip, duration));
+        SwitchBGM(newClip, duration, true);
     }
 
-    private IEnumerator SwitchBGMCoroutine(AudioClip newClip, float duration)
+    public void SwitchBGM(AudioClip newClip, float duration, bool fadeOutCurrent)
     {
-        if (bgmSource.isPlaying)
+        if (bgmSource == null || newClip == null)
+            return;
+
+        bgmFadeTween?.Kill();
+
+        if (bgmSource.clip == newClip)
         {
-            yield return FadeOutCoroutine(bgmSource, duration);
-            bgmSource.Stop();
+            if (!bgmSource.isPlaying)
+                PlayBGM(newClip);
+            return;
         }
 
-        bgmSource.clip = newClip;
-        bgmSource.loop = true;
-        bgmSource.volume = 0f;
-        bgmSource.Play();
+        float fadeDuration = Mathf.Max(0f, duration);
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
 
-        yield return FadeInCoroutine(bgmSource, duration);
+        if (fadeOutCurrent && bgmSource.isPlaying)
+        {
+            sequence.Append(bgmSource.DOFade(0f, fadeDuration));
+        }
+
+        sequence.AppendCallback(() =>
+        {
+            bgmSource.Stop();
+            bgmSource.clip = newClip;
+            bgmSource.loop = true;
+            bgmSource.volume = 0f;
+            bgmSource.Play();
+        });
+        sequence.Append(bgmSource.DOFade(1f, fadeDuration));
+        bgmFadeTween = sequence;
+    }
+
+    public bool ShouldTransitionBGM(string sceneName)
+    {
+        AudioClip sceneBgmClip = GetSceneBGM(sceneName);
+        return bgmSource != null && sceneBgmClip != null && bgmSource.clip != sceneBgmClip;
+    }
+
+    public Tween BeginSceneTransitionFadeOut(string sceneName, bool forceFade = false, float? duration = null)
+    {
+        if (!forceFade && !ShouldTransitionBGM(sceneName))
+            return null;
+
+        return BgFadeOut(duration ?? SceneBgmFadeDuration);
+    }
+
+    public void ApplySceneBGM(string sceneName, bool restart = false, float? duration = null)
+    {
+        AudioClip sceneBgmClip = GetSceneBGM(sceneName);
+        if (bgmSource == null || sceneBgmClip == null)
+            return;
+
+        float fadeDuration = duration ?? SceneBgmFadeDuration;
+
+        if (bgmSource.clip == sceneBgmClip && !restart)
+        {
+            if (!bgmSource.isPlaying)
+                bgmSource.Play();
+
+            BgFadeIn(fadeDuration);
+            return;
+        }
+
+        if (restart)
+        {
+            bgmFadeTween?.Kill();
+            bgmSource.Stop();
+            bgmSource.clip = sceneBgmClip;
+            bgmSource.loop = true;
+            bgmSource.time = 0f;
+            bgmSource.volume = 0f;
+            bgmSource.Play();
+            BgFadeIn(fadeDuration);
+            return;
+        }
+
+        SwitchBGM(sceneBgmClip, fadeDuration, false);
+    }
+
+    private AudioClip GetSceneBGM(string sceneName)
+    {
+        foreach (SceneBgmMapping mapping in sceneBgmMappings)
+        {
+            if (mapping.sceneName == sceneName)
+                return mapping.bgmClip;
+        }
+
+        return null;
     }
 
     // ── BGM 페이드 (내부 bgmSource 사용) ─────────────────
 
     public void BgFadeIn(float duration = 0.8f)
     {
-        StartCoroutine(FadeInCoroutine(bgmSource, duration));
+        if (bgmSource == null)
+            return;
+
+        bgmFadeTween?.Kill();
+        bgmFadeTween = bgmSource.DOFade(1f, Mathf.Max(0f, duration)).SetUpdate(true);
     }
 
-    public void BgFadeOut(float duration = 0.8f)
+    public Tween BgFadeOut(float duration = 0.8f)
     {
-        StartCoroutine(FadeOutCoroutine(bgmSource, duration));
+        if (bgmSource == null)
+            return null;
+
+        bgmFadeTween?.Kill();
+        bgmFadeTween = bgmSource.DOFade(0f, Mathf.Max(0f, duration)).SetUpdate(true);
+        return bgmFadeTween;
     }
 
     // ── BGM 페이드 (외부 AudioSource 사용, 기존 오버로드 유지) ──
@@ -158,13 +281,42 @@ public class SoundManager : MonoBehaviour
 
     public void SFXPlay(string sfxName, AudioClip clip)
     {
+        SFXPlay(sfxName, clip, 1f);
+    }
+
+    public void SFXPlay(string sfxName, AudioClip clip, float volume)
+    {
         GameObject go = new GameObject(sfxName + "Sound");
         AudioSource source = go.AddComponent<AudioSource>();
-        source.outputAudioMixerGroup = audioMixer.FindMatchingGroups("SFX")[0];
+        if (audioMixer != null)
+        {
+            var groups = audioMixer.FindMatchingGroups("SFX");
+            if (groups != null && groups.Length > 0)
+                source.outputAudioMixerGroup = groups[0];
+        }
         source.clip = clip;
+        source.volume = volume;
         source.Play();
 
         StartCoroutine(DestroyAfterRealtime(go, clip.length));
+    }
+
+    public void PlayCardUseSFX(Tier tier)
+    {
+        AudioClip clip = GetCardUseSFX(tier);
+        if (clip == null)
+            return;
+
+        SFXPlay("CardUseSFX", clip, cardUseSFXVolume);
+    }
+
+    private AudioClip GetCardUseSFX(Tier tier)
+    {
+        int index = (int)tier;
+        if (cardUseSFXByTier == null || index < 0 || index >= cardUseSFXByTier.Length)
+            return null;
+
+        return cardUseSFXByTier[index];
     }
 
     // ── 볼륨 설정 / 조회 ──────────────────────────────────

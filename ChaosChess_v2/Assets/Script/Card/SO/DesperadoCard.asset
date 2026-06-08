@@ -13,23 +13,31 @@ MonoBehaviour:
   m_Name: DesperadoCard
   m_EditorClassIdentifier: 
   CardName: "\uB370\uC2A4\uD398\uB77C\uB3C4"
-  CardImage: {fileID: 0}
-  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 \uC774\uBC88 \uD134 \uCD1D
-    2\uBC88 \uD589\uB3D9\uD560 \uC218 \uC788\uC9C0\uB9CC, \uB450 \uBC88\uC9F8 \uD589\uB3D9
-    \uD6C4 \uAE30\uBB3C\uC774 \uD30C\uAD34\uB429\uB2C8\uB2E4."
+  CardImage: {fileID: -1662158825, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 \uC774\uBC88 \uD134\uC5D0
+    <color=#4499FF>2\uBC88 \uC5F0\uC18D \uD589\uB3D9</color>\uD569\uB2C8\uB2E4. \uB2E8,
+    \uD589\uB3D9 \uD6C4 <color=#FF4444>\uC989\uC2DC \uD30C\uAD34\uB429\uB2C8\uB2E4</color>."
   Type: 0
   CardTier: 4
   PieceType: 63
   PieceTargetColor: 0
-  PieceLimitTurn: 0
+  PieceLimitTurn: 1
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  StatusDisplayType: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

@@ -28,6 +28,9 @@ public class BlessingCard : CardData, ITileCard
         GameObject obj = new GameObject("BlessingEffect");
         BlessingEffect effect = obj.AddComponent<BlessingEffect>();
 
+        effect.CardSO = DataSO;
+        effect.DataSO = DataSO;
+        
         effect.Init(pos);
         effect.Apply();
         effect.duration = DataSO.MaintainTurn;
@@ -36,6 +39,8 @@ public class BlessingCard : CardData, ITileCard
 
 public class BlessingEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     public int duration;
 
     private Piece currentPiece;
@@ -43,13 +48,33 @@ public class BlessingEffect : TileEffector
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
+
+        ShowTileEffect(DataSO);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
+
+        ClearTileEffect();
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
+    }
+
+    private void HandlePieceDestroyed(Piece piece)
+    {
+        if (piece == currentPiece) { currentPiece = null; Revert(); }
+    }
+
+    // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
     }
 
     public override void OnPieceEnter(Piece piece)

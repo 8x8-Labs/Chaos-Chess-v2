@@ -29,15 +29,12 @@ public class FatherEnemyCard : CardData, IPieceCard
     public void Create(Piece piece)
     {
         var effector = CreatePieceEffector<FatherEnemyEffector>(piece);
-        effector.fatherEnemyCard = this;
         effector.Apply();
     }
 }
 
 public class FatherEnemyEffector : PieceEffector
 {
-    public FatherEnemyCard fatherEnemyCard;
-
     private void OnPieceSelected(Piece piece)
     {
         if (piece != target) return;
@@ -56,10 +53,7 @@ public class FatherEnemyEffector : PieceEffector
     {
         GameManager.Instance.OnAwakenedPieceSelected -= OnPieceSelected;
 
-        GameManager.Instance.NextTurn();
-
-        if (!GameManager.Instance.IsPlayerTurn)
-            GameManager.Instance.RequestAIMove();
+        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
 
         Destroy(this);
     }
@@ -68,6 +62,7 @@ public class FatherEnemyEffector : PieceEffector
     {
         if (!target.IsAwakened) return;
 
+        GameManager.Instance.CancelCurrentSelectionForBoardTransition();
 
         Vector3Int pos = target.Pos;
         PieceColor color = target.Color;
@@ -100,16 +95,26 @@ public class FatherEnemyEffector : PieceEffector
         }
         else
         {
-            OnRevert();
-            fatherEnemyCard.Create(target);
+            Revert();
+            ApplyAwakening(target);
         }
 
+    }
+
+    private void ApplyAwakening(Piece piece)
+    {
+        if (piece == null) return;
+
+        var effector = piece.gameObject.AddComponent<FatherEnemyEffector>();
+        effector.CardSO = CardSO;
+        effector.Init(piece, CardSO != null ? CardSO.PieceLimitTurn : RemainingTurns);
+        effector.Apply();
     }
 
     private void FinishAwakening()
     {
         target.IsAwakened = false;
 
-        OnRevert();
+        Revert();
     }
 }

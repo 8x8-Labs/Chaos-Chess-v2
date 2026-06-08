@@ -5,6 +5,8 @@ using DG.Tweening;
 
 public class GameManager : MonoBehaviour
 {
+    private const int AiMoveTimeMs = 5000;
+
     public GameResult FinishType { get; set; } = GameResult.None;
 
     public static GameManager Instance;
@@ -15,13 +17,19 @@ public class GameManager : MonoBehaviour
     public List<Sprite> BlackSprites = new List<Sprite>();
     public List<Sprite> WhiteSprites = new List<Sprite>();
 
-    private int curTurn = 1;
+    [SerializeField] private int curTurn;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
+    public bool IsPlayerInCheck { get; private set; }
 
     public bool IsGameInput = true;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
+    public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
     private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
+    // 투기장 진행 중 기존 예약 액션(폭탄, 지속효과 해제 등) 소모를 잠시 멈춥니다.
+    private bool areQueuedActionsPaused = false;
+    private int queuedActionPauseTurn = -1;
+    private int cardIntervalPauseCount = 0;
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
     public event Action OnPlayerTurnStarted;
@@ -33,6 +41,8 @@ public class GameManager : MonoBehaviour
     public event Action<Action, Action> OnTimeReversalRequired;
     /// <summary>아버지의 원수 카드 전용 이벤트 입니다.</summary>
     public event Action<Piece> OnAwakenedPieceSelected;
+    /// <summary>플레이어 체크 상태가 바뀔 때 카드 UI 입력 차단 갱신에 사용됩니다.</summary>
+    public event Action<bool> OnPlayerCheckStateChanged;
 
     public PieceColor turnColor
     {
@@ -64,12 +74,12 @@ public class GameManager : MonoBehaviour
     private int extraPlayerActions = 0;
     private Piece lockedPiece = null;
 
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -77,24 +87,88 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void Start()
+    private void Start()
     {
-        FairyStockfishBridge.Instance.InitEngine("chess");
+        IsEndGame = false;
+        CardRandomizerManager.Instance?.ClearActiveCards();
+        CardSelectionState.Reset();
+        boardUI = FindFirstObjectByType<BoardUI>();
+        uiManager = FindFirstObjectByType<UIManager>();
+
+        FinishType = GameResult.None;
 
         curTurn = 1;
 
-        boardUI = GetComponent<BoardUI>();
-        uiManager = FindFirstObjectByType<UIManager>();
-
+        BoardManager.Instance.OnPromotionRequired -= HandlePromotion;
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
 
+        OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 
-        BoardManager.Instance.LoadFEN();
+        LoadMapManager();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+    }
+
+    /// <summary>
+    /// MapManager에서 FEN과 ELO(맵의 전체적인 상태)를 받아와서 스톡피쉬에 적용한다
+    /// </summary>
+    private void LoadMapManager()
+    {
+        FairyStockfishBridge.Instance.InitEngine("chess");
+        if (MapManager.Instance != null && MapManager.Instance.curMap != null)
+        {
+            int elo = MapManager.Instance.curMap.ELO;
+            FairyStockfishBridge.Instance.SetElo(elo);
+
+            string fen = MapManager.Instance.curMap.FEN;
+            BoardManager.Instance.LoadFEN(fen);
+
+            if (MapManager.Instance.curMap.nodeType == NodeType.Elite)
+                ApplyEliteTransformation();
+        }
+        else
+        {
+            FairyStockfishBridge.Instance.SetElo(1000);
+
+            BoardManager.Instance.LoadFEN();
+        }
+    }
+
+    /// <summary>
+    /// 엘리트 노드 진입 시 적 기물 일부를 변형 기물(Amazon/Chancellor/KnightRider)로 교체한다.
+    /// </summary>
+    private void ApplyEliteTransformation()
+    {
+        List<Piece> candidates = new List<Piece>();
+        candidates.AddRange(BoardManager.Instance.GetPiece<Knight>(EnemyColor));
+        candidates.AddRange(BoardManager.Instance.GetPiece<Bishop>(EnemyColor));
+        candidates.AddRange(BoardManager.Instance.GetPiece<Rook>(EnemyColor));
+        candidates.AddRange(BoardManager.Instance.GetPiece<Queen>(EnemyColor));
+        if (candidates.Count == 0) return;
+
+        char[] variantChars = { 's', 'y', 'z' }; // Amazon, Chancellor, KnightRider
+
+        int count = Mathf.Min(UnityEngine.Random.Range(1, 3), candidates.Count);
+        for (int i = 0; i < count; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, candidates.Count);
+            Piece target = candidates[randomIndex];
+            candidates.RemoveAt(randomIndex);
+
+            char variantChar = variantChars[UnityEngine.Random.Range(0, variantChars.Length)];
+            BoardManager.Instance.ChangePiece(target.Pos, EnemyColor, variantChar);
+        }
+    }
+
+    /// <summary>AI ELO를 delta만큼 조정합니다.</summary>
+    public void ModifyELO(int delta)
+    {
+        int elo = MapManager.Instance.curMap.ELO + delta;
+        MapManager.Instance.curMap.ELO = elo;
+        FairyStockfishBridge.Instance.SetElo(elo);
     }
 
     public void SelectGrid(Vector3Int pos)
@@ -123,8 +197,8 @@ public class GameManager : MonoBehaviour
         else
         {
             MoveSelected(pos);
-            boardUI.DeleteSelectTile();
-            boardUI.DeleteValidMoveTiles();
+            boardUI?.DeleteSelectTile();
+            boardUI?.DeleteValidMoveTiles();
         }
     }
 
@@ -146,6 +220,7 @@ public class GameManager : MonoBehaviour
         FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
         {
             EvaluateGameState(moves);
+            ApplyGameResult();
             BoardManager.Instance.UpdatePiecesCanMovePos(moves);
             OnPlayerTurnStarted?.Invoke();
         });
@@ -216,7 +291,12 @@ public class GameManager : MonoBehaviour
                 OnTurnChanged?.Invoke();
                 OnPlayerTurnStarted?.Invoke();
             }
+
             OnHalfTurnChanged?.Invoke();
+
+            BoardManager.Instance.CheckKingExistence();
+
+            ApplyGameResult();
 
             BoardManager.Instance.RefreshMoves();
 
@@ -235,7 +315,20 @@ public class GameManager : MonoBehaviour
     /// <param name="act">작동 액션</param>
     public void AppendAction(int x, Action act)
     {
-        recievedActions.Add((curTurn + x * 2, act));
+        CardRandomizerManager.ActiveCardToken activeCardToken =
+            CardRandomizerManager.Instance?.RetainActiveCard();
+
+        recievedActions.Add((curTurn + x * 2, () =>
+        {
+            try
+            {
+                act?.Invoke();
+            }
+            finally
+            {
+                activeCardToken?.Complete();
+            }
+        }));
     }
 
     /// <summary>
@@ -243,6 +336,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void ReturnAction()
     {
+        if (areQueuedActionsPaused)
+            return;
+
         for (int i = recievedActions.Count - 1; i >= 0; i--)
         {
             var item = recievedActions[i];
@@ -255,6 +351,52 @@ public class GameManager : MonoBehaviour
         }
 
     }
+
+    /// <summary>예약 액션 소모를 일시 정지합니다.</summary>
+    public void PauseQueuedActions()
+    {
+        if (areQueuedActionsPaused)
+            return;
+
+        areQueuedActionsPaused = true;
+        queuedActionPauseTurn = curTurn;
+    }
+
+    /// <summary>
+    /// 예약 액션 소모를 재개합니다.
+    /// 일시정지 중 흘러간 턴 수만큼 예약 트리거 턴을 뒤로 밀어, 남은 지속 턴을 보존합니다.
+    /// </summary>
+    public void ResumeQueuedActions()
+    {
+        if (!areQueuedActionsPaused)
+            return;
+
+        int delta = curTurn - queuedActionPauseTurn;
+        if (delta != 0)
+        {
+            for (int i = 0; i < recievedActions.Count; i++)
+            {
+                var item = recievedActions[i];
+                recievedActions[i] = (item.turn + delta, item.action);
+            }
+        }
+
+        areQueuedActionsPaused = false;
+        queuedActionPauseTurn = -1;
+    }
+
+    /// <summary>카드 지급 주기 카운트를 일시 정지합니다.</summary>
+    public void PushCardIntervalPause()
+    {
+        cardIntervalPauseCount++;
+    }
+
+    /// <summary>카드 지급 주기 카운트 일시 정지를 해제합니다.</summary>
+    public void PopCardIntervalPause()
+    {
+        cardIntervalPauseCount = Mathf.Max(0, cardIntervalPauseCount - 1);
+    }
+
     // MoveSelected 안에서 플레이어 수 적용 후:
     private void MoveSelected(Vector3Int target)
     {
@@ -265,6 +407,10 @@ public class GameManager : MonoBehaviour
 
         if (BoardManager.Instance.MovePiece(piece, target))
         {
+            BoardManager.Instance.RefreshMoves();
+            boardUI?.DeleteSelectTile();
+            boardUI?.DeleteValidMoveTiles();
+
             // 프로모션이면 여기서 멈춤
             if (!IsGameInput)
                 return;
@@ -273,6 +419,10 @@ public class GameManager : MonoBehaviour
             {
                 if (extraPlayerActions > 0)
                 {
+                    // 데스페라도 추가 행동 중에도, 이미 상대가 체크메이트면 즉시 게임 종료합니다.
+                    if (TryApplyImmediateOpponentCheckmate())
+                        return;
+
                     extraPlayerActions--;
                     RefreshPlayerTurn();
                 }
@@ -286,6 +436,39 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 현재 보드에서 "상대 턴" 기준으로 체크메이트를 판정해 즉시 승패를 적용합니다.
+    /// 데스페라도처럼 턴을 넘기지 않는 추가 행동 분기에서 사용합니다.
+    /// </summary>
+    private bool TryApplyImmediateOpponentCheckmate()
+    {
+        BoardManager.Instance.UpdateFEN();
+        string currentFen = BoardManager.Instance.GetFEN();
+
+        string[] fenParts = currentFen.Split(' ');
+        if (fenParts.Length < 2)
+            return false;
+
+        string originalTurn = fenParts[1];
+        fenParts[1] = (originalTurn == "w") ? "b" : "w";
+        string opponentTurnFen = string.Join(" ", fenParts);
+
+        FairyStockfishBridge.Instance.SetPosition(opponentTurnFen);
+        string[] opponentMoves = FairyStockfishBridge.Instance.GetLegalMoves();
+        bool opponentInCheck = FairyStockfishBridge.Instance.IsInCheck();
+
+        // 이후 흐름을 위해 엔진 포지션을 원래 턴 상태로 복원합니다.
+        FairyStockfishBridge.Instance.SetPosition(currentFen);
+
+        if (opponentMoves.Length == 0 && opponentInCheck)
+        {
+            OnSurrender(EnemyColor);
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>현재 보드 상태를 Stockfish에 동기화합니다. 투기장 종료 후 기물 복원 시 사용합니다.</summary>
     public void SyncPositionToStockfish()
     {
@@ -296,17 +479,78 @@ public class GameManager : MonoBehaviour
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
     }
 
+    /// <summary>
+    /// 보드 강제 재배치 직전 선택/하이라이트/애니메이션 상태를 정리합니다.
+    /// </summary>
+    public void CancelCurrentSelectionForBoardTransition()
+    {
+        selectedPiece = null;
+        boardUI?.DeleteSelectTile();
+        boardUI?.DeleteValidMoveTiles();
+    }
+
     public void RequestAIMove()
     {
+        if (IsEndGame)
+            return;
+
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,
-            moveTimeMs: 2000,
+            moveTimeMs: AiMoveTimeMs,
             callback: (uciMove) =>
             {
-                // UCI 수 (예: "e2e4") → Vector3Int 변환 후 BoardManager에 적용
-                BoardManager.Instance.ApplyUCIMove(uciMove);
+                if (BoardManager.Instance.IsValidUciMove(uciMove))
+                {
+                    BoardManager.Instance.ApplyUCIMove(uciMove);
+                    return;
+                }
+
+                Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
+                ApplyFallbackLegalAIMove();
             }
         );
+    }
+
+    private void ApplyFallbackLegalAIMove()
+    {
+        FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
+        {
+            if (moves == null || moves.Length == 0)
+            {
+                EvaluateGameState(Array.Empty<string>());
+                ApplyGameResult();
+                return;
+            }
+
+            string randomMove = ChooseRandomLegalMove(moves);
+            if (randomMove == "none")
+            {
+                Debug.LogWarning("[AI] No valid legal moves found after filtering. Ending game.");
+                EvaluateGameState(Array.Empty<string>());
+                ApplyGameResult();
+                return;
+            }
+
+            BoardManager.Instance.ApplyUCIMove(randomMove);
+        });
+    }
+
+    private string ChooseRandomLegalMove(string[] moves)
+    {
+        string selectedMove = "none";
+        int count = 0;
+
+        foreach (string move in moves)
+        {
+            if (!BoardManager.Instance.IsValidUciMove(move))
+                continue;
+
+            count++;
+            if (UnityEngine.Random.Range(0, count) == 0)
+                selectedMove = move;
+        }
+
+        return selectedMove;
     }
 
     private void EvaluateGameState(string[] moves)
@@ -315,16 +559,29 @@ public class GameManager : MonoBehaviour
         {
             // 투기장 중 체크메이트는 아레나 정리 후 처리 (OnCheckmate 직접 호출 시 RequestAIMove와 경합)
             if (moves.Length == 0 && FairyStockfishBridge.Instance.IsInCheck())
+            {
                 ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
+                ResetActions();
+            }
+            UpdatePlayerCheckState(false);
             return;
         }
 
-        if (FinishType != GameResult.None) return;
+        if (FinishType != GameResult.None)
+        {
+            UpdatePlayerCheckState(false);
+            return;
+        }
         if (BoardManager.Instance.GetHalfmoveClock() >= 150)
         {
             FinishType = GameResult.Draw;
         }
+        else if (FairyStockfishBridge.Instance.IsInsufficientMaterial())
+        {
+            FinishType = GameResult.Draw;
+        }
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
+        UpdatePlayerCheckState(IsPlayerTurn && isCheck);
 
 
         if (moves.Length == 0)
@@ -338,6 +595,20 @@ public class GameManager : MonoBehaviour
         {
             OnCheck();
         }
+    }
+
+    public void SetGameInput(bool enabled)
+    {
+        IsGameInput = enabled;
+    }
+
+    private void UpdatePlayerCheckState(bool isPlayerInCheck)
+    {
+        if (IsPlayerInCheck == isPlayerInCheck)
+            return;
+
+        IsPlayerInCheck = isPlayerInCheck;
+        OnPlayerCheckStateChanged?.Invoke(IsPlayerInCheck);
     }
 
     private void OnCheck()
@@ -378,6 +649,8 @@ public class GameManager : MonoBehaviour
 
     private void ApplyGameResult()
     {
+        if (IsEndGame)
+            return;
         if (FinishType == GameResult.None) return;
 
         switch (FinishType)
@@ -393,12 +666,30 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        if (GameCycleManager.Instance != null && !GameCycleManager.Instance.IsPracticeMode)
+            MapManager.Instance?.OnCombatCleared();
         EndGame();
     }
 
     private void EndGame()
     {
         IsEndGame = true;
+
         UI.ShowEndGame(FinishType);
+        if (GameCycleManager.Instance != null && !GameCycleManager.Instance.IsPracticeMode)
+            PlayerState.Instance?.EndGame(FinishType);
+    }
+
+    /// <summary>
+    /// 모든 액션을 지웁니다
+    /// </summary>
+    private void ResetActions()
+    {
+        OnPlayerTurnStarted = null;
+        OnTurnChanged = null;
+        OnHalfTurnChanged = null;
+        OnTimeReversalRequired = null;
+        OnAwakenedPieceSelected = null;
+        OnPlayerCheckStateChanged = null;
     }
 }

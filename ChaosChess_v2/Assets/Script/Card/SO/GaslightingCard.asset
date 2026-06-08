@@ -13,22 +13,29 @@ MonoBehaviour:
   m_Name: GaslightingCard
   m_EditorClassIdentifier: 
   CardName: "\uAC00\uC2A4\uB77C\uC774\uD305"
-  CardImage: {fileID: 0}
-  CardDescription: "\uD134\uC744 \uC18C\uBAA8\uD574\uC11C \uB79C\uB364\uD55C \uAE30\uBB3C\uC744
-    \uC790\uC2E0\uC758 \uAE30\uBB3C\uB85C \uB9CC\uB4ED\uB2C8\uB2E4. (\uD0B9, \uD038,
-    \uB8E9 \uC81C\uC678)"
+  CardImage: {fileID: -1490083451, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C \uC911 \uB79C\uB364\uD55C 1\uAE30\uB97C <color=#4499FF>\uC544\uAD70\uC73C\uB85C \uC804\uD658</color>\uD569\uB2C8\uB2E4. (\uD0B9\u00B7\uD038\u00B7\uB8E9 \uC81C\uC678)\n<color=#FF4444>\uD134\uC744 \uC18C\uBAA8\uD569\uB2C8\uB2E4.</color>"
   Type: 0
+  CardTier: 1
   PieceType: 7
   PieceTargetColor: 1
   PieceLimitTurn: 0
-  RequiredPieceCount: 1
+  RequiredPieceCount: 0
   TileCount: 0
   MaintainTurn: 0
+  NeedEffectTileBase: 0
+  EffectTileBase: {fileID: 0}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
+  ShowStatusCard: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
+  AdditionalDescriptionTitle: 
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: 

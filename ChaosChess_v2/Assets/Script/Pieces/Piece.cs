@@ -11,6 +11,10 @@ public enum PieceColor
 
 public class Piece : MonoBehaviour
 {
+    /// <summary>BoardManager.DestroyPiece()가 호출될 때 파괴되는 기물을 인자로 발화합니다.</summary>
+    public static event Action<Piece> OnPieceDestroyed;
+    internal static void InvokeOnPieceDestroyed(Piece piece) => OnPieceDestroyed?.Invoke(piece);
+
     // 무언갈 잡을때 효과 발동
     private List<Action<Vector3Int>> onCaptureEffects = new();
 
@@ -211,7 +215,12 @@ public class Piece : MonoBehaviour
 
     public const float MoveDuration = 0.5f;
 
-    public virtual void Move(Vector3Int target, Vector3 WorldPos, bool animate = true)
+    public virtual void Move(Vector3Int target, Vector3 WorldPos)
+    {
+        Move(target, WorldPos, false);
+    }
+
+    public virtual void Move(Vector3Int target, Vector3 WorldPos, bool animate)
     {
         Pos = target;
 
@@ -232,7 +241,10 @@ public class Piece : MonoBehaviour
     {
         var copy = new List<Action<Vector3Int>>(onCaptureEffects);
 
-        GetComponent<IPieceEffect>()?.OnPieceCapture();
+        foreach (var eff in GetComponents<IPieceEffect>())
+        {
+            eff.OnPieceCapture();
+        }
 
         foreach (var effect in copy)
         {

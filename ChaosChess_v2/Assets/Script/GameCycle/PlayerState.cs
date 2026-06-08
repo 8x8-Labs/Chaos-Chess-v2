@@ -1,0 +1,108 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
+/// 게임의 데이터를 저장하는 클래스
+/// 데이터 종류
+/// - 카드 획득 턴 수
+/// - 인게임에서의 최대 카드 보유 수
+/// - 현재 얻은 버프
+/// - 현재 가지고있는 카드
+/// - 승,무,패 횟수
+/// - 현재 게임 결과
+/// </summary>
+public class PlayerState : MonoBehaviour
+{
+    public static PlayerState Instance;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private int _defaultCardInterval = 5;
+    public int DefaultCardInterval => _defaultCardInterval;
+
+    private int _defaultMaxCardCount = 4;
+    public int DefaultMaxCardCount => _defaultMaxCardCount;
+
+    [SerializeField] private List<GameObject> _cardPool = new();
+    public IReadOnlyList<GameObject> CardPool => _cardPool;
+
+    [SerializeField] private List<BuffPick> _buffs = new();
+    public IReadOnlyList<BuffPick> Buffs => _buffs;
+
+    public void AddCard(GameObject card)
+    {
+        if (card == null) return;
+        _cardPool.Add(card);
+        CardData cardData = card.GetComponent<CardData>();
+        if (cardData?.DataSO != null && CollectionManager.Instance != null)
+            CollectionManager.Instance.Discover(cardData.DataSO.CardName);
+    }
+
+    public bool RemoveCard(GameObject card)
+    {
+        if (card == null) return false;
+        return _cardPool.Remove(card);
+    }
+
+    public void AddBuff(BuffSO definition, BuffSide side) => _buffs.Add(new BuffPick(definition, side));
+    public void AddBuff(BuffSO definition, BuffSide side, int magnitude) => _buffs.Add(new BuffPick(definition, side, magnitude));
+
+    [field: SerializeField] public int WinCount { get; private set; } = 0;
+    [field: SerializeField] public int DrawCount { get; private set; } = 0;
+    [field: SerializeField] public int LoseCount { get; private set; } = 0;
+
+    [SerializeField] private GameResult curGameResult = GameResult.None;
+
+    public GameResult CurGameResult => curGameResult;
+
+    public void EndGame(GameResult result)
+    {
+        switch (result)
+        {
+            case GameResult.WhiteWin:
+                WinCount++;
+                break;
+            case GameResult.BlackWin:
+                LoseCount++;
+                break;
+            case GameResult.Draw:
+                DrawCount++;
+                break;
+        }
+        curGameResult = result;
+    }
+
+    public void InitializeRun()
+    {
+        _buffs.Clear();
+        _cardPool.Clear();
+
+        WinCount = 0;
+        DrawCount = 0;
+        LoseCount = 0;
+
+        curGameResult = GameResult.None;
+    }
+
+    /// <summary>
+    /// 저장 데이터에서 불러온 승/무/패 횟수를 직접 설정한다.
+    /// InitializeRun()은 무조건 0으로 초기화하므로, 로드 시에는 이 메서드로 덮어쓴다.
+    /// </summary>
+    public void SetWinDrawLose(int win, int draw, int lose)
+    {
+        WinCount = win;
+        DrawCount = draw;
+        LoseCount = lose;
+    }
+}

@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fd1d52bc7835dc49a6852a596f9c1f0, type: 3}
+  m_Name: TimeBomb
+  m_EditorClassIdentifier: 
+  CardName: "\uC2DC\uD55C\uD3ED\uD0C4"
+  CardImage: {fileID: -516176455, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uC2DC\uD55C\uD3ED\uD0C4</color>\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4."
+  Type: 1
+  CardTier: 3
+  PieceType: 0
+  PieceTargetColor: 0
+  PieceLimitTurn: 0
+  RequiredPieceCount: 0
+  TileCount: 1
+  MaintainTurn: 3
+  NeedEffectTileBase: 1
+  EffectTileBase: {fileID: 11400000, guid: 22fb84878390e6941b631e2b2faa1ef9, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 2
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames:
+  - {fileID: 11400000, guid: 22fb84878390e6941b631e2b2faa1ef9, type: 2}
+  - {fileID: 11400000, guid: e31b6f0c00b9d6249b9d20ee3a9cf7ec, type: 2}
+  - {fileID: 11400000, guid: 475a875d917caec449047f70d8fc11fb, type: 2}
+  RestrictTiles: 0
+  BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  NeedTargetColor: 0
+  GlobalTargetColor: 0
+  HasLimit: 0
+  LimitTurn: 0
+  StatusDisplayType: 2
+  NeedAdditionalDescription: 1
+  DescriptionType: 1
+  AdditionalDescriptionTitle: "\uC2DC\uD55C\uD3ED\uD0C4"
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: "<color=#FFD700>3\uD134</color> \uD6C4 \uD574\uB2F9 \uCE78\uACFC \uC0C1\uD558\uC88C\uC6B0 <color=#FFD700>4\uCE78</color>\uC758 \uBAA8\uB4E0 \uAE30\uBB3C\uC774 <color=#FF4444>\uD3ED\uBC1C\uB85C \uD30C\uAD34\uB429\uB2C8\uB2E4</color>."

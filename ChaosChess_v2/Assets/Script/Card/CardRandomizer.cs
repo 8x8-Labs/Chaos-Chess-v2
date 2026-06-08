@@ -1,47 +1,66 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class CardRandomizer : MonoBehaviour
 {
-    [SerializeField] private GameObject[] cardPrefabs;
     [SerializeField] private Transform content;
-    [SerializeField] private int startCard = 3;
+    [SerializeField] private float spawnDelay = 0.2f;
 
     private int currentCardCnt = 0;
+    public int CurrentCardCnt => currentCardCnt;
+
     private Dictionary<GameObject, GameObject> _activeCards = new();
 
-    private void Start()
+    private CardRandomizerManager cardRandomizerManager;
+
+    private void Awake()
     {
-        for (int i = 0; i < startCard; i++) GenerateCards();
+        cardRandomizerManager = CardRandomizerManager.Instance;
     }
 
-    /// <summary>내장 cardPrefabs 풀에서 랜덤 카드를 생성합니다.</summary>
-    public void GenerateCards() => GenerateCard(new List<GameObject>(cardPrefabs));
-
-    /// <summary>지정된 풀에서 중복 없이 랜덤 카드를 하나 생성합니다.</summary>
-    public void GenerateCard(List<GameObject> pool)
+    /// <summary>
+    /// 지정된 카드 풀에서 현재 활성 카드와
+    /// 중복되지 않는 랜덤 카드를 생성합니다.
+    /// </summary>
+    public void GenerateCard(List<GameObject> pool, int count = 1)
     {
-        HashSet<GameObject> usedPrefabs = new HashSet<GameObject>(_activeCards.Values);
+        List<GameObject> randomCards =
+            cardRandomizerManager.GetRandomCardsFromPool(
+                pool,
+                _activeCards.Values,
+                count
+            );
 
-        List<GameObject> available = pool.Except(usedPrefabs).ToList();
+        if (randomCards.Count == 0)
+            return;
 
-        for (int i = available.Count - 1; i > 0; i--)
+        currentCardCnt += randomCards.Count;
+
+        // 코루틴으로 카드 딜레이 스폰 기능 부여
+        StartCoroutine(SpawnCard(randomCards, spawnDelay));
+    }
+
+    private IEnumerator SpawnCard(List<GameObject> list, float delay)
+    {
+        foreach (GameObject cardPrefab in list)
         {
-            int j = Random.Range(0, i + 1);
-            (available[i], available[j]) = (available[j], available[i]);
-        }
+            GameObject instance =
+                Instantiate(cardPrefab, content);
 
-        if (available.Count == 0) return;
-        currentCardCnt++;
-        var instance = Instantiate(available[0], content);
-        _activeCards[instance] = available[0];
+            _activeCards[instance] = cardPrefab;
+
+            yield return new WaitForSeconds(delay);
+        }
     }
 
     public void RemoveCard(GameObject card)
     {
         card.GetComponent<CardAnim>().DestroyCard();
+
         currentCardCnt--;
+
         _activeCards.Remove(card);
     }
 }

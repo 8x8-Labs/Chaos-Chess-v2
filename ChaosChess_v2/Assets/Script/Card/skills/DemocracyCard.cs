@@ -10,6 +10,8 @@ public class DemocracyCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
+        Debug.Log("[Democracy] Card executed.");
+
         DemocracyEffect effect =
             CreateGlobalEffector<DemocracyEffect>();
 
@@ -27,13 +29,15 @@ public class DemocracyEffect : GlobalEffector
 
     protected override void OnRevert()
     {
+        Debug.Log("[Democracy] Effect reverted.");
         GameManager.Instance.OnTurnChanged -= CheckCondition;
         Destroy(gameObject);
     }
 
-    public void OnDestroy()
+    protected override void OnDestroy()
     {
         Revert();
+        base.OnDestroy();
     }
 
     public void CheckCondition()
@@ -59,8 +63,9 @@ public class DemocracyEffect : GlobalEffector
 
         if (pawnCount >= 2 * otherCount)
         {
+            Debug.Log($"[Democracy] Condition met: Pawns={pawnCount}, Others={otherCount}");
             GameManager.Instance.OnSurrender(GameManager.Instance.EnemyColor);
-            OnRevert();
+            Revert();
         }
     }
 }

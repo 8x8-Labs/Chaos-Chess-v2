@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// 포탈 - 타일 전용 (고급)
@@ -22,8 +22,9 @@ public class PortalSkill : CardData, ITileCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        PortalEffect portalA = CreateTileEffector<PortalEffect>(args.TargetPos[0]);
-        PortalEffect portalB = CreateTileEffector<PortalEffect>(args.TargetPos[1]);
+        var portals = CreateTileEffectors<PortalEffect>(args.TargetPos);
+        PortalEffect portalA = portals[0];
+        PortalEffect portalB = portals[1];
 
         portalA.Dest = portalB;
         portalB.Dest = portalA;
@@ -37,6 +38,9 @@ public class PortalSkill : CardData, ITileCard
         portalA.CasterColor = casterColor;
         portalB.CasterColor = casterColor;
 
+        portalA.DataSO = DataSO;
+        portalB.DataSO = DataSO;
+
         portalA.Apply();
         portalB.Apply();
     }
@@ -44,17 +48,23 @@ public class PortalSkill : CardData, ITileCard
 
 public class PortalEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     public PortalEffect Dest;
     public SharedCounter SharedUses;
     public PieceColor CasterColor;
 
     protected override void OnApply()
     {
+        ShowTileEffect(DataSO);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        ClearTileEffect();
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }

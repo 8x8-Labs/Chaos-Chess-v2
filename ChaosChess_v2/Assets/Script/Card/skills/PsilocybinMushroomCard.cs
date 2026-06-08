@@ -24,55 +24,52 @@ public class PsilocybinMushroomCard : CardData, ITileCard
         Vector3Int tile = args.TargetPos[0];
 
         PsilocybinMushroomTileEffect effect = CreateTileEffector<PsilocybinMushroomTileEffect>(tile);
-        effect.SetOwner(this);
-        effect.Apply();
-    }
 
-    public void ApplyPieceEffect(Piece piece)
-    {
-        if (piece == null) return;
+        effect.DataSO = DataSO;
 
-        var effect = CreatePieceEffector<PsilocybinMushroomPieceEffect>(piece);
-        effect.Init(piece, 3);
         effect.Apply();
     }
 }
 
 public class PsilocybinMushroomTileEffect : TileEffector
 {
-    private PsilocybinMushroomCard owner;
-
-    public void SetOwner(PsilocybinMushroomCard card)
-    {
-        owner = card;
-    }
+    public CardDataSO DataSO;
 
     protected override void OnApply()
     {
+        ShowTileEffect(DataSO);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        ClearTileEffect();
+
         Destroy(gameObject);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
     }
 
     public override void OnPieceEnter(Piece piece)
     {
-        if (piece == null || owner == null) return;
+        if (piece == null) return;
+        if (PieceEffector.HasActiveMovementOverride(piece)) return;
 
-        owner.ApplyPieceEffect(piece);
+        var effect = piece.gameObject.AddComponent<PsilocybinMushroomPieceEffect>();
+        effect.CardSO = null;
+        effect.Init(piece, 3);
+        effect.Apply();
 
         Revert();
     }
 }
 
-public class PsilocybinMushroomPieceEffect : PieceEffector
+public class PsilocybinMushroomPieceEffect : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -82,7 +79,8 @@ public class PsilocybinMushroomPieceEffect : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "w")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
 
         Destroy(this);

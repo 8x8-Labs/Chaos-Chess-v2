@@ -23,11 +23,10 @@ public class CaterpillarCard : CardData, IPieceCard
     {
         var effector = CreatePieceEffector<CaterpillarEffector>(args.Targets[0]);
         effector.Apply();
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, effector.Revert);
     }
 }
 
-public class CaterpillarEffector : PieceEffector
+public class CaterpillarEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -37,7 +36,8 @@ public class CaterpillarEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.FenOverride = null;
+        if (target != null && target.FenOverride?.ToLower() == "z")
+            target.FenOverride = null;
         RefreshMoves();
         Destroy(this);
     }

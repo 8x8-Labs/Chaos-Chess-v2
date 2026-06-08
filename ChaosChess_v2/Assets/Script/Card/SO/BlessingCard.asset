@@ -13,10 +13,8 @@ MonoBehaviour:
   m_Name: BlessingCard
   m_EditorClassIdentifier: 
   CardName: "\uAC00\uD638"
-  CardImage: {fileID: 0}
-  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 \uAE30\uBB3C\uC774 3\uD134 \uB3D9\uC548
-    \uC788\uC744 \uACBD\uC6B0 \uB2E4\uC74C \uB4F1\uAE09\uC758 \uAE30\uBB3C\uB85C
-    \uC2B9\uACA9"
+  CardImage: {fileID: -1989526714, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uAC00\uD638</color>\uB97C \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 2
   PieceType: 0
@@ -25,11 +23,19 @@ MonoBehaviour:
   RequiredPieceCount: 0
   TileCount: 1
   MaintainTurn: 3
+  NeedEffectTileBase: 1
+  EffectTileBase: {fileID: 11400000, guid: 14131cb138fcd994097f5949ed13c5bd, type: 2}
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  NeedAdditionalDescription: 0
-  DescriptionType: 0
+  StatusDisplayType: 1
+  NeedAdditionalDescription: 1
+  DescriptionType: 1
+  AdditionalDescriptionTitle: "\uAC00\uD638"
+  PieceDescImage: {fileID: 0}
+  MovementImage: {fileID: 0}
+  PieceDescContent: 
+  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 <color=#FFD700>3\uD134</color>\uAC04 \uC774 \uCE78\uC5D0 \uBA38\uBB3C\uBA74 <color=#00CC44>\uD55C \uB2E8\uACC4 \uC2B9\uACA9\uD569\uB2C8\uB2E4</color>.\n\uD3F0 \u2192 \uB098\uC774\uD2B8 / \uB098\uC774\uD2B8\u00B7\uBE44\uC20D \u2192 \uB8E9 / \uB8E9 \u2192 \uD038"

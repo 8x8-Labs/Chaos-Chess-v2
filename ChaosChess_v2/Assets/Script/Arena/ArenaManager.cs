@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 
@@ -23,7 +25,18 @@ public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 /// </summary>
 public class ArenaManager : MonoBehaviour
 {
+    private const int MaxPlayerMoveCount = 8;
+
     public static ArenaManager Instance;
+    [SerializeField] private CardHandLayout cardHandLayout;
+
+    internal event Action<CardDataSO, int> ArenaStarted;
+    internal event Action<int> ArenaRemainingTurnsChanged;
+    internal event Action ArenaEnded;
+
+    /// <summary>투기장 시작 전 저장된(일시정지된) 타일/전역 효과가 존재하는지 여부입니다.</summary>
+    public bool AreStoredEffectsSuspended => isArenaActive && suspendedEffects.Count > 0;
+    private int RemainingPlayerMoves => Mathf.Max(0, MaxPlayerMoveCount - playerMoveCount);
 
     // 투기장 참가 기물
     private List<Piece> opponentArenaPieces = new();  // 상대 투기장 기물 (최대 3개)
@@ -41,6 +54,10 @@ public class ArenaManager : MonoBehaviour
     // Timeout 복원용: 아레나 시작 시점의 모든 기물 위치 스냅샷
     private Dictionary<Piece, Vector3Int> savedPositions = new();
     private string savedCastlingFen;  // 아레나 시작 시점의 캐슬링 권한 (Timeout 시 복원)
+    // 투기장 진입 전 잠시 꺼두는 효과 목록(타일/전역만)
+    private readonly List<Effector> suspendedEffects = new();
+    // 타일 이펙트(시각 효과) 복원용 스냅샷
+    private Dictionary<Vector3Int, TileBase> savedTileEffects = new();
 
     private void Awake()
     {
@@ -52,17 +69,21 @@ public class ArenaManager : MonoBehaviour
     /// 투기장을 시작합니다.
     /// </summary>
     /// <param name="opponents">투기장에 참여할 상대 기물 목록 (최대 3개)</param>
-    public void StartArena(List<Piece> opponents)
+    public void StartArena(List<Piece> opponents, CardDataSO arenaCardSO = null)
     {
         if (isArenaActive) return;
         isArenaActive = true;
+        cardHandLayout?.SetArenaInputBlocked(true);
+
+        GameManager gm = GameManager.Instance;
+        gm.PushCardIntervalPause();
+        gm.CancelCurrentSelectionForBoardTransition();
 
         opponentArenaPieces = opponents;
         playerMoveCount = 0;
         hiddenPieces.Clear();
 
         BoardManager bm = BoardManager.Instance;
-        GameManager gm = GameManager.Instance;
         var allPiece = bm.GetAllPieces();
 
         // 아레나 시작 시 모든 기물 위치 저장 (Timeout 시 완전 복원에 사용)
@@ -73,6 +94,12 @@ public class ArenaManager : MonoBehaviour
         // 캐슬링 권한 저장 — BatchReassign이 King/Rook 복원 시 플래그를 손상시키므로 별도 보존
         bm.UpdateFEN();
         savedCastlingFen = bm.GetFEN().Split(' ')[2];
+        if (bm.TileEffectDrawer != null)
+            savedTileEffects = bm.TileEffectDrawer.CaptureTileEffects();
+        SuspendStoredEffects();
+        gm.PauseQueuedActions();
+        if (bm.TileEffectDrawer != null)
+            bm.TileEffectDrawer.ClearAllTileEffects();
 
         // 양쪽 King 참조 저장 — Stockfish 연산에 필요
         playerKing = allPiece.Find(p => p.Color == gm.PlayerColor && p.Type == PieceType.King);
@@ -105,6 +132,11 @@ public class ArenaManager : MonoBehaviour
 
         // 반턴 이벤트 구독으로 포획 감지 및 턴 카운트
         gm.OnHalfTurnChanged += OnHalfTurnChanged;
+
+        // 투기장 보드 최종 상태에서 1회만 동기화
+        gm.SyncPositionToStockfish();
+
+        ArenaStarted?.Invoke(arenaCardSO, RemainingPlayerMoves);
     }
 
     /// <summary>
@@ -131,11 +163,13 @@ public class ArenaManager : MonoBehaviour
         if (!GameManager.Instance.IsPlayerTurn)
         {
             playerMoveCount++;
-            if (playerMoveCount >= 8)
+            ArenaRemainingTurnsChanged?.Invoke(RemainingPlayerMoves);
+
+            if (playerMoveCount >= MaxPlayerMoveCount)
                 EndArena(ArenaResult.Timeout);
         }
     }
-
+    
     /// <summary>
     /// 투기장을 종료하고 결과를 처리합니다.
     /// </summary>
@@ -146,11 +180,15 @@ public class ArenaManager : MonoBehaviour
         isArenaActive = false;
 
         GameManager gm = GameManager.Instance;
+        gm.PopCardIntervalPause();
+        gm.CancelCurrentSelectionForBoardTransition();
 
         // 이벤트 구독 해제 및 투기장 모드 비활성화
         gm.OnHalfTurnChanged -= OnHalfTurnChanged;
         gm.IsArenaMode = false;
+        cardHandLayout?.SetArenaInputBlocked(false);
         gm.SetLockedPiece(null);
+        ArenaEnded?.Invoke();
 
         // King 무적 해제 — 메인 게임 복귀 후 King이 정상적으로 포획될 수 있어야 함
         playerKing?.ConsumeInvincibility();
@@ -181,19 +219,24 @@ public class ArenaManager : MonoBehaviour
         foreach (Piece p in hiddenPieces)
             if (p != null) BoardManager.Instance.RestorePiece(p);
         hiddenPieces.Clear();
+        ResumeStoredEffects();
+        if (BoardManager.Instance.TileEffectDrawer != null && savedTileEffects != null)
+            BoardManager.Instance.TileEffectDrawer.RestoreTileEffects(savedTileEffects);
+        gm.ResumeQueuedActions();
+
+        // 복원 완료 최종 상태에서 1회만 동기화
+        gm.SyncPositionToStockfish();
 
         switch (result)
         {
             case ArenaResult.PlayerWon:
                 // 상대 투기장 기물은 이미 DestroyPiece()로 제거된 상태이므로 추가 처리 불필요
                 Debug.Log("[Arena] 플레이어 승리 — 상대 투기장 기물 제거됨");
-                gm.SyncPositionToStockfish();
                 // RequestAIMove는 MoveSelected()가 NextTurn() 완료 후 호출 — 여기서 호출 시 GetLegalMoves와 충돌
                 break;
 
             case ArenaResult.Timeout:
                 Debug.Log("[Arena] 8턴 초과 — 무효, 메인 게임 재개");
-                gm.SyncPositionToStockfish();
                 // RequestAIMove는 MoveSelected()가 NextTurn() 완료 후 호출 — 여기서 호출 시 GetLegalMoves와 충돌
                 break;
 
@@ -202,5 +245,50 @@ public class ArenaManager : MonoBehaviour
                 gm.OnSurrender(gm.EnemyColor);
                 break;
         }
+    }
+
+    /// <summary>투기장 시작 전 타일/전역 효과를 저장 목록에 넣고 일시 정지합니다.</summary>
+    private void SuspendStoredEffects()
+    {
+        suspendedEffects.Clear();
+        BoardManager bm = BoardManager.Instance;
+
+        foreach (GlobalEffector effector in bm.GetGlobalEffectors())
+        {
+            if (effector == null || effector.IsSuspended)
+                continue;
+            // 카드 특성상 투기장에서도 유지돼야 하는 효과는 제외
+            if (effector is IArenaPersistentEffect)
+                continue;
+
+            suspendedEffects.Add(effector);
+            effector.SuspendForArena();
+        }
+
+        foreach (TileEffector effector in bm.GetAllTileEffectors())
+        {
+            if (effector == null || effector.IsSuspended)
+                continue;
+            // 카드 특성상 투기장에서도 유지돼야 하는 효과는 제외
+            if (effector is IArenaPersistentEffect)
+                continue;
+
+            suspendedEffects.Add(effector);
+            effector.SuspendForArena();
+        }
+    }
+
+    /// <summary>투기장 전에 저장해 둔 타일/전역 효과를 다시 활성화합니다.</summary>
+    private void ResumeStoredEffects()
+    {
+        foreach (Effector effector in suspendedEffects)
+        {
+            if (effector == null)
+                continue;
+
+            effector.ResumeFromArena();
+        }
+
+        suspendedEffects.Clear();
     }
 }

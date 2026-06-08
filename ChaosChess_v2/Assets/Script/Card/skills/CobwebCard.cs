@@ -25,39 +25,35 @@ public class CobwebCard : CardData, ITileCard
     {
         Vector3Int pos = args.TargetPos[0];
 
-        CobwebEffector effect = CreateGlobalEffector<CobwebEffector>();
-        effect.TilePos = pos;
-        effect.cobwebCard = this;
+        CobwebEffector effect = CreateTileEffector<CobwebEffector>(pos);
+        effect.SetUntilTriggered();
         effect.Apply();
-    }
-
-    public void OnStuckWrap(Piece piece)
-    {
-        CobwebPieceEffector pieceEffect = piece.gameObject.AddComponent<CobwebPieceEffector>();
-        pieceEffect.Init(piece, DataSO.LimitTurn);
-        pieceEffect.Apply();
     }
 }
 
-public class CobwebEffector : GlobalEffector
+public class CobwebEffector : TileEffector, IPiecePathBlocker
 {
     private bool isTriggered = false;
 
-    public Vector3Int TilePos;
-    public CobwebCard cobwebCard;
+    public void SetUntilTriggered()
+    {
+        SetDuration(-1);
+    }
 
     protected override void OnApply()
     {
-        BoardManager.Instance.RegisterGlobalEffector(this);
+        ShowTileEffect();
+        BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
-        BoardManager.Instance.UnregisterGlobalEffector(this);
+        ClearTileEffect();
+        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
 
-    public override bool CanPieceAct(Piece piece, Vector3Int from, Vector3Int to)
+    public bool CanPieceTraverse(Piece piece, Vector3Int from, Vector3Int to)
     {
         if (isTriggered) return true;
         if (piece is King) return true;
@@ -68,11 +64,14 @@ public class CobwebEffector : GlobalEffector
         while (cur != to)
         {
             cur += dir;
-            if (cur == TilePos)
+            if (cur == tilePos)
             {
+                if (PieceEffector.HasActiveMovementOverride(piece))
+                    return true;
+
                 isTriggered = true;
-                BoardManager.Instance.ForceTeleport(piece, TilePos, '\0', false);
-                cobwebCard.OnStuckWrap(piece);
+                BoardManager.Instance.ForceTeleport(piece, tilePos, '\0', false);
+                ApplyStuckEffect(piece);
                 BoardManager.Instance.RefreshMoves();
                 Revert();
                 return false;
@@ -125,9 +124,19 @@ public class CobwebEffector : GlobalEffector
 
         return Vector3Int.zero;
     }
+
+    private void ApplyStuckEffect(Piece piece)
+    {
+        if (piece == null) return;
+
+        CobwebPieceEffector pieceEffect = piece.gameObject.AddComponent<CobwebPieceEffector>();
+        pieceEffect.CardSO = null;
+        pieceEffect.Init(piece, CardSO.LimitTurn);
+        pieceEffect.Apply();
+    }
 }
 
-public class CobwebPieceEffector : PieceEffector
+public class CobwebPieceEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
@@ -137,7 +146,8 @@ public class CobwebPieceEffector : PieceEffector
 
     protected override void OnRevert()
     {
-        target.MoveFenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

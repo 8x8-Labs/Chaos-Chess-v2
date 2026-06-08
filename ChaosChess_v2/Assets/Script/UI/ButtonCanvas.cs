@@ -1,6 +1,7 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class ButtonCanvas : ButtonParent
@@ -15,12 +16,14 @@ public class ButtonCanvas : ButtonParent
     [SerializeField] private float fadeDuration = 0.2f;
     [SerializeField] private float uiAnimDelay = 0.2f;
     [SerializeField] private List<BasicUIAnimation> animationButtons;
+    [SerializeField] private UnityEvent OnCanvasEnabled;
+    [SerializeField] private UnityEvent OnCanvasDisabled;
 
     private CanvasGroup canvasGroup;
     private ScrollRect scrollRect;
     private Canvas canvas;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
         // Debug.Log($"{gameObject.name}에 있는 캔버스 그룹 오브젝트: {canvasGroup.gameObject.name}");
@@ -33,6 +36,8 @@ public class ButtonCanvas : ButtonParent
     public override void EnableParent()
     {
         canvas.enabled = true;
+        OnCanvasEnabled?.Invoke();
+
         if (scrollRect != null)
         {
             scrollRect.verticalNormalizedPosition = 1;
@@ -46,6 +51,7 @@ public class ButtonCanvas : ButtonParent
     // 캔버스를 비활성화 시키고 알파를 0으로 바꿈
     public override void DisableParent()
     {
+        OnCanvasDisabled?.Invoke();
         canvas.enabled = false;
         canvasGroup.alpha = 0f;
     }
@@ -53,9 +59,12 @@ public class ButtonCanvas : ButtonParent
     public void FadeOut()
     {
         canvasGroup.DOFade(1f, fadeDuration);
+        int animIndex = 0;
         for (int i = 0; i < animationButtons.Count; i++)
         {
-            animationButtons[i].StartAnimation(i * uiAnimDelay);
+            if (animationButtons[i] == null || !animationButtons[i].gameObject.activeInHierarchy) continue;
+            animationButtons[i].StartAnimation(animIndex * uiAnimDelay);
+            animIndex++;
         }
     }
     public void FadeIn()
@@ -64,6 +73,7 @@ public class ButtonCanvas : ButtonParent
         canvasGroup.DOFade(0f, fadeDuration)
             .OnComplete(() =>
             {
+                OnCanvasDisabled?.Invoke();
                 canvas.enabled = false;
             });
     }

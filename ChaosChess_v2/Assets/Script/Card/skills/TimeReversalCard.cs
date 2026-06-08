@@ -28,10 +28,7 @@ public class TimeReversalEffecter : GlobalEffector
     {
         string NewFEN = BoardManager.Instance.GetFEN();
 
-        BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces());
-        BoardManager.Instance.LoadFEN(DefaultFEN);
-
-        BoardManager.Instance.RefreshMoves();
+        BoardManager.Instance.ReplacePositionFromFen(DefaultFEN);
 
         GameManager.Instance.RequestTimeReversal(
             () =>
@@ -41,11 +38,7 @@ public class TimeReversalEffecter : GlobalEffector
             () =>
             {
                 Destroy(gameObject);
-                BoardManager.Instance.DestroyPieces(BoardManager.Instance.GetAllPieces());
-                BoardManager.Instance.LoadFEN(NewFEN);
-
-                BoardManager.Instance.RefreshMoves();
-
+                BoardManager.Instance.ReplacePositionFromFen(NewFEN);
             }
         );
     }

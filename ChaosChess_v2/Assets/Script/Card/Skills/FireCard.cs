@@ -19,29 +19,45 @@ public class FireCard : CardData, ITileCard
     public void Execute(CardEffectArgs args = null)
     {
         FireEffect effect = CreateTileEffector<FireEffect>(args.TargetPos[0]);
+        effect.DataSO = DataSO;
         effect.Apply();
     }
 }
 
 public class FireEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     private BoardManager boardManager = BoardManager.Instance;
     private Piece enterPiece;
     private int deathTurn = 0;
 
     protected override void OnApply()
     {
+        Piece.OnPieceDestroyed += HandlePieceDestroyed;
+
+        ShowTileEffect(DataSO);
+
         boardManager.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
+
+        ClearTileEffect();
+
         Destroy(gameObject);
+    }
+
+    private void HandlePieceDestroyed(Piece piece)
+    {
+        if (piece == enterPiece) { enterPiece = null; Revert(); }
     }
 
     public override void OnPieceEnter(Piece piece)
     {
-        if(enterPiece == null)
+        if (enterPiece == null)
             enterPiece = piece;
     }
 
@@ -49,20 +65,24 @@ public class FireEffect : TileEffector
 
     public override void OnTurnChanged()
     {
-        if(enterPiece != null)
+        if (enterPiece != null)
         {
             deathTurn++;
 
-            if(deathTurn > 1)
+            if (deathTurn > 1)
             {
                 boardManager.DestroyPiece(enterPiece);
                 Revert();
             }
         }
+
+        RefreshTileEffectTurnAnimation(DataSO, 2 - deathTurn);
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
         boardManager.UnregisterTileEffector(tilePos, this);
     }
 }

@@ -7,7 +7,10 @@ public class PieceSelector : Selector<Piece>
 {
     [SerializeField] private UIPieceDrawer pieceDrawer;
     [SerializeField] private SelectorUI selectorUI;
+    // GetComponents(List<T>) 재사용 버퍼로 선택 시점 GC 할당을 줄입니다.
+    private readonly List<PieceEffector> pieceEffectorBuffer = new();
     private IPieceCard skillCard;
+    private IPieceTargetFilter targetFilter;
     private bool executable => isExecute();
 
     public override void DeselectFirstTarget()
@@ -47,12 +50,7 @@ public class PieceSelector : Selector<Piece>
             // 널 체크
             if (p != null)
             {
-                // 기물 타입과 색상 체크
-                if((p.Type & cardData.DataSO.PieceType) != 0 &&
-                    p.Color == cardData.DataSO.PieceTargetColor)
-                {
-                    SelectTarget(p);
-                }
+                SelectTarget(p);
             }
         }
     }
@@ -61,8 +59,15 @@ public class PieceSelector : Selector<Piece>
     {
         if (!selectState) return;
 
-        if(Target.TryGetComponent<PieceEffector>(out var effector))
+        if (!CanSelectPiece(Target))
         {
+            Target.NotSelect();
+            return;
+        }
+
+        if (HasActivePieceEffector(Target))
+        {
+            // 현재 활성(일시정지 아님) 기물 효과가 있으면 중복 적용을 막습니다.
             Target.NotSelect();
             return;
         }
@@ -85,6 +90,12 @@ public class PieceSelector : Selector<Piece>
 
     protected override bool isExecute()
     {
+        if (cardData == null || cardData.DataSO == null)
+            return false;
+
+        if (cardData.DataSO.RequiredPieceCount <= 0)
+            return true;
+
         return selectedTargets.Count == cardData.DataSO.RequiredPieceCount;
     }
 
@@ -98,8 +109,10 @@ public class PieceSelector : Selector<Piece>
             LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
         
-        skillCard.Execute(args);
-        if(cardData != null)
+        CardRandomizerManager.Instance?.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
+
+        bool switchedSelector = CardSelectionState.CurrentOwner != CardSelectionOwner.Piece;
+        if(cardData != null && !switchedSelector)
             cardRandomizer?.RemoveCard(cardData.gameObject);
 
         DisableSelector();
@@ -109,28 +122,21 @@ public class PieceSelector : Selector<Piece>
     {
         BoardManager bm = BoardManager.Instance;
 
-        // 1. 현재 기물 검사
-        List<Piece> pieces = bm.GetAllPieces()
-            .Where(p => (p.Type & cardData.DataSO.PieceType) != 0 &&
-                    p.Color == cardData.DataSO.PieceTargetColor)
-            .ToList();
-
-        if (pieces.Count == 0)
+        // 선택 가능한 기물을 순회하며, 효과가 전혀 없거나 전부 투기장 일시정지 상태인 기물을 찾으면 즉시 대상 가능으로 봅니다.
+        bool anySelectable = false;
+        foreach (Piece piece in bm.GetAllPieces())
         {
-            Debug.Log("기물이 존재하지 않습니다!");
-            return false; 
-        } 
+            if (!CanSelectPiece(piece)) continue;
+            anySelectable = true;
 
-        // 2. 기물 중 효과 적용 중인지 검사
-        foreach(Piece piece in pieces)
-        {
-            if(!piece.TryGetComponent<PieceEffector>(out var value))
-            {
+            if (!HasActivePieceEffector(piece))
                 return true;
-            }
         }
 
-        // Debug.Log("기물에 효과가 모두 적용되었습니다!");
+        if (!anySelectable)
+            Debug.Log("기물이 존재하지 않습니다!");
+
+        // else: 기물에 효과가 모두 적용되었습니다!
         return false;
     }
 
@@ -138,11 +144,13 @@ public class PieceSelector : Selector<Piece>
     {
         cardData = data;
         skillCard = cardData.GetComponent<IPieceCard>();
+        targetFilter = cardData.GetComponent<IPieceTargetFilter>();
         selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
 
         GameManager.Instance.IsGameInput = false;
+        LockCardSelection(CardSelectionOwner.Piece);
         selectorCanvas.enabled = true;
         selectState = true;
 
@@ -150,20 +158,69 @@ public class PieceSelector : Selector<Piece>
 
         // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
         // 선택자를 비활성화하기
-        if (!isTargetExist()) DisableSelector();
+        if (!isTargetExist())
+        {
+            DisableSelector();
+            return;
+        }
+
+        // 선택 수 요구가 0인 카드는 선택 UI 없이 즉시 실행합니다.
+        if (cardData.DataSO.RequiredPieceCount <= 0)
+        {
+            ExecuteSkill();
+        }
     }
 
     protected override void DisableSelector()
     {
         GameManager.Instance.IsGameInput = true;
+        UnlockCardSelection(CardSelectionOwner.Piece);
         selectorCanvas.enabled = false;
         selectState = false;
 
         cardData = null;
         skillCard = null;
+        targetFilter = null;
         foreach(Piece p in selectedTargets) p.OnDeselect();
         selectedTargets.Clear();
         selectorUI.DisableButtonState();
 
+    }
+
+    private bool CanSelectPiece(Piece piece)
+    {
+        if (piece == null || cardData == null || cardData.DataSO == null)
+            return false;
+
+        if ((piece.Type & cardData.DataSO.PieceType) == 0)
+            return false;
+
+        if (piece.Color != cardData.DataSO.PieceTargetColor)
+            return false;
+
+        return targetFilter == null || targetFilter.CanSelectPiece(piece);
+    }
+
+    /// <summary>해당 기물에 일시정지되지 않은 PieceEffector가 하나라도 있는지 확인합니다.</summary>
+    private bool HasActivePieceEffector(Piece piece)
+    {
+        if (PieceEffector.HasActiveMovementOverride(piece))
+            return true;
+
+        pieceEffectorBuffer.Clear();
+        try
+        {
+            piece.GetComponents(pieceEffectorBuffer);
+            foreach (PieceEffector effector in pieceEffectorBuffer)
+            {
+                if (effector != null && !effector.IsSuspended)
+                    return true;
+            }
+        }
+        finally
+        {
+            pieceEffectorBuffer.Clear();
+        }
+        return false;
     }
 }

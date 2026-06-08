@@ -1,4 +1,12 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public enum TileEffectAnimationMode
+{
+    None,
+    Time,
+    Turn
+}
 
 [CreateAssetMenu(fileName = "Card Data", menuName = "Card/Card Data")]
 public class CardDataSO : ScriptableObject
@@ -23,7 +31,7 @@ public class CardDataSO : ScriptableObject
     [Range(-1, 10)]
     public int PieceLimitTurn;
     public int RequiredPieceCount;
-    
+
     // 타일 타입에 필요한 설정
     [Space(30)]
     [Header("타일 타입 설정")]
@@ -33,6 +41,52 @@ public class CardDataSO : ScriptableObject
     /// </summary>
     [Range(-1, 75)]
     public int MaintainTurn;
+    /// <summary>
+    /// 타일 이펙트가 필요한지 여부
+    /// </summary>
+    public bool NeedEffectTileBase;
+    /// <summary>
+    /// 효과가 적용된 타일에 표시할 기본 타일베이스
+    /// </summary>
+    public TileBase EffectTileBase;
+    /// <summary>
+    /// 선택 순서별로 다른 타일베이스를 사용할지 여부
+    /// </summary>
+    public bool UseMultipleEffectTileBases;
+    /// <summary>
+    /// 선택 순서별로 표시할 타일베이스 목록입니다.
+    /// </summary>
+    public TileBase[] EffectTileBases;
+    public TileEffectAnimationMode EffectTileAnimationMode = TileEffectAnimationMode.None;
+    [Min(0.01f)]
+    public float EffectTileFrameInterval = 0.2f;
+    [Tooltip("시간 기반 애니메이션 프레임 또는 턴 기반 상태 프레임입니다.")]
+    public TileBase[] EffectTileAnimationFrames;
+
+    public TileBase GetEffectTileBase(int index)
+    {
+        if (!UseMultipleEffectTileBases)
+            return EffectTileBase;
+
+        if (EffectTileBases == null || EffectTileBases.Length == 0)
+            return EffectTileBase;
+
+        if (index >= 0 && index < EffectTileBases.Length && EffectTileBases[index] != null)
+            return EffectTileBases[index];
+
+        return EffectTileBases[0] != null ? EffectTileBases[0] : EffectTileBase;
+    }
+
+    public TileBase GetEffectTileAnimationFrame(int frameIndex, int effectTileIndex = 0)
+    {
+        if (EffectTileAnimationFrames == null || EffectTileAnimationFrames.Length == 0)
+            return GetEffectTileBase(effectTileIndex);
+
+        int safeIndex = Mathf.Clamp(frameIndex, 0, EffectTileAnimationFrames.Length - 1);
+        return EffectTileAnimationFrames[safeIndex] != null
+            ? EffectTileAnimationFrames[safeIndex]
+            : GetEffectTileBase(effectTileIndex);
+    }
     /// <summary>
     /// 활성화 시 BlockedTiles 배열 기준으로 선택 불가 타일을 지정합니다.
     /// </summary>
@@ -52,6 +106,8 @@ public class CardDataSO : ScriptableObject
     public PieceColor GlobalTargetColor;
     public bool HasLimit;
     public int LimitTurn;
+    [Tooltip("상태 카드에 표시할 문구 타입입니다.")]
+    public ActiveEffectStatusType StatusDisplayType = ActiveEffectStatusType.Active;
 
     [Space(30)]
     [Header("부가 정보 설정")]

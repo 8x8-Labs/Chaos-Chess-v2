@@ -24,14 +24,38 @@ public class TimeBombCard : CardData, ITileCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        List<Vector3Int> tiles = args.TargetPos;
-
         Vector3Int center = args.TargetPos[0];
+        TimeBombEffector effector = CreateTileEffector<TimeBombEffector>(center);
+        effector.Apply();
+    }
+}
 
-        GameManager.Instance.AppendAction(DataSO.MaintainTurn, () =>
+public class TimeBombEffector : TileEffector
+{
+    protected override void OnApply()
+    {
+        ShowTileEffect();
+
+        BoardManager.Instance.RegisterTileEffector(tilePos, this);
+    }
+
+    protected override void OnRevert()
+    {
+        ClearTileEffect();
+
+        BoardManager.Instance.UnregisterTileEffector(tilePos, this);
+        Destroy(gameObject);
+    }
+
+    public override void OnTurnChanged()
+    {
+        if (RemainingTurns <= 1)
         {
-            Explode(center);
-        });
+            Explode(tilePos);
+            return;
+        }
+
+        base.OnTurnChanged();
     }
 
     private void Explode(Vector3Int center)

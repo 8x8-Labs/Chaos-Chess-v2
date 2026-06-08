@@ -26,19 +26,27 @@ public class JumpingPlatformCard : CardData, ITileCard
     {
         JumpingPlatformEffect effect = CreateTileEffector<JumpingPlatformEffect>(args.TargetPos[0]);
 
+        effect.DataSO = DataSO;
+        
         effect.Apply();
     }
 }
 
 public class JumpingPlatformEffect : TileEffector
 {
+    public CardDataSO DataSO;
+
     protected override void OnApply()
     {
+        ShowTileEffect(DataSO);
+
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        ClearTileEffect();
+
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }

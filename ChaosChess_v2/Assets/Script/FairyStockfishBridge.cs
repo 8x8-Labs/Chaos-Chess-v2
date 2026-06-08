@@ -34,6 +34,12 @@ public class FairyStockfishBridge : MonoBehaviour
 
     void Awake()
     {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         _instance = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -151,8 +157,14 @@ public class FairyStockfishBridge : MonoBehaviour
 
         Thread thread = new Thread(() =>
         {
+            lock (_queueLock)
+            {
+                _outputQueue.Clear();
+            }
+
             SendCommand(command);
-            string bestMove = WaitForBestMove();
+            int timeoutMs = moveTimeMs > 0 ? Mathf.Max(moveTimeMs + 1000, 3000) : 10000;
+            string bestMove = WaitForBestMove(timeoutMs);
             _isThinking = false;
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
@@ -428,8 +440,8 @@ public class FairyStockfishBridge : MonoBehaviour
 
     private string WaitForBestMove(int timeoutMs = 10000)
     {
-        DateTime timeout = DateTime.Now.AddMilliseconds(timeoutMs);
-        while (DateTime.Now < timeout)
+        DateTime timeout = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < timeout)
         {
             lock (_queueLock)
             {
@@ -445,6 +457,26 @@ public class FairyStockfishBridge : MonoBehaviour
             }
             Thread.Sleep(10);
         }
+
+        SendCommand("stop");
+        timeout = DateTime.UtcNow.AddMilliseconds(1000);
+        while (DateTime.UtcNow < timeout)
+        {
+            lock (_queueLock)
+            {
+                while (_outputQueue.Count > 0)
+                {
+                    string line = _outputQueue.Dequeue();
+                    if (line.StartsWith("bestmove"))
+                    {
+                        string[] parts = line.Split(' ');
+                        return parts.Length > 1 ? parts[1] : "none";
+                    }
+                }
+            }
+            Thread.Sleep(10);
+        }
+
         return "none";
     }
 #endif
