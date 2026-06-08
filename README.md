@@ -48,6 +48,18 @@
 | `GetLegalMovesFromSquare(string square)` | `square` : UCI 형식 칸 좌표<br>예) `"e2"` | `string[]` : 해당 칸에서 출발하는 UCI 이동 목록<br>예) `["e2e3", "e2e4"]` | 특정 칸에서 이동 가능한 수를 반환합니다. |
 | `GetGameResult()` | 없음 | `1` : 진행 중<br>`0` : 스테일메이트<br>`-1` : 체크메이트 | 현재 게임 결과를 반환합니다. |
 
+## 버전 / 릴리스 규칙
+
+버전은 **SemVer(`vMAJOR.MINOR.PATCH`)**를 따르며, GitHub 릴리스는 **PR 단위**로 노트를 모으는 [release-drafter](https://github.com/release-drafter/release-drafter)가 자동 관리합니다. 빌드 버전은 Git 태그를 단일 진실 출처로 삼아 Unity 빌드에 자동 각인됩니다.
+
+```
+feature/* ─→ develop ──→ release/x.y.z ──→ main
+             다음 버전     테스트·RC          정식
+             draft 누적   vX.Y.Z-rc.N       vX.Y.Z
+```
+
+📖 **자세한 내용은 [버전 & 릴리스 가이드](docs/RELEASE.md)를 참고하세요.** (브랜치 전략 · 라벨→버전 매핑 · 출시 사이클 · Unity 빌드 버전 각인 · 최초 셋업)
+
 ## 필수 설정
 
 - 씬에는 반드시 `FairyStockfishBridge`와 `UnityMainThreadDispatcher`가 있어야 합니다.

@@ -1,0 +1,98 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+# develop(draft 누적), release/*(RC 프리릴리스), main(정식 publish) 모두 허용
+branches:
+  - develop
+  - 'release/*'
+  - main
+
+# PR 라벨 → 노트 카테고리(한글 제목). 내부 변경/수정도 라벨만 붙이면 그대로 들어간다.
+categories:
+  - title: '✨ 새로운 기능'
+    labels:
+      - 'feat'
+      - 'feature'
+      - 'enhancement'
+  - title: '🔄 기능 수정'
+    labels:
+      - 'modify'
+  - title: '🐛 버그 수정'
+    labels:
+      - 'fix'
+      - 'bugfix'
+  - title: '♻️ 리팩토링'
+    labels:
+      - 'refactor'
+  - title: '🗑️ 삭제'
+    labels:
+      - 'remove'
+  - title: '📝 문서'
+    labels:
+      - 'docs'
+
+# 어떤 카테고리에도 안 잡힌 PR은 이 섹션으로 (누락 방지)
+category-template: '$TITLE'
+
+exclude-labels:
+  - 'skip-changelog'
+
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: '\<*_&'
+
+# 라벨 → SemVer 증가 규칙 (정식 출시 전이라 0.x 유지)
+version-resolver:
+  major:
+    labels:
+      - 'major'
+      - 'breaking'
+  minor:
+    labels:
+      - 'feat'
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'modify'
+      - 'refactor'
+      - 'remove'
+      - 'docs'
+  default: patch
+
+# PR 제목/브랜치 이름으로 라벨 자동 부여 → 커밋 컨벤션 그대로 라벨에 매핑
+autolabeler:
+  - label: 'feat'
+    branch:
+      - '/^feature\/.+/'
+    title:
+      - '/^feat/i'
+      - '/^add/i'
+  - label: 'fix'
+    branch:
+      - '/^fix\/.+/'
+      - '/^bugfix\/.+/'
+    title:
+      - '/^fix/i'
+  - label: 'modify'
+    title:
+      - '/^modify/i'
+  - label: 'refactor'
+    branch:
+      - '/^refactor\/.+/'
+    title:
+      - '/^refactor/i'
+  - label: 'remove'
+    title:
+      - '/^remove/i'
+  - label: 'docs'
+    title:
+      - '/^docs/i'
+
+template: |
+  ## 변경 사항
+
+  $CHANGES
+
+  **전체 변경 내역**: $PREVIOUS_TAG...v$RESOLVED_VERSION
