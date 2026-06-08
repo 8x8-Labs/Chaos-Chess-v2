@@ -23437,10 +23437,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5092826633846912328, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -6601691336363857274, guid: b826e31c13e0d364d9b24dc223a52f3b, type: 3}
     - target: {fileID: 5481899324075856558, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}
       propertyPath: disablePanel
       value: 
       objectReference: {fileID: 380174261}
+    - target: {fileID: 5573176168684959578, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6316707970655562846, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -23584,6 +23592,10 @@ PrefabInstance:
     - target: {fileID: 9056248823124740717, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 9094949736275155635, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6725642127812877614, guid: e79c0536680dbac4a9b14b3dfee70bc8, type: 3}

@@ -16,7 +16,7 @@ MonoBehaviour:
   CardImage: {fileID: -2027574454, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
   CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 \uC8FC\uBCC0 <color=#FFD700>5\u00D75 \uCE78</color> \uC911 <color=#4499FF>\uBE48 \uB79C\uB364\uD55C \uC704\uCE58</color>\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 0
-  CardTier: 0
+  CardTier: 1
   PieceType: 2
   PieceTargetColor: 0
   PieceLimitTurn: -1
