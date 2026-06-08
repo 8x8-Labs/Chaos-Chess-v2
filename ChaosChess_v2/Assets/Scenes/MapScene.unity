@@ -1266,6 +1266,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapContainer: {fileID: 1537558345}
   mapButtonPrefab: {fileID: 4660915655800250675, guid: eea79cb657b37c742b12dc509f12ace2, type: 3}
+  linePrefab: {fileID: 1661547642005261267, guid: 898c5cd82424f2e43b694365f29419ae, type: 3}
   floorHeight: 800
   nodeSpacing: 500
   lineWidth: 6

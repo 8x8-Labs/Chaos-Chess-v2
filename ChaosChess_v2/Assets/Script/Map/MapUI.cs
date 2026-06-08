@@ -7,6 +7,8 @@ public class MapUI : MonoBehaviour
 {
     [SerializeField] private RectTransform mapContainer;
     [SerializeField] private GameObject mapButtonPrefab;
+    // Image + RectTransform을 가진 라인 프리팹. DrawLine()에서 new GameObject + AddComponent<Image> 대신 Instantiate로 재사용한다.
+    [SerializeField] private GameObject linePrefab;
 
     [SerializeField] private float floorHeight = 160f;
     [SerializeField] private float nodeSpacing = 180f;
@@ -24,7 +26,23 @@ public class MapUI : MonoBehaviour
     [SerializeField] private string effectChildName = "Effect";
 
     private readonly Dictionary<Map, GameObject> _nodeObjects = new();
+    private readonly Dictionary<Map, EffectVisual> _effectVisuals = new();
     private bool _built = false;
+
+    // 노드 이펙트 자식의 Image/ParticleSystem 참조를 인스턴스화 시점에 캐싱해 둔다.
+    private readonly struct EffectVisual
+    {
+        public readonly GameObject gameObject;
+        public readonly Image[] images;
+        public readonly ParticleSystem[] particles;
+
+        public EffectVisual(GameObject gameObject, Image[] images, ParticleSystem[] particles)
+        {
+            this.gameObject = gameObject;
+            this.images = images;
+            this.particles = particles;
+        }
+    }
 
     private void Start()
     {
@@ -64,6 +82,7 @@ public class MapUI : MonoBehaviour
             Destroy(child.gameObject);
 
         _nodeObjects.Clear();
+        _effectVisuals.Clear();
 
         // ── 노드 버튼 생성 ────────────────────────────────────────────────────
         for (int floor = 0; floor < manager.totalFloors; floor++)
@@ -81,6 +100,15 @@ public class MapUI : MonoBehaviour
                 // 앵커를 하단 중앙으로 설정하여 절대좌표(anchoredPosition)로 배치
                 rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
                 rt.anchoredPosition = pos;
+
+                var effectChild = obj.transform.Find(effectChildName);
+                if (effectChild != null)
+                {
+                    _effectVisuals[map] = new EffectVisual(
+                        effectChild.gameObject,
+                        effectChild.GetComponentsInChildren<Image>(true),
+                        effectChild.GetComponentsInChildren<ParticleSystem>(true));
+                }
 
                 ApplyState(obj, map);
 
@@ -144,26 +172,25 @@ public class MapUI : MonoBehaviour
         if (obj.TryGetComponent<Button>(out var btn))
             btn.interactable = !map.isCleared && map.isAccessible;
 
-        var effectObj = obj.transform.Find(effectChildName);
-        if (effectObj != null)
+        if (_effectVisuals.TryGetValue(map, out var effectVisual))
         {
             bool showEffect = map.nodeType != NodeType.Normal && !map.isCleared;
-            effectObj.gameObject.SetActive(showEffect);
+            effectVisual.gameObject.SetActive(showEffect);
 
             if (showEffect)
             {
                 Color effectColor = map.isAccessible ? Color.white : new Color(0.3f, 0.3f, 0.3f);
-                SetEffectColor(effectObj, effectColor);
+                SetEffectColor(effectVisual, effectColor);
             }
         }
     }
 
-    private void SetEffectColor(Transform effectObj, Color color)
+    private void SetEffectColor(EffectVisual effectVisual, Color color)
     {
-        foreach (var img in effectObj.GetComponentsInChildren<Image>(true))
+        foreach (var img in effectVisual.images)
             img.color = color;
 
-        foreach (var ps in effectObj.GetComponentsInChildren<ParticleSystem>(true))
+        foreach (var ps in effectVisual.particles)
         {
             var main = ps.main;
             main.startColor = color;
@@ -173,12 +200,11 @@ public class MapUI : MonoBehaviour
     // Image를 길쭉한 RectTransform으로 회전시켜 두 점 사이의 연결선을 그린다.
     private void DrawLine(Vector2 from, Vector2 to)
     {
-        var lineObj = new GameObject("Line");
-        lineObj.transform.SetParent(mapContainer, false);
+        GameObject lineObj = Instantiate(linePrefab, mapContainer);
         // 노드 버튼보다 먼저 렌더링되도록 가장 뒤로 이동
         lineObj.transform.SetSiblingIndex(0);
 
-        var img = lineObj.AddComponent<Image>();
+        var img = lineObj.GetComponent<Image>();
         img.color = new Color(0.6f, 0.6f, 0.6f, 0.6f);
 
         var rt = lineObj.GetComponent<RectTransform>();
