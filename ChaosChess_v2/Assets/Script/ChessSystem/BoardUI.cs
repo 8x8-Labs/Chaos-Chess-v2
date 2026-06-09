@@ -10,8 +10,13 @@ public class BoardUI : MonoBehaviour
     [SerializeField] private TileBase MoveTile;
     [SerializeField] private TileBase CaptureTile;
 
+    [Header("직전 수 하이라이트 (전용 레이어)")]
+    [SerializeField] private Tilemap LastMoveBoard;
+    [SerializeField] private TileBase LastMoveTile;
+
     private Vector3Int prvMouseCellPos;
     private List<Vector3Int> drawnMoveTilePositions = new List<Vector3Int>();
+    private readonly List<Vector3Int> lastMoveTilePositions = new List<Vector3Int>();
 
     public void DrawSelectTile(Vector3Int pos)
     {
@@ -77,5 +82,34 @@ public class BoardUI : MonoBehaviour
 
             drawnMoveTilePositions.Add(pos);
         }
+    }
+
+    /// <summary>직전 수의 출발/도착 칸을 전용 레이어에 하이라이트합니다.
+    /// 좌표가 유효하지 않으면(예: -1) 해당 칸은 칠하지 않으므로, (-1,-1)을 넘기면 클리어만 수행됩니다.</summary>
+    public void DrawLastMove(Vector3Int from, Vector3Int to)
+    {
+        ClearLastMove();
+        StampLastMove(from);
+        StampLastMove(to);
+    }
+
+    private void StampLastMove(Vector3Int pos)
+    {
+        if (LastMoveBoard == null || LastMoveTile == null) return;
+        if (pos.x < 0 || pos.y < 0) return;
+
+        LastMoveBoard.SetTile(pos, LastMoveTile);
+        LastMoveBoard.SetTileFlags(pos, TileFlags.None);
+        lastMoveTilePositions.Add(pos);
+    }
+
+    public void ClearLastMove()
+    {
+        if (LastMoveBoard != null)
+        {
+            foreach (Vector3Int pos in lastMoveTilePositions)
+                LastMoveBoard.SetTile(pos, null);
+        }
+        lastMoveTilePositions.Clear();
     }
 }
