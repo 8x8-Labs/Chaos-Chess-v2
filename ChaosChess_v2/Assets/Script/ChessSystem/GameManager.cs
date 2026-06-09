@@ -114,6 +114,9 @@ public class GameManager : MonoBehaviour
         {
             BoardManager.Instance.OnLastMoveChanged -= boardUI.DrawLastMove;
             BoardManager.Instance.OnLastMoveChanged += boardUI.DrawLastMove;
+
+            BoardManager.Instance.OnMoveBlocked -= boardUI.DrawBlockedMove;
+            BoardManager.Instance.OnMoveBlocked += boardUI.DrawBlockedMove;
         }
 
         OnTimeReversalRequired -= HandleTimeReversal;

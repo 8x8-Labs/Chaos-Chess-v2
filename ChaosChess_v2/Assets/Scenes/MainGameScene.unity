@@ -9729,6 +9729,7 @@ MonoBehaviour:
   CaptureTile: {fileID: 11400000, guid: 5cf46e4da3ae88d43adfcc7529c75573, type: 2}
   LastMoveBoard: {fileID: 267020847}
   LastMoveTile: {fileID: 11400000, guid: 45d467bd40f011b449c184e90d796b27, type: 2}
+  BlockedMoveTile: {fileID: 11400000, guid: da4a65c4809a7c0408dfec003b0e5190, type: 2}
 --- !u!114 &1388470024
 MonoBehaviour:
   m_ObjectHideFlags: 0
