@@ -81,7 +81,8 @@ public class SyncEffect : TileEffector
 
     public override void OnPieceExit(Piece piece)
     {
-        TryBeginSynchronizedMove(piece, tilePos, child?.TilePos ?? default);
+        if (child != null)
+            TryBeginSynchronizedMove(piece, tilePos, child.TilePos);
     }
 
     public void OnLinkedTileExit(Piece piece)
@@ -168,7 +169,8 @@ public class SyncChild : TileEffector
 
     public override void OnPieceExit(Piece piece)
     {
-        parent?.OnLinkedTileExit(piece);
+        if (parent != null)
+            parent.OnLinkedTileExit(piece);
     }
 }
 
@@ -187,7 +189,17 @@ public class SyncMoveTrigger : PieceEffector
 
     public override void OnPieceMove(Vector3Int dest)
     {
-        parent?.CompleteSynchronizedMove(linkedPiece, startPos, dest);
+        if (parent != null)
+            parent.CompleteSynchronizedMove(linkedPiece, startPos, dest);
+
+        Revert();
+    }
+
+    public override void OnPieceCaptured()
+    {
+        if (parent != null)
+            parent.Revert();
+
         Revert();
     }
 }
