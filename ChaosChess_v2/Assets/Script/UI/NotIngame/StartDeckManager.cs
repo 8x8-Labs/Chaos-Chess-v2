@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,10 +10,14 @@ public class StartDeckManager : MonoBehaviour
     [SerializeField] private int commonCardCount = 4;
     [SerializeField] private int uncommonCardCount = 2;
     [SerializeField] private int uniqueCardCount = 1;
+    [SerializeField] private int maxRerollCount = 3;
     [SerializeField] private float rerollCardInterval = 0.12f;
     [SerializeField] private float rerollAnimationDurationMultiplier = 0.45f;
+    [SerializeField] private float disabledTextAlpha = 0.5f;
 
     private readonly List<GameObject> currentStarterCards = new List<GameObject>();
+    private TMP_Text rerollButtonText;
+    private int remainingRerollCount;
 
     private void OnEnable()
     {
@@ -29,6 +34,8 @@ public class StartDeckManager : MonoBehaviour
     public void Init()
     {
         CacheRerollButton();
+        remainingRerollCount = Mathf.Max(0, maxRerollCount);
+        UpdateRerollButtonText();
         SetRerollButtonInteractable(false);
         RemoveCurrentStarterCards();
         DealStarterCards();
@@ -36,6 +43,10 @@ public class StartDeckManager : MonoBehaviour
 
     public void Reroll()
     {
+        if (remainingRerollCount <= 0) return;
+
+        remainingRerollCount--;
+        UpdateRerollButtonText();
         SetRerollButtonInteractable(false);
         RemoveCurrentStarterCards();
         DealStarterCards();
@@ -94,7 +105,7 @@ public class StartDeckManager : MonoBehaviour
 
     private void EnableRerollButton()
     {
-        SetRerollButtonInteractable(true);
+        SetRerollButtonInteractable(remainingRerollCount > 0);
     }
 
     private void SetRerollButtonInteractable(bool interactable)
@@ -102,19 +113,50 @@ public class StartDeckManager : MonoBehaviour
         CacheRerollButton();
         if (rerollButton != null)
             rerollButton.interactable = interactable;
+
+        SetRerollButtonTextAlpha(interactable ? 1f : disabledTextAlpha);
     }
 
     private void CacheRerollButton()
     {
-        if (rerollButton != null) return;
+        if (rerollButton != null)
+        {
+            CacheRerollButtonText();
+            return;
+        }
 
         StartDeckRerollButton marker = GetComponentInChildren<StartDeckRerollButton>(true);
         if (marker != null)
         {
             rerollButton = marker.Button;
+            CacheRerollButtonText();
             return;
         }
 
         Debug.LogWarning($"{nameof(StartDeckManager)}에 {nameof(rerollButton)} 참조가 연결되지 않았습니다.", this);
+    }
+
+    private void CacheRerollButtonText()
+    {
+        if (rerollButtonText != null || rerollButton == null) return;
+
+        rerollButtonText = rerollButton.GetComponentInChildren<TMP_Text>(true);
+    }
+
+    private void UpdateRerollButtonText()
+    {
+        CacheRerollButtonText();
+        if (rerollButtonText != null)
+            rerollButtonText.text = $"다시 뽑기 {remainingRerollCount}/{Mathf.Max(0, maxRerollCount)}";
+    }
+
+    private void SetRerollButtonTextAlpha(float alpha)
+    {
+        CacheRerollButtonText();
+        if (rerollButtonText == null) return;
+
+        Color color = rerollButtonText.color;
+        color.a = Mathf.Clamp01(alpha);
+        rerollButtonText.color = color;
     }
 }
