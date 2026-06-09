@@ -7,6 +7,14 @@ public class GameManager : MonoBehaviour
 {
     private const int AiMoveTimeMs = 5000;
 
+    // 모바일에서는 엔진이 즉시 수를 반환해 AI가 너무 빠르게 두는 느낌을 주므로,
+    // 수를 적용하기 전 최소한의 연출 딜레이를 보장한다 (초 단위).
+#if UNITY_ANDROID || UNITY_IOS
+    private const float MinAiMoveDelaySeconds = 0.8f;
+#else
+    private const float MinAiMoveDelaySeconds = 0f;
+#endif
+
     public GameResult FinishType { get; set; } = GameResult.None;
 
     public static GameManager Instance;
@@ -494,21 +502,44 @@ public class GameManager : MonoBehaviour
         if (IsEndGame)
             return;
 
+        float requestTime = Time.realtimeSinceStartup;
+
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,
             moveTimeMs: AiMoveTimeMs,
             callback: (uciMove) =>
             {
-                if (BoardManager.Instance.IsValidUciMove(uciMove))
+                RunAfterMinAiDelay(requestTime, () =>
                 {
-                    BoardManager.Instance.ApplyUCIMove(uciMove);
-                    return;
-                }
+                    if (IsEndGame)
+                        return;
 
-                Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
-                ApplyFallbackLegalAIMove();
+                    if (BoardManager.Instance.IsValidUciMove(uciMove))
+                    {
+                        BoardManager.Instance.ApplyUCIMove(uciMove);
+                        return;
+                    }
+
+                    Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
+                    ApplyFallbackLegalAIMove();
+                });
             }
         );
+    }
+
+    // 엔진 응답이 최소 연출 시간보다 빨리 도착하면 남은 시간만큼 지연 후 실행한다.
+    private void RunAfterMinAiDelay(float requestTime, Action action)
+    {
+        float elapsed = Time.realtimeSinceStartup - requestTime;
+        float remaining = MinAiMoveDelaySeconds - elapsed;
+
+        if (remaining <= 0f)
+        {
+            action();
+            return;
+        }
+
+        DOVirtual.DelayedCall(remaining, () => action(), ignoreTimeScale: true);
     }
 
     private void ApplyFallbackLegalAIMove()
