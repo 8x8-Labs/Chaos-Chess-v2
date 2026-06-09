@@ -37,6 +37,16 @@ public class CardDataSOEditor : Editor
     SerializedProperty limitTurn;
     SerializedProperty statusDisplayType;
 
+    // VFX 연출
+    SerializedProperty vfxApply;
+    SerializedProperty vfxLoop;
+    SerializedProperty vfxHook;
+    SerializedProperty vfxRevert;
+    SerializedProperty vfxPlayApplyAnim;
+    SerializedProperty vfxPlayHookAnim;
+    SerializedProperty vfxAnimStrength;
+    SerializedProperty vfxAnimDuration;
+
     // 부가 정보
     SerializedProperty needAdditionalDescription;
     SerializedProperty descriptionType;
@@ -48,6 +58,7 @@ public class CardDataSOEditor : Editor
 
     // 섹션 토글 상태
     bool showBaseInfo = true;
+    bool showVFX = true;
     bool showTypeSettings = true;
     bool showAdditionalInfo = true;
 
@@ -87,6 +98,16 @@ public class CardDataSOEditor : Editor
         limitTurn = serializedObject.FindProperty("LimitTurn");
         statusDisplayType = serializedObject.FindProperty("StatusDisplayType");
 
+        SerializedProperty vfx = serializedObject.FindProperty("VFX");
+        vfxApply = vfx.FindPropertyRelative("ApplyVFXPrefab");
+        vfxLoop = vfx.FindPropertyRelative("LoopVFXPrefab");
+        vfxHook = vfx.FindPropertyRelative("HookVFXPrefab");
+        vfxRevert = vfx.FindPropertyRelative("RevertVFXPrefab");
+        vfxPlayApplyAnim = vfx.FindPropertyRelative("PlayApplyAnim");
+        vfxPlayHookAnim = vfx.FindPropertyRelative("PlayHookAnim");
+        vfxAnimStrength = vfx.FindPropertyRelative("AnimStrength");
+        vfxAnimDuration = vfx.FindPropertyRelative("AnimDuration");
+
         needAdditionalDescription = serializedObject.FindProperty("NeedAdditionalDescription");
         descriptionType = serializedObject.FindProperty("DescriptionType");
         additionalDescriptionTitle = serializedObject.FindProperty("AdditionalDescriptionTitle");
@@ -117,6 +138,18 @@ public class CardDataSOEditor : Editor
                 EditorGUILayout.Space(4);
                 EditorGUILayout.PropertyField(statusDisplayType, new GUIContent("상태 표시 타입"));
                 DrawStatusDisplayPreview();
+            }
+        }
+
+        EditorGUILayout.Space(6);
+
+        // ── VFX 연출 설정 ───────────────────────────────
+        showVFX = DrawSectionHeader("VFX 연출 설정", showVFX);
+        if (showVFX)
+        {
+            using (new EditorGUILayout.VerticalScope(sectionBoxStyle))
+            {
+                DrawVFXFields();
             }
         }
 
@@ -167,6 +200,32 @@ public class CardDataSOEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
+    // ── VFX 연출 필드 렌더링 ─────────────────────────────
+    void DrawVFXFields()
+    {
+        HelpBox("효과 적용/유지/소멸 및 게임 훅 발동 시 재생할 파티클·트윈 연출입니다. 비워두면 해당 시점 연출은 생략됩니다.", MessageType.None);
+
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("파티클 프리팹", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(vfxApply, new GUIContent("적용 시 (1회)"));
+            EditorGUILayout.PropertyField(vfxLoop, new GUIContent("유지 중 (루프)"));
+            EditorGUILayout.PropertyField(vfxHook, new GUIContent("훅 발동 시 (1회)"));
+            EditorGUILayout.PropertyField(vfxRevert, new GUIContent("소멸 시 (1회)"));
+        }
+
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("기본 트윈 (펀치/스케일)", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(vfxPlayApplyAnim, new GUIContent("적용 시 펀치"));
+            EditorGUILayout.PropertyField(vfxPlayHookAnim, new GUIContent("훅 시 펀치"));
+            EditorGUILayout.PropertyField(vfxAnimStrength, new GUIContent("펀치 세기"));
+            EditorGUILayout.PropertyField(vfxAnimDuration, new GUIContent("펀치 진행 시간(초)"));
+        }
+    }
+
     // ── 타입별 필드 렌더링 ───────────────────────────────
     void DrawTypeSpecificFields(CardType type)
     {
@@ -202,6 +261,10 @@ public class CardDataSOEditor : Editor
             EditorGUILayout.HelpBox("-1 : 턴 제한 없이 계속 유지됩니다.", MessageType.Warning);
         }
         EditorGUILayout.PropertyField(requiredPieceCount, new GUIContent("필요 기물 수"));
+
+        EditorGUILayout.Space(6);
+        HelpBox("효과 범위를 타일로 표시하려면 아래에서 타일을 지정하세요. (예: 무하한 3x3 범위)", MessageType.None);
+        DrawTileEffectFields();
     }
 
     void DrawTileFields()
