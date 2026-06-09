@@ -62,7 +62,7 @@ public static class VFXSpawner
         foreach (ParticleSystem ps in systems)
         {
             ParticleSystem.MainModule main = ps.main;
-            float duration = main.duration + main.startLifetime.constantMax;
+            float duration = main.startDelay.constantMax + main.duration + main.startLifetime.constantMax;
             if (duration > maxLifetime)
                 maxLifetime = duration;
         }

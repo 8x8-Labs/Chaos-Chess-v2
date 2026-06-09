@@ -318,7 +318,12 @@ public abstract class PieceEffector : Effector, IPieceEffect
 
     protected override Transform VFXFollowTarget => target != null ? target.transform : null;
 
-    public virtual void OnPieceCaptured() { PlayHookVFX(); }
+    public virtual void OnPieceCaptured()
+    {
+        // 잡혀서 곧 파괴될 기물이므로 펀치 트윈 없이 파티클 버스트만 재생합니다.
+        if (target != null)
+            PlayHookVFX(target.transform.position, null);
+    }
     public virtual void OnPieceCapture() { PlayHookVFX(); }
     public virtual void OnPieceMove(Vector3Int dest) { PlayHookVFX(); }
 }
