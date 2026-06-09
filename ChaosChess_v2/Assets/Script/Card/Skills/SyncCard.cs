@@ -118,6 +118,7 @@ public class SyncEffect : TileEffector
 
         if (linkedPiece == null)
         {
+            Revert();
             return;
         }
 
