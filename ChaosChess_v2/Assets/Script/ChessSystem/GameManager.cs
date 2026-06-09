@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void LoadMapManager()
     {
-        FairyStockfishBridge.Instance.InitEngine("chess");
+        FairyStockfishBridge.Instance.InitEngine("chaoschess");
         if (MapManager.Instance != null && MapManager.Instance.curMap != null)
         {
             int elo = MapManager.Instance.curMap.ELO;
