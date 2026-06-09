@@ -12,9 +12,9 @@ Git 변경사항을 자동으로 감지하고 GitHub PR을 생성하는 스킬.
  
 ## 언어 규칙 (필수)
  
-- **PR 제목**: Conventional Commits 형식(`feat:`, `fix:` 등)은 영어로 작성
+- **PR 제목 태그**: 변경 유형에 맞는 영어 태그(`[Feat]`, `[Fix]` 등)를 앞에 붙인다 — 이 태그로 release-drafter autolabeler가 **버전 라벨을 자동 부여**한다 (아래 "버전 / 릴리스 규칙" 참고)
 - **PR 본문 전체**: 반드시 한글로 작성
-- 제목 예시: `[Feature] 카드 등록 UI 추가`
+- 제목 예시: `[Feat] 카드 등록 UI 추가`, `[Fix] 인벤토리 슬롯 정렬 오류 수정`
  
 ---
  
@@ -69,9 +69,22 @@ git log origin/main..HEAD --oneline
 변경사항을 분석해 자동으로 작성한다.
  
 **PR 제목 규칙:**
-- `[Feature] <한글 설명>` 형식 사용
-- 설명은 **반드시 한글**
-- 예: `[Feature] 카드 뒤집기 애니메이션 추가`, `[Feature] 인벤토리 슬롯 정렬 오류 수정`
+- `[태그] <한글 설명>` 형식 사용. 설명은 **반드시 한글**
+- **태그는 변경 유형에 맞게 고른다.** release-drafter autolabeler가 제목 태그(또는 브랜치명)를 보고 버전 라벨을 자동 부여하므로, 태그가 틀리면 릴리스 노트 분류와 버전 증가(minor/patch)가 어긋난다.
+
+| 변경 유형 | 제목 태그 | 부여되는 라벨 | 버전 |
+|-----------|-----------|---------------|------|
+| 새 기능 | `[Feat]` (또는 `[Feature]`) | `feat` | minor |
+| 버그 수정 | `[Fix]` (또는 `[Bug]`) | `fix` | patch |
+| 기능 수정 | `[Modify]` | `modify` | patch |
+| 리팩토링 | `[Refactor]` | `refactor` | patch |
+| 삭제 | `[Remove]` | `remove` | patch |
+| 문서 | `[Docs]` | `docs` | patch |
+| 빌드·설정·패키지 | `[Chore]` | `chore` | patch |
+| 호환성 깨짐 | (제목 태그 없음 — `major` 라벨 수동 부여) | `major` | major |
+
+- 예: `[Feat] 카드 뒤집기 애니메이션 추가`, `[Fix] 인벤토리 슬롯 정렬 오류 수정`
+- 브랜치명도 autolabeler 대상이다: `feature/*`→`feat`, `fix/*`·`bugfix/*`→`fix`, `refactor/*`→`refactor`, `chore/*`→`chore`. 제목 태그와 브랜치 유형이 일치하도록 맞춘다.
  
 **PR 본문 규칙:**
 - 본문 전체를 **한글**로 작성한다
@@ -98,18 +111,24 @@ git log origin/main..HEAD --oneline
  
 변경사항을 분석해 아래 기준으로 라벨을 결정한다.
  
-**기본 라벨 규칙:**
+> ⚠️ **라벨이 곧 버전이다.** 이 저장소는 [release-drafter](https://github.com/release-drafter/release-drafter)가 **PR 라벨**로 릴리스 노트 분류와 다음 SemVer 버전을 계산한다. autolabeler가 제목/브랜치로 1차 부여하지만 자동 라벨이 비거나 틀릴 수 있으니, 아래 표의 **release-drafter 라벨(`feat`/`fix`/`modify`/…)** 을 직접 확인·부여한다. 상세 규칙은 [docs/RELEASE.md](../../../docs/RELEASE.md)와 `.github/release-drafter.yml` 참고.
  
-| 조건 | 라벨 |
-|------|------|
-| 새 기능 추가 (`feat`, 신규 API/컴포넌트 등) | `feature` |
-| 버그 수정 (`fix`, 오류 해결 등) | `bug` |
-| 리팩토링, 코드 정리 (`refactor`, `chore`) | `refactor` |
-| 문서 수정 (`docs`, README, 주석 등) | `documentation` |
-| 테스트 코드 추가/수정 | `test` |
-| 의존성, 빌드, 설정 파일 변경 | `chore` |
-| UI/스타일 변경 | `style` |
-| 성능 개선 | `performance` |
+**기본 라벨 규칙 (release-drafter 버전 매핑):**
+ 
+| 조건 | 라벨 | 버전 영향 |
+|------|------|-----------|
+| 새 기능 추가 (신규 API/컴포넌트 등) | `feat` | **minor** |
+| 버그 수정 (오류 해결 등) | `fix` | patch |
+| 기존 기능 수정 (동작 변경) | `modify` | patch |
+| 리팩토링 (동작 변화 없는 개선) | `refactor` | patch |
+| 코드·파일 삭제 | `remove` | patch |
+| 문서 수정 (README, 주석 등) | `docs` | patch |
+| 빌드·설정·의존성·패키지·테스트·스타일·성능 | `chore` | patch |
+| 호환성 깨지는 변경 | `major` | **major** |
+| 릴리스 노트에서 제외 | `skip-changelog` | 없음 |
+ 
+- `feat` 라벨이 하나라도 있으면 그 PR은 **minor** 로 올라간다(유형이 섞이면 가장 높은 버전 영향을 따른다). 단순 수정 PR에 `feat`를 잘못 붙이지 않도록 주의한다.
+- 위 라벨이 저장소에 없으면 [docs/RELEASE.md](../../../docs/RELEASE.md) 5절의 셋업 명령으로 생성한다.
  
 **Unity 특화 라벨 규칙:**
  
@@ -120,6 +139,8 @@ git log origin/main..HEAD --oneline
 | 애니메이션 컨트롤러·클립 변경 | `animation` |
 | `ProjectSettings/` 변경 | `build` |
 | 외부 패키지(`Packages/`) 변경 | `chore` |
+
+> Unity 특화 라벨은 **보조 분류용**이다. 버전 계산에는 영향을 주지 않으므로, 위 "기본 라벨 규칙"의 release-drafter 버전 라벨(`feat`/`fix`/… )을 **반드시 함께** 붙인다.
  
 **카드 관련 라벨 규칙 (필수):**
 - 변경된 파일 경로, 커밋 메시지, PR 내용 중 다음 키워드가 하나라도 포함되면 `Card` 라벨을 **반드시** 추가한다:
@@ -128,8 +149,8 @@ git log origin/main..HEAD --oneline
 > 라벨은 여러 개 적용 가능하다. `Card` 라벨은 다른 라벨과 함께 병기한다.
  
 **라벨 적용 예시:**
-- 카드 결제 버그 수정 → `bug`, `Card`
-- 카드 컴포넌트 신규 구현 → `feature`, `Card`
+- 카드 결제 버그 수정 → `fix`, `Card`
+- 카드 컴포넌트 신규 구현 → `feat`, `Card`
 - 카드 관련 없는 리팩토링 → `refactor`
  
 ### 5단계: PR 생성 전 확인
