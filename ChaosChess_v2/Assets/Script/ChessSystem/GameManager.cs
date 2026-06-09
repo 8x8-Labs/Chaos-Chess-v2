@@ -517,6 +517,10 @@ public class GameManager : MonoBehaviour
             {
                 RunAfterMinAiDelay(requestTime, () =>
                 {
+                    // 지연 도중 씬 전환으로 인스턴스가 파괴되었을 수 있어 유효성 재확인
+                    if (this == null || BoardManager.Instance == null)
+                        return;
+
                     if (IsEndGame)
                         return;
 
