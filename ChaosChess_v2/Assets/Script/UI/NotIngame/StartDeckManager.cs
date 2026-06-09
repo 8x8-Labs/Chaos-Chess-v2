@@ -7,6 +7,7 @@ public class StartDeckManager : MonoBehaviour
 {
     [SerializeField] private UICardPanel uiCardPanel;
     [SerializeField] private Button rerollButton;
+    [SerializeField] private TMP_Text rerollButtonText;
     [SerializeField] private int commonCardCount = 4;
     [SerializeField] private int uncommonCardCount = 2;
     [SerializeField] private int uniqueCardCount = 1;
@@ -16,7 +17,6 @@ public class StartDeckManager : MonoBehaviour
     [SerializeField] private float disabledTextAlpha = 0.5f;
 
     private readonly List<GameObject> currentStarterCards = new List<GameObject>();
-    private TMP_Text rerollButtonText;
     private int remainingRerollCount;
 
     private void OnEnable()
@@ -155,8 +155,6 @@ public class StartDeckManager : MonoBehaviour
         CacheRerollButtonText();
         if (rerollButtonText == null) return;
 
-        Color color = rerollButtonText.color;
-        color.a = Mathf.Clamp01(alpha);
-        rerollButtonText.color = color;
+        rerollButtonText.alpha = Mathf.Clamp01(alpha);
     }
 }
