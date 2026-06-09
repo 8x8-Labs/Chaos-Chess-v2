@@ -26,7 +26,7 @@ public class ButtonCanvas : ButtonParent
 
     protected virtual void Awake()
     {
-        canvasGroup = GetComponent<CanvasGroup>();;
+        canvasGroup = GetComponent<CanvasGroup>();
         canvas = GetComponent<Canvas>();
         scrollRect = GetComponentInChildren<ScrollRect>();
     }
