@@ -2,9 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// 동기화 - 일반
-/// 동기화 칸에 들어가면 반대 행의 기물이 동기화된 기물과 함께 움직이며,
-/// 이 효과는 1턴 동안만 발동하고 반대 행에 기물이 없으면 사라집니다.
-/// 동기화된 기물은 다른 쪽으로 이동할 경우 효과가 해제됩니다.
+/// 선택한 칸과 반대 행 같은 열의 칸을 동기화 칸으로 만듭니다.
+/// 두 칸에 기물이 모두 있으면 어느 쪽이 먼저 이동하든 다른 기물이 동일하게 이동하며,
+/// 이 효과는 한 번 발동한 후 사라집니다.
 /// </summary>
 public class SyncCard : CardData, ITileCard
 {
@@ -36,6 +36,8 @@ public class SyncCard : CardData, ITileCard
         parent.DataSO = DataSO;
 
         parent.child = child;
+        child.parent = parent;
+        child.Apply();
         parent.Apply();
     }
 }
@@ -47,15 +49,12 @@ public class SyncEffect : TileEffector
 
     public SyncChild child;
     private SyncLinkLine syncLine;
+    private bool isMirroring;
+    private bool isResolving;
 
     protected override void OnApply()
     {
-        if (DataSO.NeedEffectTileBase)
-        {
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(tilePos, DataSO, 0, RemainingTurns);
-            if (child != null)
-                BoardManager.Instance.TileEffectDrawer.SetTileEffect(child.TilePos, DataSO, 0, child.RemainingTurns);
-        }
+        ShowTileEffect(DataSO);
 
         if (LinkLineSettings.Enabled && child != null)
             syncLine = SyncLinkLine.Create(transform, tilePos, child.TilePos, LinkLineSettings);
@@ -65,54 +64,71 @@ public class SyncEffect : TileEffector
 
     protected override void OnRevert()
     {
-        // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
-        {
             BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(tilePos);
-            if (child != null)
-                BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(child.TilePos);
-        }
 
         DestroySyncLine();
         BoardManager.Instance?.UnregisterTileEffector(tilePos, this);
+
         if (child != null)
         {
             child.Revert();
-            Destroy(child.gameObject);
+            child = null;
         }
+
         Destroy(gameObject);
     }
 
-    public override void OnPieceEnter(Piece piece)
+    public override void OnPieceExit(Piece piece)
     {
-        // child가 이미 활성화 중이거나 소멸된 경우 무시
-        if (child == null || child.SynchronizedPiece != null) return;
+        TryBeginSynchronizedMove(piece, tilePos, child?.TilePos ?? default);
+    }
 
-        // 반대 칸에 기물이 없으면 효과 소멸
-        Piece oppoPiece = BoardManager.Instance.GetPiece(child.TilePos);
-        if (oppoPiece == null)
+    public void OnLinkedTileExit(Piece piece)
+    {
+        if (child == null) return;
+        TryBeginSynchronizedMove(piece, child.TilePos, tilePos);
+    }
+
+    private void TryBeginSynchronizedMove(Piece movingPiece, Vector3Int startPos, Vector3Int linkedTile)
+    {
+        if (isMirroring || isResolving || child == null) return;
+
+        Piece linkedPiece = BoardManager.Instance.GetPiece(linkedTile);
+        if (linkedPiece == null)
         {
             Revert();
             return;
         }
 
-        // child 참조를 끊어 OnRevert에서 이중 정리 방지
-        SyncChild activatedChild = child;
-        child = null;
+        isResolving = true;
+        SyncMoveTrigger trigger = movingPiece.gameObject.AddComponent<SyncMoveTrigger>();
+        trigger.Init(movingPiece, -1);
+        trigger.parent = this;
+        trigger.linkedPiece = linkedPiece;
+        trigger.startPos = startPos;
+        trigger.Apply();
+    }
 
-        activatedChild.Activate(oppoPiece);
+    public void CompleteSynchronizedMove(Piece linkedPiece, Vector3Int startPos, Vector3Int destination)
+    {
+        if (!isResolving) return;
+        isResolving = false;
 
-        // 입장 기물에 SyncFollower 부착 — 다음 이동 시 반대 기물 동기 이동
-        SyncFollower follower = piece.gameObject.AddComponent<SyncFollower>();
+        if (linkedPiece == null)
+        {
+            return;
+        }
 
-        follower.DataSO = DataSO;
-
-        follower.syncChild = activatedChild;
-        follower.syncTilePos = tilePos;
-        follower.Init(piece, -1);
+        Vector3Int target = linkedPiece.Pos + (destination - startPos);
+        if (BoardManager.Instance.IsInside(target))
+        {
+            isMirroring = true;
+            BoardManager.Instance.ForceTeleport(linkedPiece, target);
+            isMirroring = false;
+        }
 
         Revert();
-        follower.Apply();
     }
 
     private void DestroySyncLine()
@@ -133,125 +149,45 @@ public class SyncEffect : TileEffector
 public class SyncChild : TileEffector
 {
     public CardDataSO DataSO;
-
-    public Piece SynchronizedPiece;
-    private bool isMirroring;
+    public SyncEffect parent;
 
     protected override void OnApply()
     {
-        Piece.OnPieceDestroyed += HandlePieceDestroyed;
-
         ShowTileEffect(DataSO);
-
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
-        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
-
-        // 타일 이펙트 제거
         if (DataSO.NeedEffectTileBase)
             BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(tilePos);
 
-        SynchronizedPiece = null;
         BoardManager.Instance?.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }
 
-    private void HandlePieceDestroyed(Piece piece)
-    {
-        if (piece == SynchronizedPiece) Revert();
-    }
-
-    // Revert()를 거치지 않고 오브젝트가 파괴되는 예외적 경로 대비
-    protected override void OnDestroy()
-    {
-        base.OnDestroy();
-        Piece.OnPieceDestroyed -= HandlePieceDestroyed;
-    }
-
-    /// <summary>동기화 기물을 설정하고 타일 감시를 시작합니다.</summary>
-    public void Activate(Piece synced)
-    {
-        SynchronizedPiece = synced;
-        Apply();
-    }
-
-    /// <summary>입장 기물의 이동 방향과 동일하게 동기화 기물을 이동합니다.</summary>
-    public void MirrorMove(Vector3Int from, Vector3Int to)
-    {
-        if (SynchronizedPiece == null)
-        {
-            Revert();
-            return;
-        }
-
-        Vector3Int delta = to - from;
-        Vector3Int target = SynchronizedPiece.Pos + delta;
-
-        if (!BoardManager.Instance.IsInside(target))
-        {
-            Revert();
-            return;
-        }
-
-        isMirroring = true;
-        BoardManager.Instance.ForceTeleport(SynchronizedPiece, target);
-        isMirroring = false;
-
-        Revert();
-    }
-
-    /// <summary>동기화 기물이 독립적으로 이동하면 동기화를 해제합니다.</summary>
     public override void OnPieceExit(Piece piece)
     {
-        if (!isMirroring && piece == SynchronizedPiece)
-            Revert();
+        parent?.OnLinkedTileExit(piece);
     }
 }
 
-public class SyncFollower : PieceEffector
+public class SyncMoveTrigger : PieceEffector
 {
-    public CardDataSO DataSO;
+    public SyncEffect parent;
+    public Piece linkedPiece;
+    public Vector3Int startPos;
 
-    public SyncChild syncChild;
-    public Vector3Int syncTilePos;
-    private bool isReady; // 동기화 칸 입장 이동은 무시, 다음 이동부터 적용
-
-    protected override void OnApply()
-    {
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance.TileEffectDrawer.SetTileEffect(syncTilePos, DataSO, 0, RemainingTurns);
-
-        isReady = false;
-    }
+    protected override void OnApply() { }
 
     protected override void OnRevert()
     {
-        // 타일 이펙트 제거
-        if (DataSO.NeedEffectTileBase)
-            BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(syncTilePos);
-
         Destroy(this);
     }
 
     public override void OnPieceMove(Vector3Int dest)
     {
-        if (!isReady)
-        {
-            isReady = true;
-            return;
-        }
-
-        if (syncChild != null)
-            syncChild.MirrorMove(syncTilePos, dest);
-        Revert();
-    }
-
-    public override void OnPieceCaptured()
-    {
-        if (syncChild != null) syncChild.Revert();
+        parent?.CompleteSynchronizedMove(linkedPiece, startPos, dest);
         Revert();
     }
 }
