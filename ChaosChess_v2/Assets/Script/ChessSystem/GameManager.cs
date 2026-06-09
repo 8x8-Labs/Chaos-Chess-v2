@@ -30,6 +30,8 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerInCheck { get; private set; }
 
     public bool IsGameInput = true;
+    /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
+    public bool AiAutoMoveEnabled = true;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
@@ -190,7 +192,9 @@ public class GameManager : MonoBehaviour
 
     public void SelectGrid(Vector3Int pos)
     {
-        if (!IsPlayerTurn) return;
+        // AI가 켜져 있으면 플레이어(화이트) 턴에만 입력을 허용합니다.
+        // AI를 끄면(카드 랩) 양쪽을 수동으로 둘 수 있도록 턴 색 제한을 해제합니다.
+        if (!IsPlayerTurn && AiAutoMoveEnabled) return;
         if (!BoardManager.Instance.IsInside(pos)) return;
 
         // 파괴된 기물이 잠겨있으면 잠금 해제
@@ -509,6 +513,9 @@ public class GameManager : MonoBehaviour
     public void RequestAIMove()
     {
         if (IsEndGame)
+            return;
+
+        if (!AiAutoMoveEnabled)
             return;
 
         float requestTime = Time.realtimeSinceStartup;
