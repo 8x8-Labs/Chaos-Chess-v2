@@ -146,11 +146,13 @@ public class LimitlessTileEffector : TileEffector, IArenaPersistentEffect
 
     protected override void OnApply()
     {
+        ShowTileEffect();
         BoardManager.Instance.RegisterTileEffector(tilePos, this);
     }
 
     protected override void OnRevert()
     {
+        ClearTileEffect();
         BoardManager.Instance.UnregisterTileEffector(tilePos, this);
         Destroy(gameObject);
     }

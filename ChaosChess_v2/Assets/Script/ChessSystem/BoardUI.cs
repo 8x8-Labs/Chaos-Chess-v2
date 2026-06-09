@@ -13,6 +13,8 @@ public class BoardUI : MonoBehaviour
     [Header("직전 수 하이라이트 (전용 레이어)")]
     [SerializeField] private Tilemap LastMoveBoard;
     [SerializeField] private TileBase LastMoveTile;
+    [Tooltip("효과로 차단되어 취소된 수의 from/to에 표시할 타일 (구분 색). 비우면 LastMoveTile 사용)")]
+    [SerializeField] private TileBase BlockedMoveTile;
 
     private Vector3Int prvMouseCellPos;
     private List<Vector3Int> drawnMoveTilePositions = new List<Vector3Int>();
@@ -89,16 +91,26 @@ public class BoardUI : MonoBehaviour
     public void DrawLastMove(Vector3Int from, Vector3Int to)
     {
         ClearLastMove();
-        StampLastMove(from);
-        StampLastMove(to);
+        StampMove(from, LastMoveTile);
+        StampMove(to, LastMoveTile);
     }
 
-    private void StampLastMove(Vector3Int pos)
+    /// <summary>효과로 차단되어 취소된 수의 시도 출발/도착 칸을 하이라이트합니다.
+    /// 직전 수 레이어를 공유하므로 다음 수가 그려질 때 자연히 덮어써집니다.</summary>
+    public void DrawBlockedMove(Vector3Int from, Vector3Int to)
     {
-        if (LastMoveBoard == null || LastMoveTile == null) return;
+        TileBase tile = BlockedMoveTile != null ? BlockedMoveTile : LastMoveTile;
+        ClearLastMove();
+        StampMove(from, tile);
+        StampMove(to, tile);
+    }
+
+    private void StampMove(Vector3Int pos, TileBase tile)
+    {
+        if (LastMoveBoard == null || tile == null) return;
         if (pos.x < 0 || pos.y < 0) return;
 
-        LastMoveBoard.SetTile(pos, LastMoveTile);
+        LastMoveBoard.SetTile(pos, tile);
         LastMoveBoard.SetTileFlags(pos, TileFlags.None);
         lastMoveTilePositions.Add(pos);
     }

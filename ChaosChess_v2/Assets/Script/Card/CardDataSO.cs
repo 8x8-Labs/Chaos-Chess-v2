@@ -8,6 +8,35 @@ public enum TileEffectAnimationMode
     Turn
 }
 
+/// <summary>
+/// 카드 효과가 기물/타일에 적용될 때 재생할 파티클·트윈 연출 설정입니다.
+/// 프리팹을 비워두면 해당 시점 연출은 자동으로 생략됩니다.
+/// </summary>
+[System.Serializable]
+public class CardVFXConfig
+{
+    [Header("파티클 프리팹")]
+    [Tooltip("효과 적용 순간 1회 재생")]
+    public GameObject ApplyVFXPrefab;
+    [Tooltip("효과가 유지되는 동안 지속 재생(앵커에 부착되어 따라다님)")]
+    public GameObject LoopVFXPrefab;
+    [Tooltip("이동/잡기/타일 진입 등 게임 훅 발동 시 1회 재생")]
+    public GameObject HookVFXPrefab;
+    [Tooltip("효과 소멸 순간 1회 재생")]
+    public GameObject RevertVFXPrefab;
+
+    [Header("기본 트윈 연출 (펀치/스케일)")]
+    [Tooltip("적용 시 앵커에 펀치 스케일 재생")]
+    public bool PlayApplyAnim = true;
+    [Tooltip("훅 발동 시 앵커에 펀치 스케일 재생")]
+    public bool PlayHookAnim = true;
+    [Range(0f, 1f)]
+    public float AnimStrength = 0.2f;
+    [Tooltip("펀치 트윈 진행 시간(초)")]
+    [Min(0.01f)]
+    public float AnimDuration = 0.3f;
+}
+
 [CreateAssetMenu(fileName = "Card Data", menuName = "Card/Card Data")]
 public class CardDataSO : ScriptableObject
 {
@@ -19,6 +48,10 @@ public class CardDataSO : ScriptableObject
 
     public CardType Type;
     public Tier CardTier;
+
+    [Space(30)]
+    [Header("VFX 연출 설정")]
+    public CardVFXConfig VFX = new CardVFXConfig();
 
     // 기물 타입에 필요한 설정
     [Space(30)]

@@ -216,6 +216,60 @@ public void Execute(CardEffectArgs args)
 
 ---
 
+## VFX 연출 (파티클 + 트윈)
+
+효과가 적용/유지/소멸되거나 게임 훅이 발동할 때 파티클과 기본 펀치 트윈을 자동으로 재생합니다.
+연출 에셋은 카드별 `CardDataSO.VFX`(`CardVFXConfig`)에 직접 연결합니다.
+
+### CardDataSO.VFX 필드
+
+| 필드 | 재생 시점 |
+|---|---|
+| `ApplyVFXPrefab` | 효과 적용 순간 1회 버스트 |
+| `LoopVFXPrefab` | 효과 유지 중 지속 루프 (앵커에 부착되어 따라다님) |
+| `HookVFXPrefab` | 게임 훅(이동/잡기/진입 등) 발동 시 1회 버스트 |
+| `RevertVFXPrefab` | 효과 소멸 순간 1회 버스트 |
+| `PlayApplyAnim` / `PlayHookAnim` | 적용/훅 시 앵커에 펀치 스케일 트윈 재생 여부 |
+| `AnimStrength` | 펀치 세기 |
+| `AnimDuration` | 펀치 트윈 진행 시간(초) |
+
+> 프리팹을 비워두면 해당 시점 연출은 자동으로 생략됩니다. 기존 카드(미설정)는 동작 변화가 없습니다.
+
+### 자동 재생 (apply / loop / revert)
+
+베이스 `Effector`의 `Apply()` / `Revert()`에 통합되어 있어 **서브클래스가 따로 호출할 필요가 없습니다.**
+위치/부착 대상은 각 타입이 제공합니다.
+
+| 타입 | 앵커 위치 | 루프 부착 대상 |
+|---|---|---|
+| `PieceEffector` | `target.transform.position` | 기물 transform (이동 시 따라가고, 기물 파괴 시 자동 정리) |
+| `TileEffector` | `GridPosToWorldPos(tilePos)` | 호스트 GameObject (호스트 파괴 시 자동 정리) |
+| `GlobalEffector` | 없음 → apply/loop/revert 연출 생략 (훅 VFX만 사용) |
+
+루프 VFX는 앵커의 자식으로 붙으므로 정상 `Revert`·강제 `Destroy`(기물 잡힘 등) 양쪽에서 누수 없이 정리됩니다.
+
+### 훅 VFX (opt-in)
+
+게임 훅 VFX는 **서브클래스에서 호출**해야 합니다. 베이스 훅 메서드가 기본으로 `PlayHookVFX()`를 호출하므로,
+훅을 override할 때 `base.OnXxx()`를 호출하면 훅 VFX를 함께 얻습니다(호출하지 않으면 무시).
+
+```csharp
+public override void OnPieceMove(Vector3Int dest)
+{
+    base.OnPieceMove(dest);  // HookVFXPrefab 버스트 + 펀치
+    // 고유 로직...
+}
+```
+
+직접 위치를 지정하려면 `PlayHookVFX(Vector3 worldPos, Transform punchTarget = null)`를 사용합니다.
+훅 버스트는 부모 없이 스폰되어 대상 기물이 같은 프레임에 파괴돼도(잡힘) 정상 표시됩니다.
+
+### 스폰/정리
+
+`VFXSpawner`(정적 헬퍼)가 담당합니다. 풀링은 적용하지 않으며(추후 확장), 원샷은 파티클 수명이 끝나면 자동 파괴됩니다.
+
+---
+
 ## 턴 관리
 
 `OnTurnChanged()`는 `GameManager.NextTurn()` 호출 시 `OnAnyTurnChanged` 이벤트를 통해 **자동으로 호출**됩니다.  

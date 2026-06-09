@@ -62,6 +62,7 @@ public abstract class Effector : MonoBehaviour, IEffect
         hasNotifiedApplied = true;
         OnAnyEffectApplied?.Invoke(this);
         OnEffectApplied();
+        PlayApplyVFX();
     }
 
     /// <summary>효과를 대상에서 제거합니다. 턴 이벤트를 해제하고 OnRevert()를 호출합니다.</summary>
@@ -77,6 +78,10 @@ public abstract class Effector : MonoBehaviour, IEffect
         bool shouldNotifyReverted = hasNotifiedApplied;
         hasNotifiedApplied = false;
 
+        StopLoopVFX();
+        if (shouldNotifyReverted)
+            PlayRevertVFX();
+
         OnRevert();
         if (shouldNotifyReverted)
             OnAnyEffectReverted?.Invoke(this);
@@ -88,6 +93,7 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     protected virtual void OnDestroy()
     {
+        StopLoopVFX();
         if (!isApplied) return;
 
         isApplied = false;
@@ -203,6 +209,69 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     /// <summary>선택 순서별 타일 연출 인덱스입니다. 필요 시 서브 클래스에서 재정의합니다.</summary>
     protected virtual int GetVisualEffectTileIndex() => 0;
+
+    // ───────── VFX 연출 (CardSO.VFX 기반 자동 재생) ─────────
+
+    private GameObject loopVFXInstance;
+
+    /// <summary>VFX 연출 기준 월드 좌표입니다. 서브클래스가 제공하지 않으면 위치 기반 연출(적용/유지/소멸)은 생략됩니다.</summary>
+    protected virtual bool TryGetVFXWorldPosition(out Vector3 pos) { pos = default; return false; }
+
+    /// <summary>루프 VFX를 부착하고 펀치를 적용할 대상입니다. 부착 대상이 파괴되면 루프도 함께 정리됩니다.</summary>
+    protected virtual Transform VFXFollowTarget => null;
+
+    /// <summary>효과 적용 시 1회 버스트 + 지속 루프 + 기본 펀치 트윈을 재생합니다.</summary>
+    private void PlayApplyVFX()
+    {
+        CardVFXConfig vfx = CardSO?.VFX;
+        if (vfx == null) return;
+        if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
+
+        Transform follow = VFXFollowTarget;
+        VFXSpawner.SpawnOneShot(vfx.ApplyVFXPrefab, pos, follow);
+
+        if (vfx.LoopVFXPrefab != null)
+            loopVFXInstance = VFXSpawner.SpawnLoop(vfx.LoopVFXPrefab, pos, follow);
+
+        if (vfx.PlayApplyAnim)
+            VFXSpawner.PlayPunch(follow, vfx.AnimStrength, vfx.AnimDuration);
+    }
+
+    /// <summary>효과 소멸 시 1회 버스트를 재생합니다. 호스트가 곧 파괴돼도 살아남도록 부모 없이 스폰합니다.</summary>
+    private void PlayRevertVFX()
+    {
+        CardVFXConfig vfx = CardSO?.VFX;
+        if (vfx == null || vfx.RevertVFXPrefab == null) return;
+        if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
+
+        VFXSpawner.SpawnOneShot(vfx.RevertVFXPrefab, pos, null);
+    }
+
+    /// <summary>지속 루프 VFX를 정리합니다.</summary>
+    private void StopLoopVFX()
+    {
+        if (loopVFXInstance == null) return;
+        Destroy(loopVFXInstance);
+        loopVFXInstance = null;
+    }
+
+    /// <summary>앵커 위치에 게임 훅 VFX를 재생합니다. 서브클래스 훅(이동/잡기/진입 등)에서 호출하세요.</summary>
+    protected void PlayHookVFX()
+    {
+        if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
+        PlayHookVFX(pos, VFXFollowTarget);
+    }
+
+    /// <summary>지정 월드 좌표에 게임 훅 VFX를 재생합니다. 버스트는 부모 없이 스폰되어 대상 파괴(기물 잡힘 등)와 무관하게 유지됩니다.</summary>
+    protected void PlayHookVFX(Vector3 worldPos, Transform punchTarget = null)
+    {
+        CardVFXConfig vfx = CardSO?.VFX;
+        if (vfx == null) return;
+
+        VFXSpawner.SpawnOneShot(vfx.HookVFXPrefab, worldPos, null);
+        if (vfx.PlayHookAnim)
+            VFXSpawner.PlayPunch(punchTarget, vfx.AnimStrength, vfx.AnimDuration);
+    }
 }
 
 /// <summary>기물에 부착되는 효과의 기반 추상 클래스</summary>
@@ -240,9 +309,23 @@ public abstract class PieceEffector : Effector, IPieceEffect
         SetDuration(duration);
     }
 
-    public virtual void OnPieceCaptured() { }
-    public virtual void OnPieceCapture() { }
-    public virtual void OnPieceMove(Vector3Int dest) { }
+    protected override bool TryGetVFXWorldPosition(out Vector3 pos)
+    {
+        if (target == null) { pos = default; return false; }
+        pos = target.transform.position;
+        return true;
+    }
+
+    protected override Transform VFXFollowTarget => target != null ? target.transform : null;
+
+    public virtual void OnPieceCaptured()
+    {
+        // 잡혀서 곧 파괴될 기물이므로 펀치 트윈 없이 파티클 버스트만 재생합니다.
+        if (target != null)
+            PlayHookVFX(target.transform.position, null);
+    }
+    public virtual void OnPieceCapture() { PlayHookVFX(); }
+    public virtual void OnPieceMove(Vector3Int dest) { PlayHookVFX(); }
 }
 
 /// <summary>타일에 부착되는 효과의 기반 추상 클래스</summary>
@@ -265,9 +348,18 @@ public abstract class TileEffector : Effector, ITileEffect
         SetDuration(duration);
     }
 
-    public virtual void OnPieceEnter(Piece piece) { }
-    public virtual void OnPieceExit(Piece piece) { }
+    public virtual void OnPieceEnter(Piece piece) { PlayHookVFX(); }
+    public virtual void OnPieceExit(Piece piece) { PlayHookVFX(); }
     public virtual bool CanPieceEnter(Piece piece, Vector3Int from, Vector3Int to) { return true; }
+
+    protected override bool TryGetVFXWorldPosition(out Vector3 pos)
+    {
+        if (BoardManager.Instance == null) { pos = default; return false; }
+        pos = BoardManager.Instance.GridPosToWorldPos(tilePos);
+        return true;
+    }
+
+    protected override Transform VFXFollowTarget => transform;
 
     public override void OnTurnChanged()
     {
@@ -357,7 +449,11 @@ public abstract class GlobalEffector : Effector
     /// <summary>조건에 맞는 기물이 이동하거나 잡을 때 호출됩니다.</summary>
     /// <param name="piece">행동한 기물</param>
     /// <param name="dest">이동한 목적지</param>
-    public virtual void OnPieceAct(Piece piece, Vector3Int dest) { }
+    public virtual void OnPieceAct(Piece piece, Vector3Int dest)
+    {
+        if (piece != null)
+            PlayHookVFX(piece.transform.position, piece.transform);
+    }
 
     /// <summary>조건에 맞는 기물이 다른 기물을 잡을 때 호출됩니다.</summary>
     /// <param name="piece">행동한 기물</param>

@@ -14,28 +14,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uBB34\uD558\uD55C"
   CardImage: {fileID: 2063513820, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C \uC8FC\uC704\uC5D0 <color=#4499FF>\uBD09\uC778 \uAD6C\uC5ED</color>\uC744 \uC124\uC815\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C \uC8FC\uC704\uC5D0 <color=#4499FF>\uBD09\uC778
+    \uAD6C\uC5ED</color>\uC744 \uC124\uC815\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 1
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: -1
   PieceTargetColor: 0
   PieceLimitTurn: -1
   RequiredPieceCount: 1
   TileCount: 0
   MaintainTurn: 0
-  NeedEffectTileBase: 0
-  EffectTileBase: {fileID: 0}
+  NeedEffectTileBase: 1
+  EffectTileBase: {fileID: 11400000, guid: 2ea4e41bf1020104aadf5e26276394e6, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
+  StatusDisplayType: 0
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uBD09\uC778 \uAD6C\uC5ED"
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uD574\uB2F9 \uAE30\uBB3C\uC740 <color=#FF4444>\uC774\uB3D9 \uBD88\uAC00</color>. \uBC18\uACBD <color=#FFD700>1\uCE78</color> \uB0B4\uB85C \uC5B4\uB5A0\uD55C \uAE30\uBB3C\uB3C4 \uC811\uADFC\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4. \uC9C4\uC785 \uC2DC\uB3C4 \uC2DC \uC218\uAC00 \uCDE8\uC18C\uB418\uBA70 \uD6A8\uACFC\uAC00 \uD574\uC81C\uB429\uB2C8\uB2E4."
+  AdditionalDescriptionContent: "\uD574\uB2F9 \uAE30\uBB3C\uC740 <color=#FF4444>\uC774\uB3D9
+    \uBD88\uAC00</color>. \uBC18\uACBD <color=#FFD700>1\uCE78</color> \uB0B4\uB85C
+    \uC5B4\uB5A0\uD55C \uAE30\uBB3C\uB3C4 \uC811\uADFC\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.
+    \uC9C4\uC785 \uC2DC\uB3C4 \uC2DC \uC218\uAC00 \uCDE8\uC18C\uB418\uBA70 \uD6A8\uACFC\uAC00
+    \uD574\uC81C\uB429\uB2C8\uB2E4."

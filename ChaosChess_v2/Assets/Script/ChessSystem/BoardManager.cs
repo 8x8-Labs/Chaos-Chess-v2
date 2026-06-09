@@ -113,6 +113,9 @@ public class BoardManager : MonoBehaviour
     /// <summary>직전 수가 바뀔 때 (from, to)를 통지합니다. 하이라이트 UI가 구독합니다.</summary>
     public event System.Action<Vector3Int, Vector3Int> OnLastMoveChanged;
 
+    /// <summary>효과로 차단되어 취소된 수의 시도 (from, to)를 통지합니다. 하이라이트 UI가 구독합니다.</summary>
+    public event System.Action<Vector3Int, Vector3Int> OnMoveBlocked;
+
     [SerializeField] private string FEN;
     private List<Piece> Pieces = new List<Piece>();
     private Piece[,] board = new Piece[8, 8];
@@ -382,7 +385,10 @@ public class BoardManager : MonoBehaviour
         Vector3Int from = piece.Pos;
 
         if (!CanMoveToTile(piece, from, target))
+        {
+            OnMoveBlocked?.Invoke(from, target); // 시도한 from→to를 하이라이트로 표시
             return true; // 기물 이동을 안하고 턴을 넘김
+        }
 
         Vector3Int prevEP = enPassantPos;
         enPassantPos = new Vector3Int(-1, -1, -1);

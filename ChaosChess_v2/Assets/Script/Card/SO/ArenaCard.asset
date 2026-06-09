@@ -14,9 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uD22C\uAE30\uC7A5"
   CardImage: {fileID: -1063908585, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uB0B4 \uAE30\uBB3C \uC804\uCCB4\uC640 \uC0C1\uB300 \uAE30\uBB3C <color=#FFD700>4\uAE30</color>\uAC00 <color=#4499FF>\uD22C\uAE30\uC7A5</color>\uC73C\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
+  CardDescription: "\uB0B4 \uAE30\uBB3C \uC804\uCCB4\uC640 \uC0C1\uB300 \uAE30\uBB3C
+    <color=#FFD700>4\uAE30</color>\uAC00 <color=#4499FF>\uD22C\uAE30\uC7A5</color>\uC73C\uB85C
+    \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 2
   CardTier: 4
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
   PieceType: -1
   PieceTargetColor: 0
   PieceLimitTurn: 8
@@ -25,13 +35,17 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 1
   DescriptionType: 1
@@ -39,4 +53,10 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "<color=#FFD700>8\uD134</color>\uAC04 \uC77C\uBC18 \uCCB4\uC2A4 \uB8F0\uB85C \uBBF8\uB2C8 \uAC8C\uC784\uC744 \uC9C4\uD589\uD569\uB2C8\uB2E4.\n\n<color=#00CC44>\uCCB4\uD06C\uBA54\uC774\uD2B8 \uB2EC\uC131 \u2192 \uC989\uC2DC \uC2B9\uB9AC</color>\n\uC0C1\uB300 \uAE30\uBB3C 3\uAE30(\uD0B9 \uC81C\uC678) \uD3EC\uD68D \u2192 \uBA54\uC778 \uAC8C\uC784 \uBCF5\uADC0 \uD6C4 <color=#00CC44>\uD574\uB2F9 \uAE30\uBB3C \uC81C\uAC70</color>\n<color=#FFD700>8\uD134</color> \uC885\uB8CC \u2192 \uAE30\uBB3C \uBCF5\uC6D0 \uD6C4 \uBA54\uC778 \uAC8C\uC784 \uBCF5\uADC0"
+  AdditionalDescriptionContent: "<color=#FFD700>8\uD134</color>\uAC04 \uC77C\uBC18
+    \uCCB4\uC2A4 \uB8F0\uB85C \uBBF8\uB2C8 \uAC8C\uC784\uC744 \uC9C4\uD589\uD569\uB2C8\uB2E4.\n\n<color=#00CC44>\uCCB4\uD06C\uBA54\uC774\uD2B8
+    \uB2EC\uC131 \u2192 \uC989\uC2DC \uC2B9\uB9AC</color>\n\uC0C1\uB300 \uAE30\uBB3C
+    3\uAE30(\uD0B9 \uC81C\uC678) \uD3EC\uD68D \u2192 \uBA54\uC778 \uAC8C\uC784 \uBCF5\uADC0
+    \uD6C4 <color=#00CC44>\uD574\uB2F9 \uAE30\uBB3C \uC81C\uAC70</color>\n<color=#FFD700>8\uD134</color>
+    \uC885\uB8CC \u2192 \uAE30\uBB3C \uBCF5\uC6D0 \uD6C4 \uBA54\uC778 \uAC8C\uC784
+    \uBCF5\uADC0"

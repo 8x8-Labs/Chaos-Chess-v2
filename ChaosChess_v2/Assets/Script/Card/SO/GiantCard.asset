@@ -14,9 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uAC70\uB300\uD654"
   CardImage: {fileID: -2116945493, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC5D0\uAC8C <color=#4499FF>\uAC70\uB300\uD654</color>\uB97C \uBD80\uC5EC\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC5D0\uAC8C <color=#4499FF>\uAC70\uB300\uD654</color>\uB97C
+    \uBD80\uC5EC\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 2
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.3
+    AnimDuration: 0.2
   PieceType: 7
   PieceTargetColor: 0
   PieceLimitTurn: -1
@@ -25,13 +35,17 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
   StatusDisplayType: 0
   NeedAdditionalDescription: 1
   DescriptionType: 1
@@ -39,4 +53,6 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uC774\uB3D9\uD560 \uB54C\uB9C8\uB2E4 \uB3C4\uCC29 \uC704\uCE58 <color=#FFD700>\uBC18\uACBD 1\uCE78</color> \uB0B4 \uAE30\uBB3C\uB4E4\uC744 <color=#FFD700>1\uD134</color>\uAC04 <color=#FF4444>\uBB34\uB825\uD654</color>\uD569\uB2C8\uB2E4."
+  AdditionalDescriptionContent: "\uC774\uB3D9\uD560 \uB54C\uB9C8\uB2E4 \uB3C4\uCC29
+    \uC704\uCE58 <color=#FFD700>\uBC18\uACBD 1\uCE78</color> \uB0B4 \uAE30\uBB3C\uB4E4\uC744
+    <color=#FFD700>1\uD134</color>\uAC04 <color=#FF4444>\uBB34\uB825\uD654</color>\uD569\uB2C8\uB2E4."
