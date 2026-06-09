@@ -110,6 +110,12 @@ public class GameManager : MonoBehaviour
         BoardManager.Instance.OnPromotionRequired -= HandlePromotion;
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
 
+        if (boardUI != null)
+        {
+            BoardManager.Instance.OnLastMoveChanged -= boardUI.DrawLastMove;
+            BoardManager.Instance.OnLastMoveChanged += boardUI.DrawLastMove;
+        }
+
         OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 

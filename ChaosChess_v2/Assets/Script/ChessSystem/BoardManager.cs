@@ -106,6 +106,13 @@ public class BoardManager : MonoBehaviour
     private Castling castling = new Castling();
     private Vector3Int enPassantPos = new Vector3Int(-1, -1, -1);
 
+    /// <summary>직전 수의 출발/도착 칸. 수가 없으면 (-1,-1,-1).</summary>
+    public Vector3Int LastMoveFrom { get; private set; } = new Vector3Int(-1, -1, -1);
+    public Vector3Int LastMoveTo { get; private set; } = new Vector3Int(-1, -1, -1);
+
+    /// <summary>직전 수가 바뀔 때 (from, to)를 통지합니다. 하이라이트 UI가 구독합니다.</summary>
+    public event System.Action<Vector3Int, Vector3Int> OnLastMoveChanged;
+
     [SerializeField] private string FEN;
     private List<Piece> Pieces = new List<Piece>();
     private Piece[,] board = new Piece[8, 8];
@@ -223,6 +230,10 @@ public class BoardManager : MonoBehaviour
         UpdateFEN();
 
         FairyStockfishBridge.Instance.SetPosition(FEN);
+
+        // 새 보드 상태 → 직전 수 초기화 및 하이라이트 제거 통지
+        LastMoveFrom = LastMoveTo = new Vector3Int(-1, -1, -1);
+        OnLastMoveChanged?.Invoke(LastMoveFrom, LastMoveTo);
 
         CheckKingExistence();
     }
@@ -465,6 +476,12 @@ public class BoardManager : MonoBehaviour
         {
             eff.OnPieceMove(target);
         }
+
+        // 직전 수 기록. 캐슬링 룩은 안쪽 재귀에서 먼저 통지되고,
+        // 바깥(킹) 호출이 마지막에 덮어쓰므로 최종값은 킹의 from/to가 된다.
+        LastMoveFrom = from;
+        LastMoveTo = target;
+        OnLastMoveChanged?.Invoke(from, target);
 
         return true;
     }
