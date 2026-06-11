@@ -51,7 +51,8 @@ public class GiantEffector : PieceEffector
                         continue;
 
                     GiantStunEffector stun = target.gameObject.AddComponent<GiantStunEffector>();
-                    stun.CardSO = null;
+                    stun.CardSO = CardSO;
+                    stun.SetVFXConfig(CardSO.PieceEffectVFX);
                     stun.Init(target, 1);
                     stun.Apply();
                 }

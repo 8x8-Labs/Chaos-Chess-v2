@@ -46,9 +46,15 @@ public class HoneytrapCard : CardData, ICard
         }
         if (minv == 1000)
             return;
-        Debug.Log(ans);
-        Debug.Log(king.Pos);
         BoardManager.Instance.ForceTeleport(king, ans);
+
+        // 상대 킹에게 미인계 연출 재생 (SO의 VFX.ApplyVFXPrefab 사용)
+        if (DataSO != null)
+        {
+            VFXSpawner.SpawnOneShot(DataSO.VFX.ApplyVFXPrefab, king.transform.position, king.transform);
+            if (DataSO.VFX.PlayApplyAnim)
+                VFXSpawner.PlayPunch(king.transform, DataSO.VFX.AnimStrength, DataSO.VFX.AnimDuration);
+        }
     }
     private int MDist(Vector3Int a, Vector3Int b)
     {
