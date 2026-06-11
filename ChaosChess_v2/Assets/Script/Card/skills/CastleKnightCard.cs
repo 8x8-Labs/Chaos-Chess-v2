@@ -49,5 +49,18 @@ public class CastleKnightCard : CardData, IPieceCard
             return;
         BoardManager.Instance.ChangePiece(pos, knight.Color, 'y');
         BoardManager.Instance.DestroyPiece(knight);
+
+        // 이 카드는 Effector를 만들지 않으므로 SO에 지정된 적용 VFX/애니메이션을 직접 재생한다.
+        if (DataSO != null)
+        {
+            Piece chancellor = BoardManager.Instance.GetPiece(pos);
+            Vector3 vfxPos = chancellor != null
+                ? chancellor.transform.position
+                : BoardManager.Instance.GridPosToWorldPos(pos);
+            VFXSpawner.SpawnOneShot(DataSO.VFX.ApplyVFXPrefab, vfxPos,
+                chancellor != null ? chancellor.transform : null);
+            if (DataSO.VFX.PlayApplyAnim && chancellor != null)
+                VFXSpawner.PlayPunch(chancellor.transform, DataSO.VFX.AnimStrength, DataSO.VFX.AnimDuration);
+        }
     }
 }
