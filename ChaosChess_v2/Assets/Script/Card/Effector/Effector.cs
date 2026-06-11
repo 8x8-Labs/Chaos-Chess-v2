@@ -169,9 +169,14 @@ public abstract class Effector : MonoBehaviour, IEffect
 
         remainingTurns--;
         if (IsExpired)
+        {
             Revert();
+        }
         else
+        {
             OnAnyEffectTurnTicked?.Invoke(this);
+            NotifyTurnTickListeners();
+        }
     }
 
     protected virtual void OnHalfTurnChanged() { }
@@ -214,6 +219,20 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     private GameObject loopVFXInstance;
 
+    // 루프 VFX 인스턴스에서 캐싱한 생애주기 리스너들 (훅별로 분리)
+    private IEffectApplyListener[] applyListeners;
+    private IEffectHookListener[] hookListeners;
+    private IEffectTickListener[] tickListeners;
+    private IEffectRevertListener[] revertListeners;
+
+    private CardVFXConfig vfxConfigOverride;
+
+    /// <summary>이 effector가 사용할 VFX 설정입니다. 기본은 CardSO.VFX이며, SetVFXConfig로 교체할 수 있습니다.</summary>
+    protected CardVFXConfig VFXConfig => vfxConfigOverride ?? CardSO?.VFX;
+
+    /// <summary>CardSO.VFX 대신 사용할 VFX 설정을 지정합니다. (예: 타일이 기물에 효과를 부여할 때의 연출)</summary>
+    public void SetVFXConfig(CardVFXConfig config) => vfxConfigOverride = config;
+
     /// <summary>VFX 연출 기준 월드 좌표입니다. 서브클래스가 제공하지 않으면 위치 기반 연출(적용/유지/소멸)은 생략됩니다.</summary>
     protected virtual bool TryGetVFXWorldPosition(out Vector3 pos) { pos = default; return false; }
 
@@ -223,7 +242,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과 적용 시 1회 버스트 + 지속 루프 + 기본 펀치 트윈을 재생합니다.</summary>
     private void PlayApplyVFX()
     {
-        CardVFXConfig vfx = CardSO?.VFX;
+        CardVFXConfig vfx = VFXConfig;
         if (vfx == null) return;
         if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
 
@@ -231,7 +250,17 @@ public abstract class Effector : MonoBehaviour, IEffect
         VFXSpawner.SpawnOneShot(vfx.ApplyVFXPrefab, pos, follow);
 
         if (vfx.LoopVFXPrefab != null)
+        {
             loopVFXInstance = VFXSpawner.SpawnLoop(vfx.LoopVFXPrefab, pos, follow);
+            CacheVFXListeners(loopVFXInstance);
+
+            if (applyListeners != null)
+            {
+                EffectVFXContext ctx = MakeContext(pos);
+                foreach (IEffectApplyListener listener in applyListeners)
+                    listener?.OnEffectApply(in ctx);
+            }
+        }
 
         if (vfx.PlayApplyAnim)
             VFXSpawner.PlayPunch(follow, vfx.AnimStrength, vfx.AnimDuration);
@@ -240,7 +269,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과 소멸 시 1회 버스트를 재생합니다. 호스트가 곧 파괴돼도 살아남도록 부모 없이 스폰합니다.</summary>
     private void PlayRevertVFX()
     {
-        CardVFXConfig vfx = CardSO?.VFX;
+        CardVFXConfig vfx = VFXConfig;
         if (vfx == null || vfx.RevertVFXPrefab == null) return;
         if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
 
@@ -251,6 +280,16 @@ public abstract class Effector : MonoBehaviour, IEffect
     private void StopLoopVFX()
     {
         if (loopVFXInstance == null) return;
+
+        // Revert()와 OnDestroy()가 모두 거치는 단일 지점이므로 여기서만 소멸을 통지합니다.
+        if (revertListeners != null)
+        {
+            EffectVFXContext ctx = MakeContext(loopVFXInstance.transform.position);
+            foreach (IEffectRevertListener listener in revertListeners)
+                listener?.OnEffectRevert(in ctx);
+        }
+        ClearVFXListeners();
+
         Destroy(loopVFXInstance);
         loopVFXInstance = null;
     }
@@ -265,12 +304,54 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>지정 월드 좌표에 게임 훅 VFX를 재생합니다. 버스트는 부모 없이 스폰되어 대상 파괴(기물 잡힘 등)와 무관하게 유지됩니다.</summary>
     protected void PlayHookVFX(Vector3 worldPos, Transform punchTarget = null)
     {
-        CardVFXConfig vfx = CardSO?.VFX;
+        CardVFXConfig vfx = VFXConfig;
         if (vfx == null) return;
 
         VFXSpawner.SpawnOneShot(vfx.HookVFXPrefab, worldPos, null);
         if (vfx.PlayHookAnim)
             VFXSpawner.PlayPunch(punchTarget, vfx.AnimStrength, vfx.AnimDuration);
+
+        if (hookListeners != null)
+        {
+            EffectVFXContext ctx = MakeContext(worldPos);
+            foreach (IEffectHookListener listener in hookListeners)
+                listener?.OnEffectHook(in ctx);
+        }
+    }
+
+    // ───────── VFX 리스너 (복제본 컴포넌트 호출) ─────────
+
+    /// <summary>루프 VFX 인스턴스에서 훅별 리스너를 캐싱합니다.</summary>
+    private void CacheVFXListeners(GameObject instance)
+    {
+        applyListeners = instance.GetComponentsInChildren<IEffectApplyListener>(true);
+        hookListeners = instance.GetComponentsInChildren<IEffectHookListener>(true);
+        tickListeners = instance.GetComponentsInChildren<IEffectTickListener>(true);
+        revertListeners = instance.GetComponentsInChildren<IEffectRevertListener>(true);
+    }
+
+    private void ClearVFXListeners()
+    {
+        applyListeners = null;
+        hookListeners = null;
+        tickListeners = null;
+        revertListeners = null;
+    }
+
+    private EffectVFXContext MakeContext(Vector3 worldPos) => new(this, worldPos, remainingTurns);
+
+    /// <summary>턴 경과를 리스너에 전달합니다.</summary>
+    private void NotifyTurnTickListeners()
+    {
+        if (tickListeners == null) return;
+
+        Vector3 pos = TryGetVFXWorldPosition(out Vector3 p)
+            ? p
+            : (loopVFXInstance != null ? loopVFXInstance.transform.position : Vector3.zero);
+
+        EffectVFXContext ctx = MakeContext(pos);
+        foreach (IEffectTickListener listener in tickListeners)
+            listener?.OnEffectTurnTick(in ctx);
     }
 }
 
@@ -401,7 +482,8 @@ public abstract class TileEffector : Effector, ITileEffect
             tilePos,
             visualData,
             effectTileIndex,
-            RemainingTurns);
+            RemainingTurns,
+            playAppear: true);
     }
 
     protected void ClearTileEffect()

@@ -270,6 +270,80 @@ public override void OnPieceMove(Vector3Int dest)
 
 ---
 
+## VFX 리스너 (복제본 컴포넌트 호출)
+
+복제된 **루프 VFX 인스턴스**(`LoopVFXPrefab`)의 컴포넌트가 effector 생애주기 시점에 자기 함수를 호출받도록 하는 훅입니다.
+단순히 파티클만 재생하는 게 아니라, 복제본 안의 동작 로직(조준 연출, 남은 턴 표시 등)을 effector와 연동할 때 사용합니다.
+
+### 인터페이스 (필요한 것만 골라 구현)
+
+| 인터페이스 | 메서드 | 호출 시점 |
+|---|---|---|
+| `IEffectApplyListener` | `OnEffectApply(in EffectVFXContext)` | 효과 적용 순간(루프 VFX 스폰 직후) |
+| `IEffectHookListener` | `OnEffectHook(in EffectVFXContext)` | 이동/잡기/타일 진입 등 게임 훅 발동 시 |
+| `IEffectTickListener` | `OnEffectTurnTick(in EffectVFXContext)` | 지속 턴 1턴 경과(만료 직전 제외) |
+| `IEffectRevertListener` | `OnEffectRevert(in EffectVFXContext)` | 효과 만료/해제로 루프 VFX 정리 직전 |
+
+각 인터페이스는 독립적입니다. 4개를 다 구현할 필요 없이 원하는 시점만 구현하세요.
+
+```csharp
+// LoopVFXPrefab에 올리는 컴포넌트. 적용/턴경과/소멸만 받고 훅은 무시.
+public class AimEffect : MonoBehaviour, IEffectApplyListener, IEffectTickListener, IEffectRevertListener
+{
+    public void OnEffectApply(in EffectVFXContext ctx) { /* 등장 연출 */ }
+    public void OnEffectTurnTick(in EffectVFXContext ctx) { /* ctx.RemainingTurns 표시 갱신 */ }
+    public void OnEffectRevert(in EffectVFXContext ctx) { /* 퇴장 연출 (이후 자동 파괴) */ }
+}
+```
+
+### EffectVFXContext
+
+| 필드 | 설명 |
+|---|---|
+| `Effector` | 호출한 효과(대상 기물/타일 등 접근용) |
+| `WorldPos` | 호출 시점 앵커 월드 좌표 |
+| `RemainingTurns` | 남은 지속 턴 (`-1` = 영구) |
+
+### 동작 규칙
+
+- 리스너는 **`LoopVFXPrefab` 인스턴스(및 그 자식)에서만** 캐싱됩니다. 동작 컴포넌트는 루프 프리팹에 올리세요. (원샷 Apply/Hook/Revert 프리팹은 스스로 파괴되어 수명 관리 대상이 아님)
+- effector ↔ 복제본이 1:1로 묶이므로 같은 카드를 여러 기물에 써도 각 인스턴스는 자기 effector 시점에만 반응합니다.
+- `OnEffectRevert`는 정상 만료·수동 `Revert`·강제 파괴(기물 잡힘 등) 모두에서 정확히 1회 호출됩니다(`StopLoopVFX` 단일 지점).
+- `LoopVFXPrefab`에 해당 인터페이스 컴포넌트가 없으면 아무 동작도 하지 않습니다(기존 카드 무영향).
+- `GlobalEffector`는 앵커 위치가 없어 루프 VFX를 띄우지 않으므로 이 메커니즘은 `PieceEffector`/`TileEffector`에만 적용됩니다.
+
+---
+
+## 타일 등장 연출 (TileEffector 전용)
+
+`TileEffector`의 타일이 **처음 깔리는 순간**의 등장 방식을 카드별 `CardDataSO`에서 설정합니다.
+기물에 박히는 타일베이스(`EffectTileBase`/`EffectTileAnimationFrames`)에만 적용되며, 파티클 VFX와는 독립적입니다.
+
+### CardDataSO 필드
+
+| 필드 | 설명 |
+|---|---|
+| `TileAppearMode` | `None`(고정 타일 — 즉시 표시) / `Drop`(물체형 타일 — 위에서 떨어짐) / `Scale`(작은 크기에서 원래 크기로 확대) |
+| `TileAppearDropHeight` | 떨어지기 시작하는 높이(셀 단위) |
+| `TileAppearDropDuration` | 떨어지는 시간(초) |
+| `TileAppearDropEase` | 착지감용 DOTween `Ease`(기본 `OutBounce`) |
+| `TileAppearScaleFrom` | 확대를 시작하는 크기 배율(기본 `0.7` → 원래 크기 `1`로 확대) |
+| `TileAppearScaleDuration` | 확대되는 시간(초) |
+| `TileAppearScaleEase` | 확대용 DOTween `Ease`(기본 `OutBack`) |
+
+### 동작
+
+- `Drop` 모드면 `ShowTileEffect()` 호출 시 **실제 타일을 셀에 깐 뒤 셀별 transform 행렬(`Tilemap.SetTransformMatrix`)로 위쪽에서 떨어뜨리고, 착지 순간 행렬을 항등(identity)으로 되돌립니다.** 임시 스프라이트를 따로 띄우지 않으므로 크기·sorting이 타일과 100% 일치하고, 애니메이션 타일/룰 타일에도 그대로 동작합니다.
+- `Scale` 모드면 같은 방식으로 셀에 타일을 깐 뒤 `TileAppearScaleFrom`(기본 0)에서 `1`까지 균일 확대하고, 완료 시 행렬을 항등으로 되돌립니다. 타일 메시는 이미 셀 로컬 원점(타일 중심) 기준으로 그려지므로 pivot 보정 없이 순수 `Matrix4x4.Scale`만 적용해 가운데에서 확대됩니다.
+- 셀 transform 행렬을 적용하려면 셀의 `TileFlags.LockTransform` 잠금을 풀어야 하므로, 연출 전에 `SetTileFlags(pos, TileFlags.None)`를 호출합니다(완료 후 재배치 시 타일 기본 플래그로 복원).
+- DOTween은 `Matrix4x4`를 직접 트윈하지 못하므로 `DOVirtual.Float`로 스칼라(`Drop`=높이 오프셋 셀×`cellSize.y`, `Scale`=크기 배율)를 트윈하며 매 틱 행렬을 다시 씁니다. 이징은 각각 `TileAppearDropEase`/`TileAppearScaleEase`.
+- 등장 연출은 **최초 적용(`ShowTileEffect`) 경로에만** 붙습니다. 투기장 복귀·세이브 복원 등 재표시(`ToggleTileVisual`/`RestoreTileEffects`)에서는 재생되지 않습니다.
+- 착지 전 `ClearTileEffect`/덮어쓰기/`ClearAllTileEffects`가 들어오면 진행 중인 트윈은 정리되고 셀 행렬은 항등으로 복원됩니다.
+
+> `ObeyOrderCard`/`SyncCard`처럼 `TileEffectDrawer.SetTileEffect`를 직접 호출하는 특수 케이스는 기본값(`playAppear: false`)이라 등장 연출이 생략됩니다. 필요 시 `playAppear: true`를 직접 넘기세요.
+
+---
+
 ## 턴 관리
 
 `OnTurnChanged()`는 `GameManager.NextTurn()` 호출 시 `OnAnyTurnChanged` 이벤트를 통해 **자동으로 호출**됩니다.  
