@@ -34,7 +34,7 @@ public class WindmillEffector : GlobalEffector
             if (PieceEffector.HasActiveMovementOverride(piece))
                 continue;
 
-            string overrideFen = piece.Type == PieceType.Rook ? "b" : piece.Type == PieceType.Bishop ? "r" : null;
+            string overrideFen = piece.Type == PieceType.Rook ? "x" : piece.Type == PieceType.Bishop ? "v" : null;
             if (overrideFen == null)
                 continue;
 
@@ -52,7 +52,7 @@ public class WindmillEffector : GlobalEffector
         foreach (Piece piece in changed)
         {
             string p = piece != null ? piece.MoveFenOverride?.ToLower() : null;
-            if (p == "b" || p == "r")
+            if (p == "x" || p == "v")
                 piece.MoveFenOverride = null;
         }
         changed.Clear();
