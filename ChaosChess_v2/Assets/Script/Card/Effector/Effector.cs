@@ -239,11 +239,21 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>루프 VFX를 부착하고 펀치를 적용할 대상입니다. 부착 대상이 파괴되면 루프도 함께 정리됩니다.</summary>
     protected virtual Transform VFXFollowTarget => null;
 
+    /// <summary>효과음을 재생합니다. 클립이 없거나 SoundManager가 없으면 조용히 무시합니다.</summary>
+    private void PlaySFX(AudioClip clip, float volume)
+    {
+        if (clip == null || SoundManager.Instance == null) return;
+        SoundManager.Instance.SFXPlay(CardSO != null ? CardSO.CardName : "CardEffect", clip, volume);
+    }
+
     /// <summary>효과 적용 시 1회 버스트 + 지속 루프 + 기본 펀치 트윈을 재생합니다.</summary>
     private void PlayApplyVFX()
     {
         CardVFXConfig vfx = VFXConfig;
         if (vfx == null) return;
+
+        PlaySFX(vfx.ApplySFX, vfx.SFXVolume);
+
         if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
 
         Transform follow = VFXFollowTarget;
@@ -270,7 +280,11 @@ public abstract class Effector : MonoBehaviour, IEffect
     private void PlayRevertVFX()
     {
         CardVFXConfig vfx = VFXConfig;
-        if (vfx == null || vfx.RevertVFXPrefab == null) return;
+        if (vfx == null) return;
+
+        PlaySFX(vfx.RevertSFX, vfx.SFXVolume);
+
+        if (vfx.RevertVFXPrefab == null) return;
         if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
 
         VFXSpawner.SpawnOneShot(vfx.RevertVFXPrefab, pos, null);
@@ -306,6 +320,8 @@ public abstract class Effector : MonoBehaviour, IEffect
     {
         CardVFXConfig vfx = VFXConfig;
         if (vfx == null) return;
+
+        PlaySFX(vfx.HookSFX, vfx.SFXVolume);
 
         VFXSpawner.SpawnOneShot(vfx.HookVFXPrefab, worldPos, null);
         if (vfx.PlayHookAnim)
@@ -516,6 +532,16 @@ public abstract class GlobalEffector : Effector
     {
         base.OnTurnChanged();
         if (IsApplied && !IsExpired) OnTurnTicked?.Invoke(this);
+    }
+
+    // 전역 효과는 단일 대상이 없으므로 적용/소멸 VFX의 앵커로 보드 중앙을 사용합니다.
+    // (훅 VFX는 OnPieceAct에서 행동한 기물 위치를 직접 넘기므로 영향받지 않습니다.)
+    protected override bool TryGetVFXWorldPosition(out Vector3 pos)
+    {
+        if (BoardManager.Instance == null) { pos = default; return false; }
+        pos = (BoardManager.Instance.GridPosToWorldPos(new Vector3Int(3, 3, 0))
+             + BoardManager.Instance.GridPosToWorldPos(new Vector3Int(4, 4, 0))) * 0.5f;
+        return true;
     }
 
     protected PieceType watchType;   // 감시할 기물 타입 (Flags 조합 가능, None = 모든 타입)

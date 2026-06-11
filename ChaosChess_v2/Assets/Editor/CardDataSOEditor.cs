@@ -238,6 +238,16 @@ public class CardDataSOEditor : Editor
             EditorGUILayout.PropertyField(config.FindPropertyRelative("AnimStrength"), new GUIContent("펀치 세기"));
             EditorGUILayout.PropertyField(config.FindPropertyRelative("AnimDuration"), new GUIContent("펀치 진행 시간(초)"));
         }
+
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("효과음", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("ApplySFX"), new GUIContent("적용 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("HookSFX"), new GUIContent("훅 발동 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("RevertSFX"), new GUIContent("소멸 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("SFXVolume"), new GUIContent("효과음 볼륨"));
+        }
     }
 
     // ── 타입별 필드 렌더링 ───────────────────────────────

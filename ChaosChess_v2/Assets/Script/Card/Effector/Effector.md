@@ -232,8 +232,13 @@ public void Execute(CardEffectArgs args)
 | `PlayApplyAnim` / `PlayHookAnim` | 적용/훅 시 앵커에 펀치 스케일 트윈 재생 여부 |
 | `AnimStrength` | 펀치 세기 |
 | `AnimDuration` | 펀치 트윈 진행 시간(초) |
+| `ApplySFX` | 효과 적용 순간 1회 효과음 |
+| `HookSFX` | 게임 훅(이동/잡기/타일 진입 등) 발동 시 1회 효과음 |
+| `RevertSFX` | 효과 소멸 순간 1회 효과음 |
+| `SFXVolume` | 위 효과음들의 재생 볼륨(0~1) |
 
-> 프리팹을 비워두면 해당 시점 연출은 자동으로 생략됩니다. 기존 카드(미설정)는 동작 변화가 없습니다.
+> 프리팹/클립을 비워두면 해당 시점 연출은 자동으로 생략됩니다. 기존 카드(미설정)는 동작 변화가 없습니다.
+> 효과음은 `SoundManager.SFXPlay`로 SFX 믹서 그룹을 통해 2D로 재생되며, 파티클과 동일한 시점(적용/훅/소멸)에 자동으로 울립니다. VFX 프리팹이 없어도 효과음만 단독 재생할 수 있습니다.
 
 ### 자동 재생 (apply / loop / revert)
 
@@ -244,7 +249,9 @@ public void Execute(CardEffectArgs args)
 |---|---|---|
 | `PieceEffector` | `target.transform.position` | 기물 transform (이동 시 따라가고, 기물 파괴 시 자동 정리) |
 | `TileEffector` | `GridPosToWorldPos(tilePos)` | 호스트 GameObject (호스트 파괴 시 자동 정리) |
-| `GlobalEffector` | 없음 → apply/loop/revert 연출 생략 (훅 VFX만 사용) |
+| `GlobalEffector` | 보드 중앙 (단일 대상이 없어 중앙을 앵커로 사용) | 부모 없음 (정적 위치, Revert 시 정리) |
+
+> `GlobalEffector`의 apply/revert VFX는 보드 중앙에 1회 버스트로 표시됩니다. 훅 VFX는 별도로 `OnPieceAct`에서 행동한 기물 위치를 직접 넘겨 재생합니다. 효과음(SFX)은 좌표와 무관한 2D 재생이라 세 타입 모두에서 동일하게 동작합니다.
 
 루프 VFX는 앵커의 자식으로 붙으므로 정상 `Revert`·강제 `Destroy`(기물 잡힘 등) 양쪽에서 누수 없이 정리됩니다.
 

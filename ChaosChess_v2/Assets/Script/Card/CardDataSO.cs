@@ -46,6 +46,17 @@ public class CardVFXConfig
     [Tooltip("펀치 트윈 진행 시간(초)")]
     [Min(0.01f)]
     public float AnimDuration = 0.3f;
+
+    [Header("효과음 (비워두면 재생 생략)")]
+    [Tooltip("효과 적용 순간 1회 재생")]
+    public AudioClip ApplySFX;
+    [Tooltip("이동/잡기/타일 진입 등 게임 훅 발동 시 1회 재생")]
+    public AudioClip HookSFX;
+    [Tooltip("효과 소멸 순간 1회 재생")]
+    public AudioClip RevertSFX;
+    [Range(0f, 1f)]
+    [Tooltip("위 효과음들의 재생 볼륨")]
+    public float SFXVolume = 1f;
 }
 
 [CreateAssetMenu(fileName = "Card Data", menuName = "Card/Card Data")]
