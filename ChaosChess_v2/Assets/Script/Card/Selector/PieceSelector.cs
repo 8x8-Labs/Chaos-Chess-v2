@@ -138,9 +138,10 @@ public class PieceSelector : Selector<Piece>
         }
 
         if (!anySelectable)
-            Debug.Log("기물이 존재하지 않습니다!");
+            CardBlockNotifier.Notify(CardBlockReason.NoTargetPiece);
+        else
+            CardBlockNotifier.Notify(CardBlockReason.AllPiecesAffected);
 
-        // else: 기물에 효과가 모두 적용되었습니다!
         return false;
     }
 
@@ -162,6 +163,7 @@ public class PieceSelector : Selector<Piece>
 
         // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
         // 선택자를 비활성화하기
+        // 적용 가능한 대상이 없으면 isTargetExist 내부에서 사유를 알린 뒤 선택을 취소합니다.
         if (!isTargetExist())
         {
             DisableSelector();

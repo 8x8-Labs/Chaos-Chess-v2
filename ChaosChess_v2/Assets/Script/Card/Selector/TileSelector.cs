@@ -141,6 +141,32 @@ public class TileSelector : Selector<Vector3Int>
         {
             effectPos.Add(effector.TilePos);
         }
+
+        // 놓을 수 있는 빈 칸이 없으면 선택을 취소합니다.
+        if (!HasSelectableTile())
+        {
+            CardBlockNotifier.Notify(CardBlockReason.NoSelectableTile, cardData.DataSO.CardName);
+            DisableSelector();
+            return;
+        }
+    }
+
+    // 보드에서 선택 가능한 빈 칸(기물 없음 + 차단 타일 아님 + 효과 미적용)이 하나라도 있는지 확인합니다.
+    private bool HasSelectableTile()
+    {
+        CardDataSO so = cardData.DataSO;
+        for (int y = 0; y < 8; y++)
+        {
+            for (int x = 0; x < 8; x++)
+            {
+                Vector3Int pos = new Vector3Int(x, y, 0);
+                if (boardManager.GetPiece(pos) != null) continue;
+                if (so.RestrictTiles && so.BlockedTiles[y * 8 + x]) continue;
+                if (effectPos.Contains(pos)) continue;
+                return true;
+            }
+        }
+        return false;
     }
 
     protected override void DisableSelector()
