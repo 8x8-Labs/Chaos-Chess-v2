@@ -14,9 +14,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uAC00\uC2A4\uB77C\uC774\uD305"
   CardImage: {fileID: -1490083451, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C \uC911 \uB79C\uB364\uD55C 1\uAE30\uB97C <color=#4499FF>\uC544\uAD70\uC73C\uB85C \uC804\uD658</color>\uD569\uB2C8\uB2E4. (\uD0B9\u00B7\uD038\u00B7\uB8E9 \uC81C\uC678)\n<color=#FF4444>\uD134\uC744 \uC18C\uBAA8\uD569\uB2C8\uB2E4.</color>"
+  CardDescription: "\uC0C1\uB300 \uAE30\uBB3C \uC911 \uB79C\uB364\uD55C 1\uAE30\uB97C
+    <color=#4499FF>\uC544\uAD70\uC73C\uB85C \uC804\uD658</color>\uD569\uB2C8\uB2E4.
+    (\uD0B9\xB7\uD038\xB7\uB8E9 \uC81C\uC678)\n<color=#FF4444>\uD134\uC744 \uC18C\uBAA8\uD569\uB2C8\uB2E4.</color>"
   Type: 0
   CardTier: 1
+  VFX:
+    ApplyVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 7
   PieceTargetColor: 1
   PieceLimitTurn: 0
@@ -25,13 +53,25 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
+  StatusDisplayType: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 
