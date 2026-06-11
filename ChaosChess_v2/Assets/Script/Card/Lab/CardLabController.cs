@@ -73,6 +73,10 @@ public class CardLabController : MonoBehaviour
             ? fenInput.text.Trim()
             : DefaultFen;
         BoardManager.Instance.LoadFEN(fen);
+
+        // LoadFEN은 기물 배치와 엔진 포지션만 설정하므로, 각 기물의 이동 가능 칸을
+        // 채우려면 합법 수를 다시 조회해야 한다. 누락 시 기물 선택해도 이동 칸이 표시되지 않는다.
+        BoardManager.Instance.RefreshMoves();
     }
 
     /// <summary>드롭다운에서 선택한 카드를 instantiate하고 타입에 맞게 실행합니다.</summary>
