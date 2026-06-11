@@ -25,12 +25,38 @@ public class GaslightingCard : CardData, IPieceCard
         Piece p = GetRandomPiece();
         if (p == null) return;
 
+        Vector3Int pos = p.Pos;
+
         BoardManager.Instance.ChangePiece(
-            pos: p.Pos,
+            pos: pos,
             color: GameManager.Instance.PlayerColor,
             type: p.TypeToChar());
 
+        // 즉발 카드라 Effector를 거치지 않으므로(PieceLimitTurn=0이면 Apply 직후 만료되어
+        // 적용 VFX가 생략됨) 변환된 기물 위치에 적용 VFX를 직접 재생한다.
+        PlayApplyVFX(pos);
+
         GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+    }
+
+    /// <summary>변환된 기물 위치에 DataSO.VFX의 적용 연출(파티클 버스트 + 펀치 + 효과음)을 1회 재생합니다.</summary>
+    private void PlayApplyVFX(Vector3Int pos)
+    {
+        CardVFXConfig vfx = DataSO != null ? DataSO.VFX : null;
+        if (vfx == null) return;
+
+        Piece changed = BoardManager.Instance.GetPiece(pos);
+        Vector3 worldPos = changed != null
+            ? changed.transform.position
+            : BoardManager.Instance.GridPosToWorldPos(pos);
+
+        VFXSpawner.SpawnOneShot(vfx.ApplyVFXPrefab, worldPos);
+
+        if (vfx.PlayApplyAnim && changed != null)
+            VFXSpawner.PlayPunch(changed.transform, vfx.AnimStrength, vfx.AnimDuration);
+
+        if (vfx.ApplySFX != null && SoundManager.Instance != null)
+            SoundManager.Instance.SFXPlay(DataSO.CardName, vfx.ApplySFX, vfx.SFXVolume);
     }
 
     private Piece GetRandomPiece()
