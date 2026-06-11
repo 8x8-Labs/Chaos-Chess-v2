@@ -14,9 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uB300\uC804\uCC28\uC9C0\uB8B0"
   CardImage: {fileID: -600370867, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uC9C0\uB8B0</color>\uB97C \uC124\uCE58\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uC9C0\uB8B0</color>\uB97C
+    \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 1
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
@@ -25,6 +35,15 @@ MonoBehaviour:
   MaintainTurn: -1
   NeedEffectTileBase: 1
   EffectTileBase: {fileID: 11400000, guid: 7ac2bc84044511f4ea6b7396cfbac663, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 1
+  TileAppearDropHeight: 0.7
+  TileAppearDropDuration: 0.3
+  TileAppearDropEase: 30
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -38,4 +57,6 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "<color=#FFD700>5\uC810 \uC774\uC0C1</color> \uAE30\uBB3C\uC774 \uC9C0\uB8B0 \uCE78\uC744 \uC9C0\uB098\uAC00\uBA74, <color=#FFD700>\uBC18\uACBD 1\uCE78</color> \uB0B4 \uBAA8\uB4E0 \uAE30\uBB3C\uC774 <color=#FF4444>\uC989\uC0AC\uD569\uB2C8\uB2E4</color>."
+  AdditionalDescriptionContent: "<color=#FFD700>5\uC810 \uC774\uC0C1</color> \uAE30\uBB3C\uC774
+    \uC9C0\uB8B0 \uCE78\uC744 \uC9C0\uB098\uAC00\uBA74, <color=#FFD700>\uBC18\uACBD
+    1\uCE78</color> \uB0B4 \uBAA8\uB4E0 \uAE30\uBB3C\uC774 <color=#FF4444>\uC989\uC0AC\uD569\uB2C8\uB2E4</color>."

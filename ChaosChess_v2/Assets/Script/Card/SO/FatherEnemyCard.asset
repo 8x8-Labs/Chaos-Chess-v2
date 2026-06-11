@@ -17,6 +17,24 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC744 <color=#4499FF>\uAC01\uC131</color>\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 0
   CardTier: 2
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 3632289893917741781, guid: b3c5227938a28d34893ec6747b5a6bd2, type: 3}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 0
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 1
   PieceTargetColor: 0
   PieceLimitTurn: -1
@@ -25,17 +43,32 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
+  StatusDisplayType: 0
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uAC01\uC131"
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uAC01\uC131\uD55C \uD3F0\uC740 \uC790\uC2E0\uC758 \uD134\uC744 \uC18C\uBAA8\uD574 <color=#00CC44>\uB2E8\uACC4\uC801\uC73C\uB85C \uC2B9\uACA9</color>\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uB098\uC774\uD2B8 \u2192 \uBE44\uC20D \u2192 \uD038"
+  AdditionalDescriptionContent: "\uAC01\uC131\uD55C \uD3F0\uC740 \uC790\uC2E0\uC758
+    \uD134\uC744 \uC18C\uBAA8\uD574 <color=#00CC44>\uB2E8\uACC4\uC801\uC73C\uB85C
+    \uC2B9\uACA9</color>\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uB098\uC774\uD2B8
+    \u2192 \uBE44\uC20D \u2192 \uD038"

@@ -14,9 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uBBF8\uC778\uACC4"
   CardImage: {fileID: -1412277583, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC0C1\uB300 \uD0B9\uC744 <color=#4499FF>\uC544\uAD70 \uD038 \uBC29\uD5A5\uC73C\uB85C 1\uCE78 \uAC15\uC81C \uC774\uB3D9</color>\uC2DC\uD0B5\uB2C8\uB2E4."
+  CardDescription: "\uC0C1\uB300 \uD0B9\uC744 <color=#4499FF>\uC544\uAD70 \uD038
+    \uBC29\uD5A5\uC73C\uB85C 1\uCE78 \uAC15\uC81C \uC774\uB3D9</color>\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 2
   CardTier: 0
+  VFX:
+    ApplyVFXPrefab: {fileID: 4667662071279711980, guid: de271241761645a4d832cdc937c89b50, type: 3}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 15
   PieceTargetColor: 0
   PieceLimitTurn: -1
@@ -25,13 +44,25 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
+  StatusDisplayType: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 
