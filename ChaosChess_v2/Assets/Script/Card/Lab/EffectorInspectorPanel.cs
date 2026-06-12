@@ -97,13 +97,18 @@ public class EffectorInspectorPanel : MonoBehaviour
         Effector.OnAnyEffectReverted -= HandleReverted;
         try
         {
+            active.RemoveAll(e => e == null);
+            // 스냅샷을 순회하되, revert 도중 연쇄로 새 이펙터가 Apply되어 active에 추가될 수 있으므로
+            // active.Clear() 대신 실제로 해제한 이펙터만 개별 제거해 신규 항목이 유실되지 않도록 합니다.
             Effector[] snapshot = active.ToArray();
             foreach (Effector e in snapshot)
             {
                 if (e != null)
+                {
                     e.Revert();
+                    active.Remove(e);
+                }
             }
-            active.Clear();
         }
         finally
         {

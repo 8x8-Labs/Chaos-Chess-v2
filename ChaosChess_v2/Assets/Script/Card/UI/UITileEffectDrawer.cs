@@ -143,6 +143,7 @@ public class UITileEffectDrawer : MonoBehaviour
         tween.OnComplete(() =>
         {
             appearTweens.Remove(pos);
+            if (effectTilemap == null) return;
             effectTilemap.SetTransformMatrix(pos, Matrix4x4.identity);
             PlaceTileEffect(pos, dataSO, effectTileIndex, remainingTurns);
         });

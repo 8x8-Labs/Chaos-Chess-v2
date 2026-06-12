@@ -268,7 +268,7 @@ public abstract class Effector : MonoBehaviour, IEffect
             {
                 EffectVFXContext ctx = MakeContext(pos);
                 foreach (IEffectApplyListener listener in applyListeners)
-                    listener?.OnEffectApply(in ctx);
+                    if (IsListenerAlive(listener)) listener.OnEffectApply(in ctx);
             }
         }
 
@@ -300,7 +300,7 @@ public abstract class Effector : MonoBehaviour, IEffect
         {
             EffectVFXContext ctx = MakeContext(loopVFXInstance.transform.position);
             foreach (IEffectRevertListener listener in revertListeners)
-                listener?.OnEffectRevert(in ctx);
+                if (IsListenerAlive(listener)) listener.OnEffectRevert(in ctx);
         }
         ClearVFXListeners();
 
@@ -331,7 +331,7 @@ public abstract class Effector : MonoBehaviour, IEffect
         {
             EffectVFXContext ctx = MakeContext(worldPos);
             foreach (IEffectHookListener listener in hookListeners)
-                listener?.OnEffectHook(in ctx);
+                if (IsListenerAlive(listener)) listener.OnEffectHook(in ctx);
         }
     }
 
@@ -357,6 +357,18 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     private EffectVFXContext MakeContext(Vector3 worldPos) => new(this, worldPos, remainingTurns);
 
+    /// <summary>
+    /// 리스너가 호출 가능한 상태인지 검사합니다.
+    /// 인터페이스 타입은 UnityEngine.Object를 직접 상속하지 않으므로 C# null(`?.`)만으로는
+    /// 이미 Destroy된 컴포넌트를 걸러내지 못합니다. Unity 객체일 경우 실제 생존 여부까지 확인합니다.
+    /// </summary>
+    private static bool IsListenerAlive(object listener)
+    {
+        if (listener == null) return false;
+        if (listener is UnityEngine.Object unityObj) return unityObj != null;
+        return true;
+    }
+
     /// <summary>턴 경과를 리스너에 전달합니다.</summary>
     private void NotifyTurnTickListeners()
     {
@@ -368,7 +380,7 @@ public abstract class Effector : MonoBehaviour, IEffect
 
         EffectVFXContext ctx = MakeContext(pos);
         foreach (IEffectTickListener listener in tickListeners)
-            listener?.OnEffectTurnTick(in ctx);
+            if (IsListenerAlive(listener)) listener.OnEffectTurnTick(in ctx);
     }
 }
 

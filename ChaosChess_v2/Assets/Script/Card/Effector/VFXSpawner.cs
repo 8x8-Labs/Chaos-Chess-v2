@@ -21,6 +21,18 @@ public static class VFXSpawner
     private static readonly Dictionary<Transform, Tween> activePunches = new();
     private static readonly Dictionary<Transform, Vector3> punchBaseScales = new();
 
+    // static 필드는 씬 전환·플레이 종료에도 유지되므로, Domain Reload가 꺼진 에디터에서
+    // 이전 플레이 세션의 잔여 데이터가 남아 오작동하지 않도록 진입 시 명시적으로 비운다.
+    // 잔여 Tween이 살아있을 수 있으니 Kill까지 수행한 뒤 딕셔너리를 정리한다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        foreach (Tween t in activePunches.Values)
+            t?.Kill();
+        activePunches.Clear();
+        punchBaseScales.Clear();
+    }
+
     /// <summary>1회성 연출 프리팹을 스폰하고, 파티클 수명이 끝나면 자동으로 파괴합니다.</summary>
     /// <param name="prefab">스폰할 프리팹 (null이면 무시)</param>
     /// <param name="worldPos">스폰 위치(월드)</param>
