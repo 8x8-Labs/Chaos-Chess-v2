@@ -58,6 +58,18 @@ public class VariantPieceInfoPanel : ButtonPanel
     public override void DisablePanel()
     {
         base.DisablePanel();
+        RestoreGameInput();
+    }
+
+    // "확인" 버튼을 거치지 않고 씬 전환·부모 비활성화 등으로 패널이 닫히면 DisablePanel이 호출되지
+    // 않아 IsGameInput이 false로 남는 소프트락이 발생할 수 있으므로, OnDisable에서 안전하게 복구한다.
+    private void OnDisable()
+    {
+        RestoreGameInput();
+    }
+
+    private void RestoreGameInput()
+    {
         if (gameManager == null) gameManager = GameManager.Instance;
         if (gameManager != null) gameManager.IsGameInput = true;
     }
