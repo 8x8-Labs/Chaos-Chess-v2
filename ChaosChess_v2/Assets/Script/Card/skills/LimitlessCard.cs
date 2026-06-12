@@ -76,14 +76,14 @@ public class LimitlessPieceEffector : PieceEffector, IMovementOverrideEffect
 
     protected override void OnApply()
     {
-        target.FenOverride = "a";
+        target.MoveFenOverride = "a";
         BoardManager.Instance.RefreshMoves();
     }
 
     protected override void OnRevert()
     {
-        if (target != null && target.FenOverride?.ToLower() == "a")
-            target.FenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
 
         if (controller != null && !controller.IsBroken)
             controller.Break(skipPieceEffector: true);
@@ -142,6 +142,14 @@ public class LimitlessTileEffector : TileEffector, IArenaPersistentEffect
     public void SetController(LimitlessFieldController controller)
     {
         this.controller = controller;
+    }
+
+    // 필드 타일은 파티클 VFX를 재생하지 않습니다. (중앙 기물의 LimitlessPieceEffector가 대표로 1회 재생하며,
+    // 타일이 직접 재생하면 LoopVFXPrefab이 9개 타일 각각의 자식으로 붙어 중복됩니다.)
+    protected override bool TryGetVFXWorldPosition(out Vector3 pos)
+    {
+        pos = default;
+        return false;
     }
 
     protected override void OnApply()

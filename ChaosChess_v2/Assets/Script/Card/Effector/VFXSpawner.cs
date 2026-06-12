@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
@@ -13,6 +14,24 @@ public static class VFXSpawner
     private const float DefaultPunchDuration = 0.3f;
     private const int PunchVibrato = 6;
     private const float PunchElasticity = 0.5f;
+
+    // 같은 대상에 펀치가 겹칠 때(예: 잡기 한 번에 OnPieceCapture + OnPieceMove가 동시 발동)
+    // DOPunchScale이 부풀어 있는 현재 스케일을 복귀 기준으로 잡아 잔류 스케일이 남는 문제를 막기 위해
+    // 진행 중인 펀치 트윈과 최초 기준 스케일을 대상별로 추적한다.
+    private static readonly Dictionary<Transform, Tween> activePunches = new();
+    private static readonly Dictionary<Transform, Vector3> punchBaseScales = new();
+
+    // static 필드는 씬 전환·플레이 종료에도 유지되므로, Domain Reload가 꺼진 에디터에서
+    // 이전 플레이 세션의 잔여 데이터가 남아 오작동하지 않도록 진입 시 명시적으로 비운다.
+    // 잔여 Tween이 살아있을 수 있으니 Kill까지 수행한 뒤 딕셔너리를 정리한다.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
+    {
+        foreach (Tween t in activePunches.Values)
+            t?.Kill();
+        activePunches.Clear();
+        punchBaseScales.Clear();
+    }
 
     /// <summary>1회성 연출 프리팹을 스폰하고, 파티클 수명이 끝나면 자동으로 파괴합니다.</summary>
     /// <param name="prefab">스폰할 프리팹 (null이면 무시)</param>
@@ -48,7 +67,33 @@ public static class VFXSpawner
     {
         if (target == null || strength <= 0f) return;
         float dur = duration > 0f ? duration : DefaultPunchDuration;
-        target.DOPunchScale(Vector3.one * strength, dur, PunchVibrato, PunchElasticity);
+
+        // 이미 진행 중인 펀치가 있으면 최초 기준 스케일을 보존한 채 정리하고,
+        // 부풀어 있을 수 있는 현재 스케일을 기준으로 되돌린 뒤 새 펀치를 시작한다.
+        Vector3 baseScale;
+        if (activePunches.TryGetValue(target, out Tween running))
+        {
+            baseScale = punchBaseScales[target];
+            running.OnKill(null);        // 기존 OnKill 콜백이 dict를 오염시키는 것을 방지
+            running.Kill();
+            activePunches.Remove(target);
+            punchBaseScales.Remove(target);
+            target.localScale = baseScale;
+        }
+        else
+        {
+            baseScale = target.localScale;
+        }
+
+        punchBaseScales[target] = baseScale;
+        activePunches[target] = target
+            .DOPunchScale(Vector3.one * strength, dur, PunchVibrato, PunchElasticity)
+            .OnComplete(() => { if (target != null) target.localScale = baseScale; })
+            .OnKill(() =>
+            {
+                activePunches.Remove(target);
+                punchBaseScales.Remove(target);
+            });
     }
 
     /// <summary>인스턴스의 파티클 시스템들로부터 자동 파괴까지의 수명을 계산합니다.</summary>

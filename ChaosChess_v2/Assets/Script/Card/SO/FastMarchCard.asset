@@ -14,9 +14,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC2E0\uC18D\uD589\uAD70"
   CardImage: {fileID: -1706169764, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC774 \uC774\uBC88 \uD134\uC5D0 <color=#4499FF>\uC804\uBC29\uC73C\uB85C 2\uCE78</color> \uC774\uB3D9\uD569\uB2C8\uB2E4. (1\uD68C)"
+  CardDescription: "\uC120\uD0DD\uD55C \uD3F0\uC774 \uC774\uBC88 \uD134\uC5D0 <color=#4499FF>\uC804\uBC29\uC73C\uB85C
+    2\uCE78</color> \uC774\uB3D9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4 (1\uD68C)"
   Type: 0
   CardTier: 0
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 2142092779321001634, guid: da6bc71f956315a46b52c307b92a09c1, type: 3}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 1
   PieceTargetColor: 0
   PieceLimitTurn: 1
@@ -25,13 +52,24 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
   StatusDisplayType: 2
   NeedAdditionalDescription: 0
   DescriptionType: 0

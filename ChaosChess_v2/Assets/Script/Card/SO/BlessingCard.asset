@@ -14,9 +14,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uAC00\uD638"
   CardImage: {fileID: -1989526714, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uAC00\uD638</color>\uB97C \uC124\uCE58\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uAC00\uD638</color>\uB97C
+    \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 2
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
@@ -25,6 +52,18 @@ MonoBehaviour:
   MaintainTurn: 3
   NeedEffectTileBase: 1
   EffectTileBase: {fileID: 11400000, guid: 14131cb138fcd994097f5949ed13c5bd, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -38,4 +77,7 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 <color=#FFD700>3\uD134</color>\uAC04 \uC774 \uCE78\uC5D0 \uBA38\uBB3C\uBA74 <color=#00CC44>\uD55C \uB2E8\uACC4 \uC2B9\uACA9\uD569\uB2C8\uB2E4</color>.\n\uD3F0 \u2192 \uB098\uC774\uD2B8 / \uB098\uC774\uD2B8\u00B7\uBE44\uC20D \u2192 \uB8E9 / \uB8E9 \u2192 \uD038"
+  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 <color=#FFD700>3\uD134</color>\uAC04
+    \uC774 \uCE78\uC5D0 \uBA38\uBB3C\uBA74 <color=#00CC44>\uD55C \uB2E8\uACC4 \uC2B9\uACA9\uD569\uB2C8\uB2E4</color>.\n\uD3F0
+    \u2192 \uB098\uC774\uD2B8 / \uB098\uC774\uD2B8\xB7\uBE44\uC20D \u2192 \uB8E9
+    / \uB8E9 \u2192 \uD038"

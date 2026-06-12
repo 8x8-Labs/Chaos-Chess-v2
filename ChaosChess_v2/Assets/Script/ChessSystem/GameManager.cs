@@ -25,11 +25,17 @@ public class GameManager : MonoBehaviour
     public List<Sprite> BlackSprites = new List<Sprite>();
     public List<Sprite> WhiteSprites = new List<Sprite>();
 
+    [Header("Elite Transformation")]
+    [Tooltip("엘리트 노드 진입 시 변형 기물 위치에 스폰할 공통 업그레이드 연출 프리팹")]
+    [SerializeField] private GameObject variantUpgradeVfxPrefab;
+
     [SerializeField] private int curTurn;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
     public bool IsPlayerInCheck { get; private set; }
 
     public bool IsGameInput = true;
+    /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
+    public bool AiAutoMoveEnabled = true;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
@@ -168,6 +174,9 @@ public class GameManager : MonoBehaviour
 
         char[] variantChars = { 's', 'y', 'z' }; // Amazon, Chancellor, KnightRider
 
+        // 이번 입장에서 새로 등장한 변형 기물 종류 (중복 제거). 설명 UI 표시에 사용합니다.
+        List<PieceType> introduced = new List<PieceType>();
+
         int count = Mathf.Min(UnityEngine.Random.Range(1, 3), candidates.Count);
         for (int i = 0; i < count; i++)
         {
@@ -176,9 +185,41 @@ public class GameManager : MonoBehaviour
             candidates.RemoveAt(randomIndex);
 
             char variantChar = variantChars[UnityEngine.Random.Range(0, variantChars.Length)];
-            BoardManager.Instance.ChangePiece(target.Pos, EnemyColor, variantChar);
+            Vector3Int pos = target.Pos;
+            BoardManager.Instance.ChangePiece(pos, EnemyColor, variantChar);
+
+            // 업그레이드 연출을 변형된 기물 위치에 스폰합니다.
+            if (variantUpgradeVfxPrefab != null)
+            {
+                Vector3 worldPos = BoardManager.Instance.GridPosToWorldPos(pos);
+                Instantiate(variantUpgradeVfxPrefab, worldPos, Quaternion.identity);
+            }
+
+            PieceType type = VariantCharToPieceType(variantChar);
+            if (type != PieceType.None && !introduced.Contains(type))
+                introduced.Add(type);
         }
+
+        // 패널 표시는 다음 프레임으로 미룹니다.
+        // (씬 로드 중 Start()에서 호출되므로, 패널 자신의 Start()가 끝나기 전에
+        //  EnablePanel을 호출하면 패널의 DisablePanel에 덮어써질 수 있습니다.)
+        if (introduced.Count > 0)
+            StartCoroutine(ShowVariantInfoNextFrame(introduced));
     }
+
+    private System.Collections.IEnumerator ShowVariantInfoNextFrame(List<PieceType> types)
+    {
+        yield return null;
+        UI?.ShowVariantPieceInfo(types);
+    }
+
+    private static PieceType VariantCharToPieceType(char variantChar) => variantChar switch
+    {
+        's' => PieceType.Amazon,
+        'y' => PieceType.Chancellor,
+        'z' => PieceType.KnightRider,
+        _ => PieceType.None
+    };
 
     /// <summary>AI ELO를 delta만큼 조정합니다.</summary>
     public void ModifyELO(int delta)
@@ -190,7 +231,9 @@ public class GameManager : MonoBehaviour
 
     public void SelectGrid(Vector3Int pos)
     {
-        if (!IsPlayerTurn) return;
+        // AI가 켜져 있으면 플레이어(화이트) 턴에만 입력을 허용합니다.
+        // AI를 끄면(카드 랩) 양쪽을 수동으로 둘 수 있도록 턴 색 제한을 해제합니다.
+        if (!IsPlayerTurn && AiAutoMoveEnabled) return;
         if (!BoardManager.Instance.IsInside(pos)) return;
 
         // 파괴된 기물이 잠겨있으면 잠금 해제
@@ -509,6 +552,9 @@ public class GameManager : MonoBehaviour
     public void RequestAIMove()
     {
         if (IsEndGame)
+            return;
+
+        if (!AiAutoMoveEnabled)
             return;
 
         float requestTime = Time.realtimeSinceStartup;

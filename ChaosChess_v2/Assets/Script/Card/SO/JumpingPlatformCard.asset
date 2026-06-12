@@ -14,9 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC810\uD504\uB300"
   CardImage: {fileID: 1737697133, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uC810\uD504\uB300</color>\uB97C \uC124\uCE58\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uC810\uD504\uB300</color>\uB97C
+    \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 0
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
@@ -25,6 +35,15 @@ MonoBehaviour:
   MaintainTurn: -1
   NeedEffectTileBase: 1
   EffectTileBase: {fileID: 11400000, guid: 4c0d4b52ac16bc541acc46ca233caaf7, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 1
+  TileAppearDropHeight: 0.7
+  TileAppearDropDuration: 0.4
+  TileAppearDropEase: 30
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -38,4 +57,7 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uBC1F\uC73C\uBA74 \uC774\uB3D9 \uBC29\uD5A5\uC73C\uB85C <color=#FFD700>2\uCE78 \uC810\uD504</color>\uD569\uB2C8\uB2E4. \uCC29\uC9C0 \uC704\uCE58\uC5D0 \uAE30\uBB3C\uC774 \uC788\uC73C\uBA74 <color=#FF4444>\uD30C\uAD34\uB429\uB2C8\uB2E4</color>.\n1\uD68C \uC0AC\uC6A9 \uD6C4 \uC790\uB3D9 \uD574\uC81C\uB429\uB2C8\uB2E4."
+  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uBC1F\uC73C\uBA74 \uC774\uB3D9
+    \uBC29\uD5A5\uC73C\uB85C <color=#FFD700>2\uCE78 \uC810\uD504</color>\uD569\uB2C8\uB2E4.
+    \uCC29\uC9C0 \uC704\uCE58\uC5D0 \uAE30\uBB3C\uC774 \uC788\uC73C\uBA74 <color=#FF4444>\uD30C\uAD34\uB429\uB2C8\uB2E4</color>.\n1\uD68C
+    \uC0AC\uC6A9 \uD6C4 \uC790\uB3D9 \uD574\uC81C\uB429\uB2C8\uB2E4."

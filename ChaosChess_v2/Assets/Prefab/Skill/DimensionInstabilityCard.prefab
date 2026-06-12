@@ -118,3 +118,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DataSO: {fileID: 11400000, guid: 5bef13b4d064a3d41b4c2ec28e9c29a6, type: 2}
+  ghostMaterial: {fileID: 2100000, guid: b8c9ccbbaea259e40a269b144bec8fe1, type: 2}

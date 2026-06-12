@@ -20,6 +20,15 @@ MonoBehaviour:
   CardTier: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 7222266805189775858, guid: 69cd5d9d559a877489955ee8d6cd044c, type: 3}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}
     HookVFXPrefab: {fileID: 0}
     RevertVFXPrefab: {fileID: 0}
@@ -40,6 +49,13 @@ MonoBehaviour:
   EffectTileAnimationMode: 0
   EffectTileFrameInterval: 0.2
   EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0.7
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0

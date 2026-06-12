@@ -14,9 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uD3C9\uD654 \uD611\uC815 \uACF5\uAC04"
   CardImage: {fileID: 1230551065, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC744 <color=#4499FF>\uD3C9\uD654 \uAD6C\uC5ED</color>\uC73C\uB85C \uC9C0\uC815\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC744 <color=#4499FF>\uD3C9\uD654 \uAD6C\uC5ED</color>\uC73C\uB85C
+    \uC9C0\uC815\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 2
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
@@ -25,6 +35,18 @@ MonoBehaviour:
   MaintainTurn: -1
   NeedEffectTileBase: 1
   EffectTileBase: {fileID: 11400000, guid: bda92be893ac497479862717956918ab, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 1
+  TileAppearDropHeight: 0.7
+  TileAppearDropDuration: 0.3
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0.7
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -38,4 +60,6 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uC774 \uCE78\uC5D0\uC11C \uAE30\uBB3C \uC7A1\uAE30\uB97C \uC2DC\uB3C4\uD558\uBA74 <color=#FFD700>\uC790\uB3D9\uC73C\uB85C \uCDE8\uC18C</color>\uB418\uBA70 \uD6A8\uACFC\uAC00 \uD574\uC81C\uB429\uB2C8\uB2E4."
+  AdditionalDescriptionContent: "\uC774 \uCE78\uC5D0\uC11C \uAE30\uBB3C \uC7A1\uAE30\uB97C
+    \uC2DC\uB3C4\uD558\uBA74 <color=#FFD700>\uC790\uB3D9\uC73C\uB85C \uCDE8\uC18C</color>\uB418\uBA70
+    \uD6A8\uACFC\uAC00 \uD574\uC81C\uB429\uB2C8\uB2E4."

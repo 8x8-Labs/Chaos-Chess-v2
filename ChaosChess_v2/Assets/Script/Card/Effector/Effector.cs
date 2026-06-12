@@ -169,9 +169,14 @@ public abstract class Effector : MonoBehaviour, IEffect
 
         remainingTurns--;
         if (IsExpired)
+        {
             Revert();
+        }
         else
+        {
             OnAnyEffectTurnTicked?.Invoke(this);
+            NotifyTurnTickListeners();
+        }
     }
 
     protected virtual void OnHalfTurnChanged() { }
@@ -214,24 +219,58 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     private GameObject loopVFXInstance;
 
+    // 루프 VFX 인스턴스에서 캐싱한 생애주기 리스너들 (훅별로 분리)
+    private IEffectApplyListener[] applyListeners;
+    private IEffectHookListener[] hookListeners;
+    private IEffectTickListener[] tickListeners;
+    private IEffectRevertListener[] revertListeners;
+
+    private CardVFXConfig vfxConfigOverride;
+
+    /// <summary>이 effector가 사용할 VFX 설정입니다. 기본은 CardSO.VFX이며, SetVFXConfig로 교체할 수 있습니다.</summary>
+    protected CardVFXConfig VFXConfig => vfxConfigOverride ?? CardSO?.VFX;
+
+    /// <summary>CardSO.VFX 대신 사용할 VFX 설정을 지정합니다. (예: 타일이 기물에 효과를 부여할 때의 연출)</summary>
+    public void SetVFXConfig(CardVFXConfig config) => vfxConfigOverride = config;
+
     /// <summary>VFX 연출 기준 월드 좌표입니다. 서브클래스가 제공하지 않으면 위치 기반 연출(적용/유지/소멸)은 생략됩니다.</summary>
     protected virtual bool TryGetVFXWorldPosition(out Vector3 pos) { pos = default; return false; }
 
     /// <summary>루프 VFX를 부착하고 펀치를 적용할 대상입니다. 부착 대상이 파괴되면 루프도 함께 정리됩니다.</summary>
     protected virtual Transform VFXFollowTarget => null;
 
+    /// <summary>효과음을 재생합니다. 클립이 없거나 SoundManager가 없으면 조용히 무시합니다.</summary>
+    private void PlaySFX(AudioClip clip, float volume)
+    {
+        if (clip == null || SoundManager.Instance == null) return;
+        SoundManager.Instance.SFXPlay(CardSO != null ? CardSO.CardName : "CardEffect", clip, volume);
+    }
+
     /// <summary>효과 적용 시 1회 버스트 + 지속 루프 + 기본 펀치 트윈을 재생합니다.</summary>
     private void PlayApplyVFX()
     {
-        CardVFXConfig vfx = CardSO?.VFX;
+        CardVFXConfig vfx = VFXConfig;
         if (vfx == null) return;
+
+        PlaySFX(vfx.ApplySFX, vfx.SFXVolume);
+
         if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
 
         Transform follow = VFXFollowTarget;
         VFXSpawner.SpawnOneShot(vfx.ApplyVFXPrefab, pos, follow);
 
         if (vfx.LoopVFXPrefab != null)
+        {
             loopVFXInstance = VFXSpawner.SpawnLoop(vfx.LoopVFXPrefab, pos, follow);
+            CacheVFXListeners(loopVFXInstance);
+
+            if (applyListeners != null)
+            {
+                EffectVFXContext ctx = MakeContext(pos);
+                foreach (IEffectApplyListener listener in applyListeners)
+                    if (IsListenerAlive(listener)) listener.OnEffectApply(in ctx);
+            }
+        }
 
         if (vfx.PlayApplyAnim)
             VFXSpawner.PlayPunch(follow, vfx.AnimStrength, vfx.AnimDuration);
@@ -240,8 +279,12 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>효과 소멸 시 1회 버스트를 재생합니다. 호스트가 곧 파괴돼도 살아남도록 부모 없이 스폰합니다.</summary>
     private void PlayRevertVFX()
     {
-        CardVFXConfig vfx = CardSO?.VFX;
-        if (vfx == null || vfx.RevertVFXPrefab == null) return;
+        CardVFXConfig vfx = VFXConfig;
+        if (vfx == null) return;
+
+        PlaySFX(vfx.RevertSFX, vfx.SFXVolume);
+
+        if (vfx.RevertVFXPrefab == null) return;
         if (!TryGetVFXWorldPosition(out Vector3 pos)) return;
 
         VFXSpawner.SpawnOneShot(vfx.RevertVFXPrefab, pos, null);
@@ -251,6 +294,16 @@ public abstract class Effector : MonoBehaviour, IEffect
     private void StopLoopVFX()
     {
         if (loopVFXInstance == null) return;
+
+        // Revert()와 OnDestroy()가 모두 거치는 단일 지점이므로 여기서만 소멸을 통지합니다.
+        if (revertListeners != null)
+        {
+            EffectVFXContext ctx = MakeContext(loopVFXInstance.transform.position);
+            foreach (IEffectRevertListener listener in revertListeners)
+                if (IsListenerAlive(listener)) listener.OnEffectRevert(in ctx);
+        }
+        ClearVFXListeners();
+
         Destroy(loopVFXInstance);
         loopVFXInstance = null;
     }
@@ -265,12 +318,69 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>지정 월드 좌표에 게임 훅 VFX를 재생합니다. 버스트는 부모 없이 스폰되어 대상 파괴(기물 잡힘 등)와 무관하게 유지됩니다.</summary>
     protected void PlayHookVFX(Vector3 worldPos, Transform punchTarget = null)
     {
-        CardVFXConfig vfx = CardSO?.VFX;
+        CardVFXConfig vfx = VFXConfig;
         if (vfx == null) return;
+
+        PlaySFX(vfx.HookSFX, vfx.SFXVolume);
 
         VFXSpawner.SpawnOneShot(vfx.HookVFXPrefab, worldPos, null);
         if (vfx.PlayHookAnim)
             VFXSpawner.PlayPunch(punchTarget, vfx.AnimStrength, vfx.AnimDuration);
+
+        if (hookListeners != null)
+        {
+            EffectVFXContext ctx = MakeContext(worldPos);
+            foreach (IEffectHookListener listener in hookListeners)
+                if (IsListenerAlive(listener)) listener.OnEffectHook(in ctx);
+        }
+    }
+
+    // ───────── VFX 리스너 (복제본 컴포넌트 호출) ─────────
+
+    /// <summary>루프 VFX 인스턴스에서 훅별 리스너를 캐싱합니다.</summary>
+    private void CacheVFXListeners(GameObject instance)
+    {
+        if (instance == null) return;
+        applyListeners = instance.GetComponentsInChildren<IEffectApplyListener>(true);
+        hookListeners = instance.GetComponentsInChildren<IEffectHookListener>(true);
+        tickListeners = instance.GetComponentsInChildren<IEffectTickListener>(true);
+        revertListeners = instance.GetComponentsInChildren<IEffectRevertListener>(true);
+    }
+
+    private void ClearVFXListeners()
+    {
+        applyListeners = null;
+        hookListeners = null;
+        tickListeners = null;
+        revertListeners = null;
+    }
+
+    private EffectVFXContext MakeContext(Vector3 worldPos) => new(this, worldPos, remainingTurns);
+
+    /// <summary>
+    /// 리스너가 호출 가능한 상태인지 검사합니다.
+    /// 인터페이스 타입은 UnityEngine.Object를 직접 상속하지 않으므로 C# null(`?.`)만으로는
+    /// 이미 Destroy된 컴포넌트를 걸러내지 못합니다. Unity 객체일 경우 실제 생존 여부까지 확인합니다.
+    /// </summary>
+    private static bool IsListenerAlive(object listener)
+    {
+        if (listener == null) return false;
+        if (listener is UnityEngine.Object unityObj) return unityObj != null;
+        return true;
+    }
+
+    /// <summary>턴 경과를 리스너에 전달합니다.</summary>
+    private void NotifyTurnTickListeners()
+    {
+        if (tickListeners == null) return;
+
+        Vector3 pos = TryGetVFXWorldPosition(out Vector3 p)
+            ? p
+            : (loopVFXInstance != null ? loopVFXInstance.transform.position : Vector3.zero);
+
+        EffectVFXContext ctx = MakeContext(pos);
+        foreach (IEffectTickListener listener in tickListeners)
+            if (IsListenerAlive(listener)) listener.OnEffectTurnTick(in ctx);
     }
 }
 
@@ -401,7 +511,8 @@ public abstract class TileEffector : Effector, ITileEffect
             tilePos,
             visualData,
             effectTileIndex,
-            RemainingTurns);
+            RemainingTurns,
+            playAppear: true);
     }
 
     protected void ClearTileEffect()
@@ -434,6 +545,16 @@ public abstract class GlobalEffector : Effector
     {
         base.OnTurnChanged();
         if (IsApplied && !IsExpired) OnTurnTicked?.Invoke(this);
+    }
+
+    // 전역 효과는 단일 대상이 없으므로 적용/소멸 VFX의 앵커로 보드 중앙을 사용합니다.
+    // (훅 VFX는 OnPieceAct에서 행동한 기물 위치를 직접 넘기므로 영향받지 않습니다.)
+    protected override bool TryGetVFXWorldPosition(out Vector3 pos)
+    {
+        if (BoardManager.Instance == null) { pos = default; return false; }
+        pos = (BoardManager.Instance.GridPosToWorldPos(new Vector3Int(3, 3, 0))
+             + BoardManager.Instance.GridPosToWorldPos(new Vector3Int(4, 4, 0))) * 0.5f;
+        return true;
     }
 
     protected PieceType watchType;   // 감시할 기물 타입 (Flags 조합 가능, None = 모든 타입)

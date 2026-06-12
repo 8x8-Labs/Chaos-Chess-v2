@@ -8,6 +8,17 @@ public enum TileEffectAnimationMode
     Turn
 }
 
+/// <summary>타일 이펙트가 처음 깔릴 때의 등장 연출 방식입니다.</summary>
+public enum TileAppearAnimationMode
+{
+    /// <summary>고정 타일: 애니메이션 없이 즉시 표시</summary>
+    None,
+    /// <summary>물체형 타일: 위에서 아래로 떨어지며 등장</summary>
+    Drop,
+    /// <summary>확대형 타일: 작은 크기에서 원래 크기로 확대되며 등장</summary>
+    Scale
+}
+
 /// <summary>
 /// 카드 효과가 기물/타일에 적용될 때 재생할 파티클·트윈 연출 설정입니다.
 /// 프리팹을 비워두면 해당 시점 연출은 자동으로 생략됩니다.
@@ -35,6 +46,17 @@ public class CardVFXConfig
     [Tooltip("펀치 트윈 진행 시간(초)")]
     [Min(0.01f)]
     public float AnimDuration = 0.3f;
+
+    [Header("효과음 (비워두면 재생 생략)")]
+    [Tooltip("효과 적용 순간 1회 재생")]
+    public AudioClip ApplySFX;
+    [Tooltip("이동/잡기/타일 진입 등 게임 훅 발동 시 1회 재생")]
+    public AudioClip HookSFX;
+    [Tooltip("효과 소멸 순간 1회 재생")]
+    public AudioClip RevertSFX;
+    [Range(0f, 1f)]
+    [Tooltip("위 효과음들의 재생 볼륨")]
+    public float SFXVolume = 1f;
 }
 
 [CreateAssetMenu(fileName = "Card Data", menuName = "Card/Card Data")]
@@ -52,6 +74,9 @@ public class CardDataSO : ScriptableObject
     [Space(30)]
     [Header("VFX 연출 설정")]
     public CardVFXConfig VFX = new CardVFXConfig();
+
+    [Tooltip("타일/효과가 기물에 효과를 부여할 때, 그 기물에 적용되는 연출입니다. (VFX와 별개)")]
+    public CardVFXConfig PieceEffectVFX = new CardVFXConfig();
 
     // 기물 타입에 필요한 설정
     [Space(30)]
@@ -95,6 +120,27 @@ public class CardDataSO : ScriptableObject
     public float EffectTileFrameInterval = 0.2f;
     [Tooltip("시간 기반 애니메이션 프레임 또는 턴 기반 상태 프레임입니다.")]
     public TileBase[] EffectTileAnimationFrames;
+
+    [Header("타일 등장 연출")]
+    [Tooltip("None=고정 타일(즉시 표시), Drop=물체형 타일(위에서 떨어짐), Scale=작은 크기에서 확대")]
+    public TileAppearAnimationMode TileAppearMode = TileAppearAnimationMode.None;
+    [Tooltip("떨어지기 시작하는 높이(셀 단위)")]
+    [Min(0f)]
+    public float TileAppearDropHeight = 3f;
+    [Tooltip("떨어지는 데 걸리는 시간(초)")]
+    [Min(0.01f)]
+    public float TileAppearDropDuration = 0.35f;
+    [Tooltip("떨어질 때 사용할 DOTween 이징(착지감)")]
+    public DG.Tweening.Ease TileAppearDropEase = DG.Tweening.Ease.OutBounce;
+
+    [Tooltip("Scale 모드에서 확대를 시작하는 크기 배율(0 → 가운데 점에서 솟아나듯 등장)")]
+    [Min(0f)]
+    public float TileAppearScaleFrom = 0f;
+    [Tooltip("확대되는 데 걸리는 시간(초)")]
+    [Min(0.01f)]
+    public float TileAppearScaleDuration = 0.3f;
+    [Tooltip("확대될 때 사용할 DOTween 이징")]
+    public DG.Tweening.Ease TileAppearScaleEase = DG.Tweening.Ease.OutBack;
 
     public TileBase GetEffectTileBase(int index)
     {

@@ -14,9 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uAC70\uBBF8\uC904"
   CardImage: {fileID: 9887003, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uAC70\uBBF8\uC904</color>\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC5D0 <color=#4499FF>\uAC70\uBBF8\uC904</color>\uC744
+    \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 1
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 1553041093156533887, guid: e944f300d8d74364a8016b8c5c2a30ed, type: 3}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
@@ -25,6 +44,18 @@ MonoBehaviour:
   MaintainTurn: 3
   NeedEffectTileBase: 1
   EffectTileBase: {fileID: 11400000, guid: 52d0954d1d5c5b347a072e4f2978ce5c, type: 2}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0.7
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -38,4 +69,6 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uAC70\uBBF8\uC904 \uCE78\uC744 \uC9C0\uB098\uAC00\uBA74 <color=#FFD700>3\uD134</color>\uAC04 <color=#FF4444>\uC774\uB3D9\uC774 \uBD09\uC1C4\uB429\uB2C8\uB2E4</color>."
+  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uAC70\uBBF8\uC904 \uCE78\uC744
+    \uC9C0\uB098\uAC00\uBA74 <color=#FFD700>3\uD134</color>\uAC04 <color=#FF4444>\uC774\uB3D9\uC774
+    \uBD09\uC1C4\uB429\uB2C8\uB2E4</color>."
