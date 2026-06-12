@@ -62,7 +62,10 @@ public static class VFXSpawner
         if (activePunches.TryGetValue(target, out Tween running))
         {
             baseScale = punchBaseScales[target];
-            running.Kill();              // 정리 콜백(OnKill)이 dict에서 제거함
+            running.OnKill(null);        // 기존 OnKill 콜백이 dict를 오염시키는 것을 방지
+            running.Kill();
+            activePunches.Remove(target);
+            punchBaseScales.Remove(target);
             target.localScale = baseScale;
         }
         else

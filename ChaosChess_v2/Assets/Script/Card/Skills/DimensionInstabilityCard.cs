@@ -25,7 +25,10 @@ public class DimensionInstabilityCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
+        if (args == null || args.Targets == null || args.Targets.Count == 0) return;
         Piece piece = args.Targets[0];
+        if (piece == null) return;
+
         var effector = CreatePieceEffector<DimensionInstabilityEffector>(piece);
         effector.GhostMaterial = ghostMaterial;
         effector.Apply();
@@ -75,6 +78,12 @@ public class DimensionInstabilityEffector : PieceEffector
         ghostObject = null;
         ghostRenderer = null;
         Destroy(this);
+    }
+
+    /// <summary>OnRevert를 거치지 않고 파괴될 경우(타겟 기물 파괴 등)에도 가상 나이트가 씬에 남지 않도록 정리합니다.</summary>
+    private void OnDestroy()
+    {
+        if (ghostObject != null) Destroy(ghostObject);
     }
 
     /// <summary>가상 나이트 비주얼을 생성(최초)하거나 이동시킵니다.</summary>

@@ -340,6 +340,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     /// <summary>루프 VFX 인스턴스에서 훅별 리스너를 캐싱합니다.</summary>
     private void CacheVFXListeners(GameObject instance)
     {
+        if (instance == null) return;
         applyListeners = instance.GetComponentsInChildren<IEffectApplyListener>(true);
         hookListeners = instance.GetComponentsInChildren<IEffectHookListener>(true);
         tickListeners = instance.GetComponentsInChildren<IEffectTickListener>(true);

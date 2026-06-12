@@ -92,13 +92,23 @@ public class EffectorInspectorPanel : MonoBehaviour
     public void RevertAll()
     {
         // Revert가 목록을 수정하므로 복사본을 순회합니다.
-        Effector[] snapshot = active.ToArray();
-        foreach (Effector e in snapshot)
+        // 이벤트 구독을 임시로 해제하여 루프 내에서 Refresh()가 반복 호출되는 것을 방지하고,
+        // 마지막에 한 번만 갱신합니다.
+        Effector.OnAnyEffectReverted -= HandleReverted;
+        try
         {
-            if (e != null)
-                e.Revert();
+            Effector[] snapshot = active.ToArray();
+            foreach (Effector e in snapshot)
+            {
+                if (e != null)
+                    e.Revert();
+            }
+            active.Clear();
         }
-        active.Clear();
+        finally
+        {
+            Effector.OnAnyEffectReverted += HandleReverted;
+        }
         Refresh();
     }
 }

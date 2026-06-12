@@ -112,7 +112,7 @@ public class ArenaManager : MonoBehaviour
         keepPieces.UnionWith(opponents);
         keepPieces.Add(opponentKing); // playerKing은 플레이어 기물로 이미 포함됨
         // HidePiece가 Pieces 리스트(GetAllPieces 원본)를 수정하므로 스냅샷으로 순회
-        foreach (Piece p in allPiece.ToList())
+        foreach (Piece p in new List<Piece>(allPiece))
         {
             if (!keepPieces.Contains(p))
             {

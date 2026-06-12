@@ -23,8 +23,9 @@ public class MissingPromotionCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        if (args.Targets == null || args.Targets.Count == 0) return;
+        if (args == null || args.Targets == null || args.Targets.Count == 0) return;
         Piece p = args.Targets[0];
+        if (p == null) return;
 
         // 교체 시 대상 기물이 파괴되므로 연출 위치를 먼저 확보합니다.
         Vector3 worldPos = p.transform.position;

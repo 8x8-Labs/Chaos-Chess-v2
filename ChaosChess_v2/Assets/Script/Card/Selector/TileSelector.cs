@@ -161,7 +161,7 @@ public class TileSelector : Selector<Vector3Int>
             {
                 Vector3Int pos = new Vector3Int(x, y, 0);
                 if (boardManager.GetPiece(pos) != null) continue;
-                if (so.RestrictTiles && so.BlockedTiles[y * 8 + x]) continue;
+                if (so.RestrictTiles && (so.BlockedTiles == null || y * 8 + x >= so.BlockedTiles.Length || so.BlockedTiles[y * 8 + x])) continue;
                 if (effectPos.Contains(pos)) continue;
                 return true;
             }

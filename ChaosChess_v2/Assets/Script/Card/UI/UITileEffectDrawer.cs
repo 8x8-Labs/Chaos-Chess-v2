@@ -122,7 +122,8 @@ public class UITileEffectDrawer : MonoBehaviour
                     if (effectTilemap != null && effectTilemap.HasTile(pos))
                         effectTilemap.SetTransformMatrix(pos, BuildScaleMatrix(scale));
                 })
-                .SetEase(dataSO.TileAppearScaleEase);
+                .SetEase(dataSO.TileAppearScaleEase)
+                .SetTarget(effectTilemap);
         }
         else // Drop
         {
@@ -135,7 +136,8 @@ public class UITileEffectDrawer : MonoBehaviour
                     if (effectTilemap != null && effectTilemap.HasTile(pos))
                         effectTilemap.SetTransformMatrix(pos, Matrix4x4.Translate(new Vector3(0f, offset, 0f)));
                 })
-                .SetEase(dataSO.TileAppearDropEase);
+                .SetEase(dataSO.TileAppearDropEase)
+                .SetTarget(effectTilemap);
         }
 
         tween.OnComplete(() =>
