@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -37,5 +38,14 @@ public class UIManager : MonoBehaviour
     public void ShowEndGame(GameResult result)
     {
         endGamePanel.Show(result);
+    }
+
+
+    [SerializeField] private VariantPieceInfoPanel variantPieceInfoPanel;
+
+    public void ShowVariantPieceInfo(IReadOnlyList<PieceType> types)
+    {
+        if (variantPieceInfoPanel == null) return;
+        variantPieceInfoPanel.Show(types);
     }
 }
