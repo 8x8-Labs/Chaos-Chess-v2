@@ -24,6 +24,12 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
+        if (cardRandomizer == null)
+        {
+            Debug.LogError($"{nameof(Player)} requires a {nameof(CardRandomizer)} reference.", this);
+            return;
+        }
+
         GameManager.Instance.OnPlayerTurnStarted += HandlePlayerTurnStarted;
         GameManager.Instance.OnCardIntervalPauseChanged += HandleCardIntervalPauseChanged;
         cardRandomizer.OnCardCountChanged += HandleCardCountChanged;
@@ -35,8 +41,7 @@ public class Player : MonoBehaviour
         _buffs = new List<BuffPick>(PlayerState.Instance.Buffs);
 
         ExecuteBuffs();
-        int currentCardCnt = cardRandomizer.CurrentCardCnt;
-        int spawnCount = _maxCardCount - currentCardCnt;
+        int spawnCount = _maxCardCount - CurrentCardCount;
         if (spawnCount > 0)
             cardRandomizer.GenerateCard(_cardPool, spawnCount);
 
@@ -73,7 +78,7 @@ public class Player : MonoBehaviour
         }
 
         _playerTurnCount++;
-        if (_playerTurnCount < _cardInterval || cardRandomizer.CurrentCardCnt >= _maxCardCount)
+        if (_playerTurnCount < _cardInterval || IsCardHandFull)
         {
             NotifyCardGrantStateChanged();
             return;

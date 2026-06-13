@@ -38,11 +38,15 @@ public class CardGrantStatusUI : MonoBehaviour
 
     private IEnumerator BindPlayerWhenReady()
     {
-        while (player == null || !player.IsCardGrantInitialized)
+        while (player == null)
         {
             player = FindFirstObjectByType<Player>();
-            yield return null;
+            if (player == null)
+                yield return null;
         }
+
+        while (!player.IsCardGrantInitialized)
+            yield return null;
 
         player.OnCardGrantStateChanged += Refresh;
         player.OnCardGranted += PlayGrantedFeedback;
@@ -62,6 +66,8 @@ public class CardGrantStatusUI : MonoBehaviour
     private void Refresh()
     {
         if (player == null || labelText == null) return;
+
+        if (grantSequence != null && grantSequence.IsActive() && grantSequence.IsPlaying()) return;
 
         if (player.IsCardGrantPaused)
         {
@@ -91,7 +97,11 @@ public class CardGrantStatusUI : MonoBehaviour
             .Append(statusRoot.DOScale(1.08f, 0.12f))
             .Append(statusRoot.DOScale(1f, 0.12f))
             .AppendInterval(GrantMessageDuration)
-            .OnComplete(Refresh);
+            .OnComplete(() =>
+            {
+                grantSequence = null;
+                Refresh();
+            });
     }
 
     private void SetStatus(string text)
