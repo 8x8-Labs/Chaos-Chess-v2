@@ -8,7 +8,7 @@ public class CardGrantStatusUI : MonoBehaviour
     private const float GrantMessageDuration = 0.8f;
     private const int EmphasisSize = 84;
     private const string WaitingHex = "#FFE633";
-    private const string ReadyHex = "#75D6FF";
+    private const string GrantedHex = "#75D6FF";
     private const string NoticeHex = "#FF9F43";
 
     [SerializeField] private RectTransform statusRoot;
@@ -75,12 +75,6 @@ public class CardGrantStatusUI : MonoBehaviour
             return;
         }
 
-        if (player.IsCardGrantReady)
-        {
-            SetStatus($"카드 {Emphasize("지급 가능", ReadyHex)}");
-            return;
-        }
-
         int remainingTurns = player.RemainingTurnsUntilCardGrant;
         SetStatus($"{Emphasize($"{remainingTurns}턴", WaitingHex)} 후 지급");
     }
@@ -90,7 +84,7 @@ public class CardGrantStatusUI : MonoBehaviour
         if (statusRoot == null || labelText == null) return;
 
         grantSequence?.Kill();
-        SetStatus($"카드 {Emphasize("지급!", ReadyHex)}");
+        SetStatus($"카드 {Emphasize("지급!", GrantedHex)}");
         statusRoot.localScale = Vector3.one;
 
         grantSequence = DOTween.Sequence()

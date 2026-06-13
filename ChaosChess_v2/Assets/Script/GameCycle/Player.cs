@@ -14,7 +14,6 @@ public class Player : MonoBehaviour
 
     public bool IsCardGrantInitialized { get; private set; }
     public int RemainingTurnsUntilCardGrant => Mathf.Max(0, _cardInterval - _playerTurnCount);
-    public bool IsCardGrantReady => _playerTurnCount >= _cardInterval;
     public bool IsCardHandFull => CurrentCardCount >= _maxCardCount;
     public bool IsCardGrantPaused => GameManager.Instance != null && GameManager.Instance.IsCardIntervalPaused;
 
