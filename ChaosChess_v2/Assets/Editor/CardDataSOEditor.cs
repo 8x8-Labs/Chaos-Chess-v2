@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEditor;
 
 [CustomEditor(typeof(CardDataSO))]
@@ -25,7 +26,6 @@ public class CardDataSOEditor : Editor
     SerializedProperty useMultipleEffectTileBases;
     SerializedProperty effectTileBases;
     SerializedProperty effectTileAnimationMode;
-    SerializedProperty effectTileFrameInterval;
     SerializedProperty effectTileAnimationFrames;
     SerializedProperty tileAppearMode;
     SerializedProperty tileAppearDropHeight;
@@ -88,7 +88,6 @@ public class CardDataSOEditor : Editor
         useMultipleEffectTileBases = serializedObject.FindProperty("UseMultipleEffectTileBases");
         effectTileBases = serializedObject.FindProperty("EffectTileBases");
         effectTileAnimationMode = serializedObject.FindProperty("EffectTileAnimationMode");
-        effectTileFrameInterval = serializedObject.FindProperty("EffectTileFrameInterval");
         effectTileAnimationFrames = serializedObject.FindProperty("EffectTileAnimationFrames");
         tileAppearMode = serializedObject.FindProperty("TileAppearMode");
         tileAppearDropHeight = serializedObject.FindProperty("TileAppearDropHeight");
@@ -332,7 +331,8 @@ public class CardDataSOEditor : Editor
                 return;
 
             DrawTileEffectAnimationFields();
-            if ((TileEffectAnimationMode)effectTileAnimationMode.enumValueIndex == TileEffectAnimationMode.None)
+            var animationMode = (TileEffectAnimationMode)effectTileAnimationMode.enumValueIndex;
+            if (animationMode != TileEffectAnimationMode.Turn)
                 DrawTileEffectBaseFields();
 
             if (allowAppear)
@@ -391,6 +391,20 @@ public class CardDataSOEditor : Editor
 
     void DrawTileEffectAnimationFields()
     {
+        effectTileBase ??= serializedObject.FindProperty("EffectTileBase");
+        useMultipleEffectTileBases ??= serializedObject.FindProperty("UseMultipleEffectTileBases");
+        effectTileAnimationMode ??= serializedObject.FindProperty("EffectTileAnimationMode");
+        effectTileAnimationFrames ??= serializedObject.FindProperty("EffectTileAnimationFrames");
+
+        if (effectTileBase == null
+            || useMultipleEffectTileBases == null
+            || effectTileAnimationMode == null
+            || effectTileAnimationFrames == null)
+        {
+            EditorGUILayout.HelpBox("타일 애니메이션 설정을 불러오지 못했습니다. 에셋을 다시 선택해주세요.", MessageType.Error);
+            return;
+        }
+
         EditorGUILayout.Space(4);
         using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
         {
@@ -404,21 +418,29 @@ public class CardDataSOEditor : Editor
                 return;
             }
 
-            EditorGUI.indentLevel++;
-            EditorGUILayout.PropertyField(effectTileAnimationFrames, new GUIContent("프레임"), true);
-
             if (mode == TileEffectAnimationMode.Time)
             {
-                EditorGUILayout.PropertyField(effectTileFrameInterval, new GUIContent("프레임 간격(초)"));
-            }
-            else if (mode == TileEffectAnimationMode.Turn)
-            {
-                EditorGUILayout.HelpBox("0번 프레임 = 시작, 1번 프레임 = 1턴 경과", MessageType.None);
+                EditorGUILayout.HelpBox(
+                    "시간 기반 애니메이션은 아래 타일 베이스에 지정한 AnimatedTile의 프레임과 속도를 사용합니다.",
+                    MessageType.Info);
+
+                if (!useMultipleEffectTileBases.boolValue
+                    && effectTileBase.objectReferenceValue != null
+                    && effectTileBase.objectReferenceValue is not AnimatedTile)
+                {
+                    EditorGUILayout.HelpBox(
+                        "Time 모드의 타일 베이스에는 AnimatedTile을 지정해야 합니다.",
+                        MessageType.Warning);
+                }
+
+                return;
             }
 
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(effectTileAnimationFrames, new GUIContent("턴 상태 프레임"), true);
+            EditorGUILayout.HelpBox("0번 프레임 = 시작, 1번 프레임 = 1턴 경과", MessageType.None);
             if (effectTileAnimationFrames.arraySize == 0)
                 EditorGUILayout.HelpBox("프레임이 비어 있으면 기본 타일 베이스가 표시됩니다.", MessageType.Warning);
-
             EditorGUI.indentLevel--;
         }
     }

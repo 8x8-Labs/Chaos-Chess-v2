@@ -115,10 +115,9 @@ public class CardDataSO : ScriptableObject
     /// 선택 순서별로 표시할 타일베이스 목록입니다.
     /// </summary>
     public TileBase[] EffectTileBases;
+    [Tooltip("Time은 EffectTileBase에 지정한 AnimatedTile에 위임하고, Turn은 아래 프레임 배열을 사용합니다.")]
     public TileEffectAnimationMode EffectTileAnimationMode = TileEffectAnimationMode.None;
-    [Min(0.01f)]
-    public float EffectTileFrameInterval = 0.2f;
-    [Tooltip("시간 기반 애니메이션 프레임 또는 턴 기반 상태 프레임입니다.")]
+    [Tooltip("Turn 모드에서 남은 턴에 따라 표시할 상태 프레임입니다.")]
     public TileBase[] EffectTileAnimationFrames;
 
     [Header("타일 등장 연출")]
