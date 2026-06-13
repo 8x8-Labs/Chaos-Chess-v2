@@ -38,20 +38,26 @@ public class CardGrantStatusUI : MonoBehaviour
 
     private IEnumerator BindPlayerWhenReady()
     {
-        while (player == null)
+        while (true)
         {
-            player = FindFirstObjectByType<Player>();
-            if (player == null)
+            while (player == null)
+            {
+                player = FindFirstObjectByType<Player>();
                 yield return null;
+            }
+
+            while (player != null && !player.IsCardGrantInitialized)
+                yield return null;
+
+            if (player != null)
+            {
+                player.OnCardGrantStateChanged += Refresh;
+                player.OnCardGranted += PlayGrantedFeedback;
+                bindCoroutine = null;
+                Refresh();
+                yield break;
+            }
         }
-
-        while (!player.IsCardGrantInitialized)
-            yield return null;
-
-        player.OnCardGrantStateChanged += Refresh;
-        player.OnCardGranted += PlayGrantedFeedback;
-        bindCoroutine = null;
-        Refresh();
     }
 
     private void UnbindPlayer()
