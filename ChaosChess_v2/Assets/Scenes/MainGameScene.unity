@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9989696, g: 1, b: 0.040880322, a: 1}
+  m_Color: {r: 1, g: 0.97742105, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -11275,7 +11275,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contentPanel: {fileID: 3200000101}
   effectLayout: {fileID: 3200000104}
-  cardPrefab: {fileID: 2543569183586122757, guid: f5e6ba8a3d58a984286ac488322065e1, type: 3}
+  cardPrefab: {fileID: 5188852121270727302, guid: 9800978b59d7e4e4f897dc10ae0d3a85, type: 3}
   collapsedSpacing: -200
   expandedSpacing: 10
   spacingAnimDuration: 0.2
@@ -22578,7 +22578,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  clickSound: {fileID: 0}
+  clickSound: {fileID: 8300000, guid: 10c1ce1260803ab4e961c1894ff2ab2d, type: 3}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
   enableCanvas: {fileID: 0}
@@ -22645,9 +22645,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 30, y: 1050}
+  m_AnchoredPosition: {x: 280, y: 1150}
   m_SizeDelta: {x: 500, y: 200}
-  m_Pivot: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3200000302
 CanvasRenderer:
   m_ObjectHideFlags: 0

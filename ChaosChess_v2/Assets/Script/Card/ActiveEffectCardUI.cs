@@ -14,19 +14,19 @@ public class ActiveEffectCardUI : MonoBehaviour
     [SerializeField] private float animationDuration = 0.2f;
     [SerializeField] private float yOffset = 160f;
 
+    private RectTransform cardRect => CardImage?.rectTransform;
+
     public float AnimationDuration => animationDuration;
 
     public void PlayAppearAnimation(Action onComplete = null)
     {
-        RectTransform rt = GetComponent<RectTransform>();
-        rt.anchoredPosition -= new Vector2(0f, yOffset);
-        rt.DOAnchorPosY(yOffset, animationDuration).SetRelative().OnComplete(() => onComplete?.Invoke());
+        cardRect.anchoredPosition = new Vector2(0f, -yOffset);
+        cardRect.DOAnchorPosY(0f, animationDuration).OnComplete(() => onComplete?.Invoke());
     }
 
     public void PlayDisappearAnimation(Action onComplete)
     {
-        RectTransform rt = GetComponent<RectTransform>();
-        rt.DOAnchorPosY(rt.anchoredPosition.y - yOffset, animationDuration)
+        cardRect.DOAnchorPosY(-yOffset, animationDuration)
           .SetEase(Ease.InQuad)
           .OnComplete(() => onComplete?.Invoke());
     }
