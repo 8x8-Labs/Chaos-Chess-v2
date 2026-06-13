@@ -47,6 +47,8 @@ public class GameManager : MonoBehaviour
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
     public event Action OnPlayerTurnStarted;
+    /// <summary>카드 지급 주기 카운트의 일시정지 상태가 바뀔 때 발행됩니다.</summary>
+    public event Action OnCardIntervalPauseChanged;
     /// <summary>매 턴(플레이어·AI 모두) 종료 직후 발행됩니다. Effector 지속 턴 카운트다운에 사용됩니다.</summary>
     public event Action OnTurnChanged;
     /// <summary>반 턴 종료 직후 발행됩니다.</summary>
@@ -449,12 +451,14 @@ public class GameManager : MonoBehaviour
     public void PushCardIntervalPause()
     {
         cardIntervalPauseCount++;
+        OnCardIntervalPauseChanged?.Invoke();
     }
 
     /// <summary>카드 지급 주기 카운트 일시 정지를 해제합니다.</summary>
     public void PopCardIntervalPause()
     {
         cardIntervalPauseCount = Mathf.Max(0, cardIntervalPauseCount - 1);
+        OnCardIntervalPauseChanged?.Invoke();
     }
 
     // MoveSelected 안에서 플레이어 수 적용 후:
@@ -776,6 +780,7 @@ public class GameManager : MonoBehaviour
     private void ResetActions()
     {
         OnPlayerTurnStarted = null;
+        OnCardIntervalPauseChanged = null;
         OnTurnChanged = null;
         OnHalfTurnChanged = null;
         OnTimeReversalRequired = null;
