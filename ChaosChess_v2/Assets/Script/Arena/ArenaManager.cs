@@ -220,9 +220,9 @@ public class ArenaManager : MonoBehaviour
         foreach (Piece p in hiddenPieces)
             if (p != null) BoardManager.Instance.RestorePiece(p);
         hiddenPieces.Clear();
-        ResumeStoredEffects();
         if (BoardManager.Instance.TileEffectDrawer != null && savedTileEffects != null)
             BoardManager.Instance.TileEffectDrawer.RestoreTileEffects(savedTileEffects);
+        ResumeStoredEffects();
         gm.ResumeQueuedActions();
 
         // 복원 완료 최종 상태에서 1회만 동기화

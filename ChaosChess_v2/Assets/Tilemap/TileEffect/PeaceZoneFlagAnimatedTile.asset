@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
+  m_Name: PeaceZoneFlagAnimatedTile
+  m_EditorClassIdentifier: 
+  m_AnimatedSprites:
+  - {fileID: 8171864365139417887, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: -8101465684693563283, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: -5360561233360395612, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: 777118019098333355, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: -1726918050305583835, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: 2585745618025407950, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: -7654667536099118956, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: -3544835377981496103, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: -6112793874128548226, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: 7689893613936730033, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: 1272070724488423121, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  - {fileID: 6086717681329318971, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
+  m_MinSpeed: 10
+  m_MaxSpeed: 10
+  m_AnimationStartTime: 0
+  m_AnimationStartFrame: 0
+  m_TileColliderType: 0
+  m_TileAnimationFlags: 0

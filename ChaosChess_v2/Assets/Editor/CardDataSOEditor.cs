@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEditor;
 
 [CustomEditor(typeof(CardDataSO))]
@@ -25,7 +26,6 @@ public class CardDataSOEditor : Editor
     SerializedProperty useMultipleEffectTileBases;
     SerializedProperty effectTileBases;
     SerializedProperty effectTileAnimationMode;
-    SerializedProperty effectTileFrameInterval;
     SerializedProperty effectTileAnimationFrames;
     SerializedProperty tileAppearMode;
     SerializedProperty tileAppearDropHeight;
@@ -88,7 +88,6 @@ public class CardDataSOEditor : Editor
         useMultipleEffectTileBases = serializedObject.FindProperty("UseMultipleEffectTileBases");
         effectTileBases = serializedObject.FindProperty("EffectTileBases");
         effectTileAnimationMode = serializedObject.FindProperty("EffectTileAnimationMode");
-        effectTileFrameInterval = serializedObject.FindProperty("EffectTileFrameInterval");
         effectTileAnimationFrames = serializedObject.FindProperty("EffectTileAnimationFrames");
         tileAppearMode = serializedObject.FindProperty("TileAppearMode");
         tileAppearDropHeight = serializedObject.FindProperty("TileAppearDropHeight");
@@ -332,8 +331,7 @@ public class CardDataSOEditor : Editor
                 return;
 
             DrawTileEffectAnimationFields();
-            if ((TileEffectAnimationMode)effectTileAnimationMode.enumValueIndex == TileEffectAnimationMode.None)
-                DrawTileEffectBaseFields();
+            DrawTileEffectBaseFields();
 
             if (allowAppear)
                 DrawTileAppearFields();
@@ -404,21 +402,46 @@ public class CardDataSOEditor : Editor
                 return;
             }
 
-            EditorGUI.indentLevel++;
-            EditorGUILayout.PropertyField(effectTileAnimationFrames, new GUIContent("프레임"), true);
-
             if (mode == TileEffectAnimationMode.Time)
             {
-                EditorGUILayout.PropertyField(effectTileFrameInterval, new GUIContent("프레임 간격(초)"));
-            }
-            else if (mode == TileEffectAnimationMode.Turn)
-            {
-                EditorGUILayout.HelpBox("0번 프레임 = 시작, 1번 프레임 = 1턴 경과", MessageType.None);
+                EditorGUILayout.HelpBox(
+                    "시간 기반 애니메이션은 아래 타일 베이스에 지정한 AnimatedTile의 프레임과 속도를 사용합니다.",
+                    MessageType.Info);
+
+                bool hasNonAnimatedTile = false;
+                if (useMultipleEffectTileBases.boolValue)
+                {
+                    for (int i = 0; i < effectTileBases.arraySize; i++)
+                    {
+                        Object tile = effectTileBases.GetArrayElementAtIndex(i).objectReferenceValue;
+                        if (tile != null && tile is not AnimatedTile)
+                        {
+                            hasNonAnimatedTile = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    Object tile = effectTileBase.objectReferenceValue;
+                    hasNonAnimatedTile = tile != null && tile is not AnimatedTile;
+                }
+
+                if (hasNonAnimatedTile)
+                {
+                    EditorGUILayout.HelpBox(
+                        "Time 모드의 타일 베이스에는 AnimatedTile을 지정해야 합니다.",
+                        MessageType.Warning);
+                }
+
+                return;
             }
 
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(effectTileAnimationFrames, new GUIContent("턴 상태 프레임"), true);
+            EditorGUILayout.HelpBox("0번 프레임 = 시작, 1번 프레임 = 1턴 경과", MessageType.None);
             if (effectTileAnimationFrames.arraySize == 0)
                 EditorGUILayout.HelpBox("프레임이 비어 있으면 기본 타일 베이스가 표시됩니다.", MessageType.Warning);
-
             EditorGUI.indentLevel--;
         }
     }

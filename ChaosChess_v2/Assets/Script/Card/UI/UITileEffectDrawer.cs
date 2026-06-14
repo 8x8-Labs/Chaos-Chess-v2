@@ -17,7 +17,6 @@ public class UITileEffectDrawer : MonoBehaviour
         public int EffectTileIndex;
         public int InitialRemainingTurns;
         public int FrameIndex;
-        public float Elapsed;
 
         public TileEffectAnimationState(CardDataSO dataSO, int effectTileIndex, int initialRemainingTurns, int initialFrame)
         {
@@ -25,29 +24,6 @@ public class UITileEffectDrawer : MonoBehaviour
             EffectTileIndex = effectTileIndex;
             InitialRemainingTurns = initialRemainingTurns;
             FrameIndex = initialFrame;
-        }
-    }
-
-    private void Update()
-    {
-        if (effectTilemap == null || animationStates.Count == 0)
-            return;
-
-        foreach (var pair in animationStates)
-        {
-            TileEffectAnimationState state = pair.Value;
-            CardDataSO dataSO = state.DataSO;
-            if (dataSO == null || dataSO.EffectTileAnimationMode != TileEffectAnimationMode.Time)
-                continue;
-
-            float frameInterval = Mathf.Max(0.01f, dataSO.EffectTileFrameInterval);
-            state.Elapsed += Time.deltaTime;
-            if (state.Elapsed < frameInterval)
-                continue;
-
-            int framesToAdvance = Mathf.FloorToInt(state.Elapsed / frameInterval);
-            state.Elapsed %= frameInterval;
-            AdvanceFrame(pair.Key, state, framesToAdvance);
         }
     }
 
@@ -81,7 +57,7 @@ public class UITileEffectDrawer : MonoBehaviour
         if (effectTilemap == null || dataSO == null)
             return;
 
-        if (dataSO.EffectTileAnimationMode == TileEffectAnimationMode.None)
+        if (dataSO.EffectTileAnimationMode != TileEffectAnimationMode.Turn)
         {
             animationStates.Remove(pos);
             effectTilemap.SetTile(pos, dataSO.GetEffectTileBase(effectTileIndex));
@@ -98,7 +74,7 @@ public class UITileEffectDrawer : MonoBehaviour
     /// <returns>표시할 타일이 없으면 false(호출측이 즉시 배치로 대체).</returns>
     private bool TryStartAppearAnimation(Vector3Int pos, CardDataSO dataSO, int effectTileIndex, int remainingTurns)
     {
-        TileBase initialTile = dataSO.EffectTileAnimationMode == TileEffectAnimationMode.None
+        TileBase initialTile = dataSO.EffectTileAnimationMode != TileEffectAnimationMode.Turn
             ? dataSO.GetEffectTileBase(effectTileIndex)
             : dataSO.GetEffectTileAnimationFrame(0, effectTileIndex);
 
@@ -263,17 +239,4 @@ public class UITileEffectDrawer : MonoBehaviour
         return Mathf.Clamp(elapsedTurns, 0, frameCount - 1);
     }
 
-    private void AdvanceFrame(Vector3Int pos, TileEffectAnimationState state, int framesToAdvance = 1)
-    {
-        CardDataSO dataSO = state.DataSO;
-        int frameCount = dataSO.EffectTileAnimationFrames != null
-            ? dataSO.EffectTileAnimationFrames.Length
-            : 0;
-
-        if (frameCount <= 0)
-            return;
-
-        state.FrameIndex = (state.FrameIndex + framesToAdvance) % frameCount;
-        effectTilemap.SetTile(pos, dataSO.GetEffectTileAnimationFrame(state.FrameIndex, state.EffectTileIndex));
-    }
 }
