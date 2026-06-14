@@ -391,20 +391,6 @@ public class CardDataSOEditor : Editor
 
     void DrawTileEffectAnimationFields()
     {
-        effectTileBase ??= serializedObject.FindProperty("EffectTileBase");
-        useMultipleEffectTileBases ??= serializedObject.FindProperty("UseMultipleEffectTileBases");
-        effectTileAnimationMode ??= serializedObject.FindProperty("EffectTileAnimationMode");
-        effectTileAnimationFrames ??= serializedObject.FindProperty("EffectTileAnimationFrames");
-
-        if (effectTileBase == null
-            || useMultipleEffectTileBases == null
-            || effectTileAnimationMode == null
-            || effectTileAnimationFrames == null)
-        {
-            EditorGUILayout.HelpBox("타일 애니메이션 설정을 불러오지 못했습니다. 에셋을 다시 선택해주세요.", MessageType.Error);
-            return;
-        }
-
         EditorGUILayout.Space(4);
         using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
         {
@@ -424,9 +410,26 @@ public class CardDataSOEditor : Editor
                     "시간 기반 애니메이션은 아래 타일 베이스에 지정한 AnimatedTile의 프레임과 속도를 사용합니다.",
                     MessageType.Info);
 
-                if (!useMultipleEffectTileBases.boolValue
-                    && effectTileBase.objectReferenceValue != null
-                    && effectTileBase.objectReferenceValue is not AnimatedTile)
+                bool hasNonAnimatedTile = false;
+                if (useMultipleEffectTileBases.boolValue)
+                {
+                    for (int i = 0; i < effectTileBases.arraySize; i++)
+                    {
+                        Object tile = effectTileBases.GetArrayElementAtIndex(i).objectReferenceValue;
+                        if (tile != null && tile is not AnimatedTile)
+                        {
+                            hasNonAnimatedTile = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    Object tile = effectTileBase.objectReferenceValue;
+                    hasNonAnimatedTile = tile != null && tile is not AnimatedTile;
+                }
+
+                if (hasNonAnimatedTile)
                 {
                     EditorGUILayout.HelpBox(
                         "Time 모드의 타일 베이스에는 AnimatedTile을 지정해야 합니다.",
