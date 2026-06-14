@@ -135,6 +135,7 @@ public class VariantPieceInfoPanel : ButtonPanel
             contentRoot.anchoredPosition = shownPosition;
         }
 
+        isClosing = false;
         SetContentInput(false);
         ReleaseInputBlock();
         RestoreGameInput();
