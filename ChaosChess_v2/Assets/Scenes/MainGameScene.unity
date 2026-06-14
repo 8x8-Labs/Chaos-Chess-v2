@@ -11432,8 +11432,8 @@ MonoBehaviour:
   contentRoot: {fileID: 3200000201}
   moveDistance: 240
   moveDuration: 0.3
-  showEase: 6
-  hideEase: 5
+  showEase: 18
+  hideEase: 17
 --- !u!114 &1460371063
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13783,19 +13783,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1661310179}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1460371062}
-        m_TargetAssemblyTypeName: VariantPieceInfoPanel, Assembly-CSharp
-        m_MethodName: OnClickNext
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   clickSound: {fileID: 0}
   hoverSound: {fileID: 0}
   disableCanvas: {fileID: 0}
@@ -22697,6 +22685,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3200000201}
+  - component: {fileID: 3200000202}
   m_Layer: 5
   m_Name: ContentRoot
   m_TagString: Untagged
@@ -22725,6 +22714,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &3200000202
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3200000200}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &3200000300
 GameObject:
   m_ObjectHideFlags: 0
