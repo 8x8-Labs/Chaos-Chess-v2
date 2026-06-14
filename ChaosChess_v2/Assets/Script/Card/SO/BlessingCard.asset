@@ -55,7 +55,6 @@ MonoBehaviour:
   UseMultipleEffectTileBases: 0
   EffectTileBases: []
   EffectTileAnimationMode: 0
-  EffectTileFrameInterval: 0.2
   EffectTileAnimationFrames: []
   TileAppearMode: 0
   TileAppearDropHeight: 3
