@@ -556,6 +556,9 @@ public class BoardManager : MonoBehaviour
         board[piece.Pos.x, piece.Pos.y] = null;
         foreach (var eff in piece.GetComponents<IPieceEffect>())
         {
+            if (eff is Effector cardEffector && !cardEffector.IsActive)
+                continue;
+
             eff.OnPieceCaptured();
         }
         Pieces.Remove(piece);
@@ -833,6 +836,15 @@ public class BoardManager : MonoBehaviour
         }
 
         tileEffectors.Clear();
+    }
+
+    /// <summary>현재 적용 중인 모든 카드 효과를 결과 발동 없이 취소합니다.</summary>
+    public void ClearAllCardEffects()
+    {
+        Effector.CancelAll();
+        tileEffectors.Clear();
+        globalEffectors.Clear();
+        TileEffectDrawer?.ClearAllTileEffects();
     }
 
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)

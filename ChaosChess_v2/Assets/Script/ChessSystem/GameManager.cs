@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
-    private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
+    private List<(int turn, Action action, CardRandomizerManager.ActiveCardToken token)> recievedActions = new();
     // 투기장 진행 중 기존 예약 액션(폭탄, 지속효과 해제 등) 소모를 잠시 멈춥니다.
     private bool areQueuedActionsPaused = false;
     private int queuedActionPauseTurn = -1;
@@ -380,17 +380,7 @@ public class GameManager : MonoBehaviour
         CardRandomizerManager.ActiveCardToken activeCardToken =
             CardRandomizerManager.Instance?.RetainActiveCard();
 
-        recievedActions.Add((curTurn + x * 2, () =>
-        {
-            try
-            {
-                act?.Invoke();
-            }
-            finally
-            {
-                activeCardToken?.Complete();
-            }
-        }));
+        recievedActions.Add((curTurn + x * 2, act, activeCardToken));
     }
 
     /// <summary>
@@ -407,8 +397,15 @@ public class GameManager : MonoBehaviour
 
             if (item.turn == curTurn)
             {
-                item.action.Invoke();
-                recievedActions.RemoveAt(i);
+                try
+                {
+                    item.action?.Invoke();
+                }
+                finally
+                {
+                    item.token?.Complete();
+                    recievedActions.RemoveAt(i);
+                }
             }
         }
 
@@ -439,12 +436,26 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < recievedActions.Count; i++)
             {
                 var item = recievedActions[i];
-                recievedActions[i] = (item.turn + delta, item.action);
+                recievedActions[i] = (item.turn + delta, item.action, item.token);
             }
         }
 
         areQueuedActionsPaused = false;
         queuedActionPauseTurn = -1;
+    }
+
+    /// <summary>대기 중인 카드 예약 작업과 추가 행동 상태를 결과 발동 없이 취소합니다.</summary>
+    public void ClearQueuedCardActions()
+    {
+        foreach (var item in recievedActions)
+            item.token?.Complete();
+
+        recievedActions.Clear();
+        areQueuedActionsPaused = false;
+        queuedActionPauseTurn = -1;
+        extraPlayerActions = 0;
+        lockedPiece = null;
+        UI?.HideAwakenButton();
     }
 
     /// <summary>카드 지급 주기 카운트를 일시 정지합니다.</summary>

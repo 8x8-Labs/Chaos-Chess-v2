@@ -25,6 +25,15 @@ class ConcentrationEffector : PieceEffector, IMovementOverrideEffect
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }
+
+    protected override void OnCancel()
+    {
+        if (target != null && target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
+
+        BoardManager.Instance.RefreshMoves();
+        Destroy(this);
+    }
 }
 
 public class ConcentrationCard : CardData, IPieceCard

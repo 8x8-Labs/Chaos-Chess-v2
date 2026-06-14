@@ -42,4 +42,9 @@ public class TimeReversalEffecter : GlobalEffector
             }
         );
     }
+
+    protected override void OnCancel()
+    {
+        Destroy(gameObject);
+    }
 }
