@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using DG.Tweening;
 
 public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 
@@ -29,6 +30,7 @@ public class ArenaManager : MonoBehaviour
 
     public static ArenaManager Instance;
     [SerializeField] private CardHandLayout cardHandLayout;
+    [SerializeField] private CanvasGroup arenaBG;
 
     internal event Action<CardDataSO, int> ArenaStarted;
     internal event Action<int> ArenaRemainingTurnsChanged;
@@ -74,6 +76,7 @@ public class ArenaManager : MonoBehaviour
         if (isArenaActive) return;
         isArenaActive = true;
         cardHandLayout?.SetArenaInputBlocked(true);
+        arenaBG?.DOFade(1f, 0.5f);
 
         GameManager gm = GameManager.Instance;
         gm.PushCardIntervalPause();
@@ -187,7 +190,8 @@ public class ArenaManager : MonoBehaviour
         // 이벤트 구독 해제 및 투기장 모드 비활성화
         gm.OnHalfTurnChanged -= OnHalfTurnChanged;
         gm.IsArenaMode = false;
-        cardHandLayout?.SetArenaInputBlocked(false);
+        if(cardHandLayout != null) cardHandLayout.SetArenaInputBlocked(false);
+        arenaBG.DOFade(0f, 0.5f);
         gm.SetLockedPiece(null);
         ArenaEnded?.Invoke();
 
