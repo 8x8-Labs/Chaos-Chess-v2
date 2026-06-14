@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13b75c95f34a00d4e8c04f76b73312e6, type: 3}
   m_Name: PeaceZoneFlagAnimatedTile
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   m_AnimatedSprites:
   - {fileID: 8171864365139417887, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
   - {fileID: -8101465684693563283, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
@@ -25,8 +25,8 @@ MonoBehaviour:
   - {fileID: 7689893613936730033, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
   - {fileID: 1272070724488423121, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
   - {fileID: 6086717681329318971, guid: 03ee1bb7bcb9c2f4fad884bb69980e13, type: 3}
-  m_MinSpeed: 7
-  m_MaxSpeed: 7
+  m_MinSpeed: 10
+  m_MaxSpeed: 10
   m_AnimationStartTime: 0
   m_AnimationStartFrame: 0
   m_TileColliderType: 0
