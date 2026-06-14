@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,8 +28,30 @@ public class VariantPieceInfoPanel : ButtonPanel
     [SerializeField] private string nextLabel = "다음";
     [SerializeField] private string closeLabel = "확인";
 
+    [Header("Animation")]
+    [SerializeField] private RectTransform contentRoot;
+    [SerializeField] private float moveDistance = 120f;
+    [SerializeField] private float moveDuration = 0.2f;
+    [SerializeField] private Ease showEase = Ease.OutCubic;
+    [SerializeField] private Ease hideEase = Ease.InCubic;
+
     private readonly List<VariantPieceInfoSO.Entry> queue = new List<VariantPieceInfoSO.Entry>();
     private int index;
+    private Vector2 shownPosition;
+    private CanvasGroup rootCanvasGroup;
+    private CanvasGroup contentCanvasGroup;
+    private bool isClosing;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        rootCanvasGroup = GetComponent<CanvasGroup>();
+        if (contentRoot != null)
+        {
+            shownPosition = contentRoot.anchoredPosition;
+            contentCanvasGroup = contentRoot.GetComponent<CanvasGroup>();
+        }
+    }
 
     /// <summary>주어진 변형 기물 종류들을 순서대로 설명합니다. 데이터가 없는 종류는 건너뜁니다.</summary>
     public void Show(IReadOnlyList<PieceType> types)
@@ -50,6 +73,20 @@ public class VariantPieceInfoPanel : ButtonPanel
 
     public override void EnablePanel()
     {
+        isClosing = false;
+        if (rootCanvasGroup != null)
+            rootCanvasGroup.blocksRaycasts = true;
+        SetContentInput(false);
+
+        if (contentRoot != null)
+        {
+            contentRoot.DOKill();
+            contentRoot.anchoredPosition = shownPosition + Vector2.down * moveDistance;
+            contentRoot.DOAnchorPos(shownPosition, moveDuration)
+                .SetEase(showEase)
+                .OnComplete(() => SetContentInput(true));
+        }
+
         base.EnablePanel();
         if (gameManager == null) gameManager = GameManager.Instance;
         if (gameManager != null) gameManager.IsGameInput = false;
@@ -57,14 +94,70 @@ public class VariantPieceInfoPanel : ButtonPanel
 
     public override void DisablePanel()
     {
+        if (isClosing) return;
+        isClosing = true;
+
+        SetContentInput(false);
+
+        if (rootCanvasGroup != null && rootCanvasGroup.alpha <= 0.001f)
+        {
+            base.DisablePanel();
+            ReleaseInputBlock();
+            RestoreGameInput();
+            return;
+        }
+
+        if (contentRoot != null)
+        {
+            contentRoot.DOKill();
+            contentRoot.anchoredPosition = shownPosition;
+            contentRoot.DOAnchorPos(shownPosition + Vector2.down * moveDistance, moveDuration)
+                .SetEase(hideEase)
+                .OnComplete(CompleteClose);
+        }
+        else
+        {
+            CompleteClose();
+        }
+
         base.DisablePanel();
-        RestoreGameInput();
+        if (rootCanvasGroup != null)
+            rootCanvasGroup.blocksRaycasts = true;
     }
 
     // "확인" 버튼을 거치지 않고 씬 전환·부모 비활성화 등으로 패널이 닫히면 DisablePanel이 호출되지
     // 않아 IsGameInput이 false로 남는 소프트락이 발생할 수 있으므로, OnDisable에서 안전하게 복구한다.
     private void OnDisable()
     {
+        if (contentRoot != null)
+        {
+            contentRoot.DOKill();
+            contentRoot.anchoredPosition = shownPosition;
+        }
+
+        isClosing = false;
+        SetContentInput(false);
+        ReleaseInputBlock();
+        RestoreGameInput();
+    }
+
+    private void SetContentInput(bool enabled)
+    {
+        if (contentCanvasGroup == null) return;
+
+        contentCanvasGroup.interactable = enabled;
+        contentCanvasGroup.blocksRaycasts = enabled;
+    }
+
+    private void ReleaseInputBlock()
+    {
+        if (rootCanvasGroup != null)
+            rootCanvasGroup.blocksRaycasts = false;
+    }
+
+    private void CompleteClose()
+    {
+        ReleaseInputBlock();
         RestoreGameInput();
     }
 
@@ -77,6 +170,8 @@ public class VariantPieceInfoPanel : ButtonPanel
     /// <summary>"다음" 버튼 OnClick에 연결합니다. 마지막 페이지에서는 패널을 닫습니다.</summary>
     public void OnClickNext()
     {
+        if (isClosing) return;
+
         index++;
         if (index >= queue.Count)
         {
