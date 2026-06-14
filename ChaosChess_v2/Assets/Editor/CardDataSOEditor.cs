@@ -331,9 +331,7 @@ public class CardDataSOEditor : Editor
                 return;
 
             DrawTileEffectAnimationFields();
-            var animationMode = (TileEffectAnimationMode)effectTileAnimationMode.enumValueIndex;
-            if (animationMode != TileEffectAnimationMode.Turn)
-                DrawTileEffectBaseFields();
+            DrawTileEffectBaseFields();
 
             if (allowAppear)
                 DrawTileAppearFields();
