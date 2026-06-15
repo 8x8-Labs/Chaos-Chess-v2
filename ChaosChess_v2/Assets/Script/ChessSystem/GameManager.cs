@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
@@ -59,6 +60,7 @@ public class GameManager : MonoBehaviour
     public event Action<Piece> OnAwakenedPieceSelected;
     /// <summary>플레이어 체크 상태가 바뀔 때 카드 UI 입력 차단 갱신에 사용됩니다.</summary>
     public event Action<bool> OnPlayerCheckStateChanged;
+    private bool cancelCurrentGameStateEvaluation;
 
     public PieceColor turnColor
     {
@@ -688,6 +690,11 @@ public class GameManager : MonoBehaviour
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
         UpdatePlayerCheckState(IsPlayerTurn && isCheck);
 
+        if (cancelCurrentGameStateEvaluation)
+        {
+            cancelCurrentGameStateEvaluation = false;
+            return;
+        }
 
         if (moves.Length == 0)
         {
@@ -714,6 +721,22 @@ public class GameManager : MonoBehaviour
 
         IsPlayerInCheck = isPlayerInCheck;
         OnPlayerCheckStateChanged?.Invoke(IsPlayerInCheck);
+    }
+
+    public void ReevaluateGameState()
+    {
+        cancelCurrentGameStateEvaluation = true;
+        StartCoroutine(ReevaluateGameStateNextFrame());
+    }
+
+    private IEnumerator ReevaluateGameStateNextFrame()
+    {
+        yield return null;
+
+        BoardManager.Instance.RefreshMoves();
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        EvaluateGameState(moves);
+        ApplyGameResult();
     }
 
     private void OnCheck()
