@@ -97,10 +97,7 @@ public class SyncEffect : TileEffector
 
         Piece linkedPiece = BoardManager.Instance.GetPiece(linkedTile);
         if (linkedPiece == null)
-        {
-            Revert();
             return;
-        }
 
         isResolving = true;
         SyncMoveTrigger trigger = movingPiece.gameObject.AddComponent<SyncMoveTrigger>();
