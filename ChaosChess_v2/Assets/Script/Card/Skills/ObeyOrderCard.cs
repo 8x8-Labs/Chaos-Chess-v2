@@ -89,6 +89,9 @@ public class ObeyOrderEffect : TileEffector
 
         if (_state == ObeyState.Idle)
         {
+            if ((DataSO.PieceType & piece.Type) == 0)
+                return;
+
             enterPiece = piece;
             Debug.Log("enterPiece 삽입 완료");
             TransitionTo(ObeyState.WaitingForDest);

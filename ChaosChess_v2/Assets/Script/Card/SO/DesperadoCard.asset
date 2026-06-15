@@ -28,7 +28,7 @@ MonoBehaviour:
     PlayHookAnim: 1
     AnimStrength: 0.2
     AnimDuration: 0.3
-  PieceType: 47
+  PieceType: 63
   PieceTargetColor: 0
   PieceLimitTurn: 1
   RequiredPieceCount: 1

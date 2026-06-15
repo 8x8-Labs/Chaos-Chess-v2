@@ -6,7 +6,7 @@ using UnityEngine;
 /// 턴 소모 없이 나이트를 선택함
 /// 나이트가 가장 가까운 룩 자리로 이동해 합쳐져 챈슬러로 승격 (나이트가 있던 자리에는 기물이 남지 않음).
 /// </summary>
-public class CastleKnightCard : CardData, IPieceCard
+public class CastleKnightCard : CardData, IPieceCard, IPieceTargetFilter
 {
     private PieceSelector selector;
 
@@ -21,6 +21,20 @@ public class CastleKnightCard : CardData, IPieceCard
         selector.EnableSelector(this);
     }
 
+    public bool CanSelectPiece(Piece piece)
+    {
+        if (piece == null)
+            return false;
+
+        foreach (Piece candidate in BoardManager.Instance.GetAllPieces())
+        {
+            if (candidate.Type == PieceType.Rook && candidate.Color == piece.Color)
+                return true;
+        }
+
+        return false;
+    }
+
     public void Execute(CardEffectArgs args = null)
     {
         
@@ -33,7 +47,7 @@ public class CastleKnightCard : CardData, IPieceCard
         bool found = false;
         foreach (Piece piece in pieces)
         {
-            if (piece.Type == PieceType.Rook)
+            if (piece.Type == PieceType.Rook && piece.Color == knight.Color)
             {
                 int sqrDist = (p - piece.Pos).sqrMagnitude;
                 if (sqrDist < minSqrDist)

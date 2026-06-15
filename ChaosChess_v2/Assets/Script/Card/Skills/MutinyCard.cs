@@ -5,14 +5,27 @@ using UnityEngine;
 /// 하극상 - 기물 전용 (레어)
 /// 상대의 퀸은 3턴 동안 전반향으로 한칸밖에 이동할 수 없습니다.
 /// </summary>
-public class MutinyCard : CardData, ICard
+public class MutinyCard : CardData, IPieceCard
 {
+    private PieceSelector selector;
+
+    private void Awake()
+    {
+        selector = FindFirstObjectByType<PieceSelector>();
+    }
+
+    public void LoadPieceSelector()
+    {
+        if (selector == null) selector = FindFirstObjectByType<PieceSelector>();
+        selector.EnableSelector(this);
+    }
+
     public void Execute(CardEffectArgs args = null)
     {
         List<Queen> queens = BoardManager.Instance.GetPiece<Queen>
             (GameManager.Instance.EnemyColor);
 
-        if(queens == null)
+        if (queens == null || queens.Count == 0)
         {
             Debug.Log("상대 퀸이 없습니다!");
             return;

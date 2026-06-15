@@ -17,7 +17,7 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC744 <color=#4499FF>\uBA85\uB839 \uCE78</color>\uC73C\uB85C \uC9C0\uC815\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 2
-  PieceType: 0
+  PieceType: 1022
   PieceTargetColor: 0
   PieceLimitTurn: 0
   RequiredPieceCount: 0
