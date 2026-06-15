@@ -29,32 +29,48 @@ public class SneakPawnCard : CardData, IPieceCard
         Piece piece = args.Targets[0];
         if (PieceEffector.HasActiveMovementOverride(piece)) return;
 
-        piece.MoveFenOverride = "e";
+        // 행마 override를 카드(파괴 가능한 오브젝트) 대신 기물에 부착되는 effector로 관리한다.
+        // effector 생명주기가 기물과 동기화되어 만료/파괴 시 자동 정리되고,
+        // 만료 타이밍은 base의 OnTurnChanged 턴 카운팅이 PieceLimitTurn만큼 처리한다.
+        Sprite sneakSprite = piece.Color == PieceColor.White ? whiteSneakSprite : blackSneakSprite;
+        SneakPawnEffector effector = CreatePieceEffector<SneakPawnEffector>(piece);
+        effector.SetSneakSprite(sneakSprite);
+        effector.Apply();
+    }
+}
+
+public class SneakPawnEffector : PieceEffector, IMovementOverrideEffect
+{
+    private Sprite sneakSprite;
+    private SpriteRenderer spriteRenderer;
+    private Sprite originalSprite;
+
+    public void SetSneakSprite(Sprite sprite) => sneakSprite = sprite;
+
+    protected override void OnApply()
+    {
+        target.MoveFenOverride = "e";
         BoardManager.Instance.RefreshMoves();
 
         // 행마가 바뀐 것을 알리기 위해 폰 스프라이트를 커스텀 스프라이트로 교체한다.
         // MoveFenOverride는 행마만 바꾸고 스프라이트는 건드리지 않으므로 여기서 직접 처리한다.
-        SpriteRenderer sr = piece.GetComponent<SpriteRenderer>();
-        Sprite originalSprite = sr != null ? sr.sprite : null;
-        Sprite sneakSprite = piece.Color == PieceColor.White ? whiteSneakSprite : blackSneakSprite;
-        if (sr != null && sneakSprite != null)
-            sr.sprite = sneakSprite;
-
-        GameManager.Instance.AppendAction(DataSO.PieceLimitTurn, () =>
+        spriteRenderer = target.GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
         {
-            ResetMoveFen(piece, sr, originalSprite);
-        });
+            originalSprite = spriteRenderer.sprite;
+            if (sneakSprite != null)
+                spriteRenderer.sprite = sneakSprite;
+        }
     }
 
-    public void ResetMoveFen(Piece piece, SpriteRenderer sr = null, Sprite originalSprite = null)
+    protected override void OnRevert()
     {
-        if (piece == null) return;
-
-        string p = piece.MoveFenOverride?.ToLower();
-        if (p != "e") return;
-
-        piece.MoveFenOverride = null;
-        if (sr != null) sr.sprite = originalSprite;
+        if (target != null && target.MoveFenOverride?.ToLower() == "e")
+            target.MoveFenOverride = null;
+        if (spriteRenderer != null)
+            spriteRenderer.sprite = originalSprite;
         BoardManager.Instance.RefreshMoves();
+
+        Destroy(this);
     }
 }

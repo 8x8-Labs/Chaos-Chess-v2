@@ -191,7 +191,7 @@ public class ArenaManager : MonoBehaviour
         gm.OnHalfTurnChanged -= OnHalfTurnChanged;
         gm.IsArenaMode = false;
         if(cardHandLayout != null) cardHandLayout.SetArenaInputBlocked(false);
-        arenaBG.DOFade(0f, 0.5f);
+        arenaBG?.DOFade(0f, 0.5f);
         gm.SetLockedPiece(null);
         ArenaEnded?.Invoke();
 

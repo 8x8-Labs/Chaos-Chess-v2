@@ -19,7 +19,7 @@ public class MutinyCard : CardData, IPieceCard
     public void LoadPieceSelector()
     {
         if (selector == null) selector = FindFirstObjectByType<PieceSelector>();
-        selector.EnableSelector(this);
+        selector?.EnableSelector(this);
     }
 
     public void Execute(CardEffectArgs args = null)

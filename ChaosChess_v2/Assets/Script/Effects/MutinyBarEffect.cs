@@ -60,8 +60,27 @@ public class MutinyBarEffect : MonoBehaviour, IEffectApplyListener, IEffectRever
         SpriteRenderer detached = bar;
         detached.transform.SetParent(transform.parent, worldPositionStays: true);
 
+        // SetFill은 인스턴스 메서드라 트윈이 this(곧 파괴될 MutinyBarEffect)를 캡처합니다.
+        // 파괴된 오브젝트 참조로 인한 MissingReferenceException을 피하려 필요한 값을 지역 변수로 캡처하고,
+        // 떼어낸 막대(detached)만 참조하는 람다로 줄어듦 연출을 재생합니다.
+        float capturedFullScaleX = fullScaleX;
+        float capturedHalfWidthFull = halfWidthFull;
+        Vector3 capturedRestPos = restPos;
+
         // 가득 찬 상태(1)에서 빈 상태(0)로 역재생 → 오른쪽에서 왼쪽으로 줄어듭니다.
-        DOTween.To(SetFill, 1f, 0f, drainDuration)
+        DOTween.To(f =>
+        {
+            if (detached == null) return;
+            Transform t = detached.transform;
+
+            Vector3 s = t.localScale;
+            s.x = capturedFullScaleX * f;
+            t.localScale = s;
+
+            Vector3 p = t.localPosition;
+            p.x = capturedRestPos.x - capturedHalfWidthFull * (1f - f);
+            t.localPosition = p;
+        }, 1f, 0f, drainDuration)
             .SetEase(drainEase)
             .OnComplete(() =>
             {

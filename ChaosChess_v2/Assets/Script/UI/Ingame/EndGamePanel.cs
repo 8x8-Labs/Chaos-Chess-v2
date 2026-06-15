@@ -5,7 +5,6 @@ public class EndGamePanel : ButtonPanel
 {
     [SerializeField] private TextMeshProUGUI resultText;
     [SerializeField] private UIButton nextButton;
-    [Tooltip("승리는 0, 패배는 1, 무승부는 2")]
     [SerializeField] private AudioClip EndgameSFX;
 
     public void Show(GameResult result)
