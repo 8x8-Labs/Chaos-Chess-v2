@@ -27,7 +27,7 @@ public class MutinyCard : CardData, IPieceCard
         List<Queen> queens = BoardManager.Instance.GetPiece<Queen>
             (GameManager.Instance.EnemyColor);
 
-        if(queens == null)
+        if (queens == null || queens.Count == 0)
         {
             Debug.Log("상대 퀸이 없습니다!");
             return;

@@ -11,6 +11,8 @@ public interface IMovementOverrideEffect { }
 /// <summary>기물 또는 타일에 효과를 적용하고 관리하는 추상 컴포넌트</summary>
 public abstract class Effector : MonoBehaviour, IEffect
 {
+    private static readonly HashSet<Effector> activeEffectors = new();
+
     public static event System.Action<Effector> OnAnyEffectApplied;
     public static event System.Action<Effector> OnAnyEffectReverted;
     public static event System.Action<Effector> OnAnyEffectTurnTicked;
@@ -28,6 +30,7 @@ public abstract class Effector : MonoBehaviour, IEffect
     public bool IsPermanent => remainingTurns < 0;
     public int RemainingTurns => remainingTurns;
     public bool IsSuspended => isSuspended;
+    public bool IsActive => isApplied;
     protected bool IsApplied => isApplied;
 
     protected void SetDuration(int turns)
@@ -59,6 +62,7 @@ public abstract class Effector : MonoBehaviour, IEffect
             return;
         }
 
+        activeEffectors.Add(this);
         hasNotifiedApplied = true;
         OnAnyEffectApplied?.Invoke(this);
         OnEffectApplied();
@@ -87,13 +91,54 @@ public abstract class Effector : MonoBehaviour, IEffect
             OnAnyEffectReverted?.Invoke(this);
 
         OnEffectReverted();
+        activeEffectors.Remove(this);
         activeCardToken?.Complete();
         activeCardToken = null;
+    }
+
+    /// <summary>효과의 완료 결과를 발생시키지 않고 즉시 취소합니다.</summary>
+    public void Cancel()
+    {
+        if (!isApplied) return;
+
+        isApplied = false;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTurnChanged -= OnTurnChanged;
+            if (useHalfTurn)
+                GameManager.Instance.OnHalfTurnChanged -= OnHalfTurnChanged;
+        }
+
+        bool shouldNotifyReverted = hasNotifiedApplied;
+        hasNotifiedApplied = false;
+
+        StopLoopVFX();
+        OnCancel();
+
+        if (shouldNotifyReverted)
+            OnAnyEffectReverted?.Invoke(this);
+
+        OnEffectReverted();
+        activeEffectors.Remove(this);
+        activeCardToken?.Complete();
+        activeCardToken = null;
+    }
+
+    public static void CancelAll()
+    {
+        foreach (Effector effector in new List<Effector>(activeEffectors))
+        {
+            if (effector != null)
+                effector.Cancel();
+        }
+
+        activeEffectors.Clear();
     }
 
     protected virtual void OnDestroy()
     {
         StopLoopVFX();
+        activeEffectors.Remove(this);
         if (!isApplied) return;
 
         isApplied = false;
@@ -155,6 +200,9 @@ public abstract class Effector : MonoBehaviour, IEffect
 
     /// <summary>서브클래스에서 훅/버프를 해제합니다.</summary>
     protected abstract void OnRevert();
+
+    /// <summary>결과를 발생시키지 않는 강제 취소 처리입니다.</summary>
+    protected virtual void OnCancel() => OnRevert();
 
     protected virtual void OnEffectApplied() { }
     protected virtual void OnEffectReverted() { }

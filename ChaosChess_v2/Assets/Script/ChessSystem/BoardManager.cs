@@ -510,7 +510,12 @@ public class BoardManager : MonoBehaviour
     }
 
     ///<summary> pos에 새로운 기물을 추가합니다 </summary> 
-    public void ChangePiece(Vector3Int pos, PieceColor color, char type, Piece prom = null)
+    public void ChangePiece(
+        Vector3Int pos,
+        PieceColor color,
+        char type,
+        Piece prom = null,
+        bool triggerTileEnter = false)
     {
         Vector3Int sp = new();
         if (prom != null)
@@ -536,6 +541,9 @@ public class BoardManager : MonoBehaviour
             newPiece.Move(pos, WorldPos, animate: false);
 
             Pieces.Add(newPiece);
+
+            if (triggerTileEnter)
+                TriggerTileEnter(pos, newPiece);
         }
 
         RefreshMoves();
@@ -556,6 +564,9 @@ public class BoardManager : MonoBehaviour
         board[piece.Pos.x, piece.Pos.y] = null;
         foreach (var eff in piece.GetComponents<IPieceEffect>())
         {
+            if (eff is Effector cardEffector && !cardEffector.IsActive)
+                continue;
+
             eff.OnPieceCaptured();
         }
         Pieces.Remove(piece);
@@ -835,6 +846,15 @@ public class BoardManager : MonoBehaviour
         tileEffectors.Clear();
     }
 
+    /// <summary>현재 적용 중인 모든 카드 효과를 결과 발동 없이 취소합니다.</summary>
+    public void ClearAllCardEffects()
+    {
+        Effector.CancelAll();
+        tileEffectors.Clear();
+        globalEffectors.Clear();
+        TileEffectDrawer?.ClearAllTileEffects();
+    }
+
     public void RegisterTileEffector(Vector3Int pos, TileEffector effector)
     {
         if (!tileEffectors.TryGetValue(pos, out var list))
@@ -986,12 +1006,19 @@ public class BoardManager : MonoBehaviour
     }
 
     /// <summary>체스 규칙 검사 없이 기물을 대상 칸으로 강제 이동합니다.</summary>
-    public void ForceTeleport(Piece piece, Vector3Int target, char promotion = '\0', bool useTurn = false)
+    public void ForceTeleport(
+        Piece piece,
+        Vector3Int target,
+        char promotion = '\0',
+        bool useTurn = false,
+        bool triggerTileEnter = true)
     {
         Vector3Int from = piece.Pos;
 
         if (!CanMoveToTile(piece, from, target))
         {
+            OnMoveBlocked?.Invoke(from, target);
+
             if (useTurn)
             {
                 GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
@@ -1000,6 +1027,8 @@ public class BoardManager : MonoBehaviour
             {
                 RefreshMoves();
             }
+
+            return;
         }
 
         TriggerTileExit(from, piece);
@@ -1039,6 +1068,9 @@ public class BoardManager : MonoBehaviour
                 HandlePromotion(piece, target, promotion);
             }
         }
+
+        if (triggerTileEnter && piece != null)
+            TriggerTileEnter(target, piece);
 
         if (useTurn)
         {

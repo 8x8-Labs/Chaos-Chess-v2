@@ -81,5 +81,6 @@ public class TimeBombEffector : TileEffector
         }
 
         BoardManager.Instance.RefreshMoves();
+        Revert();
     }
 }

@@ -76,6 +76,4 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uAC70\uBBF8\uC904 \uCE78\uC744
-    \uC9C0\uB098\uAC00\uBA74 <color=#FFD700>3\uD134</color>\uAC04 <color=#FF4444>\uC774\uB3D9\uC774
-    \uBD09\uC1C4\uB429\uB2C8\uB2E4</color>."
+  AdditionalDescriptionContent: "\uAE30\uBB3C\uC774 \uAC70\uBBF8\uC904 \uCE78\uC744 \uC9C0\uB098\uAC00\uBA74 <color=#FFD700>3\uD134</color>\uAC04 <color=#FF4444>\uC774\uB3D9\uC774 \uBD09\uC1C4\uB429\uB2C8\uB2E4</color>. (\uD0B9 \uC81C\uC678)"

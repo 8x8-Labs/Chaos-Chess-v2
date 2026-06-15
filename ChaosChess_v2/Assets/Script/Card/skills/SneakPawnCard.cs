@@ -30,13 +30,10 @@ public class SneakPawnCard : CardData, IPieceCard
         Piece piece = args.Targets[0];
         if (PieceEffector.HasActiveMovementOverride(piece)) return;
 
-        // 행마 override를 카드(파괴 가능한 오브젝트) 대신 기물에 부착되는 effector로 관리한다.
-        // effector 생명주기가 기물과 동기화되어 만료/파괴 시 자동 정리되고,
-        // 만료 타이밍은 base의 OnTurnChanged 턴 카운팅이 PieceLimitTurn만큼 처리한다.
         Sprite sneakSprite = piece.Color == PieceColor.White ? whiteSneakSprite : blackSneakSprite;
         SneakPawnEffector effector = CreatePieceEffector<SneakPawnEffector>(piece);
         effector.SetSneakSprite(sneakSprite);
-        effector.Apply();
+        effector.Apply(true);
     }
 }
 
@@ -73,5 +70,15 @@ public class SneakPawnEffector : PieceEffector, IMovementOverrideEffect
         BoardManager.Instance.RefreshMoves();
 
         Destroy(this);
+    }
+
+    public override void OnPieceMove(Vector3Int dest)
+    {
+        Revert();
+    }
+
+    protected override void OnHalfTurnChanged()
+    {
+        Revert();
     }
 }

@@ -2,8 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// 동기화 - 일반
-/// 선택한 칸과 반대 행 같은 열의 칸을 동기화 칸으로 만듭니다.
-/// 두 칸에 기물이 모두 있으면 어느 쪽이 먼저 이동하든 다른 기물이 동일하게 이동하며,
+/// 선택한 칸과 같은 행 반대 열의 칸을 동기화 칸으로 만듭니다.
+/// 두 칸에 기물이 모두 있으면 어느 쪽이 먼저 이동하든 다른 기물이
+/// 이동한 기물의 도착 칸과 같은 행 반대 열로 이동하며,
 /// 이 효과는 한 번 발동한 후 사라집니다.
 /// </summary>
 public class SyncCard : CardData, ITileCard
@@ -82,36 +83,32 @@ public class SyncEffect : TileEffector
     public override void OnPieceExit(Piece piece)
     {
         if (child != null)
-            TryBeginSynchronizedMove(piece, tilePos, child.TilePos);
+            TryBeginSynchronizedMove(piece, child.TilePos);
     }
 
     public void OnLinkedTileExit(Piece piece)
     {
         if (child == null) return;
-        TryBeginSynchronizedMove(piece, child.TilePos, tilePos);
+        TryBeginSynchronizedMove(piece, tilePos);
     }
 
-    private void TryBeginSynchronizedMove(Piece movingPiece, Vector3Int startPos, Vector3Int linkedTile)
+    private void TryBeginSynchronizedMove(Piece movingPiece, Vector3Int linkedTile)
     {
         if (isMirroring || isResolving || child == null) return;
 
         Piece linkedPiece = BoardManager.Instance.GetPiece(linkedTile);
         if (linkedPiece == null)
-        {
-            Revert();
             return;
-        }
 
         isResolving = true;
         SyncMoveTrigger trigger = movingPiece.gameObject.AddComponent<SyncMoveTrigger>();
         trigger.Init(movingPiece, -1);
         trigger.parent = this;
         trigger.linkedPiece = linkedPiece;
-        trigger.startPos = startPos;
         trigger.Apply();
     }
 
-    public void CompleteSynchronizedMove(Piece linkedPiece, Vector3Int startPos, Vector3Int destination)
+    public void CompleteSynchronizedMove(Piece linkedPiece, Vector3Int destination)
     {
         if (!isResolving) return;
         isResolving = false;
@@ -122,11 +119,14 @@ public class SyncEffect : TileEffector
             return;
         }
 
-        Vector3Int target = linkedPiece.Pos + (destination - startPos);
-        if (BoardManager.Instance.IsInside(target))
+        Vector3Int target = new Vector3Int(7 - destination.x, destination.y, 0);
+        isMirroring = true;
+        try
         {
-            isMirroring = true;
             BoardManager.Instance.ForceTeleport(linkedPiece, target);
+        }
+        finally
+        {
             isMirroring = false;
         }
 
@@ -179,7 +179,6 @@ public class SyncMoveTrigger : PieceEffector
 {
     public SyncEffect parent;
     public Piece linkedPiece;
-    public Vector3Int startPos;
 
     protected override void OnApply() { }
 
@@ -191,7 +190,7 @@ public class SyncMoveTrigger : PieceEffector
     public override void OnPieceMove(Vector3Int dest)
     {
         if (parent != null)
-            parent.CompleteSynchronizedMove(linkedPiece, startPos, dest);
+            parent.CompleteSynchronizedMove(linkedPiece, dest);
 
         Revert();
     }

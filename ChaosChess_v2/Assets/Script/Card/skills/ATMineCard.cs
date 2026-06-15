@@ -33,7 +33,7 @@ public class ATMineCard : CardData, ITileCard
 public class ATMineEffector : TileEffector, IPiecePathEffect
 {
     private const PieceType TargetPieceTypes =
-        PieceType.Rook | PieceType.Queen | PieceType.King |
+        PieceType.Rook | PieceType.Queen |
         PieceType.Amazon | PieceType.Chancellor | PieceType.KnightRider;
 
     protected override void OnApply()

@@ -17,7 +17,7 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C \uCE78\uC744 <color=#4499FF>\uBA85\uB839 \uCE78</color>\uC73C\uB85C \uC9C0\uC815\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 2
-  PieceType: 0
+  PieceType: 1022
   PieceTargetColor: 0
   PieceLimitTurn: 0
   RequiredPieceCount: 0
@@ -38,4 +38,4 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uB4E4\uC5B4\uC628 \uAE30\uBB3C\uC5D0\uAC8C \uD2B9\uC815 \uCE78\uC73C\uB85C \uC774\uB3D9\uD558\uB77C\uB294 \uBA85\uB839\uC744 \uBD80\uC5EC\uD569\uB2C8\uB2E4. \uBA85\uB839\uC744 <color=#FFD700>3\uBC88</color> \uC218\uD589\uD55C \uAE30\uBB3C\uC740 <color=#00CC44>\uC8FD\uC74C\uC744 1\uD68C \uBB34\uD6A8\uD654\uD558\uB294 \uBCF4\uD638\uB9C9</color>\uC744 \uC5BB\uC2B5\uB2C8\uB2E4."
+  AdditionalDescriptionContent: "\uB4E4\uC5B4\uC628 \uAE30\uBB3C\uC5D0\uAC8C \uD2B9\uC815 \uCE78\uC73C\uB85C \uC774\uB3D9\uD558\uB77C\uB294 \uBA85\uB839\uC744 \uBD80\uC5EC\uD569\uB2C8\uB2E4. \uBA85\uB839\uC744 <color=#FFD700>3\uBC88</color> \uC218\uD589\uD55C \uAE30\uBB3C\uC740 <color=#00CC44>\uC8FD\uC74C\uC744 1\uD68C \uBB34\uD6A8\uD654\uD558\uB294 \uBCF4\uD638\uB9C9</color>\uC744 \uC5BB\uC2B5\uB2C8\uB2E4. (\uD3F0 \uC81C\uC678)"
