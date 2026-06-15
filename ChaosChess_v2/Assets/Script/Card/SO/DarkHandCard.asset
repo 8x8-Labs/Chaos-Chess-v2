@@ -27,6 +27,10 @@ MonoBehaviour:
     PlayHookAnim: 1
     AnimStrength: 0.2
     AnimDuration: 0.3
+    ApplySFX: {fileID: 8300000, guid: d5017b9222e61bb4fb48a0f4181ff461, type: 3}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceEffectVFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}
@@ -36,6 +40,10 @@ MonoBehaviour:
     PlayHookAnim: 1
     AnimStrength: 0.2
     AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 15
   PieceTargetColor: 1
   PieceLimitTurn: 2
@@ -47,7 +55,6 @@ MonoBehaviour:
   UseMultipleEffectTileBases: 0
   EffectTileBases: []
   EffectTileAnimationMode: 0
-  EffectTileFrameInterval: 0.2
   EffectTileAnimationFrames: []
   TileAppearMode: 0
   TileAppearDropHeight: 3

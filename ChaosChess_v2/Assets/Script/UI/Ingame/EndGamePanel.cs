@@ -5,9 +5,11 @@ public class EndGamePanel : ButtonPanel
 {
     [SerializeField] private TextMeshProUGUI resultText;
     [SerializeField] private UIButton nextButton;
+    [SerializeField] private AudioClip EndgameSFX;
 
     public void Show(GameResult result)
     {
+        SoundManager.Instance?.SFXPlay("EndgameSFX", EndgameSFX);
         switch (result)
         {
             case GameResult.WhiteWin:

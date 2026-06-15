@@ -14,9 +14,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uBD88\uBC14\uB2E4"
   CardImage: {fileID: -1123290385, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uD0C0\uC77C\uC744 <color=#4499FF>\uBD88\uBC14\uB2E4</color>\uB85C \uB9CC\uB4ED\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uD0C0\uC77C\uC744 <color=#4499FF>\uBD88\uBC14\uB2E4</color>\uB85C
+    \uB9CC\uB4ED\uB2C8\uB2E4."
   Type: 1
   CardTier: 1
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 8300000, guid: dddf89e60e848334c864066eefd57efe, type: 3}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
@@ -29,6 +56,13 @@ MonoBehaviour:
   EffectTileBases: []
   EffectTileAnimationMode: 1
   EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -42,4 +76,5 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uC9C4\uC785\uD55C \uAE30\uBB3C\uC740 \uB2E4\uC74C \uD134\uC5D0 <color=#FF4444>\uD30C\uAD34\uB429\uB2C8\uB2E4</color>."
+  AdditionalDescriptionContent: "\uC9C4\uC785\uD55C \uAE30\uBB3C\uC740 \uB2E4\uC74C
+    \uD134\uC5D0 <color=#FF4444>\uD30C\uAD34\uB429\uB2C8\uB2E4</color>."

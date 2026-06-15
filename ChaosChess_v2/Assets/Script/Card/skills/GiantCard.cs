@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 
 /// <summary>
 /// 거대화 - 기물 전용 (무력화)
@@ -29,8 +30,24 @@ public class GiantCard : CardData, IPieceCard
 }
 public class GiantEffector : PieceEffector
 {
+    // 거대화 시 기물 스프라이트를 키우는 배율과 트윈 시간(초)
+    private const float ScaleMultiplier = 1.4f;
+    private const float ScaleTweenDuration = 0.2f;
+
+    private Vector3 originalScale;
+    private Tween scaleTween;
+
     protected override void OnApply()
     {
+        if (target == null) return;
+
+        originalScale = target.transform.localScale;
+        scaleTween?.Kill();
+        // 즉시 키운다. Apply()는 OnApply() 직후 PlayApplyVFX()에서 같은 transform에
+        // DOPunchScale 펀치를 거는데, 펀치는 시작 시점의 localScale을 "기준"으로 캐싱한 뒤
+        // 완료 시 그 값으로 되돌린다(VFXSpawner.PlayPunch). 여기서 미리 크게 만들어 두면
+        // 펀치가 거대화된 스케일을 기준으로 잡아 "뿅" 커지는 연출을 그대로 살리면서 원복되지 않는다.
+        target.transform.localScale = originalScale * ScaleMultiplier;
     }
     int[] dx = { -1, -1, -1, 0, 1, 1, 1, 0 };
     int[] dy = { -1, 0, 1, 1, 1, 0, -1, -1 };
@@ -63,6 +80,10 @@ public class GiantEffector : PieceEffector
     }
     protected override void OnRevert()
     {
+        scaleTween?.Kill();
+        if (target != null)
+            scaleTween = target.transform.DOScale(originalScale, ScaleTweenDuration).SetEase(Ease.OutQuad);
+
         Destroy(this);
     }
 
