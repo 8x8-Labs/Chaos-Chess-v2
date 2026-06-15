@@ -61,7 +61,8 @@ public class CardAnim : MonoBehaviour
             return;
         }
 
-        SoundManager.Instance.SFXPlay("CardClickSFX", clickSFX);
+        if (SoundManager.Instance != null && clickSFX != null)
+            SoundManager.Instance.SFXPlay("CardClickSFX", clickSFX);
         ClickOnAnimation();
         panel.SetCardData(this);
         panel.EnablePanel();
