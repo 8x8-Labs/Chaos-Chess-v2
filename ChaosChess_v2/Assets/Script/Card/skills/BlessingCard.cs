@@ -141,6 +141,29 @@ public class BlessingEffect : TileEffector
             return;
         }
 
-        BoardManager.Instance.ChangePiece(piece.Pos, piece.Color, change);
+        // ChangePiece가 기존 기물을 파괴하므로 좌표/색을 먼저 캡처한다.
+        Vector3Int pos = piece.Pos;
+        PieceColor color = piece.Color;
+
+        BoardManager.Instance.ChangePiece(pos, color, change);
+
+        PlayPromoteVFX(pos);
+    }
+
+    // 승격은 별도 Effector를 만들지 않으므로 SO의 기물 부여 연출(PieceEffectVFX)을 직접 재생한다.
+    private void PlayPromoteVFX(Vector3Int pos)
+    {
+        CardVFXConfig vfx = DataSO != null ? DataSO.PieceEffectVFX : null;
+        if (vfx == null) return;
+
+        Piece promoted = BoardManager.Instance.GetPiece(pos);
+        Vector3 worldPos = promoted != null
+            ? promoted.transform.position
+            : BoardManager.Instance.GridPosToWorldPos(pos);
+
+        VFXSpawner.SpawnOneShot(vfx.ApplyVFXPrefab, worldPos,
+            promoted != null ? promoted.transform : null);
+        if (vfx.PlayApplyAnim && promoted != null)
+            VFXSpawner.PlayPunch(promoted.transform, vfx.AnimStrength, vfx.AnimDuration);
     }
 }

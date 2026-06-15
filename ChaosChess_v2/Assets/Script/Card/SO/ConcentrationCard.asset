@@ -14,9 +14,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC815\uC2E0 \uC9D1\uC911"
   CardImage: {fileID: 973310654, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 <color=#FFD700>4\uD134</color>\uAC04 \uC0C1\uD638\uC791\uC6A9 <color=#FF4444>\uBD88\uAC00</color> \uC0C1\uD0DC\uAC00 \uB41C \uB4A4, <color=#4499FF>\uC544\uB9C8\uC874</color>\uC73C\uB85C \uC2B9\uACA9\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 <color=#FFD700>4\uD134</color>\uAC04
+    \uC0C1\uD638\uC791\uC6A9 <color=#FF4444>\uBD88\uAC00</color> \uC0C1\uD0DC\uAC00
+    \uB41C \uB4A4, <color=#4499FF>\uC544\uB9C8\uC874</color>\uC73C\uB85C \uC2B9\uACA9\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 4
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 8545361461715977270, guid: 592a55fb849f80e46bbe594e5208952d, type: 3}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 47
   PieceTargetColor: 0
   PieceLimitTurn: 5
@@ -25,6 +53,17 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -37,5 +76,8 @@ MonoBehaviour:
   AdditionalDescriptionTitle: "\uC544\uB9C8\uC874 \uD589\uB9C8\uBC95"
   PieceDescImage: {fileID: -4919676682383813925, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   MovementImage: {fileID: -1542743459, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
-  PieceDescContent: 퀸과 나이트의 행마법을 합친 기물입니다. 직선·대각선으로 멀리 이동하거나 나이트처럼 도약할 수 있습니다.
-  AdditionalDescriptionContent:
+  PieceDescContent: "\uD038\uACFC \uB098\uC774\uD2B8\uC758 \uD589\uB9C8\uBC95\uC744
+    \uD569\uCE5C \uAE30\uBB3C\uC785\uB2C8\uB2E4. \uC9C1\uC120\xB7\uB300\uAC01\uC120\uC73C\uB85C
+    \uBA40\uB9AC \uC774\uB3D9\uD558\uAC70\uB098 \uB098\uC774\uD2B8\uCC98\uB7FC \uB3C4\uC57D\uD560
+    \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  AdditionalDescriptionContent: 

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 /// </summary>
 public class ReviveCard : CardData, ITileCard
 {
+    [SerializeField] private GameObject levelUpEffectPrefab;
+
     private TileSelector selector;
 
     private void Awake()
@@ -20,8 +22,18 @@ public class ReviveCard : CardData, ITileCard
     }
     public void Execute(CardEffectArgs args = null)
     {
-        ReviveEffector effector = CreateTileEffector<ReviveEffector>(args.TargetPos[0]);
+        if (args == null || args.TargetPos == null || args.TargetPos.Count == 0) return;
+        Vector3Int targetPos = args.TargetPos[0];
+
+        ReviveEffector effector = CreateTileEffector<ReviveEffector>(targetPos);
         effector.Apply();
+
+        // 부활한 기물 위치에 레벨업 연출을 1회 재생합니다.
+        if (levelUpEffectPrefab != null)
+        {
+            Vector3 worldPos = BoardManager.Instance.GridPosToWorldPos(targetPos);
+            Instantiate(levelUpEffectPrefab, worldPos, Quaternion.identity);
+        }
     }
 }
 
