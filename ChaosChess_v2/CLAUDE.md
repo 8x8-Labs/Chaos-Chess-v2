@@ -96,3 +96,11 @@ Cards are the primary mechanism for rewriting chess rules mid-match. The system 
 - All animations: **DOTween**
 - Async callback marshalling: `UnityMainThreadDispatcher.cs`
 - Card descriptions (`CardDataSO.CardDescription`) use TMP rich-text `<color=#RRGGBB>` tags and are stored in `.asset` YAML as `\uXXXX`-escaped Korean strings
+
+---
+
+## Git / 커밋·PR 작성 규칙
+
+- **커밋 메시지·PR 본문에 불필요한 `@` 문자를 절대 넣지 말 것** (문장 앞뒤 포함). 생성 후 첫 줄·마지막 줄에 잔여 `@`가 없는지 반드시 확인한다.
+- **Bash 툴에서 여러 줄 본문을 넘길 때 PowerShell here-string 문법(`@'...'@`)을 쓰지 말 것** — Bash에선 here-string이 아니라 리터럴이라 `@`가 그대로 본문에 박힌다. 반드시 heredoc을 사용한다: `--body "$(cat <<'EOF' ... EOF)"`.
+- PowerShell 툴에서만 `@'...'@` here-string이 유효하다. 툴과 셸 문법을 혼동하지 말 것.
