@@ -21,6 +21,19 @@ MonoBehaviour:
   CardTier: 4
   VFX:
     ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 5896058207512719259, guid: a5e1a5442486f6b48b84fc89557b5bf9, type: 3}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}
     HookVFXPrefab: {fileID: 0}
     RevertVFXPrefab: {fileID: 0}
@@ -28,6 +41,10 @@ MonoBehaviour:
     PlayHookAnim: 1
     AnimStrength: 0.2
     AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 47
   PieceTargetColor: 0
   PieceLimitTurn: 1
@@ -39,12 +56,14 @@ MonoBehaviour:
   UseMultipleEffectTileBases: 0
   EffectTileBases: []
   EffectTileAnimationMode: 0
-  EffectTileFrameInterval: 0.2
   EffectTileAnimationFrames: []
   TileAppearMode: 0
   TileAppearDropHeight: 3
   TileAppearDropDuration: 0.35
   TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0

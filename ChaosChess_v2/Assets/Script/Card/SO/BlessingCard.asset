@@ -32,7 +32,7 @@ MonoBehaviour:
     RevertSFX: {fileID: 0}
     SFXVolume: 1
   PieceEffectVFX:
-    ApplyVFXPrefab: {fileID: 0}
+    ApplyVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
     LoopVFXPrefab: {fileID: 0}
     HookVFXPrefab: {fileID: 0}
     RevertVFXPrefab: {fileID: 0}
