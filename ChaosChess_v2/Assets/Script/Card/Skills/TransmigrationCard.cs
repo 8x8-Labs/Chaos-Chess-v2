@@ -27,8 +27,10 @@ public class TransmigrationCard : CardData, IPieceCard, IPieceTargetFilter
 
     public void Execute(CardEffectArgs args = null)
     {
+        if (args == null || args.Targets == null || args.Targets.Count == 0) return;
+
         Piece piece = args.Targets[0];
-        if (!piece.IsPromotioned) return;
+        if (piece == null || !piece.IsPromotioned) return;
 
         Vector3Int startPos = piece.StartPos;
         PieceColor color = piece.Color;

@@ -165,6 +165,16 @@ public class SyncChild : TileEffector
             BoardManager.Instance?.TileEffectDrawer?.ClearTileEffect(tilePos);
 
         BoardManager.Instance?.UnregisterTileEffector(tilePos, this);
+
+        // 자식이 단독으로 해제되면 부모도 함께 해제해 한쪽만 보드에 남는 불일치를 막는다.
+        // 재진입은 sealed Revert()의 isApplied 가드로 차단되므로 참조를 먼저 끊는다.
+        if (parent != null)
+        {
+            SyncEffect p = parent;
+            parent = null;
+            p.Revert();
+        }
+
         Destroy(gameObject);
     }
 

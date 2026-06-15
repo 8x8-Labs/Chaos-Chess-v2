@@ -60,6 +60,13 @@ public class FireEffect : TileEffector
             enterPiece = piece;
     }
 
+    public override void OnPieceExit(Piece piece)
+    {
+        // 턴 종료 전에 기물이 타일을 벗어나면 파괴 대상에서 제외한다.
+        if (enterPiece == piece)
+            enterPiece = null;
+    }
+
     public override void OnTurnChanged()
     {
         if (enterPiece == null)

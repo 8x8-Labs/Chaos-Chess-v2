@@ -60,11 +60,14 @@ public class CardRandomizer : MonoBehaviour
 
     public void RemoveCard(GameObject card)
     {
-        card.GetComponent<CardAnim>().DestroyCard();
+        if (card == null) return;
+
+        // 실제로 활성 목록에 있던 카드를 제거했을 때만 카운트를 줄여 음수·desync를 방지한다.
+        if (!_activeCards.Remove(card)) return;
+
+        card.GetComponent<CardAnim>()?.DestroyCard();
 
         currentCardCnt--;
-
-        _activeCards.Remove(card);
         OnCardCountChanged?.Invoke(currentCardCnt);
     }
 }
