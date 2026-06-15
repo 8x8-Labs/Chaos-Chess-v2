@@ -67,7 +67,8 @@ public class DimensionInstabilityEffector : PieceEffector
         if (hasGhost && BoardManager.Instance.IsInside(ghostPos))
         {
             Piece occupant = BoardManager.Instance.GetPiece(ghostPos);
-            if (occupant == null || occupant.Color != target.Color)
+            // 상대 King은 카드로 직접 교체/포획될 수 없으므로 대상에서 제외한다.
+            if (occupant == null || (occupant.Color != target.Color && occupant.Type != PieceType.King))
                 BoardManager.Instance.ChangePiece(
                     ghostPos,
                     target.Color,

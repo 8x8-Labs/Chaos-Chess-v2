@@ -581,6 +581,10 @@ public class GameManager : MonoBehaviour
             moveTimeMs: AiMoveTimeMs,
             callback: (uciMove) =>
             {
+                // 콜백 도착 시점에 인스턴스가 파괴되었으면 지연 스케줄링조차 하지 않는다.
+                if (this == null)
+                    return;
+
                 RunAfterMinAiDelay(requestTime, () =>
                 {
                     // 지연 도중 씬 전환으로 인스턴스가 파괴되었을 수 있어 유효성 재확인

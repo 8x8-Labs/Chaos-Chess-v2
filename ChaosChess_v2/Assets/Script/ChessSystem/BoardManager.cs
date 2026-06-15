@@ -1013,6 +1013,8 @@ public class BoardManager : MonoBehaviour
         bool useTurn = false,
         bool triggerTileEnter = true)
     {
+        if (piece == null) return;
+
         Vector3Int from = piece.Pos;
 
         if (!CanMoveToTile(piece, from, target))
