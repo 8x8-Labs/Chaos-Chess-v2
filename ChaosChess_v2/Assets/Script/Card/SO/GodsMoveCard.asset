@@ -14,9 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC2E0\uC758 \uC218"
   CardImage: {fileID: -261564650, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC744 <color=#4499FF>\uD55C \uB2E8\uACC4 \uC989\uC2DC \uC2B9\uACA9</color>\uC2DC\uD0B5\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC744 <color=#4499FF>\uD55C \uB2E8\uACC4
+    \uC989\uC2DC \uC2B9\uACA9</color>\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 0
   CardTier: 3
+  VFX:
+    ApplyVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 15
   PieceTargetColor: 0
   PieceLimitTurn: -1
@@ -25,17 +44,30 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
+  StatusDisplayType: 0
   NeedAdditionalDescription: 1
   DescriptionType: 1
   AdditionalDescriptionTitle: "\uC2B9\uACA9 \uC21C\uC11C"
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uD3F0 \u2192 \uB098\uC774\uD2B8 / \uB098\uC774\uD2B8\u00B7\uBE44\uC20D \u2192 \uB8E9 / \uB8E9 \u2192 \uD038"
+  AdditionalDescriptionContent: "\uD3F0 \u2192 \uB098\uC774\uD2B8 / \uB098\uC774\uD2B8\xB7\uBE44\uC20D
+    \u2192 \uB8E9 / \uB8E9 \u2192 \uD038"

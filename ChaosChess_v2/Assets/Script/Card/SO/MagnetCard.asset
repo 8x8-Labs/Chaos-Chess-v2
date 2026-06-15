@@ -14,9 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uC790\uC11D"
   CardImage: {fileID: 231516107, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uD0C0\uC77C <color=#FFD700>\uBC18\uACBD 1\uCE78</color> \uB0B4 \uB79C\uB364\uD55C \uAE30\uBB3C 1\uAE30\uB97C <color=#4499FF>\uD574\uB2F9 \uCE78\uC73C\uB85C \uB04C\uC5B4\uC635\uB2C8\uB2E4</color>."
+  CardDescription: "\uC120\uD0DD\uD55C \uD0C0\uC77C <color=#FFD700>\uBC18\uACBD 1\uCE78</color>
+    \uB0B4 \uB79C\uB364\uD55C \uAE30\uBB3C 1\uAE30\uB97C <color=#4499FF>\uD574\uB2F9
+    \uCE78\uC73C\uB85C \uB04C\uC5B4\uC635\uB2C8\uB2E4</color>."
   Type: 1
   CardTier: 1
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 12
   PieceTargetColor: 0
   PieceLimitTurn: 2
@@ -25,13 +36,25 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0.7
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
   GlobalTargetColor: 0
   HasLimit: 0
   LimitTurn: 0
-  ShowStatusCard: 0
+  StatusDisplayType: 0
   NeedAdditionalDescription: 0
   DescriptionType: 0
   AdditionalDescriptionTitle: 

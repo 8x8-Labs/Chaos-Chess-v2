@@ -9,14 +9,27 @@ class ConcentrationEffector : PieceEffector, IMovementOverrideEffect
     {
         if (target == null) return;
 
-        target.FenOverride = "a";
+        target.MoveFenOverride = "a";
         BoardManager.Instance.RefreshMoves();
     }
 
     protected override void OnRevert()
     {
         if (target != null)
+        {
+            if (target.MoveFenOverride?.ToLower() == "a")
+                target.MoveFenOverride = null;
             BoardManager.Instance.ChangePiece(target.Pos, target.Color, 's');
+        }
+
+        BoardManager.Instance.RefreshMoves();
+        Destroy(this);
+    }
+
+    protected override void OnCancel()
+    {
+        if (target != null && target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
 
         BoardManager.Instance.RefreshMoves();
         Destroy(this);

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d6a7ba45e6e12447b90b2853cd47da2, type: 3}
+  m_Name: VariantPieceInfo
+  m_EditorClassIdentifier: 
+  entries:
+  - pieceType: 128
+    pieceName: "\uC544\uB9C8\uC874"
+    pieceImage: {fileID: -3018244367335226746, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    movementImage: {fileID: -1542743459, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
+    description: "\uD038\uACFC \uB098\uC774\uD2B8\uC758 \uD589\uB9C8\uBC95\uC744
+      \uD569\uCE5C \uAE30\uBB3C\uC785\uB2C8\uB2E4. \uC9C1\uC120\xB7\uB300\uAC01\uC120\uC73C\uB85C
+      \uBA40\uB9AC \uC774\uB3D9\uD558\uAC70\uB098 \uB098\uC774\uD2B8\uCC98\uB7FC
+      \uB3C4\uC57D\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  - pieceType: 256
+    pieceName: "\uCC48\uC2AC\uB7EC"
+    pieceImage: {fileID: 8588170755874669975, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    movementImage: {fileID: -1930956243171039450, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
+    description: "\uB8E9\uACFC \uB098\uC774\uD2B8\uC758 \uB2A5\uB825\uC744 \uB3D9\uC2DC\uC5D0
+      \uAC00\uC9C4 \uAE30\uBB3C\uC785\uB2C8\uB2E4."
+  - pieceType: 512
+    pieceName: "\uB098\uC774\uD2B8\uB77C\uC774\uB354"
+    pieceImage: {fileID: 7305455733785292759, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
+    movementImage: {fileID: -1915148324, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
+    description: "\uB098\uC774\uD2B8\uC758 \uC774\uB3D9 \uD328\uD134\uC744 \uAC19\uC740
+      \uBC29\uD5A5\uC73C\uB85C \uACC4\uC18D \uBC18\uBCF5\uD574 \uC774\uB3D9\uD560
+      \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uACBD\uB85C \uC704\uC5D0 \uAE30\uBB3C\uC774
+      \uC788\uC73C\uBA74 \uC774\uB3D9\uC774 \uCC28\uB2E8\uB429\uB2C8\uB2E4."

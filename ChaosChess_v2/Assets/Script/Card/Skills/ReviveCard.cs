@@ -6,6 +6,8 @@ using System.Collections.Generic;
 /// </summary>
 public class ReviveCard : CardData, ITileCard
 {
+    [SerializeField] private GameObject levelUpEffectPrefab;
+
     private TileSelector selector;
 
     private void Awake()
@@ -20,8 +22,18 @@ public class ReviveCard : CardData, ITileCard
     }
     public void Execute(CardEffectArgs args = null)
     {
-        ReviveEffector effector = CreateTileEffector<ReviveEffector>(args.TargetPos[0]);
+        if (args == null || args.TargetPos == null || args.TargetPos.Count == 0) return;
+        Vector3Int targetPos = args.TargetPos[0];
+
+        ReviveEffector effector = CreateTileEffector<ReviveEffector>(targetPos);
         effector.Apply();
+
+        // 부활한 기물 위치에 레벨업 연출을 1회 재생합니다.
+        if (levelUpEffectPrefab != null)
+        {
+            Vector3 worldPos = BoardManager.Instance.GridPosToWorldPos(targetPos);
+            Instantiate(levelUpEffectPrefab, worldPos, Quaternion.identity);
+        }
     }
 }
 
@@ -69,12 +81,16 @@ public class ReviveEffector : TileEffector
             pieces = BoardManager.Instance.WhiteDeadPieces;
         else
             pieces = BoardManager.Instance.BlackDeadPieces;
-        int maxv = 0;
+
         PieceType res = PieceType.Wall;
-        if (pieces != null)
+        if (pieces != null && pieces.Count > 0)
         {
-            foreach (PieceType piece in pieces)
+            res = pieces[0];
+            int maxv = (int)GetValue(res);
+
+            for (int i = 1; i < pieces.Count; i++)
             {
+                PieceType piece = pieces[i];
                 int g = (int)GetValue(piece);
                 if (g > maxv)
                 {
@@ -82,8 +98,10 @@ public class ReviveEffector : TileEffector
                     res = piece;
                 }
             }
+
+            pieces.Remove(res);
         }
-        pieces.Remove(res);
+
         BoardManager.Instance.ChangePiece(TilePos, GameManager.Instance.turnColor, TypeToChar(res));
         Revert();
         GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());

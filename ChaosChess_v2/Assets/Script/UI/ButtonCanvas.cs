@@ -18,6 +18,7 @@ public class ButtonCanvas : ButtonParent
     [SerializeField] private List<BasicUIAnimation> animationButtons;
     [SerializeField] private UnityEvent OnCanvasEnabled;
     [SerializeField] private UnityEvent OnCanvasDisabled;
+    [SerializeField] private UnityEvent OnFadeComplete;
 
     private CanvasGroup canvasGroup;
     private ScrollRect scrollRect;
@@ -26,7 +27,6 @@ public class ButtonCanvas : ButtonParent
     protected virtual void Awake()
     {
         canvasGroup = GetComponent<CanvasGroup>();
-        // Debug.Log($"{gameObject.name}에 있는 캔버스 그룹 오브젝트: {canvasGroup.gameObject.name}");
         canvas = GetComponent<Canvas>();
         scrollRect = GetComponentInChildren<ScrollRect>();
     }
@@ -58,7 +58,7 @@ public class ButtonCanvas : ButtonParent
 
     public void FadeOut()
     {
-        canvasGroup.DOFade(1f, fadeDuration);
+        canvasGroup.DOFade(1f, fadeDuration).OnComplete(() => OnFadeComplete?.Invoke());
         int animIndex = 0;
         for (int i = 0; i < animationButtons.Count; i++)
         {
@@ -69,7 +69,6 @@ public class ButtonCanvas : ButtonParent
     }
     public void FadeIn()
     {
-        // Debug.Log($"{gameObject.name} 캔버스 그룹 인스턴스 아이디: {canvasGroup.GetInstanceID()} ");
         canvasGroup.DOFade(0f, fadeDuration)
             .OnComplete(() =>
             {

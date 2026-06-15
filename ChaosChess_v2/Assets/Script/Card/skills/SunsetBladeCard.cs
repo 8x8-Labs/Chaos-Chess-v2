@@ -24,7 +24,7 @@ public class SunsetBladeCard : CardData, IPieceCard
     public void Execute(CardEffectArgs args = null)
     {
         var effector = CreatePieceEffector<SunsetBladeEffector>(args.Targets[0]);
-        effector.Apply();
+        effector.Apply(true);
     }
 }
 
@@ -60,5 +60,10 @@ public class SunsetBladeEffector : PieceEffector
             if(p != null) pieces.Add(p);
         }
         BoardManager.Instance.DestroyPieces(pieces);
+    }
+
+    protected override void OnHalfTurnChanged()
+    {
+        Revert();
     }
 }

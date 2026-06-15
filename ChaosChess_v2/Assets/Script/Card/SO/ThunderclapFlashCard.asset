@@ -14,9 +14,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uBCBD\uB825\uC77C\uC12C"
   CardImage: {fileID: 1927276222, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uB8E9\uC774 <color=#4499FF>\uC774\uB3D9\uD558\uBA70 \uC9C0\uB098\uAC04 \uC790\uB9AC\uC758 \uAE30\uBB3C\uC744 \uBAA8\uB450 \uD30C\uAD34</color>\uD569\uB2C8\uB2E4. (\uC774\uBC88 \uD134 \uCD5C\uB300 <color=#FFD700>3\uCE78</color>)"
+  CardDescription: "\uC120\uD0DD\uD55C \uB8E9\uC774 <color=#4499FF>\uC774\uB3D9\uD558\uBA70
+    \uC9C0\uB098\uAC04 \uC790\uB9AC\uC758 \uAE30\uBB3C\uC744 \uBAA8\uB450 \uD30C\uAD34</color>\uD569\uB2C8\uB2E4.
+    (\uC774\uBC88 \uD134 \uCD5C\uB300 <color=#FFD700>3\uCE78</color>)"
   Type: 0
   CardTier: 2
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 8993746852963023233, guid: d78eec6e9a6e84a49a02fcd9f75a4b41, type: 3}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 8
   PieceTargetColor: 0
   PieceLimitTurn: 1
@@ -25,6 +53,17 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0

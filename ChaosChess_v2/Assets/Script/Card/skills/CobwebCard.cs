@@ -130,7 +130,8 @@ public class CobwebEffector : TileEffector, IPiecePathBlocker
         if (piece == null) return;
 
         CobwebPieceEffector pieceEffect = piece.gameObject.AddComponent<CobwebPieceEffector>();
-        pieceEffect.CardSO = null;
+        pieceEffect.CardSO = CardSO;
+        pieceEffect.SetVFXConfig(CardSO.PieceEffectVFX);
         pieceEffect.Init(piece, CardSO.LimitTurn);
         pieceEffect.Apply();
     }

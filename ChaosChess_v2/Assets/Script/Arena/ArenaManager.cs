@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using DG.Tweening;
 
 public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 
@@ -29,6 +30,7 @@ public class ArenaManager : MonoBehaviour
 
     public static ArenaManager Instance;
     [SerializeField] private CardHandLayout cardHandLayout;
+    [SerializeField] private CanvasGroup arenaBG;
 
     internal event Action<CardDataSO, int> ArenaStarted;
     internal event Action<int> ArenaRemainingTurnsChanged;
@@ -74,6 +76,7 @@ public class ArenaManager : MonoBehaviour
         if (isArenaActive) return;
         isArenaActive = true;
         cardHandLayout?.SetArenaInputBlocked(true);
+        arenaBG?.DOFade(1f, 0.5f);
 
         GameManager gm = GameManager.Instance;
         gm.PushCardIntervalPause();
@@ -111,7 +114,8 @@ public class ArenaManager : MonoBehaviour
             bm.GetAllPieces().FindAll(p => p.Color == gm.PlayerColor));
         keepPieces.UnionWith(opponents);
         keepPieces.Add(opponentKing); // playerKing은 플레이어 기물로 이미 포함됨
-        foreach (Piece p in allPiece)
+        // HidePiece가 Pieces 리스트(GetAllPieces 원본)를 수정하므로 스냅샷으로 순회
+        foreach (Piece p in new List<Piece>(allPiece))
         {
             if (!keepPieces.Contains(p))
             {
@@ -186,7 +190,8 @@ public class ArenaManager : MonoBehaviour
         // 이벤트 구독 해제 및 투기장 모드 비활성화
         gm.OnHalfTurnChanged -= OnHalfTurnChanged;
         gm.IsArenaMode = false;
-        cardHandLayout?.SetArenaInputBlocked(false);
+        if(cardHandLayout != null) cardHandLayout.SetArenaInputBlocked(false);
+        arenaBG?.DOFade(0f, 0.5f);
         gm.SetLockedPiece(null);
         ArenaEnded?.Invoke();
 
@@ -219,9 +224,9 @@ public class ArenaManager : MonoBehaviour
         foreach (Piece p in hiddenPieces)
             if (p != null) BoardManager.Instance.RestorePiece(p);
         hiddenPieces.Clear();
-        ResumeStoredEffects();
         if (BoardManager.Instance.TileEffectDrawer != null && savedTileEffects != null)
             BoardManager.Instance.TileEffectDrawer.RestoreTileEffects(savedTileEffects);
+        ResumeStoredEffects();
         gm.ResumeQueuedActions();
 
         // 복원 완료 최종 상태에서 1회만 동기화

@@ -58,6 +58,14 @@ public class FatherEnemyEffector : PieceEffector
         Destroy(this);
     }
 
+    protected override void OnCancel()
+    {
+        GameManager.Instance.OnAwakenedPieceSelected -= OnPieceSelected;
+        if (target != null)
+            target.IsAwakened = false;
+        Destroy(this);
+    }
+
     public void UpgradePiece()
     {
         if (!target.IsAwakened) return;

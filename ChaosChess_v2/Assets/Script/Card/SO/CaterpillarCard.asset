@@ -14,9 +14,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uBB34\uD55C\uADA4\uB3C4"
   CardImage: {fileID: 1604764601, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 <color=#FFD700>2\uD134</color>\uAC04 <color=#4499FF>\uB098\uC774\uD2B8\uB77C\uC774\uB354</color>\uC758 \uD589\uB9C8\uBC95\uC73C\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uAC00 <color=#FFD700>2\uD134</color>\uAC04
+    <color=#4499FF>\uB098\uC774\uD2B8\uB77C\uC774\uB354</color>\uC758 \uD589\uB9C8\uBC95\uC73C\uB85C
+    \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 2
+  VFX:
+    ApplyVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
   PieceType: 2
   PieceTargetColor: 0
   PieceLimitTurn: 2
@@ -25,6 +45,18 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -37,5 +69,8 @@ MonoBehaviour:
   AdditionalDescriptionTitle: "\uB098\uC774\uD2B8\uB77C\uC774\uB354"
   PieceDescImage: {fileID: 7305455733785292759, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   MovementImage: {fileID: -1915148324, guid: 1f51cf12f7197a844b2ba6dbe5e39c40, type: 3}
-  PieceDescContent: 나이트의 이동 패턴을 같은 방향으로 계속 반복해 이동할 수 있습니다. 경로 위에 기물이 있으면 이동이 차단됩니다.
-  AdditionalDescriptionContent:
+  PieceDescContent: "\uB098\uC774\uD2B8\uC758 \uC774\uB3D9 \uD328\uD134\uC744 \uAC19\uC740
+    \uBC29\uD5A5\uC73C\uB85C \uACC4\uC18D \uBC18\uBCF5\uD574 \uC774\uB3D9\uD560 \uC218
+    \uC788\uC2B5\uB2C8\uB2E4. \uACBD\uB85C \uC704\uC5D0 \uAE30\uBB3C\uC774 \uC788\uC73C\uBA74
+    \uC774\uB3D9\uC774 \uCC28\uB2E8\uB429\uB2C8\uB2E4."
+  AdditionalDescriptionContent: 

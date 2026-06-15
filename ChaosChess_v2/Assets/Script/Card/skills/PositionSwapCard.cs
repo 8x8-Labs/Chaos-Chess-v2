@@ -11,11 +11,14 @@ public class PositionSwapCard : CardData, ICard
     {
         BoardManager bm = BoardManager.Instance;
 
-        string fen = bm.GetFEN();
+        bm.ClearAllCardEffects();
+        GameManager.Instance.ClearQueuedCardActions();
+        CardRandomizerManager.Instance?.ClearActiveCards();
+        bm.UpdateFEN();
 
+        string fen = bm.GetFEN();
         string flipped = FlipFEN(fen);
 
-        bm.ClearAllTileEffectors();
         bm.ReplacePositionFromFen(flipped);
 
         GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());

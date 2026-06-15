@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using UnityEditor;
 
 [CustomEditor(typeof(CardDataSO))]
@@ -25,8 +26,14 @@ public class CardDataSOEditor : Editor
     SerializedProperty useMultipleEffectTileBases;
     SerializedProperty effectTileBases;
     SerializedProperty effectTileAnimationMode;
-    SerializedProperty effectTileFrameInterval;
     SerializedProperty effectTileAnimationFrames;
+    SerializedProperty tileAppearMode;
+    SerializedProperty tileAppearDropHeight;
+    SerializedProperty tileAppearDropDuration;
+    SerializedProperty tileAppearDropEase;
+    SerializedProperty tileAppearScaleFrom;
+    SerializedProperty tileAppearScaleDuration;
+    SerializedProperty tileAppearScaleEase;
     SerializedProperty restrictTiles;
     SerializedProperty blockedTiles;
 
@@ -36,6 +43,10 @@ public class CardDataSOEditor : Editor
     SerializedProperty hasLimit;
     SerializedProperty limitTurn;
     SerializedProperty statusDisplayType;
+
+    // VFX 연출 (부모 프로퍼티 — 하위 필드는 렌더 시점에 조회)
+    SerializedProperty vfx;
+    SerializedProperty pieceEffectVfx;
 
     // 부가 정보
     SerializedProperty needAdditionalDescription;
@@ -48,6 +59,7 @@ public class CardDataSOEditor : Editor
 
     // 섹션 토글 상태
     bool showBaseInfo = true;
+    bool showVFX = true;
     bool showTypeSettings = true;
     bool showAdditionalInfo = true;
 
@@ -76,8 +88,14 @@ public class CardDataSOEditor : Editor
         useMultipleEffectTileBases = serializedObject.FindProperty("UseMultipleEffectTileBases");
         effectTileBases = serializedObject.FindProperty("EffectTileBases");
         effectTileAnimationMode = serializedObject.FindProperty("EffectTileAnimationMode");
-        effectTileFrameInterval = serializedObject.FindProperty("EffectTileFrameInterval");
         effectTileAnimationFrames = serializedObject.FindProperty("EffectTileAnimationFrames");
+        tileAppearMode = serializedObject.FindProperty("TileAppearMode");
+        tileAppearDropHeight = serializedObject.FindProperty("TileAppearDropHeight");
+        tileAppearDropDuration = serializedObject.FindProperty("TileAppearDropDuration");
+        tileAppearDropEase = serializedObject.FindProperty("TileAppearDropEase");
+        tileAppearScaleFrom = serializedObject.FindProperty("TileAppearScaleFrom");
+        tileAppearScaleDuration = serializedObject.FindProperty("TileAppearScaleDuration");
+        tileAppearScaleEase = serializedObject.FindProperty("TileAppearScaleEase");
         restrictTiles = serializedObject.FindProperty("RestrictTiles");
         blockedTiles = serializedObject.FindProperty("BlockedTiles");
 
@@ -86,6 +104,9 @@ public class CardDataSOEditor : Editor
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
         statusDisplayType = serializedObject.FindProperty("StatusDisplayType");
+
+        vfx = serializedObject.FindProperty("VFX");
+        pieceEffectVfx = serializedObject.FindProperty("PieceEffectVFX");
 
         needAdditionalDescription = serializedObject.FindProperty("NeedAdditionalDescription");
         descriptionType = serializedObject.FindProperty("DescriptionType");
@@ -117,6 +138,18 @@ public class CardDataSOEditor : Editor
                 EditorGUILayout.Space(4);
                 EditorGUILayout.PropertyField(statusDisplayType, new GUIContent("상태 표시 타입"));
                 DrawStatusDisplayPreview();
+            }
+        }
+
+        EditorGUILayout.Space(6);
+
+        // ── VFX 연출 설정 ───────────────────────────────
+        showVFX = DrawSectionHeader("VFX 연출 설정", showVFX);
+        if (showVFX)
+        {
+            using (new EditorGUILayout.VerticalScope(sectionBoxStyle))
+            {
+                DrawVFXFields();
             }
         }
 
@@ -167,6 +200,55 @@ public class CardDataSOEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
+    // ── VFX 연출 필드 렌더링 ─────────────────────────────
+    void DrawVFXFields()
+    {
+        HelpBox("카드 효과가 기물/타일에 적용될 때 재생할 파티클·트윈 연출입니다. 비워두면 해당 시점 연출은 생략됩니다.", MessageType.None);
+
+        EditorGUILayout.Space(4);
+        EditorGUILayout.LabelField("카드 자체 연출 (VFX)", EditorStyles.boldLabel);
+        DrawVFXConfigFields(vfx);
+
+        EditorGUILayout.Space(8);
+        HelpBox("타일/효과가 기물에 효과를 부여할 때, 그 기물에 적용되는 연출입니다. (예: 거미줄에 걸린 기물, 거대화 스턴) 부여형 카드가 아니면 비워두세요.", MessageType.None);
+        EditorGUILayout.LabelField("기물 부여 연출 (PieceEffectVFX)", EditorStyles.boldLabel);
+        DrawVFXConfigFields(pieceEffectVfx);
+    }
+
+    // ── 단일 VFX 설정(CardVFXConfig) 렌더링 ───────────────
+    void DrawVFXConfigFields(SerializedProperty config)
+    {
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("파티클 프리팹", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("ApplyVFXPrefab"), new GUIContent("적용 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("LoopVFXPrefab"), new GUIContent("유지 중 (루프)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("HookVFXPrefab"), new GUIContent("훅 발동 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("RevertVFXPrefab"), new GUIContent("소멸 시 (1회)"));
+        }
+
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("기본 트윈 (펀치/스케일)", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("PlayApplyAnim"), new GUIContent("적용 시 펀치"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("PlayHookAnim"), new GUIContent("훅 시 펀치"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("AnimStrength"), new GUIContent("펀치 세기"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("AnimDuration"), new GUIContent("펀치 진행 시간(초)"));
+        }
+
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("효과음", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("ApplySFX"), new GUIContent("적용 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("HookSFX"), new GUIContent("훅 발동 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("RevertSFX"), new GUIContent("소멸 시 (1회)"));
+            EditorGUILayout.PropertyField(config.FindPropertyRelative("SFXVolume"), new GUIContent("효과음 볼륨"));
+        }
+    }
+
     // ── 타입별 필드 렌더링 ───────────────────────────────
     void DrawTypeSpecificFields(CardType type)
     {
@@ -202,6 +284,10 @@ public class CardDataSOEditor : Editor
             EditorGUILayout.HelpBox("-1 : 턴 제한 없이 계속 유지됩니다.", MessageType.Warning);
         }
         EditorGUILayout.PropertyField(requiredPieceCount, new GUIContent("필요 기물 수"));
+
+        EditorGUILayout.Space(6);
+        HelpBox("효과 범위를 타일로 표시하려면 아래에서 타일을 지정하세요. (예: 무하한 3x3 범위)", MessageType.None);
+        DrawTileEffectFields();
     }
 
     void DrawTileFields()
@@ -216,7 +302,7 @@ public class CardDataSOEditor : Editor
             EditorGUILayout.HelpBox("-1 : 제한 없이 계속 유지됩니다.", MessageType.Warning);
         }
 
-        DrawTileEffectFields();
+        DrawTileEffectFields(allowAppear: true);
 
         EditorGUILayout.Space(4);
         EditorGUILayout.PropertyField(restrictTiles, new GUIContent("타일 제한 사용"));
@@ -233,7 +319,7 @@ public class CardDataSOEditor : Editor
         }
     }
 
-    void DrawTileEffectFields()
+    void DrawTileEffectFields(bool allowAppear = false)
     {
         EditorGUILayout.Space(6);
         using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
@@ -245,8 +331,45 @@ public class CardDataSOEditor : Editor
                 return;
 
             DrawTileEffectAnimationFields();
-            if ((TileEffectAnimationMode)effectTileAnimationMode.enumValueIndex == TileEffectAnimationMode.None)
-                DrawTileEffectBaseFields();
+            DrawTileEffectBaseFields();
+
+            if (allowAppear)
+                DrawTileAppearFields();
+        }
+    }
+
+    void DrawTileAppearFields()
+    {
+        EditorGUILayout.Space(4);
+        using (new EditorGUILayout.VerticalScope(subSectionBoxStyle))
+        {
+            EditorGUILayout.LabelField("등장 연출", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(tileAppearMode, new GUIContent("등장 방식"));
+
+            var mode = (TileAppearAnimationMode)tileAppearMode.enumValueIndex;
+            if (mode == TileAppearAnimationMode.None)
+            {
+                EditorGUILayout.HelpBox("고정 타일: 애니메이션 없이 즉시 표시됩니다.", MessageType.None);
+                return;
+            }
+
+            if (mode == TileAppearAnimationMode.Scale)
+            {
+                EditorGUILayout.HelpBox("확대형 타일: 작은 크기에서 원래 크기로 확대되며 등장합니다. (최초 설치 시에만 재생)", MessageType.None);
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(tileAppearScaleFrom, new GUIContent("시작 크기 배율"));
+                EditorGUILayout.PropertyField(tileAppearScaleDuration, new GUIContent("확대 시간(초)"));
+                EditorGUILayout.PropertyField(tileAppearScaleEase, new GUIContent("이징"));
+                EditorGUI.indentLevel--;
+                return;
+            }
+
+            EditorGUILayout.HelpBox("물체형 타일: 셀 위쪽에서 떨어지며 등장합니다. (최초 설치 시에만 재생)", MessageType.None);
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(tileAppearDropHeight, new GUIContent("떨어지는 높이(셀)"));
+            EditorGUILayout.PropertyField(tileAppearDropDuration, new GUIContent("떨어지는 시간(초)"));
+            EditorGUILayout.PropertyField(tileAppearDropEase, new GUIContent("이징(착지감)"));
+            EditorGUI.indentLevel--;
         }
     }
 
@@ -279,21 +402,46 @@ public class CardDataSOEditor : Editor
                 return;
             }
 
-            EditorGUI.indentLevel++;
-            EditorGUILayout.PropertyField(effectTileAnimationFrames, new GUIContent("프레임"), true);
-
             if (mode == TileEffectAnimationMode.Time)
             {
-                EditorGUILayout.PropertyField(effectTileFrameInterval, new GUIContent("프레임 간격(초)"));
-            }
-            else if (mode == TileEffectAnimationMode.Turn)
-            {
-                EditorGUILayout.HelpBox("0번 프레임 = 시작, 1번 프레임 = 1턴 경과", MessageType.None);
+                EditorGUILayout.HelpBox(
+                    "시간 기반 애니메이션은 아래 타일 베이스에 지정한 AnimatedTile의 프레임과 속도를 사용합니다.",
+                    MessageType.Info);
+
+                bool hasNonAnimatedTile = false;
+                if (useMultipleEffectTileBases.boolValue)
+                {
+                    for (int i = 0; i < effectTileBases.arraySize; i++)
+                    {
+                        Object tile = effectTileBases.GetArrayElementAtIndex(i).objectReferenceValue;
+                        if (tile != null && tile is not AnimatedTile)
+                        {
+                            hasNonAnimatedTile = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    Object tile = effectTileBase.objectReferenceValue;
+                    hasNonAnimatedTile = tile != null && tile is not AnimatedTile;
+                }
+
+                if (hasNonAnimatedTile)
+                {
+                    EditorGUILayout.HelpBox(
+                        "Time 모드의 타일 베이스에는 AnimatedTile을 지정해야 합니다.",
+                        MessageType.Warning);
+                }
+
+                return;
             }
 
+            EditorGUI.indentLevel++;
+            EditorGUILayout.PropertyField(effectTileAnimationFrames, new GUIContent("턴 상태 프레임"), true);
+            EditorGUILayout.HelpBox("0번 프레임 = 시작, 1번 프레임 = 1턴 경과", MessageType.None);
             if (effectTileAnimationFrames.arraySize == 0)
                 EditorGUILayout.HelpBox("프레임이 비어 있으면 기본 타일 베이스가 표시됩니다.", MessageType.Warning);
-
             EditorGUI.indentLevel--;
         }
     }

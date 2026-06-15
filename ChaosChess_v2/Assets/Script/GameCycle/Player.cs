@@ -12,9 +12,27 @@ public class Player : MonoBehaviour
     private int _maxCardCount;
     private int _playerTurnCount = 0;
 
+    public bool IsCardGrantInitialized { get; private set; }
+    public int RemainingTurnsUntilCardGrant => Mathf.Max(1, _cardInterval - _playerTurnCount);
+    public bool IsCardHandFull => CurrentCardCount >= _maxCardCount;
+    public bool IsCardGrantPaused => GameManager.Instance != null && GameManager.Instance.IsCardIntervalPaused;
+
+    private int CurrentCardCount => cardRandomizer != null ? cardRandomizer.CurrentCardCnt : 0;
+
+    public event System.Action OnCardGrantStateChanged;
+    public event System.Action OnCardGranted;
+
     private void Start()
     {
+        if (cardRandomizer == null)
+        {
+            Debug.LogError($"{nameof(Player)} requires a {nameof(CardRandomizer)} reference.", this);
+            return;
+        }
+
         GameManager.Instance.OnPlayerTurnStarted += HandlePlayerTurnStarted;
+        GameManager.Instance.OnCardIntervalPauseChanged += HandleCardIntervalPauseChanged;
+        cardRandomizer.OnCardCountChanged += HandleCardCountChanged;
 
         _cardInterval = PlayerState.Instance.DefaultCardInterval;
         _maxCardCount = PlayerState.Instance.DefaultMaxCardCount;
@@ -23,10 +41,12 @@ public class Player : MonoBehaviour
         _buffs = new List<BuffPick>(PlayerState.Instance.Buffs);
 
         ExecuteBuffs();
-        int currentCardCnt = cardRandomizer.CurrentCardCnt;
-        int spawnCount = _maxCardCount - currentCardCnt;
+        int spawnCount = _maxCardCount - CurrentCardCount;
         if (spawnCount > 0)
             cardRandomizer.GenerateCard(_cardPool, spawnCount);
+
+        IsCardGrantInitialized = true;
+        NotifyCardGrantStateChanged();
     }
 
     private void ExecuteBuffs()
@@ -40,29 +60,63 @@ public class Player : MonoBehaviour
     private void OnDestroy()
     {
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.OnPlayerTurnStarted -= HandlePlayerTurnStarted;
+            GameManager.Instance.OnCardIntervalPauseChanged -= HandleCardIntervalPauseChanged;
+        }
+
+        if (cardRandomizer != null)
+            cardRandomizer.OnCardCountChanged -= HandleCardCountChanged;
     }
 
     private void HandlePlayerTurnStarted()
     {
-        if (GameManager.Instance.IsCardIntervalPaused) return;
+        if (GameManager.Instance.IsCardIntervalPaused)
+        {
+            NotifyCardGrantStateChanged();
+            return;
+        }
 
         _playerTurnCount++;
-        if (_playerTurnCount < _cardInterval || cardRandomizer.CurrentCardCnt >= _maxCardCount) return;
-        _playerTurnCount = 0;
+        if (_playerTurnCount < _cardInterval || IsCardHandFull)
+        {
+            NotifyCardGrantStateChanged();
+            return;
+        }
 
-        cardRandomizer.GenerateCard(_cardPool);
+        int generatedCount = cardRandomizer.GenerateCard(_cardPool);
+        if (generatedCount <= 0)
+        {
+            NotifyCardGrantStateChanged();
+            return;
+        }
+
+        _playerTurnCount = 0;
+        NotifyCardGrantStateChanged();
+        OnCardGranted?.Invoke();
     }
 
     /// <summary>카드 지급 주기를 delta만큼 조정합니다. 최소값은 1입니다.</summary>
     public void ModifyCardInterval(int delta)
     {
         _cardInterval = Mathf.Max(1, _cardInterval + delta);
+        NotifyCardGrantStateChanged();
     }
 
     /// <summary>보유할 수 있는 카드 개수를 delta만큼 조정합니다. 최소값은 1, 최대값은 PlayerState.Instance.DefaultMaxCardCount(4)입니다.</summary>
     public void ModifyMaxCardCount(int delta)
     {
         _maxCardCount = Mathf.Clamp(_maxCardCount + delta, 1, PlayerState.Instance.DefaultMaxCardCount);
+        NotifyCardGrantStateChanged();
+    }
+
+    private void HandleCardCountChanged(int _) => NotifyCardGrantStateChanged();
+
+    private void HandleCardIntervalPauseChanged() => NotifyCardGrantStateChanged();
+
+    private void NotifyCardGrantStateChanged()
+    {
+        if (IsCardGrantInitialized)
+            OnCardGrantStateChanged?.Invoke();
     }
 }

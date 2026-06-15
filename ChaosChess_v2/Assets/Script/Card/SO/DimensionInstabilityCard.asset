@@ -14,9 +14,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uCC28\uC6D0 \uBD88\uC548"
   CardImage: {fileID: 961421765, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uC5D0\uAC8C <color=#4499FF>\uAC00\uC0C1\uC758 \uB098\uC774\uD2B8</color>\uB97C \uBD80\uC5EC\uD569\uB2C8\uB2E4."
+  CardDescription: "\uC120\uD0DD\uD55C \uB098\uC774\uD2B8\uC5D0\uAC8C <color=#4499FF>\uAC00\uC0C1\uC758
+    \uB098\uC774\uD2B8</color>\uB97C \uBD80\uC5EC\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 3
+  VFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
+  PieceEffectVFX:
+    ApplyVFXPrefab: {fileID: 0}
+    LoopVFXPrefab: {fileID: 0}
+    HookVFXPrefab: {fileID: 0}
+    RevertVFXPrefab: {fileID: 0}
+    PlayApplyAnim: 1
+    PlayHookAnim: 1
+    AnimStrength: 0.2
+    AnimDuration: 0.3
+    ApplySFX: {fileID: 0}
+    HookSFX: {fileID: 0}
+    RevertSFX: {fileID: 0}
+    SFXVolume: 1
   PieceType: 2
   PieceTargetColor: 0
   PieceLimitTurn: -1
@@ -25,6 +52,18 @@ MonoBehaviour:
   MaintainTurn: 0
   NeedEffectTileBase: 0
   EffectTileBase: {fileID: 0}
+  UseMultipleEffectTileBases: 0
+  EffectTileBases: []
+  EffectTileAnimationMode: 0
+  EffectTileFrameInterval: 0.2
+  EffectTileAnimationFrames: []
+  TileAppearMode: 0
+  TileAppearDropHeight: 3
+  TileAppearDropDuration: 0.35
+  TileAppearDropEase: 30
+  TileAppearScaleFrom: 0
+  TileAppearScaleDuration: 0.3
+  TileAppearScaleEase: 27
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
@@ -38,4 +77,9 @@ MonoBehaviour:
   PieceDescImage: {fileID: 0}
   MovementImage: {fileID: 0}
   PieceDescContent: 
-  AdditionalDescriptionContent: "\uB098\uC774\uD2B8 \uC774\uB3D9 \uC2DC, \uC2E4\uC81C \uC774\uB3D9 \uCE78\uC744 \uC81C\uC678\uD55C \uB2E4\uB978 \uC774\uB3D9 \uAC00\uB2A5 \uCE78 \uD558\uB098\uB85C \uAC00\uC0C1\uC758 \uB098\uC774\uD2B8\uAC00 \uC774\uB3D9\uD569\uB2C8\uB2E4. \uB098\uC774\uD2B8\uAC00 <color=#FF4444>\uC7A1\uD788\uBA74</color> \uAC00\uC0C1\uC758 \uC704\uCE58\uB85C <color=#00CC44>\uC774\uB3D9\uD569\uB2C8\uB2E4</color>. \uAC00\uB2A5\uD55C \uCE78\uC774 \uC5C6\uC73C\uBA74 \uC81C\uC790\uB9AC\uC5D0 \uBA38\uBB45\uB2C8\uB2E4."
+  AdditionalDescriptionContent: "\uB098\uC774\uD2B8 \uC774\uB3D9 \uC2DC, \uC2E4\uC81C
+    \uC774\uB3D9 \uCE78\uC744 \uC81C\uC678\uD55C \uB2E4\uB978 \uC774\uB3D9 \uAC00\uB2A5
+    \uCE78 \uD558\uB098\uB85C \uAC00\uC0C1\uC758 \uB098\uC774\uD2B8\uAC00 \uC774\uB3D9\uD569\uB2C8\uB2E4.
+    \uB098\uC774\uD2B8\uAC00 <color=#FF4444>\uC7A1\uD788\uBA74</color> \uAC00\uC0C1\uC758
+    \uC704\uCE58\uB85C <color=#00CC44>\uC774\uB3D9\uD569\uB2C8\uB2E4</color>. \uAC00\uB2A5\uD55C
+    \uCE78\uC774 \uC5C6\uC73C\uBA74 \uC81C\uC790\uB9AC\uC5D0 \uBA38\uBB45\uB2C8\uB2E4."

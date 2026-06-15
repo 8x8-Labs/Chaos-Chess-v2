@@ -118,3 +118,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DataSO: {fileID: 11400000, guid: 3bc7bc7a2f92c2d45a17b723306f5236, type: 2}
+  levelUpEffectPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}

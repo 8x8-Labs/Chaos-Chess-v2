@@ -77,7 +77,7 @@ public class PortalEffect : TileEffector
 
         SharedUses.Uses--;
 
-        BoardManager.Instance.ForceTeleport(piece, Dest.tilePos);
+        BoardManager.Instance.ForceTeleport(piece, Dest.tilePos, triggerTileEnter: false);
 
         if (SharedUses.Uses <= 0)
         {
@@ -90,7 +90,7 @@ public class PortalEffect : TileEffector
     }
 }
 
-public struct SharedCounter
+public sealed class SharedCounter
 {
     public int Uses;
     public SharedCounter(int initalUses) { Uses = initalUses; }

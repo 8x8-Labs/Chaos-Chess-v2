@@ -32,14 +32,14 @@ public class DarkHandEffector : PieceEffector, IMovementOverrideEffect
 {
     protected override void OnApply()
     {
-        target.FenOverride = "a";
+        target.MoveFenOverride = "a";
         BoardManager.Instance.RefreshMoves();
     }
 
     protected override void OnRevert()
     {
-        if (target != null && target.FenOverride?.ToLower() == "a")
-            target.FenOverride = null;
+        if (target != null && target.MoveFenOverride?.ToLower() == "a")
+            target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
     }

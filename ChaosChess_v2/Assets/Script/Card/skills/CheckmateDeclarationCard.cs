@@ -21,12 +21,12 @@ public class CheckmateDeclarationEffect : GlobalEffector
 {
     protected override void OnApply()
     {
-        GameManager.Instance.OnPlayerTurnStarted += PlayerCheck;
+        GameManager.Instance.OnPlayerCheckStateChanged += PlayerCheck;
     }
 
     protected override void OnRevert()
     {
-        GameManager.Instance.OnPlayerTurnStarted -= PlayerCheck;
+        GameManager.Instance.OnPlayerCheckStateChanged -= PlayerCheck;
         Destroy(gameObject);
     }
 
@@ -36,10 +36,9 @@ public class CheckmateDeclarationEffect : GlobalEffector
         base.OnDestroy();
     }
 
-    public void PlayerCheck()
+    public void PlayerCheck(bool isPlayerInCheck)
     {
-        bool check = FairyStockfishBridge.Instance.IsInCheck();
-        if (check)
+        if (isPlayerInCheck)
         {
             List<Piece> list = BoardManager.Instance.GetAllPieces()
                 .Where(p => p.Color == GameManager.Instance.EnemyColor
@@ -47,15 +46,17 @@ public class CheckmateDeclarationEffect : GlobalEffector
                          && p.Type != PieceType.Queen)
                 .ToList();
 
-            // 기물 5개 파괴
+            List<Piece> targets = new();
             for (int i = 0; i < 5 && list.Count > 0; i++)
             {
                 int rand = Random.Range(0, list.Count);
-                Piece target = list[rand];
-                BoardManager.Instance.DestroyPiece(target);
+                targets.Add(list[rand]);
                 list.RemoveAt(rand);
             }
+
+            BoardManager.Instance.DestroyPieces(targets, false);
             Revert();
+            GameManager.Instance.ReevaluateGameState();
         }
     }
 }

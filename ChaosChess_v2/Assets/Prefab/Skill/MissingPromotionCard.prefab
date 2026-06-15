@@ -118,3 +118,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DataSO: {fileID: 11400000, guid: fe521d9b292cc9b4faf51e9e0a8ad636, type: 2}
+  effectPrefab: {fileID: 294325518602669925, guid: b78c99407d0ac8d438c45a960a4c721f, type: 3}

@@ -1,6 +1,6 @@
 ﻿/// <summary>
 /// 불바다
-/// 현재 타일에 진입한 기물이 2턴 뒤 제거됩니다.
+/// 현재 타일에 진입한 기물이 다음 턴에 제거됩니다.
 /// </summary>
 public class FireCard : CardData, ITileCard
 {
@@ -30,7 +30,6 @@ public class FireEffect : TileEffector
 
     private BoardManager boardManager = BoardManager.Instance;
     private Piece enterPiece;
-    private int deathTurn = 0;
 
     protected override void OnApply()
     {
@@ -61,22 +60,22 @@ public class FireEffect : TileEffector
             enterPiece = piece;
     }
 
-    public override void OnPieceExit(Piece piece) => Revert();
+    public override void OnPieceExit(Piece piece)
+    {
+        // 턴 종료 전에 기물이 타일을 벗어나면 파괴 대상에서 제외한다.
+        if (enterPiece == piece)
+            enterPiece = null;
+    }
 
     public override void OnTurnChanged()
     {
-        if (enterPiece != null)
-        {
-            deathTurn++;
+        if (enterPiece == null)
+            return;
 
-            if (deathTurn > 1)
-            {
-                boardManager.DestroyPiece(enterPiece);
-                Revert();
-            }
-        }
-
-        RefreshTileEffectTurnAnimation(DataSO, 2 - deathTurn);
+        Piece doomedPiece = enterPiece;
+        enterPiece = null;
+        boardManager.DestroyPiece(doomedPiece);
+        Revert();
     }
 
     protected override void OnDestroy()

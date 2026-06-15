@@ -10,6 +10,7 @@ public class CardRandomizer : MonoBehaviour
 
     private int currentCardCnt = 0;
     public int CurrentCardCnt => currentCardCnt;
+    public event System.Action<int> OnCardCountChanged;
 
     private Dictionary<GameObject, GameObject> _activeCards = new();
 
@@ -24,7 +25,7 @@ public class CardRandomizer : MonoBehaviour
     /// 지정된 카드 풀에서 현재 활성 카드와
     /// 중복되지 않는 랜덤 카드를 생성합니다.
     /// </summary>
-    public void GenerateCard(List<GameObject> pool, int count = 1)
+    public int GenerateCard(List<GameObject> pool, int count = 1)
     {
         List<GameObject> randomCards =
             cardRandomizerManager.GetRandomCardsFromPool(
@@ -34,12 +35,14 @@ public class CardRandomizer : MonoBehaviour
             );
 
         if (randomCards.Count == 0)
-            return;
+            return 0;
 
         currentCardCnt += randomCards.Count;
+        OnCardCountChanged?.Invoke(currentCardCnt);
 
         // 코루틴으로 카드 딜레이 스폰 기능 부여
         StartCoroutine(SpawnCard(randomCards, spawnDelay));
+        return randomCards.Count;
     }
 
     private IEnumerator SpawnCard(List<GameObject> list, float delay)
@@ -57,10 +60,14 @@ public class CardRandomizer : MonoBehaviour
 
     public void RemoveCard(GameObject card)
     {
-        card.GetComponent<CardAnim>().DestroyCard();
+        if (card == null) return;
+
+        // 실제로 활성 목록에 있던 카드를 제거했을 때만 카운트를 줄여 음수·desync를 방지한다.
+        if (!_activeCards.Remove(card)) return;
+
+        card.GetComponent<CardAnim>()?.DestroyCard();
 
         currentCardCnt--;
-
-        _activeCards.Remove(card);
+        OnCardCountChanged?.Invoke(currentCardCnt);
     }
 }

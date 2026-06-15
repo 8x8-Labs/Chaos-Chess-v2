@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
@@ -6,6 +7,14 @@ using DG.Tweening;
 public class GameManager : MonoBehaviour
 {
     private const int AiMoveTimeMs = 5000;
+
+    // 모바일에서는 엔진이 즉시 수를 반환해 AI가 너무 빠르게 두는 느낌을 주므로,
+    // 수를 적용하기 전 최소한의 연출 딜레이를 보장한다 (초 단위).
+#if UNITY_ANDROID || UNITY_IOS
+    private const float MinAiMoveDelaySeconds = 0.8f;
+#else
+    private const float MinAiMoveDelaySeconds = 0f;
+#endif
 
     public GameResult FinishType { get; set; } = GameResult.None;
 
@@ -17,15 +26,21 @@ public class GameManager : MonoBehaviour
     public List<Sprite> BlackSprites = new List<Sprite>();
     public List<Sprite> WhiteSprites = new List<Sprite>();
 
+    [Header("Elite Transformation")]
+    [Tooltip("엘리트 노드 진입 시 변형 기물 위치에 스폰할 공통 업그레이드 연출 프리팹")]
+    [SerializeField] private GameObject variantUpgradeVfxPrefab;
+
     [SerializeField] private int curTurn;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
     public bool IsPlayerInCheck { get; private set; }
 
     public bool IsGameInput = true;
+    /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
+    public bool AiAutoMoveEnabled = true;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
-    private List<(int turn, Action action)> recievedActions = new List<(int, Action)>();
+    private List<(int turn, Action action, CardRandomizerManager.ActiveCardToken token)> recievedActions = new();
     // 투기장 진행 중 기존 예약 액션(폭탄, 지속효과 해제 등) 소모를 잠시 멈춥니다.
     private bool areQueuedActionsPaused = false;
     private int queuedActionPauseTurn = -1;
@@ -33,6 +48,8 @@ public class GameManager : MonoBehaviour
 
     /// <summary>플레이어 턴이 시작되고 CanMovePos가 유효해진 직후 발행됩니다.</summary>
     public event Action OnPlayerTurnStarted;
+    /// <summary>카드 지급 주기 카운트의 일시정지 상태가 바뀔 때 발행됩니다.</summary>
+    public event Action OnCardIntervalPauseChanged;
     /// <summary>매 턴(플레이어·AI 모두) 종료 직후 발행됩니다. Effector 지속 턴 카운트다운에 사용됩니다.</summary>
     public event Action OnTurnChanged;
     /// <summary>반 턴 종료 직후 발행됩니다.</summary>
@@ -43,6 +60,7 @@ public class GameManager : MonoBehaviour
     public event Action<Piece> OnAwakenedPieceSelected;
     /// <summary>플레이어 체크 상태가 바뀔 때 카드 UI 입력 차단 갱신에 사용됩니다.</summary>
     public event Action<bool> OnPlayerCheckStateChanged;
+    private bool cancelCurrentGameStateEvaluation;
 
     public PieceColor turnColor
     {
@@ -102,6 +120,15 @@ public class GameManager : MonoBehaviour
         BoardManager.Instance.OnPromotionRequired -= HandlePromotion;
         BoardManager.Instance.OnPromotionRequired += HandlePromotion;
 
+        if (boardUI != null)
+        {
+            BoardManager.Instance.OnLastMoveChanged -= boardUI.DrawLastMove;
+            BoardManager.Instance.OnLastMoveChanged += boardUI.DrawLastMove;
+
+            BoardManager.Instance.OnMoveBlocked -= boardUI.DrawBlockedMove;
+            BoardManager.Instance.OnMoveBlocked += boardUI.DrawBlockedMove;
+        }
+
         OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 
@@ -151,6 +178,9 @@ public class GameManager : MonoBehaviour
 
         char[] variantChars = { 's', 'y', 'z' }; // Amazon, Chancellor, KnightRider
 
+        // 이번 입장에서 새로 등장한 변형 기물 종류 (중복 제거). 설명 UI 표시에 사용합니다.
+        List<PieceType> introduced = new List<PieceType>();
+
         int count = Mathf.Min(UnityEngine.Random.Range(1, 3), candidates.Count);
         for (int i = 0; i < count; i++)
         {
@@ -159,9 +189,41 @@ public class GameManager : MonoBehaviour
             candidates.RemoveAt(randomIndex);
 
             char variantChar = variantChars[UnityEngine.Random.Range(0, variantChars.Length)];
-            BoardManager.Instance.ChangePiece(target.Pos, EnemyColor, variantChar);
+            Vector3Int pos = target.Pos;
+            BoardManager.Instance.ChangePiece(pos, EnemyColor, variantChar);
+
+            // 업그레이드 연출을 변형된 기물 위치에 스폰합니다.
+            if (variantUpgradeVfxPrefab != null)
+            {
+                Vector3 worldPos = BoardManager.Instance.GridPosToWorldPos(pos);
+                Instantiate(variantUpgradeVfxPrefab, worldPos, Quaternion.identity);
+            }
+
+            PieceType type = VariantCharToPieceType(variantChar);
+            if (type != PieceType.None && !introduced.Contains(type))
+                introduced.Add(type);
         }
+
+        // 패널 표시는 다음 프레임으로 미룹니다.
+        // (씬 로드 중 Start()에서 호출되므로, 패널 자신의 Start()가 끝나기 전에
+        //  EnablePanel을 호출하면 패널의 DisablePanel에 덮어써질 수 있습니다.)
+        if (introduced.Count > 0)
+            StartCoroutine(ShowVariantInfoNextFrame(introduced));
     }
+
+    private System.Collections.IEnumerator ShowVariantInfoNextFrame(List<PieceType> types)
+    {
+        yield return null;
+        UI?.ShowVariantPieceInfo(types);
+    }
+
+    private static PieceType VariantCharToPieceType(char variantChar) => variantChar switch
+    {
+        's' => PieceType.Amazon,
+        'y' => PieceType.Chancellor,
+        'z' => PieceType.KnightRider,
+        _ => PieceType.None
+    };
 
     /// <summary>AI ELO를 delta만큼 조정합니다.</summary>
     public void ModifyELO(int delta)
@@ -173,7 +235,9 @@ public class GameManager : MonoBehaviour
 
     public void SelectGrid(Vector3Int pos)
     {
-        if (!IsPlayerTurn) return;
+        // AI가 켜져 있으면 플레이어(화이트) 턴에만 입력을 허용합니다.
+        // AI를 끄면(카드 랩) 양쪽을 수동으로 둘 수 있도록 턴 색 제한을 해제합니다.
+        if (!IsPlayerTurn && AiAutoMoveEnabled) return;
         if (!BoardManager.Instance.IsInside(pos)) return;
 
         // 파괴된 기물이 잠겨있으면 잠금 해제
@@ -318,17 +382,7 @@ public class GameManager : MonoBehaviour
         CardRandomizerManager.ActiveCardToken activeCardToken =
             CardRandomizerManager.Instance?.RetainActiveCard();
 
-        recievedActions.Add((curTurn + x * 2, () =>
-        {
-            try
-            {
-                act?.Invoke();
-            }
-            finally
-            {
-                activeCardToken?.Complete();
-            }
-        }));
+        recievedActions.Add((curTurn + x * 2, act, activeCardToken));
     }
 
     /// <summary>
@@ -345,8 +399,15 @@ public class GameManager : MonoBehaviour
 
             if (item.turn == curTurn)
             {
-                item.action.Invoke();
-                recievedActions.RemoveAt(i);
+                try
+                {
+                    item.action?.Invoke();
+                }
+                finally
+                {
+                    item.token?.Complete();
+                    recievedActions.RemoveAt(i);
+                }
             }
         }
 
@@ -377,7 +438,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < recievedActions.Count; i++)
             {
                 var item = recievedActions[i];
-                recievedActions[i] = (item.turn + delta, item.action);
+                recievedActions[i] = (item.turn + delta, item.action, item.token);
             }
         }
 
@@ -385,16 +446,32 @@ public class GameManager : MonoBehaviour
         queuedActionPauseTurn = -1;
     }
 
+    /// <summary>대기 중인 카드 예약 작업과 추가 행동 상태를 결과 발동 없이 취소합니다.</summary>
+    public void ClearQueuedCardActions()
+    {
+        foreach (var item in recievedActions)
+            item.token?.Complete();
+
+        recievedActions.Clear();
+        areQueuedActionsPaused = false;
+        queuedActionPauseTurn = -1;
+        extraPlayerActions = 0;
+        lockedPiece = null;
+        UI?.HideAwakenButton();
+    }
+
     /// <summary>카드 지급 주기 카운트를 일시 정지합니다.</summary>
     public void PushCardIntervalPause()
     {
         cardIntervalPauseCount++;
+        OnCardIntervalPauseChanged?.Invoke();
     }
 
     /// <summary>카드 지급 주기 카운트 일시 정지를 해제합니다.</summary>
     public void PopCardIntervalPause()
     {
         cardIntervalPauseCount = Mathf.Max(0, cardIntervalPauseCount - 1);
+        OnCardIntervalPauseChanged?.Invoke();
     }
 
     // MoveSelected 안에서 플레이어 수 적용 후:
@@ -494,21 +571,55 @@ public class GameManager : MonoBehaviour
         if (IsEndGame)
             return;
 
+        if (!AiAutoMoveEnabled)
+            return;
+
+        float requestTime = Time.realtimeSinceStartup;
+
         FairyStockfishBridge.Instance.GetBestMoveAsync(
             depth: 12,
             moveTimeMs: AiMoveTimeMs,
             callback: (uciMove) =>
             {
-                if (BoardManager.Instance.IsValidUciMove(uciMove))
-                {
-                    BoardManager.Instance.ApplyUCIMove(uciMove);
+                // 콜백 도착 시점에 인스턴스가 파괴되었으면 지연 스케줄링조차 하지 않는다.
+                if (this == null)
                     return;
-                }
 
-                Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
-                ApplyFallbackLegalAIMove();
+                RunAfterMinAiDelay(requestTime, () =>
+                {
+                    // 지연 도중 씬 전환으로 인스턴스가 파괴되었을 수 있어 유효성 재확인
+                    if (this == null || BoardManager.Instance == null)
+                        return;
+
+                    if (IsEndGame)
+                        return;
+
+                    if (BoardManager.Instance.IsValidUciMove(uciMove))
+                    {
+                        BoardManager.Instance.ApplyUCIMove(uciMove);
+                        return;
+                    }
+
+                    Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
+                    ApplyFallbackLegalAIMove();
+                });
             }
         );
+    }
+
+    // 엔진 응답이 최소 연출 시간보다 빨리 도착하면 남은 시간만큼 지연 후 실행한다.
+    private void RunAfterMinAiDelay(float requestTime, Action action)
+    {
+        float elapsed = Time.realtimeSinceStartup - requestTime;
+        float remaining = MinAiMoveDelaySeconds - elapsed;
+
+        if (remaining <= 0f)
+        {
+            action();
+            return;
+        }
+
+        DOVirtual.DelayedCall(remaining, () => action(), ignoreTimeScale: true);
     }
 
     private void ApplyFallbackLegalAIMove()
@@ -583,6 +694,11 @@ public class GameManager : MonoBehaviour
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
         UpdatePlayerCheckState(IsPlayerTurn && isCheck);
 
+        if (cancelCurrentGameStateEvaluation)
+        {
+            cancelCurrentGameStateEvaluation = false;
+            return;
+        }
 
         if (moves.Length == 0)
         {
@@ -609,6 +725,22 @@ public class GameManager : MonoBehaviour
 
         IsPlayerInCheck = isPlayerInCheck;
         OnPlayerCheckStateChanged?.Invoke(IsPlayerInCheck);
+    }
+
+    public void ReevaluateGameState()
+    {
+        cancelCurrentGameStateEvaluation = true;
+        StartCoroutine(ReevaluateGameStateNextFrame());
+    }
+
+    private IEnumerator ReevaluateGameStateNextFrame()
+    {
+        yield return null;
+
+        BoardManager.Instance.RefreshMoves();
+        string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
+        EvaluateGameState(moves);
+        ApplyGameResult();
     }
 
     private void OnCheck()
@@ -686,6 +818,7 @@ public class GameManager : MonoBehaviour
     private void ResetActions()
     {
         OnPlayerTurnStarted = null;
+        OnCardIntervalPauseChanged = null;
         OnTurnChanged = null;
         OnHalfTurnChanged = null;
         OnTimeReversalRequired = null;

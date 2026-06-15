@@ -87,6 +87,18 @@ public class CardHandLayout : MonoBehaviour
         if (inputBlockPanel == null)
             return;
 
+        // 차단되지 않은 상태에서 차단으로 전환될 때만 로그를 남겨 매 턴 중복 출력을 막습니다.
+        if (isBlocked && !inputBlockPanel.activeSelf)
+        {
+            string reason;
+            if (gameManager == null) reason = "입력 차단";
+            else if (gameManager.IsArenaMode) reason = "투기장 진행 중";
+            else if (gameManager.IsPlayerInCheck) reason = "플레이어가 체크 상태";
+            else reason = "플레이어 턴이 아님";
+
+            Debug.Log($"[카드 사용 불가] {reason}이라 손패 입력이 차단되었습니다.");
+        }
+
         inputBlockPanel.SetActive(isBlocked);
 
         if (isBlocked)

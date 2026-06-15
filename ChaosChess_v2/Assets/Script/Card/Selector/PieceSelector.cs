@@ -109,7 +109,11 @@ public class PieceSelector : Selector<Piece>
             LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
         
-        CardRandomizerManager.Instance?.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
+        // CardRandomizerManager가 없는 환경(카드 이펙트 랩 등)에서는 직접 실행해 효과가 누락되지 않도록 합니다.
+        if (CardRandomizerManager.Instance != null)
+            CardRandomizerManager.Instance.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
+        else
+            skillCard.Execute(args);
 
         bool switchedSelector = CardSelectionState.CurrentOwner != CardSelectionOwner.Piece;
         if(cardData != null && !switchedSelector)
@@ -134,9 +138,10 @@ public class PieceSelector : Selector<Piece>
         }
 
         if (!anySelectable)
-            Debug.Log("기물이 존재하지 않습니다!");
+            CardBlockNotifier.Notify(CardBlockReason.NoTargetPiece);
+        else
+            CardBlockNotifier.Notify(CardBlockReason.AllPiecesAffected);
 
-        // else: 기물에 효과가 모두 적용되었습니다!
         return false;
     }
 
@@ -158,6 +163,7 @@ public class PieceSelector : Selector<Piece>
 
         // 현재 판에서 적용 가능한 기물이 없을 시 오류 로그를 출력한 뒤
         // 선택자를 비활성화하기
+        // 적용 가능한 대상이 없으면 isTargetExist 내부에서 사유를 알린 뒤 선택을 취소합니다.
         if (!isTargetExist())
         {
             DisableSelector();
