@@ -69,12 +69,16 @@ public class ReviveEffector : TileEffector
             pieces = BoardManager.Instance.WhiteDeadPieces;
         else
             pieces = BoardManager.Instance.BlackDeadPieces;
-        int maxv = 0;
+
         PieceType res = PieceType.Wall;
-        if (pieces != null)
+        if (pieces != null && pieces.Count > 0)
         {
-            foreach (PieceType piece in pieces)
+            res = pieces[0];
+            int maxv = (int)GetValue(res);
+
+            for (int i = 1; i < pieces.Count; i++)
             {
+                PieceType piece = pieces[i];
                 int g = (int)GetValue(piece);
                 if (g > maxv)
                 {
@@ -82,8 +86,10 @@ public class ReviveEffector : TileEffector
                     res = piece;
                 }
             }
+
+            pieces.Remove(res);
         }
-        pieces.Remove(res);
+
         BoardManager.Instance.ChangePiece(TilePos, GameManager.Instance.turnColor, TypeToChar(res));
         Revert();
         GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
