@@ -26,6 +26,7 @@ public class SneakPawnCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
+        if (args == null || args.Targets == null || args.Targets.Count == 0) return;
         Piece piece = args.Targets[0];
         if (PieceEffector.HasActiveMovementOverride(piece)) return;
 

@@ -22,6 +22,7 @@ public class ReviveCard : CardData, ITileCard
     }
     public void Execute(CardEffectArgs args = null)
     {
+        if (args == null || args.TargetPos == null || args.TargetPos.Count == 0) return;
         Vector3Int targetPos = args.TargetPos[0];
 
         ReviveEffector effector = CreateTileEffector<ReviveEffector>(targetPos);
