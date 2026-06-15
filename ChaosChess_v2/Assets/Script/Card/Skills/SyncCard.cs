@@ -121,8 +121,14 @@ public class SyncEffect : TileEffector
 
         Vector3Int target = new Vector3Int(7 - destination.x, destination.y, 0);
         isMirroring = true;
-        BoardManager.Instance.ForceTeleport(linkedPiece, target);
-        isMirroring = false;
+        try
+        {
+            BoardManager.Instance.ForceTeleport(linkedPiece, target);
+        }
+        finally
+        {
+            isMirroring = false;
+        }
 
         Revert();
     }

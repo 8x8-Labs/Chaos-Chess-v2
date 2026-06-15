@@ -32,7 +32,7 @@ public class HoneytrapCard : CardData, IPieceCard
             else if (pieces[i].Type == PieceType.King && pieces[i].Color != pcolor)
                 king = pieces[i];
         }
-        if (queens.Count == 0)
+        if (queens.Count == 0 || king == null)
             return;
 
         Piece queen = queens[UnityEngine.Random.Range(0, queens.Count) ];
