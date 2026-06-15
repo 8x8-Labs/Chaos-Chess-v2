@@ -64,9 +64,15 @@ public class DimensionInstabilityEffector : PieceEffector
 
     public override void OnPieceCaptured()
     {
-        if (hasGhost && BoardManager.Instance.IsInside(ghostPos) && BoardManager.Instance.IsEmpty(ghostPos))
+        if (hasGhost && BoardManager.Instance.IsInside(ghostPos))
         {
-            BoardManager.Instance.ChangePiece(ghostPos, target.Color, 'n');
+            Piece occupant = BoardManager.Instance.GetPiece(ghostPos);
+            if (occupant == null || occupant.Color != target.Color)
+                BoardManager.Instance.ChangePiece(
+                    ghostPos,
+                    target.Color,
+                    'n',
+                    triggerTileEnter: true);
         }
 
         Revert();
@@ -128,7 +134,7 @@ public class DimensionInstabilityEffector : PieceEffector
         cells.Remove(realDestination);
         if (cells.Count == 0)
         {
-            ghostPos = realDestination;
+            ghostPos = origin;
             return true;
         }
 
