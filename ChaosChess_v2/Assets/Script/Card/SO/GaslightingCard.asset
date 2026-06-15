@@ -45,7 +45,7 @@ MonoBehaviour:
     HookSFX: {fileID: 0}
     RevertSFX: {fileID: 0}
     SFXVolume: 1
-  PieceType: 7
+  PieceType: 967
   PieceTargetColor: 1
   PieceLimitTurn: 0
   RequiredPieceCount: 0
