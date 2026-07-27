@@ -1,0 +1,5 @@
+lastUpgrade=20100
+proj.pluginVersion=2.1.0
+proj.AppId=195283170109
+and.BundleId=com.esestudio.chaoschess
+android.SetupDone=true
