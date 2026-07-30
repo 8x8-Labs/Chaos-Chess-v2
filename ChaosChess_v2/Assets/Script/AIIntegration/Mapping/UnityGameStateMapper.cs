@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ChaosChess.AI.Domain;
 using ChaosChess.AI.Fen;
+using ChaosChess.Unity.AIIntegration.Cards;
 using UnityEngine;
 
 namespace ChaosChess.Unity.AIIntegration.Mapping
@@ -49,6 +50,16 @@ namespace ChaosChess.Unity.AIIntegration.Mapping
 
             var gameState = new GameState(boardState, cards, tileEffects);
             return new UnityGameStateMappingResult(fen, gameState, warnings);
+        }
+
+        public static UnityGameStateMappingResult Capture(
+            global::BoardManager boardManager,
+            AiCardHand aiCardHand)
+        {
+            return Capture(
+                boardManager,
+                aiCardHand != null ? aiCardHand.AvailableCards : null,
+                aiCardHand != null ? aiCardHand.DefaultRemainingUses : 0);
         }
     }
 }
