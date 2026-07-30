@@ -19,6 +19,18 @@ public enum TileAppearAnimationMode
     Scale
 }
 
+public enum AiCardCategory
+{
+    Unknown = 0,
+    Tactical = 10,
+    Defensive = 20,
+    Mobility = 30,
+    BoardControl = 40,
+    Summon = 50,
+    Transformation = 60,
+    Utility = 70
+}
+
 /// <summary>
 /// 카드 효과가 기물/타일에 적용될 때 재생할 파티클·트윈 연출 설정입니다.
 /// 프리팹을 비워두면 해당 시점 연출은 자동으로 생략됩니다.
@@ -70,6 +82,13 @@ public class CardDataSO : ScriptableObject
 
     public CardType Type;
     public Tier CardTier;
+
+    [Space(30)]
+    [Header("AI 통합 설정")]
+    [Tooltip("ChaosChess.AI CardInfo.Id에 사용하는 안정 ID입니다. 비어 있으면 AI 후보에서 제외됩니다.")]
+    public string AiCardId;
+    [Tooltip("ChaosChess.AI CardInfo.Category에 사용하는 카드 분류입니다. Unknown이면 AI 후보에서 제외됩니다.")]
+    public AiCardCategory AiCategory = AiCardCategory.Unknown;
 
     [Space(30)]
     [Header("VFX 연출 설정")]
