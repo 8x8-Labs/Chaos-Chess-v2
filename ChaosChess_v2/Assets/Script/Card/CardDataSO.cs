@@ -89,6 +89,8 @@ public class CardDataSO : ScriptableObject
     public string AiCardId;
     [Tooltip("ChaosChess.AI CardInfo.Category에 사용하는 카드 분류입니다. Unknown이면 AI 후보에서 제외됩니다.")]
     public AiCardCategory AiCategory = AiCardCategory.Unknown;
+    [Tooltip("활성화된 카드만 ChaosChess.AI 후보로 전달합니다. P9 Supported subset을 명시적으로 제한하는 게이트입니다.")]
+    public bool AiSupported;
 
     [Space(30)]
     [Header("VFX 연출 설정")]

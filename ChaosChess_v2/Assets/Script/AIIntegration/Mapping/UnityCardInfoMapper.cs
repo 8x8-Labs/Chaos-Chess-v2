@@ -70,6 +70,12 @@ namespace ChaosChess.Unity.AIIntegration.Mapping
             if (remainingUses < 0)
                 throw new ArgumentOutOfRangeException(nameof(remainingUses), remainingUses, "Remaining uses cannot be negative.");
 
+            if (!dataSO.AiSupported)
+            {
+                AddWarning(warnings, $"Skipped card '{dataSO.CardName}' because AiSupported is false.");
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(dataSO.AiCardId))
             {
                 AddWarning(warnings, $"Skipped card '{dataSO.CardName}' because AiCardId is empty.");
