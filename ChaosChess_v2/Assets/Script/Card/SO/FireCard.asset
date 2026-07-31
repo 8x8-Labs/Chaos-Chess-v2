@@ -18,6 +18,8 @@ MonoBehaviour:
     \uB9CC\uB4ED\uB2C8\uB2E4."
   Type: 1
   CardTier: 1
+  AiCardId: fire
+  AiCategory: 40
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

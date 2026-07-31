@@ -18,6 +18,8 @@ MonoBehaviour:
     \uC9C0\uC815\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 2
+  AiCardId: peace_zone
+  AiCategory: 40
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}
