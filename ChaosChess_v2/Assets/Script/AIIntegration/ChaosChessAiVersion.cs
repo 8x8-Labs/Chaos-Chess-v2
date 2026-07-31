@@ -4,6 +4,8 @@
 public static class ChaosChessAiVersion
 {
     public const string Repository = "8x8-Labs/ChaosChess.AI";
-    public const string CommitSha = "4fef08e0d9f598d465484748de411049136edaff";
-    public const string DllSha256 = "25C5667152639E44C8C20244CBB73BECC20FFF6F425DE60C7EF86176171D6D88";
+    public const string Version = "0.1.0";
+    public const string Tag = "v0.1.0";
+    public const string CommitSha = "96f83377b44fdcec2af0bd0ffac243fda248d682";
+    public const string DllSha256 = "EF6B8A95A1BCAFCD6EAABF5738F1693318ADBF186EF8A3173AAD4F36FB15AC85";
 }
