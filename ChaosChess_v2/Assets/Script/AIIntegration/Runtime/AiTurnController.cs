@@ -103,6 +103,11 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                             mapping,
                             snapshot);
                     }
+                    catch (Exception ex)
+                    {
+                        Debug.LogWarning($"[AI Turn] Card decision failed: {ex.Message}");
+                        shouldFallback = true;
+                    }
                     finally
                     {
                         CompleteRequest(requestId);

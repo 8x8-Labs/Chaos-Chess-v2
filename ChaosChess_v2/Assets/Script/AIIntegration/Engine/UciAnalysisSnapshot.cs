@@ -64,7 +64,13 @@ namespace ChaosChess.Unity.AIIntegration.Engine
             if (moves.Count == 0)
                 throw new InvalidOperationException("Cannot create a position evaluation from an empty analysis snapshot.");
 
-            return moves[0].Score.ToPositionEvaluation(Perspective);
+            foreach (UciMoveAnalysis move in moves)
+            {
+                if (move.VariationIndex == 1)
+                    return move.Score.ToPositionEvaluation(Perspective);
+            }
+
+            throw new InvalidOperationException("Cannot create a position evaluation without a MultiPV 1 analysis result.");
         }
     }
 }
