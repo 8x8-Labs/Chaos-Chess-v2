@@ -4,10 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Collections.Generic;
+using ChaosChess.Unity.AIIntegration.Engine;
+using AiPieceColor = ChaosChess.AI.Domain.PieceColor;
 
 public class FairyStockfishBridge : MonoBehaviour
 {
     private static FairyStockfishBridge _instance;
+    private int _analysisRequestSequence = 0;
     public static FairyStockfishBridge Instance
     {
         get
@@ -24,6 +27,7 @@ public class FairyStockfishBridge : MonoBehaviour
     private Process _process;
     private StreamWriter _input;
     private volatile bool _isThinking = false;
+    private volatile bool _isAnalyzing = false;
     private string _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     private string _currentMoves = "";
 
@@ -171,6 +175,104 @@ public class FairyStockfishBridge : MonoBehaviour
                 callback?.Invoke(bestMove);
             });
         });
+        thread.Start();
+#endif
+    }
+
+    public void AnalyzePositionAsync(
+        string fen,
+        int depth,
+        int variationCount,
+        AiPieceColor perspective,
+        Action<int, UciAnalysisSnapshot> onComplete,
+        Action<int, string> onError = null)
+    {
+        int requestId = Interlocked.Increment(ref _analysisRequestSequence);
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            onError?.Invoke(requestId, "MultiPV analysis is not supported on Android yet.");
+        });
+#else
+        if (string.IsNullOrWhiteSpace(fen))
+        {
+            EnqueueAnalysisError(requestId, "FEN cannot be empty.", onError);
+            return;
+        }
+
+        if (depth <= 0)
+        {
+            EnqueueAnalysisError(requestId, "Analysis depth must be positive.", onError);
+            return;
+        }
+
+        if (variationCount <= 0)
+        {
+            EnqueueAnalysisError(requestId, "Variation count must be positive.", onError);
+            return;
+        }
+
+        if (_isAnalyzing || _isThinking)
+        {
+            EnqueueAnalysisError(requestId, "Fairy Stockfish is already handling another request.", onError);
+            return;
+        }
+
+        _isAnalyzing = true;
+
+        Thread thread = new Thread(() =>
+        {
+            UciAnalysisSnapshot snapshot = null;
+            string error = null;
+
+            try
+            {
+                lock (_queueLock)
+                {
+                    _outputQueue.Clear();
+                }
+
+                SendCommand("setoption name MultiPV value " + variationCount);
+                SendCommand("position fen " + fen);
+                SendCommand("go depth " + depth);
+
+                int timeoutMs = Mathf.Max(depth * 1000, 10000);
+                List<string> output = WaitForAnalysisOutput(timeoutMs, out bool sawBestMove);
+
+                if (!sawBestMove)
+                {
+                    error = "Analysis timed out before bestmove.";
+                }
+                else
+                {
+                    snapshot = UciMultiPvParser.ParseLines(output, variationCount, perspective);
+                }
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+            }
+            finally
+            {
+                SendCommand("setoption name MultiPV value 1");
+                RestorePosition();
+                _isAnalyzing = false;
+            }
+
+            UnityMainThreadDispatcher.Instance().Enqueue(() =>
+            {
+                if (this == null)
+                    return;
+
+                if (snapshot != null)
+                    onComplete?.Invoke(requestId, snapshot);
+                else
+                    onError?.Invoke(requestId, error ?? "Analysis failed.");
+            });
+        });
+
+        thread.IsBackground = true;
         thread.Start();
 #endif
     }
@@ -478,6 +580,63 @@ public class FairyStockfishBridge : MonoBehaviour
         }
 
         return "none";
+    }
+
+    private List<string> WaitForAnalysisOutput(int timeoutMs, out bool sawBestMove)
+    {
+        var result = new List<string>();
+        sawBestMove = false;
+
+        DateTime timeout = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        while (DateTime.UtcNow < timeout)
+        {
+            if (DrainAnalysisOutput(result, out sawBestMove))
+                return result;
+
+            Thread.Sleep(10);
+        }
+
+        SendCommand("stop");
+
+        timeout = DateTime.UtcNow.AddMilliseconds(1000);
+        while (DateTime.UtcNow < timeout)
+        {
+            if (DrainAnalysisOutput(result, out sawBestMove))
+                return result;
+
+            Thread.Sleep(10);
+        }
+
+        return result;
+    }
+
+    private bool DrainAnalysisOutput(List<string> result, out bool sawBestMove)
+    {
+        sawBestMove = false;
+
+        lock (_queueLock)
+        {
+            while (_outputQueue.Count > 0)
+            {
+                string line = _outputQueue.Dequeue();
+                result.Add(line);
+                if (line.StartsWith("bestmove"))
+                {
+                    sawBestMove = true;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void EnqueueAnalysisError(int requestId, string message, Action<int, string> onError)
+    {
+        UnityMainThreadDispatcher.Instance().Enqueue(() =>
+        {
+            onError?.Invoke(requestId, message);
+        });
     }
 #endif
 

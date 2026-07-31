@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using ChaosChess.Unity.AIIntegration.Runtime;
 using UnityEngine;
 using DG.Tweening;
 
@@ -37,6 +38,7 @@ public class GameManager : MonoBehaviour
     public bool IsGameInput = true;
     /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
     public bool AiAutoMoveEnabled = true;
+    [SerializeField] private AiTurnController aiTurnController;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
@@ -112,6 +114,9 @@ public class GameManager : MonoBehaviour
         CardSelectionState.Reset();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
+        aiTurnController = aiTurnController != null
+            ? aiTurnController
+            : FindFirstObjectByType<AiTurnController>();
 
         FinishType = GameResult.None;
 
@@ -572,6 +577,20 @@ public class GameManager : MonoBehaviour
             return;
 
         if (!AiAutoMoveEnabled)
+            return;
+
+        if (aiTurnController != null &&
+            aiTurnController.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
+        {
+            return;
+        }
+
+        RequestStockfishAIMove();
+    }
+
+    private void RequestStockfishAIMove()
+    {
+        if (IsEndGame || !AiAutoMoveEnabled || BoardManager.Instance == null)
             return;
 
         float requestTime = Time.realtimeSinceStartup;
