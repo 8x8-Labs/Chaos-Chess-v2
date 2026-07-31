@@ -20,6 +20,7 @@ MonoBehaviour:
   CardTier: 1
   AiCardId: fire
   AiCategory: 40
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}
