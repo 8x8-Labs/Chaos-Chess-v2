@@ -97,3 +97,6 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Gradle template backups (mainTemplate.gradle.backup, .backup2, ... and their .meta)
+*.gradle.backup*
