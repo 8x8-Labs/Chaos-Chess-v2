@@ -19,7 +19,10 @@ public class SaveManager : MonoBehaviour
     public static SaveManager Instance;
 
     // Path.Combine으로 경로 구분자 차이(Windows \, Android/iOS /)를 자동 처리한다
-    private string SavePath => Path.Combine(Application.persistentDataPath, "run_save.json");
+    // CloudSaveManager가 인스턴스 없이도 경로를 참조할 수 있도록 static으로 공개한다.
+    public static string RunSavePath => Path.Combine(Application.persistentDataPath, "run_save.json");
+
+    private string SavePath => RunSavePath;
 
     /// <summary>
     /// Load() 후 역직렬화된 데이터를 보관한다.
@@ -66,6 +69,9 @@ public class SaveManager : MonoBehaviour
 
             string json = JsonUtility.ToJson(data, true);
             File.WriteAllText(SavePath, json);
+
+            // 로컬 기록이 끝난 뒤에 올린다. 업로드는 디바운스되며 실패해도 로컬 저장은 유효하다.
+            CloudSaveManager.Instance?.RequestUpload();
         }
         catch (System.Exception e)
         {
@@ -118,6 +124,10 @@ public class SaveManager : MonoBehaviour
     {
         if (File.Exists(SavePath))
             File.Delete(SavePath);
+
+        // 삭제도 클라우드에 반영해야 한다. 올리지 않으면 다음 실행 때
+        // 클라우드에 남은 "끝난 런"을 도로 내려받게 된다.
+        CloudSaveManager.Instance?.RequestUpload();
     }
 
     // ── 저장 ──────────────────────────────────────────────────────────────────

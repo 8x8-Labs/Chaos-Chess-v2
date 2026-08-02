@@ -36,12 +36,20 @@ public class GooglePlayAuthManager : MonoBehaviour
     public string UserId { get; private set; } = string.Empty;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Bootstrap()
+    private static void Bootstrap() => EnsureInstance();
+
+    /// <summary>
+    /// 인스턴스를 보장하고 반환한다.
+    /// 같은 BeforeSceneLoad 타이밍의 RuntimeInitializeOnLoadMethod끼리는 실행 순서가
+    /// 보장되지 않으므로, 먼저 깨어난 쪽(예: CloudSaveManager)이 이걸 호출해 순서를 확정한다.
+    /// </summary>
+    public static GooglePlayAuthManager EnsureInstance()
     {
-        if (Instance != null) return;
+        if (Instance != null) return Instance;
 
         GameObject go = new GameObject(nameof(GooglePlayAuthManager));
-        go.AddComponent<GooglePlayAuthManager>();
+        // AddComponent가 Awake를 동기 실행하므로, 반환 시점에 Instance가 채워져 있다.
+        return go.AddComponent<GooglePlayAuthManager>();
     }
 
     private void Awake()
