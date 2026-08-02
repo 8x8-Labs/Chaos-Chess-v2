@@ -1,6 +1,8 @@
 using System;
 using ChaosChess.AI.Decision;
+using ChaosChess.AI.Domain;
 using UnityEngine;
+using AiPieceColor = ChaosChess.AI.Domain.PieceColor;
 
 namespace ChaosChess.Unity.AIIntegration.Cards
 {
@@ -21,7 +23,9 @@ namespace ChaosChess.Unity.AIIntegration.Cards
         public AiCardExecutionResult ExecuteFirstRecommended(
             CardDecisionResult decisionResult,
             AiCardHand aiCardHand,
-            global::BoardManager boardManager)
+            global::BoardManager boardManager,
+            GameState gameState,
+            AiPieceColor actor)
         {
             if (decisionResult == null || !decisionResult.ShouldUseCards)
             {
@@ -34,7 +38,12 @@ namespace ChaosChess.Unity.AIIntegration.Cards
 
             foreach (CardUseRecommendation recommendation in decisionResult.Recommendations)
             {
-                AiCardExecutionResult result = TryExecute(recommendation, aiCardHand, boardManager);
+                AiCardExecutionResult result = TryExecute(
+                    recommendation,
+                    aiCardHand,
+                    boardManager,
+                    gameState,
+                    actor);
                 if (result.Executed)
                     return result;
 
@@ -50,7 +59,9 @@ namespace ChaosChess.Unity.AIIntegration.Cards
         public AiCardExecutionResult TryExecute(
             CardUseRecommendation recommendation,
             AiCardHand aiCardHand,
-            global::BoardManager boardManager)
+            global::BoardManager boardManager,
+            GameState gameState,
+            AiPieceColor actor)
         {
             if (recommendation == null)
             {
@@ -76,8 +87,11 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
 
             if (!targetPlanner.TryCreatePlan(
+                    recommendation.Card.Id,
                     cardObject,
                     boardManager,
+                    gameState,
+                    actor,
                     out AiCardTargetPlan plan,
                     out AiCardExecutionStatus failureStatus,
                     out string reason))
@@ -108,7 +122,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 aiCardHand.Consume(plan.CardData.DataSO);
                 boardManager?.RefreshMoves();
 
-                Debug.Log($"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({recommendation.Card.Id}).");
+                Debug.Log($"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({recommendation.Card.Id}) with {plan.UsePlan.Target.Kind} target.");
                 return AiCardExecutionResult.Success(recommendation, plan.CardData.DataSO);
             }
             catch (Exception ex)
