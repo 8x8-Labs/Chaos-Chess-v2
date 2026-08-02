@@ -264,16 +264,17 @@ public class CloudSaveManager : MonoBehaviour
             if (string.IsNullOrEmpty(envelope.runJson))
             {
                 // 클라우드 기준으로 진행 중인 런이 없음 → 로컬 런도 정리해 상태를 일치시킨다.
-                if (File.Exists(runPath)) File.Delete(runPath);
+                // 복구 후보(.tmp/.bak)까지 지워야 이어하기 버튼이 되살아나지 않는다.
+                SafeFile.Delete(runPath);
             }
             else
             {
-                File.WriteAllText(runPath, envelope.runJson);
+                SafeFile.WriteAtomic(runPath, envelope.runJson);
             }
 
             if (!string.IsNullOrEmpty(envelope.collectionJson))
             {
-                File.WriteAllText(CollectionManager.CollectionSavePath, envelope.collectionJson);
+                SafeFile.WriteAtomic(CollectionManager.CollectionSavePath, envelope.collectionJson);
                 // 컬렉션은 Awake에서 이미 로드된 뒤라, 파일만 바꾸면 메모리에 반영되지 않는다.
                 CollectionManager.Instance?.ReloadFromDisk();
             }
@@ -380,17 +381,13 @@ public class CloudSaveManager : MonoBehaviour
         };
     }
 
+    /// <summary>
+    /// 업로드 대상 파일을 읽는다. 본 파일이 손상됐으면 SafeFile이 복구 후보로 폴백하므로,
+    /// 손상된 세이브를 그대로 클라우드에 밀어 올리는 사고를 막는다.
+    /// </summary>
     private static string ReadFileOrEmpty(string path)
     {
-        try
-        {
-            return File.Exists(path) ? File.ReadAllText(path) : string.Empty;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[CloudSave] '{path}' 읽기 실패: {e.Message}");
-            return string.Empty;
-        }
+        return SafeFile.TryRead(path, null, out string contents) ? contents : string.Empty;
     }
 
     /// <summary>
@@ -406,16 +403,13 @@ public class CloudSaveManager : MonoBehaviour
 
         foreach (string path in new[] { SaveManager.RunSavePath, CollectionManager.CollectionSavePath })
         {
-            try
-            {
-                if (!File.Exists(path)) continue;
-                long t = ToUnixMs(File.GetLastWriteTimeUtc(path));
-                if (t > latest) latest = t;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"[CloudSave] '{path}' 수정 시각 조회 실패: {e.Message}");
-            }
+            // 복구 후보(.tmp/.bak)까지 포함해 최신 시각을 본다. 본 파일이 손상돼 백업으로
+            // 폴백하는 상황에서도 "로컬에 최근 진행분이 있다"는 사실은 유지돼야 한다.
+            DateTime utc = SafeFile.GetLastWriteUtc(path);
+            if (utc == DateTime.MinValue) continue;
+
+            long t = ToUnixMs(utc);
+            if (t > latest) latest = t;
         }
 
         return latest;

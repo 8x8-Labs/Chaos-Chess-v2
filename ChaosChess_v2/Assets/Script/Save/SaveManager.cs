@@ -50,8 +50,11 @@ public class SaveManager : MonoBehaviour
         }
     }
 
-    /// <summary>저장 파일이 존재하는지 확인한다. 타이틀 UI에서 이어하기 버튼 표시 여부 결정에 사용.</summary>
-    public bool HasSaveData() => File.Exists(SavePath);
+    /// <summary>
+    /// 저장 파일이 존재하는지 확인한다. 타이틀 UI에서 이어하기 버튼 표시 여부 결정에 사용.
+    /// 본 파일이 손상돼 복구 후보만 남은 경우도 "있음"으로 본다.
+    /// </summary>
+    public bool HasSaveData() => SafeFile.Exists(SavePath);
 
     /// <summary>
     /// 현재 런 상태를 JSON으로 직렬화하여 파일에 저장한다.
@@ -68,7 +71,9 @@ public class SaveManager : MonoBehaviour
             WriteGameCycleState(data);
 
             string json = JsonUtility.ToJson(data, true);
-            File.WriteAllText(SavePath, json);
+
+            // 앱이 쓰기 도중 강제 종료돼도 이전 세이브가 남도록 임시 파일 → rename으로 교체한다.
+            if (!SafeFile.WriteAtomic(SavePath, json)) return;
 
             // 로컬 기록이 끝난 뒤에 올린다. 업로드는 디바운스되며 실패해도 로컬 저장은 유효하다.
             CloudSaveManager.Instance?.RequestUpload();
@@ -93,7 +98,14 @@ public class SaveManager : MonoBehaviour
 
         try
         {
-            string json = File.ReadAllText(SavePath);
+            // 본 파일이 손상됐으면 SafeFile이 임시본·백업본으로 자동 폴백한다.
+            // 판정 함수를 넘겨야 "파일은 있는데 JSON이 잘린" 경우까지 복구 대상이 된다.
+            if (!SafeFile.TryRead(SavePath, IsValidRunJson, out string json))
+            {
+                Debug.LogError("SaveManager.Load: 읽을 수 있는 저장 데이터가 없습니다.");
+                return;
+            }
+
             CurrentRunData = JsonUtility.FromJson<RunSaveData>(json);
 
             if (CurrentRunData == null)
@@ -119,11 +131,18 @@ public class SaveManager : MonoBehaviour
         CurrentRunData = null;
     }
 
+    /// <summary>
+    /// 저장 데이터가 온전한 런 세이브인지 판정한다. SafeFile이 복구 후보를 고를 때 쓴다.
+    /// 잘린 JSON은 여기서 예외를 던지고, SafeFile이 이를 "손상"으로 처리한다.
+    /// </summary>
+    private static bool IsValidRunJson(string json) => JsonUtility.FromJson<RunSaveData>(json) != null;
+
     /// <summary>저장 파일을 삭제한다. 런 종료(패배/클리어) 시 호출한다.</summary>
     public void DeleteSave()
     {
-        if (File.Exists(SavePath))
-            File.Delete(SavePath);
+        // 복구 후보(.tmp/.bak)까지 지워야 한다. 남겨두면 HasSaveData()가 계속 true를 반환해
+        // 끝난 런의 이어하기 버튼이 살아 있게 된다.
+        SafeFile.Delete(SavePath);
 
         // 삭제도 클라우드에 반영해야 한다. 올리지 않으면 다음 실행 때
         // 클라우드에 남은 "끝난 런"을 도로 내려받게 된다.

@@ -29,6 +29,13 @@ public class CollectionManager : MonoBehaviour
 
     public bool IsDiscovered(string cardName) => _discovered.Contains(cardName);
 
+    /// <summary>
+    /// 온전한 도감 세이브인지 판정한다. SafeFile이 복구 후보를 고를 때 쓴다.
+    /// 잘린 JSON은 여기서 예외를 던지고, SafeFile이 이를 "손상"으로 처리한다.
+    /// </summary>
+    private static bool IsValidCollectionJson(string json)
+        => JsonUtility.FromJson<CollectionSaveData>(json)?.discoveredCardNames != null;
+
     public void Discover(string cardName)
     {
         if (_discovered.Add(cardName))
@@ -41,7 +48,9 @@ public class CollectionManager : MonoBehaviour
         {
             CollectionSaveData data = new CollectionSaveData();
             data.discoveredCardNames.AddRange(_discovered);
-            File.WriteAllText(SavePath, JsonUtility.ToJson(data, true));
+
+            // 쓰기 도중 강제 종료로 도감이 통째로 날아가지 않도록 임시 파일 → rename으로 교체한다.
+            if (!SafeFile.WriteAtomic(SavePath, JsonUtility.ToJson(data, true))) return;
 
             CloudSaveManager.Instance?.RequestUpload();
         }
@@ -64,11 +73,12 @@ public class CollectionManager : MonoBehaviour
 
     private void Load()
     {
-        if (!File.Exists(SavePath)) return;
+        // 본 파일이 손상됐으면 SafeFile이 임시본·백업본으로 자동 폴백한다.
+        if (!SafeFile.TryRead(SavePath, IsValidCollectionJson, out string json)) return;
 
         try
         {
-            CollectionSaveData data = JsonUtility.FromJson<CollectionSaveData>(File.ReadAllText(SavePath));
+            CollectionSaveData data = JsonUtility.FromJson<CollectionSaveData>(json);
             if (data?.discoveredCardNames == null) return;
 
             foreach (string name in data.discoveredCardNames)
