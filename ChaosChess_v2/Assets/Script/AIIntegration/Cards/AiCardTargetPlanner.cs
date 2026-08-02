@@ -1,15 +1,34 @@
 using System.Collections.Generic;
+using ChaosChess.AI.Domain;
 using UnityEngine;
+using AiPieceColor = ChaosChess.AI.Domain.PieceColor;
+using AiPieceKind = ChaosChess.AI.Domain.PieceKind;
 
 namespace ChaosChess.Unity.AIIntegration.Cards
 {
     public sealed class AiCardTargetPlanner
     {
         private readonly List<global::PieceEffector> pieceEffectorBuffer = new();
+        private readonly DefaultCardPlanningCatalog planningCatalog;
+        private readonly CardUsePlanValidator planValidator;
+
+        public AiCardTargetPlanner()
+            : this(new DefaultCardPlanningCatalog())
+        {
+        }
+
+        public AiCardTargetPlanner(DefaultCardPlanningCatalog planningCatalog)
+        {
+            this.planningCatalog = planningCatalog ?? throw new System.ArgumentNullException(nameof(planningCatalog));
+            planValidator = new CardUsePlanValidator(planningCatalog);
+        }
 
         public bool TryCreatePlan(
+            string cardId,
             GameObject cardObject,
             global::BoardManager boardManager,
+            GameState gameState,
+            AiPieceColor actor,
             out AiCardTargetPlan plan,
             out AiCardExecutionStatus failureStatus,
             out string reason)
@@ -32,6 +51,13 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 return false;
             }
 
+            if (gameState == null)
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                reason = "GameState is null.";
+                return false;
+            }
+
             global::CardData cardData = cardObject.GetComponent<global::CardData>();
             global::CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
             if (cardData == null || dataSO == null)
@@ -41,21 +67,105 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 return false;
             }
 
+            if (string.IsNullOrWhiteSpace(cardId) ||
+                !string.Equals(cardId, dataSO.AiCardId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                failureStatus = AiCardExecutionStatus.MissingCardData;
+                reason = $"Card '{dataSO.CardName}' has mismatched AI card id '{dataSO.AiCardId}'.";
+                return false;
+            }
+
+            CardPlanningDefinition definition = planningCatalog.GetDefinition(cardId);
+            if (!definition.IsSupported)
+            {
+                failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                reason = $"Card '{cardId}' is not supported by the AI card planning catalog.";
+                return false;
+            }
+
+            if (!TryCreateTargetSelection(
+                    cardData,
+                    boardManager,
+                    actor,
+                    definition,
+                    out CardTargetSelection targetSelection,
+                    out failureStatus,
+                    out reason))
+            {
+                return false;
+            }
+
+            var usePlan = new CardUsePlan(cardId, actor, targetSelection);
+            CardPlanValidationResult validation = planValidator.Validate(gameState, usePlan);
+            if (!validation.IsValid)
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                reason = $"CardUsePlan validation failed ({validation.Code}): {validation.Reason}";
+                return false;
+            }
+
+            if (!TryCreateUnityArgs(
+                    cardData,
+                    boardManager,
+                    usePlan,
+                    out global::CardEffectArgs args,
+                    out IReadOnlyList<global::Piece> targetPieces,
+                    out IReadOnlyList<Vector3Int> targetPositions,
+                    out reason))
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                return false;
+            }
+
+            plan = new AiCardTargetPlan(cardData, usePlan, args, targetPieces, targetPositions);
+            return true;
+        }
+
+        private bool TryCreateTargetSelection(
+            global::CardData cardData,
+            global::BoardManager boardManager,
+            AiPieceColor actor,
+            CardPlanningDefinition definition,
+            out CardTargetSelection targetSelection,
+            out AiCardExecutionStatus failureStatus,
+            out string reason)
+        {
+            targetSelection = null;
+            failureStatus = AiCardExecutionStatus.TargetUnavailable;
+            reason = string.Empty;
+
+            global::CardDataSO dataSO = cardData.DataSO;
             switch (dataSO.Type)
             {
                 case global::CardType.Global:
-                    plan = new AiCardTargetPlan(
-                        cardData,
-                        args: null,
-                        targetPieces: System.Array.Empty<global::Piece>(),
-                        targetPositions: System.Array.Empty<Vector3Int>());
+                    if (definition.RequiredTargetKind != CardTargetKind.None)
+                    {
+                        failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                        reason = $"Card '{dataSO.CardName}' is global but requires '{definition.RequiredTargetKind}' target.";
+                        return false;
+                    }
+
+                    targetSelection = CardTargetSelection.None();
                     return true;
 
                 case global::CardType.Piece:
-                    return TryCreatePiecePlan(cardData, boardManager, out plan, out failureStatus, out reason);
+                    return TryCreatePieceTargetSelection(
+                        cardData,
+                        boardManager,
+                        actor,
+                        definition,
+                        out targetSelection,
+                        out failureStatus,
+                        out reason);
 
                 case global::CardType.Tile:
-                    return TryCreateTilePlan(cardData, boardManager, out plan, out failureStatus, out reason);
+                    return TryCreateTileTargetSelection(
+                        cardData,
+                        boardManager,
+                        definition,
+                        out targetSelection,
+                        out failureStatus,
+                        out reason);
 
                 default:
                     failureStatus = AiCardExecutionStatus.UnsupportedCardType;
@@ -64,19 +174,34 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
         }
 
-        private bool TryCreatePiecePlan(
+        private bool TryCreatePieceTargetSelection(
             global::CardData cardData,
             global::BoardManager boardManager,
-            out AiCardTargetPlan plan,
+            AiPieceColor actor,
+            CardPlanningDefinition definition,
+            out CardTargetSelection targetSelection,
             out AiCardExecutionStatus failureStatus,
             out string reason)
         {
-            plan = null;
+            targetSelection = null;
             failureStatus = AiCardExecutionStatus.TargetUnavailable;
             reason = string.Empty;
 
             global::CardDataSO dataSO = cardData.DataSO;
-            int requiredCount = Mathf.Max(0, dataSO.RequiredPieceCount);
+            if (definition.RequiredTargetKind != CardTargetKind.PieceAtSquare)
+            {
+                failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                reason = $"Card '{dataSO.CardName}' is piece-targeted but requires '{definition.RequiredTargetKind}' target.";
+                return false;
+            }
+
+            int requiredCount = definition.RequiredTargetCount;
+            if (Mathf.Max(0, dataSO.RequiredPieceCount) != requiredCount)
+            {
+                reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                return false;
+            }
+
             var targets = new List<global::Piece>(requiredCount);
 
             if (requiredCount > 0)
@@ -84,7 +209,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 global::IPieceTargetFilter targetFilter = cardData.GetComponent<global::IPieceTargetFilter>();
                 foreach (global::Piece piece in boardManager.GetAllPieces())
                 {
-                    if (!CanSelectPiece(piece, dataSO, targetFilter))
+                    if (!CanSelectPiece(piece, dataSO, targetFilter, actor))
                         continue;
 
                     if (HasActivePieceEffector(piece))
@@ -102,33 +227,56 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 }
             }
 
-            var args = new global::CardEffectArgs
+            if (targets.Count != 1)
             {
-                Targets = targets,
-                LimitTurn = dataSO.PieceLimitTurn
-            };
+                reason = $"Card '{dataSO.CardName}' requires exactly one piece target for CardUsePlan.";
+                return false;
+            }
 
-            plan = new AiCardTargetPlan(
-                cardData,
-                args,
-                targets,
-                targetPositions: System.Array.Empty<Vector3Int>());
+            global::Piece target = targets[0];
+            AiPieceKind targetKind = ToAiPieceKind(target.Type);
+            if (targetKind == AiPieceKind.Unknown)
+            {
+                reason = $"Card '{dataSO.CardName}' selected unsupported piece kind '{target.Type}'.";
+                return false;
+            }
+
+            targetSelection = CardTargetSelection.PieceAtSquare(
+                new PieceTargetSnapshot(
+                    ToSquare(target.Pos),
+                    ToAiColor(target.Color),
+                    targetKind));
             return true;
         }
 
-        private bool TryCreateTilePlan(
+        private bool TryCreateTileTargetSelection(
             global::CardData cardData,
             global::BoardManager boardManager,
-            out AiCardTargetPlan plan,
+            CardPlanningDefinition definition,
+            out CardTargetSelection targetSelection,
             out AiCardExecutionStatus failureStatus,
             out string reason)
         {
-            plan = null;
+            targetSelection = null;
             failureStatus = AiCardExecutionStatus.TargetUnavailable;
             reason = string.Empty;
 
             global::CardDataSO dataSO = cardData.DataSO;
-            int requiredCount = Mathf.Max(0, dataSO.TileCount);
+            if (definition.RequiredTargetKind != CardTargetKind.BoardSquare &&
+                definition.RequiredTargetKind != CardTargetKind.OrderedSquares)
+            {
+                failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                reason = $"Card '{dataSO.CardName}' is tile-targeted but requires '{definition.RequiredTargetKind}' target.";
+                return false;
+            }
+
+            int requiredCount = definition.RequiredTargetCount;
+            if (Mathf.Max(0, dataSO.TileCount) != requiredCount)
+            {
+                reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                return false;
+            }
+
             var targets = new List<Vector3Int>(requiredCount);
             HashSet<Vector3Int> occupiedEffectTiles = GetOccupiedEffectTiles(boardManager);
 
@@ -150,24 +298,75 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 return false;
             }
 
-            var args = new global::CardEffectArgs
+            if (definition.RequiredTargetKind == CardTargetKind.BoardSquare)
             {
-                TargetPos = targets,
-                LimitTurn = dataSO.MaintainTurn
-            };
+                targetSelection = CardTargetSelection.BoardSquare(ToSquare(targets[0]));
+                return true;
+            }
 
-            plan = new AiCardTargetPlan(
-                cardData,
-                args,
-                targetPieces: System.Array.Empty<global::Piece>(),
-                targetPositions: targets);
+            targetSelection = CardTargetSelection.OrderedSquares(ToSquares(targets));
             return true;
+        }
+
+        private static bool TryCreateUnityArgs(
+            global::CardData cardData,
+            global::BoardManager boardManager,
+            CardUsePlan usePlan,
+            out global::CardEffectArgs args,
+            out IReadOnlyList<global::Piece> targetPieces,
+            out IReadOnlyList<Vector3Int> targetPositions,
+            out string reason)
+        {
+            args = null;
+            targetPieces = System.Array.Empty<global::Piece>();
+            targetPositions = System.Array.Empty<Vector3Int>();
+            reason = string.Empty;
+
+            switch (usePlan.Target.Kind)
+            {
+                case CardTargetKind.None:
+                    return true;
+
+                case CardTargetKind.PieceAtSquare:
+                    if (!TryResolvePieceTarget(boardManager, usePlan.Target.Piece, out global::Piece piece, out reason))
+                        return false;
+
+                    var pieces = new List<global::Piece> { piece };
+                    args = new global::CardEffectArgs
+                    {
+                        Targets = pieces,
+                        LimitTurn = cardData.DataSO.PieceLimitTurn
+                    };
+                    targetPieces = pieces;
+                    return true;
+
+                case CardTargetKind.BoardSquare:
+                case CardTargetKind.OrderedSquares:
+                    var positions = new List<Vector3Int>(usePlan.Target.Squares.Count);
+                    foreach (Square square in usePlan.Target.Squares)
+                    {
+                        positions.Add(ToVector3Int(square));
+                    }
+
+                    args = new global::CardEffectArgs
+                    {
+                        TargetPos = positions,
+                        LimitTurn = cardData.DataSO.MaintainTurn
+                    };
+                    targetPositions = positions;
+                    return true;
+
+                default:
+                    reason = $"Unsupported CardUsePlan target kind '{usePlan.Target.Kind}'.";
+                    return false;
+            }
         }
 
         private bool CanSelectPiece(
             global::Piece piece,
             global::CardDataSO dataSO,
-            global::IPieceTargetFilter targetFilter)
+            global::IPieceTargetFilter targetFilter,
+            AiPieceColor actor)
         {
             if (piece == null || dataSO == null)
                 return false;
@@ -175,7 +374,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             if ((piece.Type & dataSO.PieceType) == 0)
                 return false;
 
-            if (piece.Color != dataSO.PieceTargetColor)
+            if (ToAiColor(piece.Color) != actor)
                 return false;
 
             return targetFilter == null || targetFilter.CanSelectPiece(piece);
@@ -242,6 +441,98 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
 
             return occupiedEffectTiles == null || !occupiedEffectTiles.Contains(pos);
+        }
+
+        private static bool TryResolvePieceTarget(
+            global::BoardManager boardManager,
+            PieceTargetSnapshot pieceTarget,
+            out global::Piece piece,
+            out string reason)
+        {
+            piece = null;
+            reason = string.Empty;
+
+            if (pieceTarget == null)
+            {
+                reason = "CardUsePlan contains no piece target snapshot.";
+                return false;
+            }
+
+            Vector3Int pos = ToVector3Int(pieceTarget.Square);
+            piece = boardManager.GetPiece(pos);
+            if (piece == null)
+            {
+                reason = $"No piece exists at CardUsePlan target {pieceTarget.Square}.";
+                return false;
+            }
+
+            if (ToAiColor(piece.Color) != pieceTarget.ExpectedColor)
+            {
+                reason = $"Piece at CardUsePlan target {pieceTarget.Square} has a different color.";
+                return false;
+            }
+
+            if (ToAiPieceKind(piece.Type) != pieceTarget.ExpectedKind)
+            {
+                reason = $"Piece at CardUsePlan target {pieceTarget.Square} has a different kind.";
+                return false;
+            }
+
+            return true;
+        }
+
+        private static Square ToSquare(Vector3Int pos)
+        {
+            return new Square(pos.x, pos.y);
+        }
+
+        private static Vector3Int ToVector3Int(Square square)
+        {
+            return new Vector3Int(square.File, square.Rank, 0);
+        }
+
+        private static IEnumerable<Square> ToSquares(IEnumerable<Vector3Int> positions)
+        {
+            foreach (Vector3Int position in positions)
+            {
+                yield return ToSquare(position);
+            }
+        }
+
+        private static AiPieceColor ToAiColor(global::PieceColor color)
+        {
+            return color == global::PieceColor.White
+                ? AiPieceColor.White
+                : AiPieceColor.Black;
+        }
+
+        private static AiPieceKind ToAiPieceKind(global::PieceType type)
+        {
+            switch (type)
+            {
+                case global::PieceType.Pawn:
+                    return AiPieceKind.Pawn;
+                case global::PieceType.Knight:
+                    return AiPieceKind.Knight;
+                case global::PieceType.Bishop:
+                    return AiPieceKind.Bishop;
+                case global::PieceType.Rook:
+                    return AiPieceKind.Rook;
+                case global::PieceType.Queen:
+                    return AiPieceKind.Queen;
+                case global::PieceType.King:
+                    return AiPieceKind.King;
+                case global::PieceType.Wall:
+                    return AiPieceKind.Wall;
+                case global::PieceType.Amazon:
+                    return AiPieceKind.Amazon;
+                case global::PieceType.Chancellor:
+                    return AiPieceKind.Chancellor;
+                case global::PieceType.KnightRider:
+                    return AiPieceKind.KnightRider;
+                default:
+                    return AiPieceKind.Unknown;
+            }
         }
     }
 }

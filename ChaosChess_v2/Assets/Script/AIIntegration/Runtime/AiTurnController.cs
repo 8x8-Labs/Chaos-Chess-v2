@@ -156,12 +156,13 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 mapping.Fen,
                 snapshot,
                 FairyStockfishBridge.Instance.IsInCheck());
+            var actor = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
             var evaluator = new GameStateEvaluator(
                 snapshotEngine,
                 new EvaluationOptions(searchDepth: analysisDepth));
             EvaluationResult evaluation = evaluator.Evaluate(
                 mapping.GameState,
-                UnityAiColorMapper.ToAiColor(gameManager.turnColor));
+                actor);
             var decisionModule = new CardDecisionModule(
                 new ConfiguredCardScorer(BuildCategoryScores()),
                 new EloCardProfile(
@@ -171,11 +172,13 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             CardDecisionResult decision = decisionModule.Decide(
                 mapping.GameState,
                 evaluation,
-                UnityAiColorMapper.ToAiColor(gameManager.turnColor));
+                actor);
             AiCardExecutionResult execution = cardExecutor.ExecuteFirstRecommended(
                 decision,
                 hand,
-                boardManager);
+                boardManager,
+                mapping.GameState,
+                actor);
 
             if (!execution.Executed)
             {
