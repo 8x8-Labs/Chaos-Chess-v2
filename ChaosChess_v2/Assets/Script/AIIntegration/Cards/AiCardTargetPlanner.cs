@@ -121,6 +121,118 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             return true;
         }
 
+        public bool TryCreatePlan(
+            CardUsePlan usePlan,
+            GameObject cardObject,
+            global::BoardManager boardManager,
+            GameState gameState,
+            AiPieceColor actor,
+            out AiCardTargetPlan plan,
+            out AiCardExecutionStatus failureStatus,
+            out string reason)
+        {
+            plan = null;
+            failureStatus = AiCardExecutionStatus.ExecutionFailed;
+            reason = string.Empty;
+
+            if (usePlan == null)
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                reason = "CardUsePlan is null.";
+                return false;
+            }
+
+            if (cardObject == null)
+            {
+                failureStatus = AiCardExecutionStatus.CardNotInHand;
+                reason = "Card object is null.";
+                return false;
+            }
+
+            if (boardManager == null)
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                reason = "BoardManager is null.";
+                return false;
+            }
+
+            if (gameState == null)
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                reason = "GameState is null.";
+                return false;
+            }
+
+            global::CardData cardData = cardObject.GetComponent<global::CardData>();
+            global::CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+            if (cardData == null || dataSO == null)
+            {
+                failureStatus = AiCardExecutionStatus.MissingCardData;
+                reason = $"Card '{cardObject.name}' has no CardData/DataSO.";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(usePlan.CardId) ||
+                !string.Equals(usePlan.CardId, dataSO.AiCardId, System.StringComparison.OrdinalIgnoreCase))
+            {
+                failureStatus = AiCardExecutionStatus.MissingCardData;
+                reason = $"Card '{dataSO.CardName}' has mismatched AI card id '{dataSO.AiCardId}'.";
+                return false;
+            }
+
+            CardPlanningDefinition definition = planningCatalog.GetDefinition(usePlan.CardId);
+            if (!definition.IsSupported)
+            {
+                failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                reason = $"Card '{usePlan.CardId}' is not supported by the AI card planning catalog.";
+                return false;
+            }
+
+            if (!ValidateUnityCardShape(
+                    cardData,
+                    definition,
+                    out failureStatus,
+                    out reason))
+            {
+                return false;
+            }
+
+            CardPlanValidationResult validation = planValidator.Validate(gameState, usePlan);
+            if (!validation.IsValid)
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                reason = $"CardUsePlan validation failed ({validation.Code}): {validation.Reason}";
+                return false;
+            }
+
+            if (!ValidateUnityTargetSelection(
+                    cardData,
+                    boardManager,
+                    actor,
+                    usePlan,
+                    out failureStatus,
+                    out reason))
+            {
+                return false;
+            }
+
+            if (!TryCreateUnityArgs(
+                    cardData,
+                    boardManager,
+                    usePlan,
+                    out global::CardEffectArgs args,
+                    out IReadOnlyList<global::Piece> targetPieces,
+                    out IReadOnlyList<Vector3Int> targetPositions,
+                    out reason))
+            {
+                failureStatus = AiCardExecutionStatus.TargetUnavailable;
+                return false;
+            }
+
+            plan = new AiCardTargetPlan(cardData, usePlan, args, targetPieces, targetPositions);
+            return true;
+        }
+
         private bool TryCreateTargetSelection(
             global::CardData cardData,
             global::BoardManager boardManager,
@@ -170,6 +282,125 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 default:
                     failureStatus = AiCardExecutionStatus.UnsupportedCardType;
                     reason = $"Unsupported card type '{dataSO.Type}'.";
+                    return false;
+            }
+        }
+
+        private static bool ValidateUnityCardShape(
+            global::CardData cardData,
+            CardPlanningDefinition definition,
+            out AiCardExecutionStatus failureStatus,
+            out string reason)
+        {
+            failureStatus = AiCardExecutionStatus.TargetUnavailable;
+            reason = string.Empty;
+
+            global::CardDataSO dataSO = cardData.DataSO;
+            switch (dataSO.Type)
+            {
+                case global::CardType.Global:
+                    if (definition.RequiredTargetKind != CardTargetKind.None)
+                    {
+                        failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                        reason = $"Card '{dataSO.CardName}' is global but requires '{definition.RequiredTargetKind}' target.";
+                        return false;
+                    }
+
+                    return true;
+
+                case global::CardType.Piece:
+                    if (definition.RequiredTargetKind != CardTargetKind.PieceAtSquare)
+                    {
+                        failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                        reason = $"Card '{dataSO.CardName}' is piece-targeted but requires '{definition.RequiredTargetKind}' target.";
+                        return false;
+                    }
+
+                    if (Mathf.Max(0, dataSO.RequiredPieceCount) != definition.RequiredTargetCount)
+                    {
+                        reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                        return false;
+                    }
+
+                    return true;
+
+                case global::CardType.Tile:
+                    if (definition.RequiredTargetKind != CardTargetKind.BoardSquare &&
+                        definition.RequiredTargetKind != CardTargetKind.OrderedSquares)
+                    {
+                        failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                        reason = $"Card '{dataSO.CardName}' is tile-targeted but requires '{definition.RequiredTargetKind}' target.";
+                        return false;
+                    }
+
+                    if (Mathf.Max(0, dataSO.TileCount) != definition.RequiredTargetCount)
+                    {
+                        reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                        return false;
+                    }
+
+                    return true;
+
+                default:
+                    failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                    reason = $"Unsupported card type '{dataSO.Type}'.";
+                    return false;
+            }
+        }
+
+        private bool ValidateUnityTargetSelection(
+            global::CardData cardData,
+            global::BoardManager boardManager,
+            AiPieceColor actor,
+            CardUsePlan usePlan,
+            out AiCardExecutionStatus failureStatus,
+            out string reason)
+        {
+            failureStatus = AiCardExecutionStatus.TargetUnavailable;
+            reason = string.Empty;
+
+            switch (usePlan.Target.Kind)
+            {
+                case CardTargetKind.None:
+                    return true;
+
+                case CardTargetKind.PieceAtSquare:
+                    if (!TryResolvePieceTarget(boardManager, usePlan.Target.Piece, out global::Piece piece, out reason))
+                        return false;
+
+                    global::IPieceTargetFilter targetFilter = cardData.GetComponent<global::IPieceTargetFilter>();
+                    if (!CanSelectPiece(piece, cardData.DataSO, targetFilter, actor))
+                    {
+                        reason = $"CardUsePlan piece target {usePlan.Target.Piece.Square} is not selectable by Unity card constraints.";
+                        return false;
+                    }
+
+                    if (HasActivePieceEffector(piece))
+                    {
+                        reason = $"CardUsePlan piece target {usePlan.Target.Piece.Square} already has an active effector.";
+                        return false;
+                    }
+
+                    return true;
+
+                case CardTargetKind.BoardSquare:
+                case CardTargetKind.OrderedSquares:
+                    HashSet<Vector3Int> occupiedEffectTiles = GetOccupiedEffectTiles(boardManager);
+                    foreach (Square square in usePlan.Target.Squares)
+                    {
+                        Vector3Int pos = ToVector3Int(square);
+                        if (!CanSelectTile(pos, cardData.DataSO, boardManager, occupiedEffectTiles))
+                        {
+                            reason = $"CardUsePlan tile target {square} is not selectable by Unity card constraints.";
+                            return false;
+                        }
+                    }
+
+                    return true;
+
+                default:
+                    failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                    reason = $"Unsupported CardUsePlan target kind '{usePlan.Target.Kind}'.";
                     return false;
             }
         }

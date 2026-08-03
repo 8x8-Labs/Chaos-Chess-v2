@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ChaosChess.AI.Decision;
+using ChaosChess.AI.Decision.CardTargeting;
 using ChaosChess.AI.Evaluation;
 using ChaosChess.Unity.AIIntegration.Cards;
 using ChaosChess.Unity.AIIntegration.Engine;
@@ -30,6 +31,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
         [SerializeField] private int utilityScore = 5;
 
         private readonly AiCardExecutor cardExecutor = new AiCardExecutor();
+        private readonly CardTargetingModule cardTargetingModule = new CardTargetingModule();
         private int requestSequence;
         private int activeRequestId;
         private bool isRequestRunning;
@@ -172,7 +174,9 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             CardDecisionResult decision = decisionModule.Decide(
                 mapping.GameState,
                 evaluation,
-                actor);
+                actor,
+                cardTargetingModule,
+                engineTopMoves: snapshot.ToMoveCandidates());
             AiCardExecutionResult execution = cardExecutor.ExecuteFirstRecommended(
                 decision,
                 hand,

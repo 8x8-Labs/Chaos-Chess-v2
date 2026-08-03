@@ -86,15 +86,30 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     recommendation);
             }
 
-            if (!targetPlanner.TryCreatePlan(
+            AiCardTargetPlan plan;
+            AiCardExecutionStatus failureStatus;
+            string reason;
+            bool createdPlan = recommendation.Plan != null
+                ? targetPlanner.TryCreatePlan(
+                    recommendation.Plan,
+                    cardObject,
+                    boardManager,
+                    gameState,
+                    actor,
+                    out plan,
+                    out failureStatus,
+                    out reason)
+                : targetPlanner.TryCreatePlan(
                     recommendation.Card.Id,
                     cardObject,
                     boardManager,
                     gameState,
                     actor,
-                    out AiCardTargetPlan plan,
-                    out AiCardExecutionStatus failureStatus,
-                    out string reason))
+                    out plan,
+                    out failureStatus,
+                    out reason);
+
+            if (!createdPlan)
             {
                 global::CardDataSO failedCardSO = cardObject != null
                     ? GetCardDataSO(cardObject)

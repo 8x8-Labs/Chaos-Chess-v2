@@ -23934,7 +23934,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   aiCardUsageEnabled: 1
   aiCardHand: {fileID: 913000004}
-  analysisDepth: 12
+  analysisDepth: 6
   variationCount: 3
   minimumCardScoreGain: 1
   tacticalScore: 10
@@ -23957,8 +23957,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingCards:
+  - {fileID: 5300482997993883823, guid: a9f0c2fc742dce043b5105c637073dea, type: 3}
+  - {fileID: 6652349515846844929, guid: 2c0e57b5a067b124d9189cd9bec5af86, type: 3}
   - {fileID: 7634445145627062371, guid: 59fda4040feb71549a7b1e33e6dac203, type: 3}
   - {fileID: 7277216013543518613, guid: e0c217151b18b46438129d9b4a8a45ee, type: 3}
+  - {fileID: 540433377832424254, guid: dfd2eb2d9c92d1441bcc7831375fc9c9, type: 3}
   defaultRemainingUses: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
