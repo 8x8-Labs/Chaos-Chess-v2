@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ChaosChess.AI.Decision;
 using ChaosChess.AI.Decision.CardTargeting;
-using ChaosChess.AI.Evaluation;
+using ChaosChess.AI.Decision.TurnPlanning;
 using ChaosChess.Unity.AIIntegration.Cards;
 using ChaosChess.Unity.AIIntegration.Engine;
 using ChaosChess.Unity.AIIntegration.Mapping;
@@ -94,111 +94,386 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                     if (!IsActiveRequest(requestId))
                         return;
 
-                    bool shouldFallback = true;
                     try
                     {
-                        shouldFallback = HandleAnalysisComplete(
+                        HandleAnalysisComplete(
                             requestId,
                             gameManager,
                             boardManager,
                             hand,
                             mapping,
-                            snapshot);
+                            snapshot,
+                            fallbackMoveRequest);
                     }
                     catch (Exception ex)
                     {
-                        Debug.LogWarning($"[AI Turn] Card decision failed: {ex.Message}");
-                        shouldFallback = true;
+                        CompleteAndRequestFallback(
+                            requestId,
+                            fallbackMoveRequest,
+                            $"Turn planning failed: {ex.Message}");
                     }
-                    finally
-                    {
-                        CompleteRequest(requestId);
-                    }
-
-                    if (shouldFallback)
-                        fallbackMoveRequest?.Invoke();
                 },
                 onError: (_, error) =>
                 {
                     if (!IsActiveRequest(requestId))
                         return;
 
-                    Debug.LogWarning($"[AI Turn] Card analysis failed: {error}");
-                    CompleteRequest(requestId);
-                    fallbackMoveRequest?.Invoke();
+                    CompleteAndRequestFallback(
+                        requestId,
+                        fallbackMoveRequest,
+                        $"Card analysis failed: {error}");
                 });
 
             return true;
         }
 
-        private bool HandleAnalysisComplete(
+        private void HandleAnalysisComplete(
             int requestId,
             global::GameManager gameManager,
             global::BoardManager boardManager,
             AiCardHand hand,
             UnityGameStateMappingResult mapping,
-            UciAnalysisSnapshot snapshot)
+            UciAnalysisSnapshot snapshot,
+            Action fallbackMoveRequest)
         {
             if (!IsActiveRequest(requestId))
-                return false;
+                return;
 
             if (this == null || gameManager == null || boardManager == null)
-                return false;
+            {
+                CompleteRequest(requestId);
+                return;
+            }
 
             if (gameManager.IsEndGame)
-                return false;
+            {
+                CompleteRequest(requestId);
+                return;
+            }
 
             if (snapshot == null || !snapshot.HasMoves)
             {
-                Debug.LogWarning("[AI Turn] Card analysis returned no moves. Falling back to move only.");
-                return true;
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    "Card analysis returned no moves.");
+                return;
             }
 
-            var snapshotEngine = new FairyStockfishSnapshotEngine(
-                mapping.Fen,
-                snapshot,
-                FairyStockfishBridge.Instance.IsInCheck());
             var actor = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
-            var evaluator = new GameStateEvaluator(
-                snapshotEngine,
-                new EvaluationOptions(searchDepth: analysisDepth));
-            EvaluationResult evaluation = evaluator.Evaluate(
-                mapping.GameState,
-                actor);
-            var decisionModule = new CardDecisionModule(
-                new ConfiguredCardScorer(BuildCategoryScores()),
-                new EloCardProfile(
-                    minimumScoreGain: Mathf.Max(0, minimumCardScoreGain),
-                    maximumCardsPerTurn: 1));
+            UnifiedTurnPlanner planner = CreateTurnPlanner(mapping.Fen, snapshot);
+            TurnPlannerResult result = planner.PlanTurn(mapping.GameState);
+            LogTurnPlannerTrace(result);
 
-            CardDecisionResult decision = decisionModule.Decide(
+            TurnPlan selectedPlan = result.SelectedPlan;
+            if (selectedPlan == null)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    "UnifiedTurnPlanner selected no executable plan.");
+                return;
+            }
+
+            Debug.Log(
+                $"[AI Turn] Selected TurnPlan rank='{selectedPlan.DeterministicRankKey}', " +
+                $"usesCard={selectedPlan.UsesCard}, hasMove={selectedPlan.HasMove}, score={selectedPlan.Score.Total}.");
+
+            if (!selectedPlan.UsesCard)
+            {
+                ExecuteSelectedMoveOrFallback(
+                    requestId,
+                    gameManager,
+                    boardManager,
+                    selectedPlan.MovePlan,
+                    fallbackMoveRequest,
+                    "no-card TurnPlan");
+                return;
+            }
+
+            ExecuteCardPlanAndReanalyze(
+                requestId,
+                gameManager,
+                boardManager,
+                hand,
+                selectedPlan,
                 mapping.GameState,
-                evaluation,
                 actor,
-                cardTargetingModule,
-                engineTopMoves: snapshot.ToMoveCandidates());
-            AiCardExecutionResult execution = cardExecutor.ExecuteFirstRecommended(
-                decision,
+                fallbackMoveRequest);
+        }
+
+        private void ExecuteCardPlanAndReanalyze(
+            int requestId,
+            global::GameManager gameManager,
+            global::BoardManager boardManager,
+            AiCardHand hand,
+            TurnPlan selectedPlan,
+            ChaosChess.AI.Domain.GameState planningGameState,
+            ChaosChess.AI.Domain.PieceColor actor,
+            Action fallbackMoveRequest)
+        {
+            AiCardExecutionResult execution = cardExecutor.ExecutePlan(
+                selectedPlan.CardPlan,
                 hand,
                 boardManager,
-                mapping.GameState,
+                planningGameState,
                 actor);
 
             if (!execution.Executed)
             {
-                Debug.Log($"[AI Turn] No AI card executed: {execution.Status} - {execution.Reason}");
-                return true;
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"Selected card plan failed: {execution.Status} - {execution.Reason}");
+                return;
             }
-
-            boardManager.RefreshMoves();
 
             if (gameManager.FinishType != global::GameResult.None || gameManager.IsEndGame)
             {
                 gameManager.ReevaluateGameState();
-                return false;
+                CompleteRequest(requestId);
+                return;
             }
 
-            return true;
+            UnityGameStateMappingResult actualMapping;
+            try
+            {
+                actualMapping = UnityGameStateMapper.Capture(boardManager, hand);
+            }
+            catch (Exception ex)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"Post-card actual state recapture failed: {ex.Message}");
+                return;
+            }
+
+            foreach (string warning in actualMapping.Warnings)
+                Debug.LogWarning($"[AI Turn] Post-card recapture: {warning}");
+
+            Debug.Log($"[AI Turn] Post-card actual state recaptured. Reanalyzing FEN: {actualMapping.Fen}");
+
+            var perspective = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
+            FairyStockfishBridge.Instance.AnalyzePositionAsync(
+                actualMapping.Fen,
+                analysisDepth,
+                variationCount,
+                perspective,
+                onComplete: (_, postCardSnapshot) =>
+                {
+                    if (!IsActiveRequest(requestId))
+                        return;
+
+                    try
+                    {
+                        HandlePostCardAnalysisComplete(
+                            requestId,
+                            gameManager,
+                            boardManager,
+                            actualMapping,
+                            selectedPlan,
+                            postCardSnapshot,
+                            fallbackMoveRequest);
+                    }
+                    catch (Exception ex)
+                    {
+                        CompleteAndRequestFallback(
+                            requestId,
+                            fallbackMoveRequest,
+                            $"Post-card move planning failed: {ex.Message}");
+                    }
+                },
+                onError: (_, error) =>
+                {
+                    if (!IsActiveRequest(requestId))
+                        return;
+
+                    CompleteAndRequestFallback(
+                        requestId,
+                        fallbackMoveRequest,
+                        $"Post-card analysis failed: {error}");
+                });
+        }
+
+        private void HandlePostCardAnalysisComplete(
+            int requestId,
+            global::GameManager gameManager,
+            global::BoardManager boardManager,
+            UnityGameStateMappingResult actualMapping,
+            TurnPlan originalPlan,
+            UciAnalysisSnapshot postCardSnapshot,
+            Action fallbackMoveRequest)
+        {
+            if (!IsActiveRequest(requestId))
+                return;
+
+            if (this == null || gameManager == null || boardManager == null)
+            {
+                CompleteRequest(requestId);
+                return;
+            }
+
+            if (gameManager.IsEndGame)
+            {
+                CompleteRequest(requestId);
+                return;
+            }
+
+            if (postCardSnapshot == null || !postCardSnapshot.HasMoves)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    "Post-card analysis returned no moves.");
+                return;
+            }
+
+            var snapshotEngine = new FairyStockfishSnapshotEngine(
+                actualMapping.Fen,
+                postCardSnapshot,
+                FairyStockfishBridge.Instance.IsInCheck());
+            var moveFilter = new MoveFilter(snapshotEngine);
+            MoveFilterResult moveResult = moveFilter.GetFilteredMoves(
+                actualMapping.GameState,
+                variationCount);
+
+            if (!moveResult.HasRecommendations)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    "Post-card MoveFilter returned no executable recommendations.");
+                return;
+            }
+
+            MoveRecommendation recommendation = moveResult.Recommendations[0];
+            if (originalPlan.MovePlan != null &&
+                !string.Equals(originalPlan.MovePlan.UciMove, recommendation.Candidate.UciMove, StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.LogWarning(
+                    $"[AI Turn] Simulated/actual move mismatch. Planned '{originalPlan.MovePlan.UciMove}', " +
+                    $"actual filtered '{recommendation.Candidate.UciMove}'. Using actual filtered move.");
+            }
+
+            ExecuteUciMoveOrFallback(
+                requestId,
+                gameManager,
+                boardManager,
+                recommendation.Candidate.UciMove,
+                fallbackMoveRequest,
+                "post-card actual MoveFilter");
+        }
+
+        private UnifiedTurnPlanner CreateTurnPlanner(
+            string fen,
+            UciAnalysisSnapshot snapshot)
+        {
+            var snapshotEngine = new FairyStockfishSnapshotEngine(
+                fen,
+                snapshot,
+                FairyStockfishBridge.Instance.IsInCheck());
+            var moveFilter = new MoveFilter(snapshotEngine);
+            var options = new TurnPlannerOptions(
+                noCardMoveCandidateCount: variationCount,
+                postCardMoveCandidateCount: variationCount,
+                opponentReplyCandidateCount: 0,
+                beamWidth: Mathf.Max(1, variationCount));
+
+            return new UnifiedTurnPlanner(
+                moveFilter,
+                cardTargetingModule,
+                options: options);
+        }
+
+        private void ExecuteSelectedMoveOrFallback(
+            int requestId,
+            global::GameManager gameManager,
+            global::BoardManager boardManager,
+            MovePlan movePlan,
+            Action fallbackMoveRequest,
+            string source)
+        {
+            if (movePlan == null)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"{source} did not contain a move plan.");
+                return;
+            }
+
+            ExecuteUciMoveOrFallback(
+                requestId,
+                gameManager,
+                boardManager,
+                movePlan.UciMove,
+                fallbackMoveRequest,
+                source);
+        }
+
+        private void ExecuteUciMoveOrFallback(
+            int requestId,
+            global::GameManager gameManager,
+            global::BoardManager boardManager,
+            string uciMove,
+            Action fallbackMoveRequest,
+            string source)
+        {
+            if (!IsActiveRequest(requestId))
+                return;
+
+            if (this == null || gameManager == null || boardManager == null)
+            {
+                CompleteRequest(requestId);
+                return;
+            }
+
+            if (gameManager.IsEndGame)
+            {
+                CompleteRequest(requestId);
+                return;
+            }
+
+            if (!boardManager.IsValidUciMove(uciMove))
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"{source} selected invalid UCI move '{uciMove}'.");
+                return;
+            }
+
+            Debug.Log($"[AI Turn] Executing {source} move '{uciMove}'.");
+            CompleteRequest(requestId);
+            boardManager.ApplyUCIMove(uciMove);
+        }
+
+        private void CompleteAndRequestFallback(
+            int requestId,
+            Action fallbackMoveRequest,
+            string reason)
+        {
+            if (!IsActiveRequest(requestId))
+                return;
+
+            Debug.LogWarning($"[AI Turn] Falling back to move-only path: {reason}");
+            CompleteRequest(requestId);
+            fallbackMoveRequest?.Invoke();
+        }
+
+        private static void LogTurnPlannerTrace(TurnPlannerResult result)
+        {
+            if (result == null)
+                return;
+
+            TurnPlannerTraceSummary trace = result.TraceSummary;
+            Debug.Log(
+                "[AI Turn] UnifiedTurnPlanner trace: " +
+                $"selected={trace.SelectedCandidateCount}, skipped={trace.SkippedCandidateCount}, " +
+                $"rootMoves={trace.RootNoCardMoveCandidateCount}, consideredCards={trace.ConsideredCardCandidateCount}, " +
+                $"postCardMoves={trace.PostCardMoveCandidateCount}, engineCalls={trace.EngineCallCount}/{trace.MaximumEngineCallCount}, " +
+                $"beamPruned={trace.BeamPrunedCandidateCount}.");
         }
 
         private AiCardHand ResolveCardHand()
