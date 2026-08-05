@@ -197,7 +197,10 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 aiCardHand.Consume(plan.CardData.DataSO);
                 boardManager?.RefreshMoves();
 
-                Debug.Log($"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}) with {plan.UsePlan.Target.Kind} target.");
+                Debug.Log(
+                    $"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}), " +
+                    $"caster={FormatCaster(plan)}, target={plan.UsePlan.Target.Kind}, " +
+                    $"squares={FormatTargetSquares(plan)}.");
                 return AiCardExecutionResult.Success(recommendation, plan.CardData.DataSO);
             }
             catch (Exception ex)
@@ -218,6 +221,28 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 : null;
 
             return cardData != null ? cardData.DataSO : null;
+        }
+
+        private static string FormatTargetSquares(AiCardTargetPlan plan)
+        {
+            if (plan == null || plan.UsePlan == null || plan.UsePlan.Target == null)
+                return "none";
+
+            if (plan.UsePlan.Target.Squares.Count == 0)
+                return "none";
+
+            var labels = new string[plan.UsePlan.Target.Squares.Count];
+            for (int i = 0; i < labels.Length; i++)
+                labels[i] = plan.UsePlan.Target.Squares[i].ToString();
+
+            return string.Join(",", labels);
+        }
+
+        private static string FormatCaster(AiCardTargetPlan plan)
+        {
+            return plan != null && plan.Args != null
+                ? plan.Args.ResolveCasterColor().ToString()
+                : "unknown";
         }
     }
 }

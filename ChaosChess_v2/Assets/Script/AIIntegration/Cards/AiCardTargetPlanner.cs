@@ -556,6 +556,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             switch (usePlan.Target.Kind)
             {
                 case CardTargetKind.None:
+                    args = CreateUnityArgs(usePlan);
                     return true;
 
                 case CardTargetKind.PieceAtSquare:
@@ -563,11 +564,9 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                         return false;
 
                     var pieces = new List<global::Piece> { piece };
-                    args = new global::CardEffectArgs
-                    {
-                        Targets = pieces,
-                        LimitTurn = cardData.DataSO.PieceLimitTurn
-                    };
+                    args = CreateUnityArgs(usePlan);
+                    args.Targets = pieces;
+                    args.LimitTurn = cardData.DataSO.PieceLimitTurn;
                     targetPieces = pieces;
                     return true;
 
@@ -579,11 +578,9 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                         positions.Add(ToVector3Int(square));
                     }
 
-                    args = new global::CardEffectArgs
-                    {
-                        TargetPos = positions,
-                        LimitTurn = cardData.DataSO.MaintainTurn
-                    };
+                    args = CreateUnityArgs(usePlan);
+                    args.TargetPos = positions;
+                    args.LimitTurn = cardData.DataSO.MaintainTurn;
                     targetPositions = positions;
                     return true;
 
@@ -591,6 +588,15 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     reason = $"Unsupported CardUsePlan target kind '{usePlan.Target.Kind}'.";
                     return false;
             }
+        }
+
+        private static global::CardEffectArgs CreateUnityArgs(CardUsePlan usePlan)
+        {
+            return new global::CardEffectArgs
+            {
+                HasCasterColor = true,
+                CasterColor = ToUnityColor(usePlan.Actor)
+            };
         }
 
         private bool CanSelectPiece(
@@ -735,6 +741,13 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             return color == global::PieceColor.White
                 ? AiPieceColor.White
                 : AiPieceColor.Black;
+        }
+
+        private static global::PieceColor ToUnityColor(AiPieceColor color)
+        {
+            return color == AiPieceColor.White
+                ? global::PieceColor.White
+                : global::PieceColor.Black;
         }
 
         private static AiPieceKind ToAiPieceKind(global::PieceType type)

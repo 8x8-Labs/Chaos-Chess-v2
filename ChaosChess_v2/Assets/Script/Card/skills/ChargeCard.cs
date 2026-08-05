@@ -11,9 +11,11 @@ public class ChargeCard : CardData, ICard
     {
         BoardManager bm = BoardManager.Instance;
 
-        PieceColor myColor = GameManager.Instance.PlayerColor;
-        int advanceDir = 1;
-        int promotionRow = 7;
+        PieceColor myColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        int advanceDir = myColor == PieceColor.White ? 1 : -1;
+        int promotionRow = myColor == PieceColor.White ? 7 : 0;
 
         List<Piece> myPawns = bm.GetAllPieces()
             .FindAll(p => p.Color == myColor && p.Type == PieceType.Pawn);
