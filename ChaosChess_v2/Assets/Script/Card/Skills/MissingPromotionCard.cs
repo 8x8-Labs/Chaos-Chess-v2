@@ -29,8 +29,9 @@ public class MissingPromotionCard : CardData, IPieceCard
 
         // 교체 시 대상 기물이 파괴되므로 연출 위치를 먼저 확보합니다.
         Vector3 worldPos = p.transform.position;
+        PieceColor targetColor = p.Color;
 
-        BoardManager.Instance.ChangePiece(p.Pos, GameManager.Instance.EnemyColor, 'p');
+        BoardManager.Instance.ChangePiece(p.Pos, targetColor, 'p');
 
         if (effectPrefab != null)
             Instantiate(effectPrefab, worldPos, Quaternion.identity);
