@@ -20,7 +20,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: sneak_pawn
   AiCategory: 30
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

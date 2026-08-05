@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 3
   AiCardId: missing_promotion
   AiCategory: 60
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 910
   PieceTargetColor: 1
   PieceLimitTurn: -1

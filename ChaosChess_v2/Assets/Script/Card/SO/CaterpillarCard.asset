@@ -21,7 +21,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: caterpillar
   AiCategory: 30
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
     LoopVFXPrefab: {fileID: 0}

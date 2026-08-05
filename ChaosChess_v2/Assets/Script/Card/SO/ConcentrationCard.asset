@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 4
   AiCardId: concentration
   AiCategory: 30
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 8545361461715977270, guid: 592a55fb849f80e46bbe594e5208952d, type: 3}
