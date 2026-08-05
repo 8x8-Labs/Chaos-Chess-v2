@@ -20,6 +20,9 @@ MonoBehaviour:
     \uC5F4\uB85C\uB294 \uC774\uB3D9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4.</color>"
   Type: 0
   CardTier: 1
+  AiCardId: teleport
+  AiCategory: 30
+  AiSupported: 0
   PieceType: 1
   PieceTargetColor: 0
   PieceLimitTurn: 0

@@ -18,6 +18,9 @@ MonoBehaviour:
     \uC989\uC2DC \uC2B9\uACA9</color>\uC2DC\uD0B5\uB2C8\uB2E4."
   Type: 0
   CardTier: 3
+  AiCardId: gods_move
+  AiCategory: 30
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
     LoopVFXPrefab: {fileID: 0}

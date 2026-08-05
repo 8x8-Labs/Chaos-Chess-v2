@@ -19,6 +19,9 @@ MonoBehaviour:
     (\uC774\uBC88 \uD134, 1\uD68C)"
   Type: 0
   CardTier: 1
+  AiCardId: sunset_blade
+  AiCategory: 10
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 1829248232839885067, guid: f182c186f5aa2724fb7dfd64323feca9, type: 3}

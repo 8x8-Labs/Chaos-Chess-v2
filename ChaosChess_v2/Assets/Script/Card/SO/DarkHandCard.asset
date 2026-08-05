@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uC0C1\uB300 \uAE30\uBB3C 1\uAE30\uB97C \uC120\uD0DD\uD574 <color=#FFD700>2\uD134</color>\uAC04 <color=#4499FF>\uD589\uB3D9\uC744 \uBD09\uC1C4\uD569\uB2C8\uB2E4</color>. (\uD0B9\u00B7\uD038\u00B7\uD2B9\uC218 \uAE30\uBB3C \uC81C\uC678)"
   Type: 0
   CardTier: 1
+  AiCardId: dark_hand
+  AiCategory: 10
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 1553041093156533887, guid: 95be09e108fa49e4dae946e73250cfa0, type: 3}

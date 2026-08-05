@@ -19,6 +19,9 @@ MonoBehaviour:
     \uCE78\uC73C\uB85C \uB04C\uC5B4\uC635\uB2C8\uB2E4</color>."
   Type: 1
   CardTier: 1
+  AiCardId: magnet
+  AiCategory: 70
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

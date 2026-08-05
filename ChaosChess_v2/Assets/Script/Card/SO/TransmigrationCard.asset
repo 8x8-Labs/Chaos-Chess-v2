@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uD504\uB85C\uBAA8\uC158\uD55C \uC0C1\uB300 \uD3F0\uC744 <color=#4499FF>\uC6D0\uB798 \uC704\uCE58\uC758 \uD3F0\uC73C\uB85C \uB418\uB3CC\uB9BD\uB2C8\uB2E4</color>. \uC6D0\uB798 \uC704\uCE58\uC5D0 \uC788\uB358 \uAE30\uBB3C\uC740 \uC9C4\uC601\uACFC \uAD00\uACC4\uC5C6\uC774 <color=#FF4444>\uD30C\uAD34\uB429\uB2C8\uB2E4</color>."
   Type: 0
   CardTier: 1
+  AiCardId: transmigration
+  AiCategory: 60
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 634362111415927516, guid: 8dded743c90c9864790036b985db272b, type: 3}
     LoopVFXPrefab: {fileID: 0}

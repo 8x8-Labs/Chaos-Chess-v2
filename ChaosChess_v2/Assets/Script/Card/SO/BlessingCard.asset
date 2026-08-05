@@ -18,6 +18,9 @@ MonoBehaviour:
     \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 2
+  AiCardId: blessing
+  AiCategory: 60
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

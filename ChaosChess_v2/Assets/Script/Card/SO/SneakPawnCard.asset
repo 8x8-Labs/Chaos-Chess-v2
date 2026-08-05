@@ -18,6 +18,9 @@ MonoBehaviour:
     \uD589\uB9C8\uBC95</color>\uC73C\uB85C \uC774\uB3D9\uD569\uB2C8\uB2E4. (1\uD68C)"
   Type: 0
   CardTier: 2
+  AiCardId: sneak_pawn
+  AiCategory: 30
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

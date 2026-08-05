@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 <color=#FFD700>5\uD134</color>\uAC04 \uC0C1\uD638\uC791\uC6A9 <color=#FF4444>\uBD88\uAC00</color> \uC0C1\uD0DC\uAC00 \uB41C \uB4A4, <color=#4499FF>\uC544\uB9C8\uC874</color>\uC73C\uB85C \uC2B9\uACA9\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 4
+  AiCardId: concentration
+  AiCategory: 30
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 8545361461715977270, guid: 592a55fb849f80e46bbe594e5208952d, type: 3}

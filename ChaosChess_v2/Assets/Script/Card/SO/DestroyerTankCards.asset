@@ -19,6 +19,9 @@ MonoBehaviour:
     \uC218 \uC788\uC2B5\uB2C8\uB2E4. \uCD5C\uB300 <color=#FFD700>3\uD68C</color>."
   Type: 2
   CardTier: 3
+  AiCardId: destroyer_tank_cards
+  AiCategory: 10
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

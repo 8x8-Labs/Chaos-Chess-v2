@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uCE74\uB4DC \uC0AC\uC6A9 \uD6C4 <color=#FFD700>4\uD134</color> \uB0B4\uC5D0 \uCCB4\uD06C\uB97C <color=#FF4444>\uB2F9\uD558\uBA74</color>, \uC0C1\uB300 \uAE30\uBB3C <color=#4499FF>5\uAC1C\uAC00 \uC989\uC2DC \uD30C\uAD34\uB429\uB2C8\uB2E4</color>. (\uD0B9\u00B7\uD038 \uC81C\uC678)"
   Type: 2
   CardTier: 3
+  AiCardId: checkmate_declaration
+  AiCategory: 10
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 7371921296451474271, guid: dc894ccbf46c4a84eae80200f83ba7a1, type: 3}
     LoopVFXPrefab: {fileID: 0}
