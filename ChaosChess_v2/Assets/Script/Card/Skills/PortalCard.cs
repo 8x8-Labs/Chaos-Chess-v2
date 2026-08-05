@@ -34,7 +34,9 @@ public class PortalSkill : CardData, ITileCard
         portalA.SharedUses = sharedUses;
         portalB.SharedUses = sharedUses;
 
-        PieceColor casterColor = GameManager.Instance.PlayerColor;
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
         portalA.CasterColor = casterColor;
         portalB.CasterColor = casterColor;
 
