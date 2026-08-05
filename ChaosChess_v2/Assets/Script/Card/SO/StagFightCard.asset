@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "<color=#FFD700>3\uD134</color>\uAC04 \uBAA8\uB4E0 \uAE30\uBB3C\uC774 <color=#4499FF>\uC804\uC9C4 \uBC29\uD5A5\uC73C\uB85C\uB9CC</color> \uC774\uB3D9\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4. (\uD0B9\u00B7\uD2B9\uC218 \uAE30\uBB3C \uC81C\uC678)"
   Type: 2
   CardTier: 2
+  AiCardId: stag_fight
+  AiCategory: 10
+  AiSupported: 0
   PieceType: 1
   PieceTargetColor: 0
   PieceLimitTurn: 1

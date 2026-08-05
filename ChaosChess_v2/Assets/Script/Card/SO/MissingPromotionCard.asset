@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C \uC0C1\uB300 \uAE30\uBB3C 1\uAE30\uB97C <color=#4499FF>\uD3F0\uC73C\uB85C \uAC15\uB4F1</color>\uC2DC\uD0B5\uB2C8\uB2E4. (\uD3F0\u00B7\uD0B9\u00B7\uD038\u00B7\uBCBD \uC81C\uC678)"
   Type: 0
   CardTier: 3
+  AiCardId: missing_promotion
+  AiCategory: 60
+  AiSupported: 1
   PieceType: 910
   PieceTargetColor: 1
   PieceLimitTurn: -1

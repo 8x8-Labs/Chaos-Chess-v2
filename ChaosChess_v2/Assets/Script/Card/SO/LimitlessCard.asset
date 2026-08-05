@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C \uC8FC\uC704\uC5D0 <color=#4499FF>\uBD09\uC778 \uAD6C\uC5ED</color>\uC744 \uC124\uC815\uD569\uB2C8\uB2E4. (\uD0B9 \uC81C\uC678)"
   Type: 0
   CardTier: 1
+  AiCardId: limitless
+  AiCategory: 30
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 7222266805189775858, guid: 69cd5d9d559a877489955ee8d6cd044c, type: 3}

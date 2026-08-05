@@ -18,6 +18,9 @@ MonoBehaviour:
     \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 0
+  AiCardId: jumping_platform
+  AiCategory: 40
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

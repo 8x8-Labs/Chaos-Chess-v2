@@ -19,6 +19,9 @@ MonoBehaviour:
     (1\uD68C)"
   Type: 0
   CardTier: 0
+  AiCardId: aim
+  AiCategory: 30
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 7011019645965184736, guid: d2e4c4a464dcab74e99051b1653ff2d6, type: 3}

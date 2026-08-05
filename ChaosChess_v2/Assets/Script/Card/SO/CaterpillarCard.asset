@@ -19,6 +19,9 @@ MonoBehaviour:
     \uC774\uB3D9\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 2
+  AiCardId: caterpillar
+  AiCategory: 30
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 8544141603478011384, guid: 81c20428003954b49b15c0757591e642, type: 3}
     LoopVFXPrefab: {fileID: 0}

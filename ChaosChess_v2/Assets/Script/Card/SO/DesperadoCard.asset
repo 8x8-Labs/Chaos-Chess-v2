@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 \uC774\uBC88 \uD134\uC5D0 <color=#4499FF>2\uBC88 \uC5F0\uC18D \uD589\uB3D9</color>\uD569\uB2C8\uB2E4. \uB2E8, \uD589\uB3D9 \uD6C4 <color=#FF4444>\uC989\uC2DC \uD30C\uAD34\uB429\uB2C8\uB2E4</color>. (\uD0B9\u00B7\uBCBD \uC81C\uC678)"
   Type: 0
   CardTier: 4
+  AiCardId: desperado
+  AiCategory: 10
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 5896058207512719259, guid: a5e1a5442486f6b48b84fc89557b5bf9, type: 3}

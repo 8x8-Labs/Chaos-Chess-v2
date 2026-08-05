@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uC0C1\uB300\uC758 \uD3F0 \uC218\uAC00 \uB2E4\uB978 \uAE30\uBB3C \uC218\uC758 <color=#FFD700>2\uBC30 \uC774\uC0C1</color>\uC774 \uB418\uBA74, <color=#4499FF>\uC0C1\uB300\uBC29\uC774 \uAC15\uC81C\uB85C \uD56D\uBCF5\uD569\uB2C8\uB2E4</color>."
   Type: 2
   CardTier: 3
+  AiCardId: democracy
+  AiCategory: 10
+  AiSupported: 0
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0

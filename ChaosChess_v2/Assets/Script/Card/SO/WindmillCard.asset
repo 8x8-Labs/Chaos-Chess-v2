@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "<color=#FFD700>2\uD134</color>\uAC04 \uC544\uAD70\uC758 \uB8E9\uC740 \uBE44\uC20D\uCC98\uB7FC, \uBE44\uC20D\uC740 \uB8E9\uCC98\uB7FC \uC774\uB3D9\uD569\uB2C8\uB2E4. (<color=#4499FF>\uD589\uB9C8\uBC95 \uAD50\uD658</color>)"
   Type: 2
   CardTier: 2
+  AiCardId: windmill
+  AiCategory: 30
+  AiSupported: 0
   PieceType: 12
   PieceTargetColor: 0
   PieceLimitTurn: 2

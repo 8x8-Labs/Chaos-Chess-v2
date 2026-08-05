@@ -18,6 +18,9 @@ MonoBehaviour:
     \uBD80\uC5EC\uD569\uB2C8\uB2E4."
   Type: 0
   CardTier: 2
+  AiCardId: giant
+  AiCategory: 60
+  AiSupported: 0
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

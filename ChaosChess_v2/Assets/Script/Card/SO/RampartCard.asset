@@ -17,6 +17,9 @@ MonoBehaviour:
   CardDescription: "\uC120\uD0DD\uD55C <color=#FFD700>2\uCE78</color>\uC5D0 <color=#4499FF>\uBCBD</color>\uC744 \uC124\uCE58\uD569\uB2C8\uB2E4."
   Type: 1
   CardTier: 0
+  AiCardId: rampart
+  AiCategory: 50
+  AiSupported: 0
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0
