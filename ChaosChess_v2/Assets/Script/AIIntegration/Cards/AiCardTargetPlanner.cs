@@ -210,6 +210,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     boardManager,
                     actor,
                     usePlan,
+                    definition,
                     out failureStatus,
                     out reason))
             {
@@ -353,6 +354,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             global::BoardManager boardManager,
             AiPieceColor actor,
             CardUsePlan usePlan,
+            CardPlanningDefinition definition,
             out AiCardExecutionStatus failureStatus,
             out string reason)
         {
@@ -369,7 +371,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                         return false;
 
                     global::IPieceTargetFilter targetFilter = cardData.GetComponent<global::IPieceTargetFilter>();
-                    if (!CanSelectPiece(piece, cardData.DataSO, targetFilter, actor))
+                    if (!CanSelectPiece(piece, cardData.DataSO, targetFilter, actor, definition))
                     {
                         reason = $"CardUsePlan piece target {usePlan.Target.Piece.Square} is not selectable by Unity card constraints.";
                         return false;
@@ -440,7 +442,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 global::IPieceTargetFilter targetFilter = cardData.GetComponent<global::IPieceTargetFilter>();
                 foreach (global::Piece piece in boardManager.GetAllPieces())
                 {
-                    if (!CanSelectPiece(piece, dataSO, targetFilter, actor))
+                    if (!CanSelectPiece(piece, dataSO, targetFilter, actor, definition))
                         continue;
 
                     if (HasActivePieceEffector(piece))
@@ -603,7 +605,8 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             global::Piece piece,
             global::CardDataSO dataSO,
             global::IPieceTargetFilter targetFilter,
-            AiPieceColor actor)
+            AiPieceColor actor,
+            CardPlanningDefinition definition)
         {
             if (piece == null || dataSO == null)
                 return false;
@@ -611,10 +614,46 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             if ((piece.Type & dataSO.PieceType) == 0)
                 return false;
 
-            if (ToAiColor(piece.Color) != actor)
+            if (!MatchesTargetOwnerRelation(piece, actor, definition))
                 return false;
 
             return targetFilter == null || targetFilter.CanSelectPiece(piece);
+        }
+
+        private static bool MatchesTargetOwnerRelation(
+            global::Piece piece,
+            AiPieceColor actor,
+            CardPlanningDefinition definition)
+        {
+            AiPieceColor targetColor = ToAiColor(piece.Color);
+            string relation = GetRequiredTargetOwnerRelation(definition);
+
+            switch (relation)
+            {
+                case "Self":
+                    return targetColor == actor;
+                case "Opponent":
+                    return targetColor != actor;
+                case "Any":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static string GetRequiredTargetOwnerRelation(CardPlanningDefinition definition)
+        {
+            if (definition == null)
+                return "Self";
+
+            System.Reflection.PropertyInfo property = definition
+                .GetType()
+                .GetProperty(
+                    "RequiredTargetOwnerRelation",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+
+            object value = property != null ? property.GetValue(definition, null) : null;
+            return value != null ? value.ToString() : "Self";
         }
 
         private bool HasActivePieceEffector(global::Piece piece)
