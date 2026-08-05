@@ -121,6 +121,66 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     failedCardSO);
             }
 
+            return ExecuteUnityPlan(plan, aiCardHand, boardManager, recommendation);
+        }
+
+        public AiCardExecutionResult ExecutePlan(
+            CardUsePlan usePlan,
+            AiCardHand aiCardHand,
+            global::BoardManager boardManager,
+            GameState gameState,
+            AiPieceColor actor)
+        {
+            if (usePlan == null)
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.NoRecommendation,
+                    "CardUsePlan is null.");
+            }
+
+            if (aiCardHand == null)
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardNotInHand,
+                    "AI card hand is null.");
+            }
+
+            if (!aiCardHand.TryFindByAiCardId(usePlan.CardId, out GameObject cardObject))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardNotInHand,
+                    $"AI hand does not contain card id '{usePlan.CardId}'.");
+            }
+
+            if (!targetPlanner.TryCreatePlan(
+                    usePlan,
+                    cardObject,
+                    boardManager,
+                    gameState,
+                    actor,
+                    out AiCardTargetPlan plan,
+                    out AiCardExecutionStatus failureStatus,
+                    out string reason))
+            {
+                global::CardDataSO failedCardSO = cardObject != null
+                    ? GetCardDataSO(cardObject)
+                    : null;
+                return AiCardExecutionResult.Failure(
+                    failureStatus,
+                    reason,
+                    recommendation: null,
+                    cardSO: failedCardSO);
+            }
+
+            return ExecuteUnityPlan(plan, aiCardHand, boardManager, recommendation: null);
+        }
+
+        private static AiCardExecutionResult ExecuteUnityPlan(
+            AiCardTargetPlan plan,
+            AiCardHand aiCardHand,
+            global::BoardManager boardManager,
+            CardUseRecommendation recommendation)
+        {
             global::ICard cardExecutor = plan.CardData.GetComponent<global::ICard>();
             if (cardExecutor == null)
             {
@@ -137,7 +197,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 aiCardHand.Consume(plan.CardData.DataSO);
                 boardManager?.RefreshMoves();
 
-                Debug.Log($"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({recommendation.Card.Id}) with {plan.UsePlan.Target.Kind} target.");
+                Debug.Log($"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}) with {plan.UsePlan.Target.Kind} target.");
                 return AiCardExecutionResult.Success(recommendation, plan.CardData.DataSO);
             }
             catch (Exception ex)
