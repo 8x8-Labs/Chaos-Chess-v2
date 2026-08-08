@@ -19,7 +19,11 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
         [Header("AI 분석")]
         [SerializeField] private int analysisDepth = 12;
         [SerializeField] private int variationCount = 3;
-        [SerializeField] private int minimumCardScoreGain = 1;
+        [SerializeField] private int cardCandidateCount = AiCardHand.MaxCards;
+        [SerializeField] private int targetCandidateCount = 32;
+        [SerializeField] private int maximumEngineCallCount = 64;
+        [SerializeField] private bool allowCoarseCardEffects = true;
+        [SerializeField] private int cardUseScoreTolerance = 25;
 
         [Header("카테고리 점수")]
         [SerializeField] private int tacticalScore = 10;
@@ -35,6 +39,31 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
         private int requestSequence;
         private int activeRequestId;
         private bool isRequestRunning;
+        private string queuedForcedCardId;
+
+        public bool HasQueuedForcedCard => !string.IsNullOrWhiteSpace(queuedForcedCardId);
+        public string QueuedForcedCardId => queuedForcedCardId;
+
+        public void QueueForcedCardForNextAiTurn(string cardId)
+        {
+            if (string.IsNullOrWhiteSpace(cardId))
+            {
+                Debug.LogWarning("[AI Turn] Ignored empty forced card request.");
+                return;
+            }
+
+            queuedForcedCardId = cardId;
+            Debug.Log($"[AI Turn] Queued forced AI card '{queuedForcedCardId}' for the next AI turn.");
+        }
+
+        public void ClearQueuedForcedCard()
+        {
+            if (string.IsNullOrWhiteSpace(queuedForcedCardId))
+                return;
+
+            Debug.Log($"[AI Turn] Cleared queued forced AI card '{queuedForcedCardId}'.");
+            queuedForcedCardId = null;
+        }
 
         public bool TryRequestTurn(
             global::GameManager gameManager,
@@ -83,6 +112,23 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 Debug.LogWarning($"[AI Turn] {warning}");
 
             var perspective = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
+
+            if (!string.IsNullOrWhiteSpace(queuedForcedCardId))
+            {
+                string forcedCardId = queuedForcedCardId;
+                queuedForcedCardId = null;
+
+                ExecuteForcedCardAndReanalyze(
+                    requestId,
+                    gameManager,
+                    boardManager,
+                    hand,
+                    forcedCardId,
+                    mapping.GameState,
+                    perspective,
+                    fallbackMoveRequest);
+                return true;
+            }
 
             FairyStockfishBridge.Instance.AnalyzePositionAsync(
                 mapping.Fen,
@@ -165,7 +211,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             TurnPlannerResult result = planner.PlanTurn(mapping.GameState);
             LogTurnPlannerTrace(result);
 
-            TurnPlan selectedPlan = result.SelectedPlan;
+            TurnPlan selectedPlan = SelectCardBiasedPlan(result);
             if (selectedPlan == null)
             {
                 CompleteAndRequestFallback(
@@ -296,6 +342,101 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 });
         }
 
+        private void ExecuteForcedCardAndReanalyze(
+            int requestId,
+            global::GameManager gameManager,
+            global::BoardManager boardManager,
+            AiCardHand hand,
+            string forcedCardId,
+            ChaosChess.AI.Domain.GameState planningGameState,
+            ChaosChess.AI.Domain.PieceColor actor,
+            Action fallbackMoveRequest)
+        {
+            Debug.Log($"[AI Turn] Executing queued forced card '{forcedCardId}'.");
+            AiCardExecutionResult execution = cardExecutor.ExecuteCardId(
+                forcedCardId,
+                hand,
+                boardManager,
+                planningGameState,
+                actor);
+
+            if (!execution.Executed)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"Queued forced card '{forcedCardId}' failed: {execution.Status} - {execution.Reason}");
+                return;
+            }
+
+            if (gameManager.FinishType != global::GameResult.None || gameManager.IsEndGame)
+            {
+                gameManager.ReevaluateGameState();
+                CompleteRequest(requestId);
+                return;
+            }
+
+            UnityGameStateMappingResult actualMapping;
+            try
+            {
+                actualMapping = UnityGameStateMapper.Capture(boardManager, hand);
+            }
+            catch (Exception ex)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"Post-forced-card actual state recapture failed: {ex.Message}");
+                return;
+            }
+
+            foreach (string warning in actualMapping.Warnings)
+                Debug.LogWarning($"[AI Turn] Post-forced-card recapture: {warning}");
+
+            Debug.Log($"[AI Turn] Queued forced card applied. Reanalyzing FEN: {actualMapping.Fen}");
+
+            var perspective = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
+            FairyStockfishBridge.Instance.AnalyzePositionAsync(
+                actualMapping.Fen,
+                analysisDepth,
+                variationCount,
+                perspective,
+                onComplete: (_, postCardSnapshot) =>
+                {
+                    if (!IsActiveRequest(requestId))
+                        return;
+
+                    try
+                    {
+                        HandlePostCardAnalysisComplete(
+                            requestId,
+                            gameManager,
+                            boardManager,
+                            actualMapping,
+                            originalPlan: null,
+                            postCardSnapshot,
+                            fallbackMoveRequest);
+                    }
+                    catch (Exception ex)
+                    {
+                        CompleteAndRequestFallback(
+                            requestId,
+                            fallbackMoveRequest,
+                            $"Post-forced-card move planning failed: {ex.Message}");
+                    }
+                },
+                onError: (_, error) =>
+                {
+                    if (!IsActiveRequest(requestId))
+                        return;
+
+                    CompleteAndRequestFallback(
+                        requestId,
+                        fallbackMoveRequest,
+                        $"Post-forced-card analysis failed: {error}");
+                });
+        }
+
         private void HandlePostCardAnalysisComplete(
             int requestId,
             global::GameManager gameManager,
@@ -348,7 +489,8 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             }
 
             MoveRecommendation recommendation = moveResult.Recommendations[0];
-            if (originalPlan.MovePlan != null &&
+            if (originalPlan != null &&
+                originalPlan.MovePlan != null &&
                 !string.Equals(originalPlan.MovePlan.UciMove, recommendation.Candidate.UciMove, StringComparison.OrdinalIgnoreCase))
             {
                 Debug.LogWarning(
@@ -376,9 +518,13 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             var moveFilter = new MoveFilter(snapshotEngine);
             var options = new TurnPlannerOptions(
                 noCardMoveCandidateCount: variationCount,
+                cardCandidateCount: Mathf.Clamp(cardCandidateCount, 1, AiCardHand.MaxCards),
+                targetCandidateCount: Mathf.Max(1, targetCandidateCount),
                 postCardMoveCandidateCount: variationCount,
                 opponentReplyCandidateCount: 0,
-                beamWidth: Mathf.Max(1, variationCount));
+                beamWidth: Mathf.Max(1, variationCount),
+                maximumEngineCallCount: Mathf.Max(1, maximumEngineCallCount),
+                allowCoarseCardEffects: allowCoarseCardEffects);
 
             return new UnifiedTurnPlanner(
                 moveFilter,
@@ -474,6 +620,40 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 $"rootMoves={trace.RootNoCardMoveCandidateCount}, consideredCards={trace.ConsideredCardCandidateCount}, " +
                 $"postCardMoves={trace.PostCardMoveCandidateCount}, engineCalls={trace.EngineCallCount}/{trace.MaximumEngineCallCount}, " +
                 $"beamPruned={trace.BeamPrunedCandidateCount}.");
+        }
+
+        private TurnPlan SelectCardBiasedPlan(TurnPlannerResult result)
+        {
+            if (result == null || !result.HasPlan)
+                return null;
+
+            TurnPlan selectedPlan = result.SelectedPlan;
+            if (selectedPlan == null || selectedPlan.UsesCard)
+                return selectedPlan;
+
+            TurnPlan bestCardPlan = null;
+            foreach (TurnPlanCandidate candidate in result.Candidates)
+            {
+                if (candidate == null || !candidate.HasPlan || candidate.Plan == null || !candidate.Plan.UsesCard)
+                    continue;
+
+                if (bestCardPlan == null || candidate.Plan.Score.Total > bestCardPlan.Score.Total)
+                    bestCardPlan = candidate.Plan;
+            }
+
+            if (bestCardPlan == null)
+                return selectedPlan;
+
+            int tolerance = Mathf.Max(0, cardUseScoreTolerance);
+            int scoreGap = selectedPlan.Score.Total - bestCardPlan.Score.Total;
+            if (scoreGap > tolerance)
+                return selectedPlan;
+
+            Debug.Log(
+                $"[AI Turn] Card-biased selection chose card plan within tolerance. " +
+                $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
+                $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
+            return bestCardPlan;
         }
 
         private AiCardHand ResolveCardHand()
