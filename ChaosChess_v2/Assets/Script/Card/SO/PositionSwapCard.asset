@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 4
   AiCardId: position_swap
   AiCategory: 30
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0

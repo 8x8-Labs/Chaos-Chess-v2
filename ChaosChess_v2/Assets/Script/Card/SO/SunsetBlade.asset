@@ -21,7 +21,7 @@ MonoBehaviour:
   CardTier: 1
   AiCardId: sunset_blade
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 1829248232839885067, guid: f182c186f5aa2724fb7dfd64323feca9, type: 3}

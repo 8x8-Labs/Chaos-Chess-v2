@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: windmill
   AiCategory: 30
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 12
   PieceTargetColor: 0
   PieceLimitTurn: 2

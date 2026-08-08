@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: father_enemy
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 3632289893917741781, guid: b3c5227938a28d34893ec6747b5a6bd2, type: 3}

@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 3
   AiCardId: democracy
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0

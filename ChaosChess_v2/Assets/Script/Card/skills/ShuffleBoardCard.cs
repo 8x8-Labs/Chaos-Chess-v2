@@ -16,12 +16,14 @@ public class ShuffleBoardCard : CardData, ICard
     {
         BoardManager bm = BoardManager.Instance;
 
-        PieceColor myColor = GameManager.Instance.PlayerColor;
-        PieceColor oppColor = GameManager.Instance.EnemyColor;
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        PieceColor targetColor = casterColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
 
         // 킹, 퀸을 제외한 상대 기물
         List<Piece> targets = bm.GetAllPieces()
-            .FindAll(p => p.Color == oppColor
+            .FindAll(p => p.Color == targetColor
                        && p.Type != PieceType.King
                        && p.Type != PieceType.Queen);
 

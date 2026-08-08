@@ -23,7 +23,7 @@ MonoBehaviour:
   CardTier: 0
   AiCardId: honey_trap
   AiCategory: 70
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 4667662071279711980, guid: de271241761645a4d832cdc937c89b50, type: 3}
     LoopVFXPrefab: {fileID: 0}

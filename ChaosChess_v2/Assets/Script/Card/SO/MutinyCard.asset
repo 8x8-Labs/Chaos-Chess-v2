@@ -21,7 +21,7 @@ MonoBehaviour:
   CardTier: 3
   AiCardId: mutiny
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 6242310121824835256, guid: bd5f209753e9ddc498bd04d16a26c24a, type: 3}

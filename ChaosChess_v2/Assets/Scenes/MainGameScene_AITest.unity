@@ -23963,6 +23963,58 @@ MonoBehaviour:
   - {fileID: 7277216013543518613, guid: e0c217151b18b46438129d9b4a8a45ee, type: 3}
   - {fileID: 540433377832424254, guid: dfd2eb2d9c92d1441bcc7831375fc9c9, type: 3}
   defaultRemainingUses: 1
+  useEditorConfiguredStartingCards: 1
+  editorStartingCardPrefabPaths:
+  - Assets/Prefab/Skill/AgileCard.prefab
+  - Assets/Prefab/Skill/AimCard.prefab
+  - Assets/Prefab/Skill/ArenaCard.prefab
+  - Assets/Prefab/Skill/ATMineCard.prefab
+  - Assets/Prefab/Skill/BlessingCard.prefab
+  - Assets/Prefab/Skill/CastleKnightCard.prefab
+  - Assets/Prefab/Skill/CaterpillarCard.prefab
+  - Assets/Prefab/Skill/ChaoticKnightCard.prefab
+  - Assets/Prefab/Skill/ChargeCard.prefab
+  - Assets/Prefab/Skill/CheckmateDeclarationCard.prefab
+  - Assets/Prefab/Skill/CobwebCard.prefab
+  - Assets/Prefab/Skill/ConcentrationCard.prefab
+  - Assets/Prefab/Skill/DarkHandCard.prefab
+  - Assets/Prefab/Skill/DemocracyCard.prefab
+  - Assets/Prefab/Skill/DesperadoCard.prefab
+  - Assets/Prefab/Skill/DestroyerTankCards.prefab
+  - Assets/Prefab/Skill/DimensionDisturbanceCard.prefab
+  - Assets/Prefab/Skill/DimensionInstabilityCard.prefab
+  - Assets/Prefab/Skill/FastMarchCard.prefab
+  - Assets/Prefab/Skill/FatherEnemyCard.prefab
+  - Assets/Prefab/Skill/FireCard.prefab
+  - Assets/Prefab/Skill/GaslightingCard.prefab
+  - Assets/Prefab/Skill/GiantCard.prefab
+  - Assets/Prefab/Skill/GodsMoveCard.prefab
+  - Assets/Prefab/Skill/HoneytrapCard.prefab
+  - Assets/Prefab/Skill/JumpingPlatformCard.prefab
+  - Assets/Prefab/Skill/LimitlessCard.prefab
+  - Assets/Prefab/Skill/MagnetCard.prefab
+  - Assets/Prefab/Skill/MissingPromotionCard.prefab
+  - Assets/Prefab/Skill/MutinyCard.prefab
+  - Assets/Prefab/Skill/ObeyOrderCard.prefab
+  - Assets/Prefab/Skill/OverbearingCard.prefab
+  - Assets/Prefab/Skill/PeaceZoneCard.prefab
+  - Assets/Prefab/Skill/PortalSkill.prefab
+  - Assets/Prefab/Skill/PositionSwapCard.prefab
+  - Assets/Prefab/Skill/PsilocybinMushroomCard.prefab
+  - Assets/Prefab/Skill/RampartCard.prefab
+  - Assets/Prefab/Skill/ReviveCard.prefab
+  - Assets/Prefab/Skill/ShuffleBoardCard.prefab
+  - Assets/Prefab/Skill/SneakPawnCard.prefab
+  - Assets/Prefab/Skill/StagFightCard.prefab
+  - Assets/Prefab/Skill/SunsetBladeCard.prefab
+  - Assets/Prefab/Skill/SyncCard.prefab
+  - Assets/Prefab/Skill/TeleportCard.prefab
+  - Assets/Prefab/Skill/ThunderclapFlashCard.prefab
+  - Assets/Prefab/Skill/TimeBombCard.prefab
+  - Assets/Prefab/Skill/TimeReversalCard.prefab
+  - Assets/Prefab/Skill/TransmigrationCard.prefab
+  - Assets/Prefab/Skill/WeirdCastling.prefab
+  - Assets/Prefab/Skill/WindmillCard.prefab
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

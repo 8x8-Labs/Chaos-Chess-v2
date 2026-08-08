@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 1
   AiCardId: overbearing
   AiCategory: 40
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 12
   PieceTargetColor: 0
   PieceLimitTurn: 2

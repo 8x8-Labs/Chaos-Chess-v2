@@ -21,7 +21,7 @@ MonoBehaviour:
   CardTier: 1
   AiCardId: magnet
   AiCategory: 70
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

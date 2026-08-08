@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 1
   AiCardId: chaotic_knight
   AiCategory: 70
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 2
   PieceTargetColor: 0
   PieceLimitTurn: -1

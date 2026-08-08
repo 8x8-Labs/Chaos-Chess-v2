@@ -21,7 +21,7 @@ MonoBehaviour:
   CardTier: 3
   AiCardId: destroyer_tank_cards
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: weird_castling
   AiCategory: 30
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 1007
   PieceTargetColor: 0
   PieceLimitTurn: -1

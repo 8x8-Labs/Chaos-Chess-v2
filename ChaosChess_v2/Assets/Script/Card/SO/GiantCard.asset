@@ -20,7 +20,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: giant
   AiCategory: 60
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

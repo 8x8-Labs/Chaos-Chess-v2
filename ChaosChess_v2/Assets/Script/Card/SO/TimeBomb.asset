@@ -20,7 +20,7 @@ MonoBehaviour:
   CardTier: 3
   AiCardId: time_bomb
   AiCategory: 40
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

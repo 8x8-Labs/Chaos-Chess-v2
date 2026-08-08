@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 3
   AiCardId: checkmate_declaration
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 7371921296451474271, guid: dc894ccbf46c4a84eae80200f83ba7a1, type: 3}
     LoopVFXPrefab: {fileID: 0}

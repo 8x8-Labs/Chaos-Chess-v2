@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 4
   AiCardId: arena
   AiCategory: 70
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 0}

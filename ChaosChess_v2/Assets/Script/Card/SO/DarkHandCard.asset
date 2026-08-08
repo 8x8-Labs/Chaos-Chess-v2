@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 1
   AiCardId: dark_hand
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 1553041093156533887, guid: 95be09e108fa49e4dae946e73250cfa0, type: 3}

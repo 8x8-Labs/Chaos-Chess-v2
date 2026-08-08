@@ -13,9 +13,14 @@ public class ArenaCard : CardData, ICard
     {
         GameManager.Instance.CancelCurrentSelectionForBoardTransition();
 
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        PieceColor targetColor = casterColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+
         // 상대 King 제외 기물 중 랜덤 3개 선택
         List<Piece> opponents = BoardManager.Instance.GetAllPieces()
-            .FindAll(p => p.Color == GameManager.Instance.EnemyColor
+            .FindAll(p => p.Color == targetColor
                        && p.Type != PieceType.King);
 
         // Fisher-Yates shuffle

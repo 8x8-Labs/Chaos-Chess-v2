@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 4
   AiCardId: revive
   AiCategory: 50
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 12
   PieceTargetColor: 0
   PieceLimitTurn: 2
