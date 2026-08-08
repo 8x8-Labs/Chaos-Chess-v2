@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 4
   AiCardId: shuffle_board
   AiCategory: 70
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0

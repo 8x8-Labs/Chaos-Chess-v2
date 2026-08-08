@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: dimension_disturbance
   AiCategory: 70
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 975
   PieceTargetColor: 1
   PieceLimitTurn: -1

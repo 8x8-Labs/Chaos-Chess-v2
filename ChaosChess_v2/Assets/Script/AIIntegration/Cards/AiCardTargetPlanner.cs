@@ -83,6 +83,15 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 return false;
             }
 
+            if (!ValidateUnityCardShape(
+                    cardData,
+                    definition,
+                    out failureStatus,
+                    out reason))
+            {
+                return false;
+            }
+
             if (!TryCreateTargetSelection(
                     cardData,
                     boardManager,
@@ -248,20 +257,13 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             reason = string.Empty;
 
             global::CardDataSO dataSO = cardData.DataSO;
-            switch (dataSO.Type)
+            switch (definition.RequiredTargetKind)
             {
-                case global::CardType.Global:
-                    if (definition.RequiredTargetKind != CardTargetKind.None)
-                    {
-                        failureStatus = AiCardExecutionStatus.UnsupportedCardType;
-                        reason = $"Card '{dataSO.CardName}' is global but requires '{definition.RequiredTargetKind}' target.";
-                        return false;
-                    }
-
+                case CardTargetKind.None:
                     targetSelection = CardTargetSelection.None();
                     return true;
 
-                case global::CardType.Piece:
+                case CardTargetKind.PieceAtSquare:
                     return TryCreatePieceTargetSelection(
                         cardData,
                         boardManager,
@@ -271,7 +273,28 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                         out failureStatus,
                         out reason);
 
-                case global::CardType.Tile:
+                case CardTargetKind.OrderedPieces:
+                    return TryCreateOrderedPieceTargetSelection(
+                        cardData,
+                        boardManager,
+                        actor,
+                        definition,
+                        out targetSelection,
+                        out failureStatus,
+                        out reason);
+
+                case CardTargetKind.PieceAndSquare:
+                    return TryCreatePieceAndSquareTargetSelection(
+                        cardData,
+                        boardManager,
+                        actor,
+                        definition,
+                        out targetSelection,
+                        out failureStatus,
+                        out reason);
+
+                case CardTargetKind.BoardSquare:
+                case CardTargetKind.OrderedSquares:
                     return TryCreateTileTargetSelection(
                         cardData,
                         boardManager,
@@ -310,20 +333,43 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     return true;
 
                 case global::CardType.Piece:
-                    if (definition.RequiredTargetKind != CardTargetKind.PieceAtSquare)
+                    switch (definition.RequiredTargetKind)
                     {
-                        failureStatus = AiCardExecutionStatus.UnsupportedCardType;
-                        reason = $"Card '{dataSO.CardName}' is piece-targeted but requires '{definition.RequiredTargetKind}' target.";
-                        return false;
-                    }
+                        case CardTargetKind.None:
+                            if (Mathf.Max(0, dataSO.RequiredPieceCount) != 0 ||
+                                Mathf.Max(0, dataSO.TileCount) != 0)
+                            {
+                                reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                                return false;
+                            }
 
-                    if (Mathf.Max(0, dataSO.RequiredPieceCount) != definition.RequiredTargetCount)
-                    {
-                        reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
-                        return false;
-                    }
+                            return true;
 
-                    return true;
+                        case CardTargetKind.PieceAtSquare:
+                        case CardTargetKind.OrderedPieces:
+                            if (Mathf.Max(0, dataSO.RequiredPieceCount) != definition.RequiredTargetCount)
+                            {
+                                reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                                return false;
+                            }
+
+                            return true;
+
+                        case CardTargetKind.PieceAndSquare:
+                            if (Mathf.Max(0, dataSO.RequiredPieceCount) != 1 ||
+                                Mathf.Max(0, dataSO.TileCount) != 1)
+                            {
+                                reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                                return false;
+                            }
+
+                            return true;
+
+                        default:
+                            failureStatus = AiCardExecutionStatus.UnsupportedCardType;
+                            reason = $"Card '{dataSO.CardName}' is piece-targeted but requires '{definition.RequiredTargetKind}' target.";
+                            return false;
+                    }
 
                 case global::CardType.Tile:
                     if (definition.RequiredTargetKind != CardTargetKind.BoardSquare &&
@@ -385,6 +431,74 @@ namespace ChaosChess.Unity.AIIntegration.Cards
 
                     return true;
 
+                case CardTargetKind.PieceAndSquare:
+                    if (!TryResolvePieceTarget(boardManager, usePlan.Target.Piece, out global::Piece pieceAndSquarePiece, out reason))
+                        return false;
+
+                    global::IPieceTargetFilter pieceAndSquareFilter = cardData.GetComponent<global::IPieceTargetFilter>();
+                    if (!CanSelectPiece(pieceAndSquarePiece, cardData.DataSO, pieceAndSquareFilter, actor, definition))
+                    {
+                        reason = $"CardUsePlan piece target {usePlan.Target.Piece.Square} is not selectable by Unity card constraints.";
+                        return false;
+                    }
+
+                    if (HasActivePieceEffector(pieceAndSquarePiece))
+                    {
+                        reason = $"CardUsePlan piece target {usePlan.Target.Piece.Square} already has an active effector.";
+                        return false;
+                    }
+
+                    if (usePlan.Target.Squares.Count != 1)
+                    {
+                        reason = $"CardUsePlan piece-and-square target must contain exactly one square.";
+                        return false;
+                    }
+
+                    HashSet<Vector3Int> pieceAndSquareOccupiedTiles = GetOccupiedEffectTiles(boardManager);
+                    Vector3Int pieceAndSquarePos = ToVector3Int(usePlan.Target.Squares[0]);
+                    if (!CanSelectTile(pieceAndSquarePos, cardData.DataSO, boardManager, pieceAndSquareOccupiedTiles))
+                    {
+                        reason = $"CardUsePlan tile target {usePlan.Target.Squares[0]} is not selectable by Unity card constraints.";
+                        return false;
+                    }
+
+                    return true;
+
+                case CardTargetKind.OrderedPieces:
+                    if (usePlan.Target.Pieces.Count != definition.RequiredTargetCount)
+                    {
+                        reason = $"CardUsePlan ordered piece target count differs from AI contract.";
+                        return false;
+                    }
+
+                    var occupiedPieceSquares = new HashSet<Square>();
+                    global::IPieceTargetFilter orderedPieceFilter = cardData.GetComponent<global::IPieceTargetFilter>();
+                    foreach (PieceTargetSnapshot pieceTarget in usePlan.Target.Pieces)
+                    {
+                        if (!TryResolvePieceTarget(boardManager, pieceTarget, out global::Piece orderedPiece, out reason))
+                            return false;
+
+                        if (!occupiedPieceSquares.Add(pieceTarget.Square))
+                        {
+                            reason = $"CardUsePlan ordered piece target {pieceTarget.Square} is duplicated.";
+                            return false;
+                        }
+
+                        if (!CanSelectPiece(orderedPiece, cardData.DataSO, orderedPieceFilter, actor, definition))
+                        {
+                            reason = $"CardUsePlan piece target {pieceTarget.Square} is not selectable by Unity card constraints.";
+                            return false;
+                        }
+
+                        if (HasActivePieceEffector(orderedPiece))
+                        {
+                            reason = $"CardUsePlan piece target {pieceTarget.Square} already has an active effector.";
+                            return false;
+                        }
+                    }
+
+                    return true;
+
                 case CardTargetKind.BoardSquare:
                 case CardTargetKind.OrderedSquares:
                     HashSet<Vector3Int> occupiedEffectTiles = GetOccupiedEffectTiles(boardManager);
@@ -407,6 +521,74 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
         }
 
+        private bool TryCreateOrderedPieceTargetSelection(
+            global::CardData cardData,
+            global::BoardManager boardManager,
+            AiPieceColor actor,
+            CardPlanningDefinition definition,
+            out CardTargetSelection targetSelection,
+            out AiCardExecutionStatus failureStatus,
+            out string reason)
+        {
+            targetSelection = null;
+            failureStatus = AiCardExecutionStatus.TargetUnavailable;
+
+            if (!TryCollectPieceTargets(
+                    cardData,
+                    boardManager,
+                    actor,
+                    definition,
+                    definition.RequiredTargetCount,
+                    out List<global::Piece> targets,
+                    out reason))
+            {
+                return false;
+            }
+
+            targetSelection = CardTargetSelection.OrderedPieces(ToPieceSnapshots(targets));
+            return true;
+        }
+
+        private bool TryCreatePieceAndSquareTargetSelection(
+            global::CardData cardData,
+            global::BoardManager boardManager,
+            AiPieceColor actor,
+            CardPlanningDefinition definition,
+            out CardTargetSelection targetSelection,
+            out AiCardExecutionStatus failureStatus,
+            out string reason)
+        {
+            targetSelection = null;
+            failureStatus = AiCardExecutionStatus.TargetUnavailable;
+
+            if (!TryCollectPieceTargets(
+                    cardData,
+                    boardManager,
+                    actor,
+                    definition,
+                    1,
+                    out List<global::Piece> pieceTargets,
+                    out reason))
+            {
+                return false;
+            }
+
+            if (!TryCollectTileTargets(
+                    cardData,
+                    boardManager,
+                    1,
+                    out List<Vector3Int> tileTargets,
+                    out reason))
+            {
+                return false;
+            }
+
+            targetSelection = CardTargetSelection.PieceAndSquare(
+                ToPieceSnapshot(pieceTargets[0]),
+                ToSquare(tileTargets[0]));
+            return true;
+        }
+
         private bool TryCreatePieceTargetSelection(
             global::CardData cardData,
             global::BoardManager boardManager,
@@ -421,43 +603,17 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             reason = string.Empty;
 
             global::CardDataSO dataSO = cardData.DataSO;
-            if (definition.RequiredTargetKind != CardTargetKind.PieceAtSquare)
-            {
-                failureStatus = AiCardExecutionStatus.UnsupportedCardType;
-                reason = $"Card '{dataSO.CardName}' is piece-targeted but requires '{definition.RequiredTargetKind}' target.";
-                return false;
-            }
-
             int requiredCount = definition.RequiredTargetCount;
-            if (Mathf.Max(0, dataSO.RequiredPieceCount) != requiredCount)
+            if (!TryCollectPieceTargets(
+                    cardData,
+                    boardManager,
+                    actor,
+                    definition,
+                    requiredCount,
+                    out List<global::Piece> targets,
+                    out reason))
             {
-                reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
                 return false;
-            }
-
-            var targets = new List<global::Piece>(requiredCount);
-
-            if (requiredCount > 0)
-            {
-                global::IPieceTargetFilter targetFilter = cardData.GetComponent<global::IPieceTargetFilter>();
-                foreach (global::Piece piece in boardManager.GetAllPieces())
-                {
-                    if (!CanSelectPiece(piece, dataSO, targetFilter, actor, definition))
-                        continue;
-
-                    if (HasActivePieceEffector(piece))
-                        continue;
-
-                    targets.Add(piece);
-                    if (targets.Count == requiredCount)
-                        break;
-                }
-
-                if (targets.Count != requiredCount)
-                {
-                    reason = $"Card '{dataSO.CardName}' needs {requiredCount} piece target(s), but only {targets.Count} were available.";
-                    return false;
-                }
             }
 
             if (targets.Count != 1)
@@ -466,19 +622,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 return false;
             }
 
-            global::Piece target = targets[0];
-            AiPieceKind targetKind = ToAiPieceKind(target.Type);
-            if (targetKind == AiPieceKind.Unknown)
-            {
-                reason = $"Card '{dataSO.CardName}' selected unsupported piece kind '{target.Type}'.";
-                return false;
-            }
-
-            targetSelection = CardTargetSelection.PieceAtSquare(
-                new PieceTargetSnapshot(
-                    ToSquare(target.Pos),
-                    ToAiColor(target.Color),
-                    targetKind));
+            targetSelection = CardTargetSelection.PieceAtSquare(ToPieceSnapshot(targets[0]));
             return true;
         }
 
@@ -504,15 +648,84 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
 
             int requiredCount = definition.RequiredTargetCount;
+            if (!TryCollectTileTargets(
+                    cardData,
+                    boardManager,
+                    requiredCount,
+                    out List<Vector3Int> targets,
+                    out reason))
+            {
+                return false;
+            }
+
+            if (definition.RequiredTargetKind == CardTargetKind.BoardSquare)
+            {
+                targetSelection = CardTargetSelection.BoardSquare(ToSquare(targets[0]));
+                return true;
+            }
+
+            targetSelection = CardTargetSelection.OrderedSquares(ToSquares(targets));
+            return true;
+        }
+
+        private bool TryCollectPieceTargets(
+            global::CardData cardData,
+            global::BoardManager boardManager,
+            AiPieceColor actor,
+            CardPlanningDefinition definition,
+            int requiredCount,
+            out List<global::Piece> targets,
+            out string reason)
+        {
+            targets = new List<global::Piece>(requiredCount);
+            reason = string.Empty;
+
+            global::CardDataSO dataSO = cardData.DataSO;
+            if (Mathf.Max(0, dataSO.RequiredPieceCount) != requiredCount)
+            {
+                reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
+                return false;
+            }
+
+            global::IPieceTargetFilter targetFilter = cardData.GetComponent<global::IPieceTargetFilter>();
+            foreach (global::Piece piece in boardManager.GetAllPieces())
+            {
+                if (!CanSelectPiece(piece, dataSO, targetFilter, actor, definition))
+                    continue;
+
+                if (HasActivePieceEffector(piece))
+                    continue;
+
+                targets.Add(piece);
+                if (targets.Count == requiredCount)
+                    break;
+            }
+
+            if (targets.Count == requiredCount)
+                return true;
+
+            reason = $"Card '{dataSO.CardName}' needs {requiredCount} piece target(s), but only {targets.Count} were available.";
+            return false;
+        }
+
+        private static bool TryCollectTileTargets(
+            global::CardData cardData,
+            global::BoardManager boardManager,
+            int requiredCount,
+            out List<Vector3Int> targets,
+            out string reason)
+        {
+            targets = new List<Vector3Int>(requiredCount);
+            reason = string.Empty;
+
+            global::CardDataSO dataSO = cardData.DataSO;
             if (Mathf.Max(0, dataSO.TileCount) != requiredCount)
             {
                 reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
                 return false;
             }
 
-            var targets = new List<Vector3Int>(requiredCount);
             HashSet<Vector3Int> occupiedEffectTiles = GetOccupiedEffectTiles(boardManager);
-
             for (int y = 0; y < 8 && targets.Count < requiredCount; y++)
             {
                 for (int x = 0; x < 8 && targets.Count < requiredCount; x++)
@@ -525,20 +738,11 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 }
             }
 
-            if (targets.Count != requiredCount)
-            {
-                reason = $"Card '{dataSO.CardName}' needs {requiredCount} tile target(s), but only {targets.Count} were available.";
-                return false;
-            }
-
-            if (definition.RequiredTargetKind == CardTargetKind.BoardSquare)
-            {
-                targetSelection = CardTargetSelection.BoardSquare(ToSquare(targets[0]));
+            if (targets.Count == requiredCount)
                 return true;
-            }
 
-            targetSelection = CardTargetSelection.OrderedSquares(ToSquares(targets));
-            return true;
+            reason = $"Card '{dataSO.CardName}' needs {requiredCount} tile target(s), but only {targets.Count} were available.";
+            return false;
         }
 
         private static bool TryCreateUnityArgs(
@@ -570,6 +774,41 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     args.Targets = pieces;
                     args.LimitTurn = cardData.DataSO.PieceLimitTurn;
                     targetPieces = pieces;
+                    return true;
+
+                case CardTargetKind.PieceAndSquare:
+                    if (!TryResolvePieceTarget(boardManager, usePlan.Target.Piece, out global::Piece pieceAndSquarePiece, out reason))
+                        return false;
+
+                    var pieceAndSquarePieces = new List<global::Piece> { pieceAndSquarePiece };
+                    var pieceAndSquarePositions = new List<Vector3Int>(usePlan.Target.Squares.Count);
+                    foreach (Square square in usePlan.Target.Squares)
+                    {
+                        pieceAndSquarePositions.Add(ToVector3Int(square));
+                    }
+
+                    args = CreateUnityArgs(usePlan);
+                    args.Targets = pieceAndSquarePieces;
+                    args.TargetPos = pieceAndSquarePositions;
+                    args.LimitTurn = cardData.DataSO.PieceLimitTurn;
+                    targetPieces = pieceAndSquarePieces;
+                    targetPositions = pieceAndSquarePositions;
+                    return true;
+
+                case CardTargetKind.OrderedPieces:
+                    var orderedPieces = new List<global::Piece>(usePlan.Target.Pieces.Count);
+                    foreach (PieceTargetSnapshot pieceTarget in usePlan.Target.Pieces)
+                    {
+                        if (!TryResolvePieceTarget(boardManager, pieceTarget, out global::Piece orderedPiece, out reason))
+                            return false;
+
+                        orderedPieces.Add(orderedPiece);
+                    }
+
+                    args = CreateUnityArgs(usePlan);
+                    args.Targets = orderedPieces;
+                    args.LimitTurn = cardData.DataSO.PieceLimitTurn;
+                    targetPieces = orderedPieces;
                     return true;
 
                 case CardTargetKind.BoardSquare:
@@ -773,6 +1012,25 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             {
                 yield return ToSquare(position);
             }
+        }
+
+        private static IEnumerable<PieceTargetSnapshot> ToPieceSnapshots(IEnumerable<global::Piece> pieces)
+        {
+            foreach (global::Piece piece in pieces)
+            {
+                yield return ToPieceSnapshot(piece);
+            }
+        }
+
+        private static PieceTargetSnapshot ToPieceSnapshot(global::Piece piece)
+        {
+            AiPieceKind targetKind = ToAiPieceKind(piece.Type);
+            return new PieceTargetSnapshot(
+                ToSquare(piece.Pos),
+                ToAiColor(piece.Color),
+                targetKind,
+                piece.IsPromotioned,
+                piece.IsPromotioned ? (Square?)ToSquare(piece.StartPos) : null);
         }
 
         private static AiPieceColor ToAiColor(global::PieceColor color)

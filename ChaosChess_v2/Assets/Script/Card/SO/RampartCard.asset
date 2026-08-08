@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 0
   AiCardId: rampart
   AiCategory: 50
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 0
   PieceTargetColor: 0
   PieceLimitTurn: 0

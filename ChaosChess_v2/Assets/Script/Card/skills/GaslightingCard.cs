@@ -22,14 +22,17 @@ public class GaslightingCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        Piece p = GetRandomPiece();
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        Piece p = GetRandomPiece(casterColor);
         if (p == null) return;
 
         Vector3Int pos = p.Pos;
 
         BoardManager.Instance.ChangePiece(
             pos: pos,
-            color: GameManager.Instance.PlayerColor,
+            color: casterColor,
             type: p.TypeToChar());
 
         // 즉발 카드라 Effector를 거치지 않으므로(PieceLimitTurn=0이면 Apply 직후 만료되어
@@ -59,14 +62,17 @@ public class GaslightingCard : CardData, IPieceCard
             SoundManager.Instance.SFXPlay(DataSO.CardName, vfx.ApplySFX, vfx.SFXVolume);
     }
 
-    private Piece GetRandomPiece()
+    private Piece GetRandomPiece(PieceColor casterColor)
     {
         Piece selectedPiece = null;
         int count = 0;
+        PieceColor targetColor = casterColor == PieceColor.White
+            ? PieceColor.Black
+            : PieceColor.White;
 
         foreach (Piece p in BoardManager.Instance.GetAllPieces())
         {
-            if (p.Color == GameManager.Instance.EnemyColor && (DataSO.PieceType & p.Type) != 0)
+            if (p.Color == targetColor && (DataSO.PieceType & p.Type) != 0)
             {
                 count++;
                 if (Random.Range(0, count) == 0)

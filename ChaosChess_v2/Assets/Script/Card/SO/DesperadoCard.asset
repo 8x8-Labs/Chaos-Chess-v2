@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 4
   AiCardId: desperado
   AiCategory: 10
-  AiSupported: 0
+  AiSupported: 1
   VFX:
     ApplyVFXPrefab: {fileID: 0}
     LoopVFXPrefab: {fileID: 5896058207512719259, guid: a5e1a5442486f6b48b84fc89557b5bf9, type: 3}

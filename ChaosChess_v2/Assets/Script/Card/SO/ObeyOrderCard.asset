@@ -19,7 +19,7 @@ MonoBehaviour:
   CardTier: 2
   AiCardId: obey_order
   AiCategory: 70
-  AiSupported: 0
+  AiSupported: 1
   PieceType: 1022
   PieceTargetColor: 0
   PieceLimitTurn: 0

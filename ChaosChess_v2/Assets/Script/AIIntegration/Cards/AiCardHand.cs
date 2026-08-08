@@ -7,9 +7,38 @@ namespace ChaosChess.Unity.AIIntegration.Cards
     {
         [SerializeField] private List<GameObject> startingCards = new();
         [SerializeField] private int defaultRemainingUses = 1;
+        [SerializeField] private bool useEditorConfiguredStartingCards;
+        [SerializeField] private List<string> editorStartingCardPrefabPaths = new();
 
         public IReadOnlyList<GameObject> AvailableCards => startingCards;
         public int DefaultRemainingUses => Mathf.Max(0, defaultRemainingUses);
+
+        private void Awake()
+        {
+#if UNITY_EDITOR
+            if (!useEditorConfiguredStartingCards)
+                return;
+
+            var resolvedCards = new List<GameObject>();
+            foreach (string path in editorStartingCardPrefabPaths)
+            {
+                if (string.IsNullOrWhiteSpace(path))
+                    continue;
+
+                GameObject cardPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (cardPrefab != null)
+                {
+                    resolvedCards.Add(cardPrefab);
+                    continue;
+                }
+
+                Debug.LogWarning($"[AI Card Hand] Could not load editor card prefab at '{path}'.");
+            }
+
+            if (resolvedCards.Count > 0)
+                startingCards = resolvedCards;
+#endif
+        }
 
         public bool Contains(global::CardDataSO cardSO)
         {
