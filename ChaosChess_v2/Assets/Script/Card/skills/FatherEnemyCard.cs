@@ -23,18 +23,26 @@ public class FatherEnemyCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        Create(args.Targets[0]);
+        Create(args.Targets[0], args != null && args.SuppressAutomaticTurnEnd);
     }
 
-    public void Create(Piece piece)
+    public void Create(Piece piece, bool suppressAutomaticTurnEnd = false)
     {
         var effector = CreatePieceEffector<FatherEnemyEffector>(piece);
+        effector.SetSuppressAutomaticTurnEnd(suppressAutomaticTurnEnd);
         effector.Apply();
     }
 }
 
 public class FatherEnemyEffector : PieceEffector
 {
+    private bool suppressAutomaticTurnEnd;
+
+    public void SetSuppressAutomaticTurnEnd(bool value)
+    {
+        suppressAutomaticTurnEnd = value;
+    }
+
     private void OnPieceSelected(Piece piece)
     {
         if (piece != target) return;
@@ -53,7 +61,8 @@ public class FatherEnemyEffector : PieceEffector
     {
         GameManager.Instance.OnAwakenedPieceSelected -= OnPieceSelected;
 
-        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+        if (!suppressAutomaticTurnEnd)
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
 
         Destroy(this);
     }
@@ -116,6 +125,7 @@ public class FatherEnemyEffector : PieceEffector
         var effector = piece.gameObject.AddComponent<FatherEnemyEffector>();
         effector.CardSO = CardSO;
         effector.Init(piece, CardSO != null ? CardSO.PieceLimitTurn : RemainingTurns);
+        effector.SetSuppressAutomaticTurnEnd(suppressAutomaticTurnEnd);
         effector.Apply();
     }
 

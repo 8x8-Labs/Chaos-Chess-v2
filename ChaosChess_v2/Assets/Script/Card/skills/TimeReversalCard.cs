@@ -78,7 +78,7 @@ public class TimeReversalEffecter : GlobalEffector
         return hasCasterColor
             && GameManager.Instance != null
             && GameManager.Instance.AiAutoMoveEnabled
-            && casterColor != GameManager.Instance.PlayerColor;
+            && casterColor == GameManager.Instance.EnemyColor;
     }
 
     private void ResolveAiDecision(string currentFen)

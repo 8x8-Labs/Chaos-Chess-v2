@@ -24,7 +24,9 @@ public class HoneytrapCard : CardData, IPieceCard
         List<Piece> pieces = BoardManager.Instance.GetAllPieces();
         List<Piece> queens = new();
         Piece king = null;
-        PieceColor pcolor = GameManager.Instance.turnColor;
+        PieceColor pcolor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
         for (int i = 0; i < pieces.Count; i++)
         {
             if (pieces[i].Type == PieceType.Queen && pieces[i].Color == pcolor)

@@ -39,7 +39,8 @@ public class GaslightingCard : CardData, IPieceCard
         // 적용 VFX가 생략됨) 변환된 기물 위치에 적용 VFX를 직접 재생한다.
         PlayApplyVFX(pos);
 
-        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+        if (args == null || args.ShouldEndTurnAfterExecution())
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
 
     /// <summary>변환된 기물 위치에 DataSO.VFX의 적용 연출(파티클 버스트 + 펀치 + 효과음)을 1회 재생합니다.</summary>

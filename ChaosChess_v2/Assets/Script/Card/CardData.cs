@@ -61,6 +61,7 @@ public class CardEffectArgs
     public int LimitTurn;                   // 적용 턴 수치
     public bool HasCasterColor;             // AI 실행 경로처럼 시전자를 명시적으로 전달하는 경우 true
     public PieceColor CasterColor;          // 카드를 시전한 색상
+    public bool SuppressAutomaticTurnEnd;   // AI 실행 경로처럼 카드 후 별도 이동 처리가 있을 때 true
 
     public PieceColor ResolveCasterColor()
     {
@@ -75,5 +76,20 @@ public class CardEffectArgs
         return GameManager.Instance != null
             ? GameManager.Instance.turnColor
             : PieceColor.White;
+    }
+
+    public bool ShouldEndTurnAfterExecution()
+    {
+        return !SuppressAutomaticTurnEnd;
+    }
+
+    public static PieceColor OpponentOf(PieceColor color)
+    {
+        return color == PieceColor.White ? PieceColor.Black : PieceColor.White;
+    }
+
+    public static ApplyType ToApplyType(PieceColor color)
+    {
+        return color == PieceColor.White ? ApplyType.White : ApplyType.Black;
     }
 }

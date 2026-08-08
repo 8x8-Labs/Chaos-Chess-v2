@@ -23,7 +23,9 @@ public class RampartCard : CardData, ITileCard
     public void Execute(CardEffectArgs args = null)
     {
         List<Vector3Int> tiles = args.TargetPos;
-        PieceColor color = GameManager.Instance.turnColor;
+        PieceColor color = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
         foreach (Vector3Int pos in tiles)
         {
             BoardManager.Instance.ChangePiece(pos, color, 'a');

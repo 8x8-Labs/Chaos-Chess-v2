@@ -10,12 +10,10 @@ public class DestroyerTankCards : CardData, ICard
     public void Execute(CardEffectArgs args = null)
     {
         DestroyerTankEffector effector = CreateGlobalEffector<DestroyerTankEffector>();
-        ApplyType watchColor;
-
-        if (GameManager.Instance.turnColor == PieceColor.White)
-            watchColor = ApplyType.White;
-        else
-            watchColor = ApplyType.Black;
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        ApplyType watchColor = CardEffectArgs.ToApplyType(casterColor);
 
         effector.Init(PieceType.Pawn, watchColor, DataSO.LimitTurn);
         effector.Apply();

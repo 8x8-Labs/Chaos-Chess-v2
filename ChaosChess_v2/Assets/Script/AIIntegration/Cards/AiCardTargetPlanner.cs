@@ -836,7 +836,8 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             return new global::CardEffectArgs
             {
                 HasCasterColor = true,
-                CasterColor = ToUnityColor(usePlan.Actor)
+                CasterColor = ToUnityColor(usePlan.Actor),
+                SuppressAutomaticTurnEnd = true
             };
         }
 
