@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using ChaosChess.Unity.AIIntegration.Runtime;
 using UnityEngine;
+using UnityEngine.Serialization;
 using DG.Tweening;
 
 public class GameManager : MonoBehaviour
@@ -21,8 +22,25 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance;
 
-    public PieceColor PlayerColor = PieceColor.White;
-    public PieceColor EnemyColor = PieceColor.Black;
+    [FormerlySerializedAs("PlayerColor")]
+    [SerializeField] private PieceColor playerColor = PieceColor.White;
+
+    /// <summary>
+    /// 플레이어(로컬)가 맡은 진영입니다. 매치 시작 시 GameCycleManager가 주입합니다.
+    /// </summary>
+    public PieceColor PlayerColor => playerColor;
+
+    /// <summary>
+    /// 상대 진영입니다. PlayerColor에서 파생되므로 따로 설정하지 않습니다.
+    /// (예전에는 독립 필드라 둘이 어긋날 수 있었습니다.)
+    /// </summary>
+    public PieceColor EnemyColor => CardTargetRelationExtensions.Opposite(playerColor);
+
+    /// <summary>매치 시작 전에 플레이어 진영을 지정합니다.</summary>
+    public void SetPlayerColor(PieceColor color)
+    {
+        playerColor = color;
+    }
 
     public List<Sprite> BlackSprites = new List<Sprite>();
     public List<Sprite> WhiteSprites = new List<Sprite>();
@@ -32,7 +50,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject variantUpgradeVfxPrefab;
 
     [SerializeField] private int curTurn;
-    public bool IsPlayerTurn => (curTurn % 2 == 1);
+    /// <summary>
+    /// 지금이 플레이어 차례인지 여부입니다. PlayerColor가 백이면 기존의 "홀수 턴" 판정과 동일합니다.
+    /// </summary>
+    public bool IsPlayerTurn => turnColor == PlayerColor;
     public bool IsPlayerInCheck { get; private set; }
 
     public bool IsGameInput = true;
@@ -100,6 +121,11 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+
+            // 이번 매치의 플레이어 진영을 런 관리자에서 받아옵니다.
+            // GameCycleManager가 없는 환경(카드 이펙트 랩 등)에서는 인스펙터 값을 그대로 씁니다.
+            if (GameCycleManager.Instance != null)
+                playerColor = GameCycleManager.Instance.PlayerColor;
         }
         else
         {
@@ -769,16 +795,9 @@ public class GameManager : MonoBehaviour
 
     public void OnSurrender(PieceColor color)
     {
-        if (color == PlayerColor)
-        {
-            FinishType = GameResult.BlackWin;
-            Debug.Log("플레이어 항복");
-        }
-        else
-        {
-            FinishType = GameResult.WhiteWin;
-            Debug.Log("AI 항복");
-        }
+        // 항복한 진영의 반대편이 승리합니다. 승패는 플레이어가 어느 색이든 색 자체로 결정됩니다.
+        FinishType = color == PieceColor.White ? GameResult.BlackWin : GameResult.WhiteWin;
+        Debug.Log(color == PlayerColor ? "플레이어 항복" : "AI 항복");
         ApplyGameResult();
     }
 
