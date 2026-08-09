@@ -242,8 +242,18 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             try
             {
                 cardExecutor.Execute(plan.Args);
-                aiCardHand.Consume(plan.CardData.DataSO);
+                bool consumed = aiCardHand.Consume(plan.CardData.DataSO);
+                if (!consumed)
+                    consumed = aiCardHand.ConsumeAiCardId(plan.UsePlan.CardId);
+
                 boardManager?.RefreshMoves();
+
+                if (!consumed)
+                {
+                    Debug.LogWarning(
+                        $"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}) " +
+                        "but could not remove it from the AI hand.");
+                }
 
                 Debug.Log(
                     $"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}), " +

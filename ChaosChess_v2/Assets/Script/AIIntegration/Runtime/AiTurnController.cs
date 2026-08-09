@@ -23,7 +23,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
         [SerializeField] private int targetCandidateCount = 32;
         [SerializeField] private int maximumEngineCallCount = 64;
         [SerializeField] private bool allowCoarseCardEffects = true;
-        [SerializeField] private int cardUseScoreTolerance = 25;
+        [SerializeField] private int cardUseScoreTolerance = 120;
 
         [Header("카테고리 점수")]
         [SerializeField] private int tacticalScore = 10;
@@ -35,6 +35,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
         [SerializeField] private int utilityScore = 5;
 
         private readonly AiCardExecutor cardExecutor = new AiCardExecutor();
+        private readonly AiCardTargetPlanner targetPlanner = new AiCardTargetPlanner();
         private readonly CardTargetingModule cardTargetingModule = new CardTargetingModule();
         private int requestSequence;
         private int activeRequestId;
@@ -43,6 +44,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
 
         public bool HasQueuedForcedCard => !string.IsNullOrWhiteSpace(queuedForcedCardId);
         public string QueuedForcedCardId => queuedForcedCardId;
+        public AiCardHand CardHand => ResolveCardHand();
 
         public void QueueForcedCardForNextAiTurn(string cardId)
         {
@@ -111,12 +113,26 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             foreach (string warning in mapping.Warnings)
                 Debug.LogWarning($"[AI Turn] {warning}");
 
+            Debug.Log(
+                $"[AI Turn] Card hand mapped: unityHand={hand.AvailableCards.Count}, " +
+                $"aiCards={mapping.GameState.AvailableCards.Count}, cards={FormatAvailableCards(mapping.GameState.AvailableCards)}.");
+
             var perspective = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
+            LogHandTargetDiagnostics(hand, boardManager, mapping.GameState, perspective);
 
             if (!string.IsNullOrWhiteSpace(queuedForcedCardId))
             {
                 string forcedCardId = queuedForcedCardId;
                 queuedForcedCardId = null;
+
+                if (!ContainsMappedCard(mapping.GameState.AvailableCards, forcedCardId))
+                {
+                    CompleteAndRequestFallback(
+                        requestId,
+                        fallbackMoveRequest,
+                        $"Queued forced card '{forcedCardId}' is not in the mapped AI hand. mappedCards={FormatAvailableCards(mapping.GameState.AvailableCards)}");
+                    return true;
+                }
 
                 ExecuteForcedCardAndReanalyze(
                     requestId,
@@ -210,6 +226,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             UnifiedTurnPlanner planner = CreateTurnPlanner(mapping.Fen, snapshot);
             TurnPlannerResult result = planner.PlanTurn(mapping.GameState);
             LogTurnPlannerTrace(result);
+            LogPlannerCardCandidates(result);
 
             TurnPlan selectedPlan = SelectCardBiasedPlan(result);
             if (selectedPlan == null)
@@ -620,6 +637,128 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 $"rootMoves={trace.RootNoCardMoveCandidateCount}, consideredCards={trace.ConsideredCardCandidateCount}, " +
                 $"postCardMoves={trace.PostCardMoveCandidateCount}, engineCalls={trace.EngineCallCount}/{trace.MaximumEngineCallCount}, " +
                 $"beamPruned={trace.BeamPrunedCandidateCount}.");
+            Debug.Log(
+                "[AI Turn] UnifiedTurnPlanner skip trace: " +
+                $"cardTargeting={trace.CardTargetingSkipCount}, cardEffect={trace.CardEffectSkipCount}, " +
+                $"engineLimit={trace.EngineCallLimitSkipCount}, opponentReplyDeferred={trace.OpponentReplyDeferredCandidateCount}.");
+        }
+
+        private void LogHandTargetDiagnostics(
+            AiCardHand hand,
+            global::BoardManager boardManager,
+            ChaosChess.AI.Domain.GameState gameState,
+            ChaosChess.AI.Domain.PieceColor actor)
+        {
+            if (hand == null || hand.AvailableCards == null)
+                return;
+
+            foreach (GameObject cardObject in hand.AvailableCards)
+            {
+                global::CardData cardData = cardObject != null
+                    ? cardObject.GetComponent<global::CardData>()
+                    : null;
+                global::CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+                if (dataSO == null)
+                {
+                    Debug.Log("[AI Turn] Hand candidate skipped: missing CardDataSO.");
+                    continue;
+                }
+
+                if (!dataSO.AiSupported || string.IsNullOrWhiteSpace(dataSO.AiCardId))
+                {
+                    Debug.Log(
+                        $"[AI Turn] Hand candidate skipped: card={FormatUnityCard(dataSO)}, " +
+                        "reason=AI metadata disabled or missing.");
+                    continue;
+                }
+
+                if (targetPlanner.TryCreatePlan(
+                        dataSO.AiCardId,
+                        cardObject,
+                        boardManager,
+                        gameState,
+                        actor,
+                        out AiCardTargetPlan plan,
+                        out AiCardExecutionStatus failureStatus,
+                        out string reason))
+                {
+                    Debug.Log(
+                        $"[AI Turn] Hand candidate target ok: card={FormatUnityCard(dataSO)}, " +
+                        $"target={plan.UsePlan.Target.Kind}.");
+                    if (IsKnownAutomaticPlannerEffectUnsupported(dataSO.AiCardId))
+                    {
+                        Debug.Log(
+                            $"[AI Turn] Hand candidate automatic planning unsupported: card={FormatUnityCard(dataSO)}, " +
+                            "reason=AI effect application cannot simulate this card yet.");
+                    }
+
+                    continue;
+                }
+
+                Debug.Log(
+                    $"[AI Turn] Hand candidate target rejected: card={FormatUnityCard(dataSO)}, " +
+                    $"status={failureStatus}, reason={reason}");
+            }
+        }
+
+        private static void LogPlannerCardCandidates(TurnPlannerResult result)
+        {
+            if (result == null)
+                return;
+
+            int cardPlanCount = 0;
+            int logged = 0;
+            foreach (TurnPlanCandidate candidate in result.Candidates)
+            {
+                if (candidate == null || !candidate.HasPlan || candidate.Plan == null || !candidate.Plan.UsesCard)
+                    continue;
+
+                cardPlanCount++;
+                if (logged >= 8)
+                    continue;
+
+                TurnPlan plan = candidate.Plan;
+                Debug.Log(
+                    $"[AI Turn] Planner card candidate: card={plan.CardPlan?.CardId ?? "<none>"}, " +
+                    $"score={plan.Score.Total}, move={plan.MovePlan?.UciMove ?? "<none>"}, " +
+                    $"rank='{plan.DeterministicRankKey}'.");
+                logged++;
+            }
+
+            if (cardPlanCount == 0)
+            {
+                Debug.Log("[AI Turn] Planner produced no executable card candidates.");
+                LogPlannerSkippedCardCandidates(result);
+            }
+            else if (cardPlanCount > logged)
+            {
+                Debug.Log($"[AI Turn] Planner card candidates logged {logged}/{cardPlanCount}.");
+            }
+        }
+
+        private static void LogPlannerSkippedCardCandidates(TurnPlannerResult result)
+        {
+            int logged = 0;
+            foreach (TurnPlanCandidate candidate in result.Candidates)
+            {
+                if (candidate == null || candidate.HasPlan)
+                    continue;
+
+                string cardId = candidate.SkippedCardPlan != null
+                    ? candidate.SkippedCardPlan.CardId
+                    : "<none>";
+                Debug.Log(
+                    $"[AI Turn] Planner skipped candidate: " +
+                    $"card={cardId}, code={candidate.SkipCode}, reason={candidate.SkipReason}, " +
+                    $"cardApplication={candidate.SkippedCardApplicationStatus}/{candidate.SkippedCardApplicationCode}.");
+
+                logged++;
+                if (logged >= 12)
+                    break;
+            }
+
+            if (logged == 0)
+                Debug.Log("[AI Turn] Planner had no skipped candidate details.");
         }
 
         private TurnPlan SelectCardBiasedPlan(TurnPlannerResult result)
@@ -628,7 +767,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 return null;
 
             TurnPlan selectedPlan = result.SelectedPlan;
-            if (selectedPlan == null || selectedPlan.UsesCard)
+            if (selectedPlan == null)
                 return selectedPlan;
 
             TurnPlan bestCardPlan = null;
@@ -637,23 +776,115 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 if (candidate == null || !candidate.HasPlan || candidate.Plan == null || !candidate.Plan.UsesCard)
                     continue;
 
-                if (bestCardPlan == null || candidate.Plan.Score.Total > bestCardPlan.Score.Total)
-                    bestCardPlan = candidate.Plan;
+                TurnPlan candidatePlan = candidate.Plan;
+                if (bestCardPlan == null || candidatePlan.Score.Total > bestCardPlan.Score.Total)
+                    bestCardPlan = candidatePlan;
             }
 
             if (bestCardPlan == null)
+            {
+                Debug.Log("[AI Turn] Card-biased selection found no executable card plan.");
                 return selectedPlan;
+            }
 
             int tolerance = Mathf.Max(0, cardUseScoreTolerance);
             int scoreGap = selectedPlan.Score.Total - bestCardPlan.Score.Total;
             if (scoreGap > tolerance)
+            {
+                Debug.Log(
+                    $"[AI Turn] Card-biased selection kept no-card plan. " +
+                    $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
+                    $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
                 return selectedPlan;
+            }
 
             Debug.Log(
                 $"[AI Turn] Card-biased selection chose card plan within tolerance. " +
                 $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
                 $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
             return bestCardPlan;
+        }
+
+        private static string FormatAvailableCards(IReadOnlyList<ChaosChess.AI.Domain.CardInfo> cards)
+        {
+            if (cards == null || cards.Count == 0)
+                return "<none>";
+
+            var parts = new List<string>(cards.Count);
+            foreach (ChaosChess.AI.Domain.CardInfo card in cards)
+            {
+                if (card == null)
+                    continue;
+
+                parts.Add(card.Id + "x" + card.RemainingUses);
+            }
+
+            return parts.Count > 0 ? string.Join(", ", parts) : "<none>";
+        }
+
+        private static string FormatUnityCard(global::CardDataSO dataSO)
+        {
+            if (dataSO == null)
+                return "<missing>";
+
+            string name = string.IsNullOrWhiteSpace(dataSO.CardName) ? "<unnamed>" : dataSO.CardName;
+            string aiId = string.IsNullOrWhiteSpace(dataSO.AiCardId) ? "no-ai-id" : dataSO.AiCardId;
+            return $"{name} [{aiId}]";
+        }
+
+        private static bool IsKnownAutomaticPlannerEffectUnsupported(string aiCardId)
+        {
+            switch (aiCardId)
+            {
+                case "agile":
+                case "aim":
+                case "arena":
+                case "caterpillar":
+                case "chaotic_knight":
+                case "charge":
+                case "checkmate_declaration":
+                case "concentration":
+                case "dark_hand":
+                case "democracy":
+                case "desperado":
+                case "destroyer_tank_cards":
+                case "dimension_disturbance":
+                case "dimension_instability":
+                case "father_enemy":
+                case "fast_march":
+                case "gaslighting":
+                case "giant":
+                case "honey_trap":
+                case "limitless":
+                case "magnet":
+                case "mutiny":
+                case "overbearing":
+                case "shuffle_board":
+                case "sneak_pawn":
+                case "stag_fight":
+                case "sunset_blade":
+                case "thunderclap_flash":
+                case "windmill":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool ContainsMappedCard(
+            IReadOnlyList<ChaosChess.AI.Domain.CardInfo> cards,
+            string cardId)
+        {
+            if (cards == null || string.IsNullOrWhiteSpace(cardId))
+                return false;
+
+            foreach (ChaosChess.AI.Domain.CardInfo card in cards)
+            {
+                if (card != null && string.Equals(card.Id, cardId, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
         }
 
         private AiCardHand ResolveCardHand()

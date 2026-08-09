@@ -579,6 +579,12 @@ public class GameManager : MonoBehaviour
         if (!AiAutoMoveEnabled)
             return;
 
+        if (turnColor != EnemyColor)
+        {
+            Debug.LogWarning($"[AI] Ignored AI move request because current turn is {turnColor}, enemy is {EnemyColor}.");
+            return;
+        }
+
         if (aiTurnController != null &&
             aiTurnController.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
         {

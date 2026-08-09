@@ -14,9 +14,11 @@ namespace ChaosChess.Unity.AIIntegration.Cards
 
         private readonly List<GameObject> runtimeCards = new();
         private bool runtimeCardsInitialized;
+        private int version;
 
         public IReadOnlyList<GameObject> AvailableCards => CurrentCards;
         public int DefaultRemainingUses => Mathf.Max(0, defaultRemainingUses);
+        public int Version => version;
 
         private void Awake()
         {
@@ -85,6 +87,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
 
             runtimeCardsInitialized = true;
+            version++;
         }
 
         public void ReplaceRuntimeCards(IEnumerable<GameObject> cards)
@@ -103,6 +106,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
 
             runtimeCardsInitialized = true;
+            version++;
         }
 
         private void OnValidate()
@@ -143,7 +147,8 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     : null;
                 global::CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
 
-                if (dataSO != null && dataSO.AiCardId == aiCardId)
+                if (dataSO != null &&
+                    string.Equals(dataSO.AiCardId, aiCardId, System.StringComparison.OrdinalIgnoreCase))
                 {
                     cardPrefab = candidate;
                     return true;
@@ -169,14 +174,80 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     ? cardPrefab.GetComponent<global::CardData>()
                     : null;
 
-                if (cardData == null || cardData.DataSO != cardSO)
+                if (cardData == null || !IsSameCardSO(cardData.DataSO, cardSO))
                     continue;
 
                 cards.RemoveAt(i);
+                version++;
                 return true;
             }
 
             return false;
+        }
+
+        public bool ConsumeAiCardId(string aiCardId)
+        {
+            if (string.IsNullOrWhiteSpace(aiCardId))
+                return false;
+
+            List<GameObject> cards = Application.isPlaying && runtimeCardsInitialized
+                ? runtimeCards
+                : startingCards;
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                GameObject cardPrefab = cards[i];
+                global::CardData cardData = cardPrefab != null
+                    ? cardPrefab.GetComponent<global::CardData>()
+                    : null;
+                global::CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+
+                if (dataSO == null ||
+                    !string.Equals(dataSO.AiCardId, aiCardId, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                cards.RemoveAt(i);
+                version++;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool ContainsAiCardId(string aiCardId)
+        {
+            if (string.IsNullOrWhiteSpace(aiCardId))
+                return false;
+
+            foreach (GameObject cardPrefab in CurrentCards)
+            {
+                global::CardData cardData = cardPrefab != null
+                    ? cardPrefab.GetComponent<global::CardData>()
+                    : null;
+                global::CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+
+                if (dataSO != null &&
+                    string.Equals(dataSO.AiCardId, aiCardId, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsSameCardSO(global::CardDataSO a, global::CardDataSO b)
+        {
+            if (a == null || b == null)
+                return false;
+
+            if (a == b)
+                return true;
+
+            return !string.IsNullOrWhiteSpace(a.AiCardId)
+                && string.Equals(a.AiCardId, b.AiCardId, System.StringComparison.OrdinalIgnoreCase);
         }
 
         private void TrimStartingCards()
