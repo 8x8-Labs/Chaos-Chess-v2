@@ -194,6 +194,8 @@ public sealed class AiCardDebugWindow : EditorWindow
                 }
             }
 
+            DrawForceStatusBox();
+
             using (new EditorGUILayout.HorizontalScope())
             {
                 if (GUILayout.Button("Scan Candidates", GUILayout.Height(28f)))
@@ -252,6 +254,14 @@ public sealed class AiCardDebugWindow : EditorWindow
                     : "Force Selected Card";
                 if (GUILayout.Button(label, GUILayout.Height(36f)))
                     ForceSelectedCard();
+            }
+
+            DrawForceStatusBox();
+
+            using (new EditorGUI.DisabledScope(selectedHandIndex < 0 || selectedHandIndex >= handCards.Count))
+            {
+                if (GUILayout.Button("Check Force Conditions", GUILayout.Height(26f)))
+                    CheckSelectedForceConditions();
             }
 
             using (new EditorGUI.DisabledScope(aiTurnController == null || !aiTurnController.HasQueuedForcedCard))
@@ -806,6 +816,136 @@ public sealed class AiCardDebugWindow : EditorWindow
             LogCandidatePlan(cardObject, mapping.GameState, actor);
     }
 
+    private void DrawForceStatusBox()
+    {
+        MessageType messageType;
+        string message = GetForceStatusMessage(out messageType);
+        EditorGUILayout.HelpBox(message, messageType);
+    }
+
+    private string GetForceStatusMessage(out MessageType messageType)
+    {
+        messageType = MessageType.Info;
+
+        if (!EditorApplication.isPlaying)
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: Play Mode에서만 실행/예약할 수 있습니다.";
+        }
+
+        if (aiCardHand == null)
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: AiCardHand 참조가 없습니다.";
+        }
+
+        if (boardManager == null)
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: BoardManager 참조가 없습니다.";
+        }
+
+        if (gameManager == null)
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: GameManager 참조가 없습니다.";
+        }
+
+        if (handCards.Count == 0)
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: AI 손패가 비어 있습니다.";
+        }
+
+        if (selectedHandIndex < 0 || selectedHandIndex >= handCards.Count)
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: 손패에서 카드를 선택해야 합니다.";
+        }
+
+        CardData cardData = GetCardData(handCards[selectedHandIndex]);
+        CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+        if (dataSO == null)
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: 선택 카드에 CardDataSO가 없습니다.";
+        }
+
+        if (string.IsNullOrWhiteSpace(dataSO.AiCardId))
+        {
+            messageType = MessageType.Warning;
+            return "Force unavailable: 선택 카드에 AiCardId가 없습니다.";
+        }
+
+        if (gameManager.IsPlayerTurn)
+        {
+            if (aiTurnController == null)
+            {
+                messageType = MessageType.Warning;
+                return "Force unavailable: 플레이어 턴 예약에는 AiTurnController가 필요합니다.";
+            }
+
+            return "Ready to queue: 지금은 플레이어 턴이라 즉시 실행하지 않고 다음 AI 턴에 예약합니다. 실제 AI 턴에 손패/카드 조건/타겟 검증을 다시 통과해야 실행됩니다.";
+        }
+
+        return "Ready to force: 즉시 targetPlan 검증 후 실행합니다. 실패하면 Log에 CardCondition/TargetUnavailable 같은 reject reason이 표시됩니다.";
+    }
+
+    private void CheckSelectedForceConditions()
+    {
+        if (!EnsureRuntimeContext())
+            return;
+
+        if (selectedHandIndex < 0 || selectedHandIndex >= handCards.Count)
+        {
+            AppendLog("forceCheck=blocked, reason=No selected hand card.");
+            return;
+        }
+
+        GameObject cardObject = handCards[selectedHandIndex];
+        CardData cardData = GetCardData(cardObject);
+        CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+        if (dataSO == null || string.IsNullOrWhiteSpace(dataSO.AiCardId))
+        {
+            AppendLog("forceCheck=blocked, reason=Selected card has no AI card id.");
+            return;
+        }
+
+        AiPieceColor actor = GetActor();
+        UnityGameStateMappingResult mapping = CaptureMapping(actor);
+        if (mapping == null)
+            return;
+
+        AppendLog("=== Forced AI card condition check ===");
+        AppendLog(FormatStateSummary(mapping));
+        AppendLog("forceCheckCard=" + FormatCardLabel(cardData) + ", actor=" + actor);
+
+        if (gameManager != null && gameManager.IsPlayerTurn)
+        {
+            AppendLog("forceCheckMode=queued, reason=PlayerTurn. Actual validation will run on next AI turn.");
+        }
+        else
+        {
+            AppendLog("forceCheckMode=immediate");
+        }
+
+        if (!targetPlanner.TryCreatePlan(
+                dataSO.AiCardId,
+                cardObject,
+                boardManager,
+                mapping.GameState,
+                actor,
+                out AiCardTargetPlan plan,
+                out AiCardExecutionStatus failureStatus,
+                out string reason))
+        {
+            AppendLog("forceCheck=rejected, status=" + failureStatus + ", kind=" + ClassifyFailure(reason) + ", reason=" + reason);
+            return;
+        }
+
+        AppendLog("forceCheck=accepted, " + FormatPlan(plan));
+    }
+
     private void ForceSelectedCard()
     {
         if (!EnsureRuntimeContext())
@@ -825,6 +965,8 @@ public sealed class AiCardDebugWindow : EditorWindow
             AppendLog("Selected card has no AI card id.");
             return;
         }
+
+        AppendLog("forceRequest=selected, card=" + FormatCardLabel(cardData));
 
         if (gameManager != null && gameManager.IsPlayerTurn)
         {
