@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using ChaosChess.AI.Decision;
 using ChaosChess.AI.Decision.CardTargeting;
 using ChaosChess.AI.Decision.TurnPlanning;
+using ChaosChess.AI.Domain;
 using ChaosChess.AI.Domain.CardEffects;
+using ChaosChess.AI.Fen;
 using ChaosChess.Unity.AIIntegration.Cards;
 using ChaosChess.Unity.AIIntegration.Engine;
 using ChaosChess.Unity.AIIntegration.Mapping;
@@ -22,9 +24,11 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
         [SerializeField] private int variationCount = 3;
         [SerializeField] private int cardCandidateCount = AiCardHand.MaxCards;
         [SerializeField] private int targetCandidateCount = 32;
+        [SerializeField] private int opponentReplyCandidateCount = TurnPlannerOptions.DefaultOpponentReplyCandidateCount;
         [SerializeField] private int maximumEngineCallCount = 64;
         [SerializeField] private bool allowCoarseCardEffects = true;
         [SerializeField] private int cardUseScoreTolerance = 120;
+        [SerializeField] private int fullHandCardUseScoreTolerance = 1000;
 
         [Header("AI 디버그")]
         [SerializeField] private bool directCardFallbackEnabled = false;
@@ -162,7 +166,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
 
                     try
                     {
-                        HandleAnalysisComplete(
+                        AnalyzeOpponentReplyAndHandle(
                             requestId,
                             gameManager,
                             boardManager,
@@ -193,6 +197,84 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             return true;
         }
 
+        private void AnalyzeOpponentReplyAndHandle(
+            int requestId,
+            global::GameManager gameManager,
+            global::BoardManager boardManager,
+            AiCardHand hand,
+            UnityGameStateMappingResult mapping,
+            UciAnalysisSnapshot snapshot,
+            Action fallbackMoveRequest)
+        {
+            int replyCount = Mathf.Max(0, opponentReplyCandidateCount);
+            if (replyCount == 0)
+            {
+                HandleAnalysisComplete(
+                    requestId,
+                    gameManager,
+                    boardManager,
+                    hand,
+                    mapping,
+                    snapshot,
+                    opponentReplyFen: null,
+                    opponentReplySnapshot: null,
+                    fallbackMoveRequest: fallbackMoveRequest);
+                return;
+            }
+
+            string opponentReplyFen = CreateOpponentReplyFen(mapping.GameState);
+            PieceColor opponent = Opponent(UnityAiColorMapper.ToAiColor(gameManager.turnColor));
+
+            FairyStockfishBridge.Instance.AnalyzePositionAsync(
+                opponentReplyFen,
+                analysisDepth,
+                replyCount,
+                opponent,
+                onComplete: (_, opponentReplySnapshot) =>
+                {
+                    if (!IsActiveRequest(requestId))
+                        return;
+
+                    try
+                    {
+                        HandleAnalysisComplete(
+                            requestId,
+                            gameManager,
+                            boardManager,
+                            hand,
+                            mapping,
+                            snapshot,
+                            opponentReplyFen,
+                            opponentReplySnapshot,
+                            fallbackMoveRequest);
+                    }
+                    catch (Exception ex)
+                    {
+                        CompleteAndRequestFallback(
+                            requestId,
+                            fallbackMoveRequest,
+                            $"Turn planning failed: {ex.Message}");
+                    }
+                },
+                onError: (_, error) =>
+                {
+                    if (!IsActiveRequest(requestId))
+                        return;
+
+                    Debug.LogWarning($"[AI Turn] Opponent reply analysis failed; continuing without reply scoring. error={error}");
+                    HandleAnalysisComplete(
+                        requestId,
+                        gameManager,
+                        boardManager,
+                        hand,
+                        mapping,
+                        snapshot,
+                        opponentReplyFen: null,
+                        opponentReplySnapshot: null,
+                        fallbackMoveRequest: fallbackMoveRequest);
+                });
+        }
+
         private void HandleAnalysisComplete(
             int requestId,
             global::GameManager gameManager,
@@ -200,6 +282,8 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             AiCardHand hand,
             UnityGameStateMappingResult mapping,
             UciAnalysisSnapshot snapshot,
+            string opponentReplyFen,
+            UciAnalysisSnapshot opponentReplySnapshot,
             Action fallbackMoveRequest)
         {
             if (!IsActiveRequest(requestId))
@@ -227,7 +311,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             }
 
             var actor = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
-            UnifiedTurnPlanner planner = CreateTurnPlanner(mapping.Fen, snapshot);
+            UnifiedTurnPlanner planner = CreateTurnPlanner(mapping.Fen, snapshot, opponentReplyFen, opponentReplySnapshot);
             TurnPlannerResult result = planner.PlanTurn(mapping.GameState);
             LogTurnPlannerTrace(result);
             LogPlannerCardCandidates(result);
@@ -521,6 +605,39 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 actualMapping.GameState,
                 variationCount);
 
+            if (ShouldPreserveOriginalPostCardMove(originalPlan) &&
+                TryGetExecutableOriginalMove(
+                    originalPlan,
+                    boardManager,
+                    out string plannedMove))
+            {
+                if (moveResult.HasRecommendations &&
+                    !string.Equals(moveResult.Recommendations[0].Candidate.UciMove, plannedMove, StringComparison.OrdinalIgnoreCase))
+                {
+                    Debug.Log(
+                        $"[AI Turn] Keeping planned post-card move '{plannedMove}' over actual filtered " +
+                        $"'{moveResult.Recommendations[0].Candidate.UciMove}' to preserve the selected card+move TurnPlan.");
+                }
+
+                ExecuteUciMoveOrFallback(
+                    requestId,
+                    gameManager,
+                    boardManager,
+                    plannedMove,
+                    fallbackMoveRequest,
+                    "post-card planned TurnPlan");
+                return;
+            }
+
+            if (originalPlan != null &&
+                originalPlan.MovePlan != null &&
+                !ShouldPreserveOriginalPostCardMove(originalPlan))
+            {
+                Debug.Log(
+                    $"[AI Turn] Using actual post-card analysis for '{originalPlan.CardPlan?.CardId}' " +
+                    $"instead of coarse planned move '{originalPlan.MovePlan.UciMove}'.");
+            }
+
             if (!moveResult.HasRecommendations)
             {
                 CompleteAndRequestFallback(
@@ -549,21 +666,70 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 "post-card actual MoveFilter");
         }
 
+        private static bool TryGetExecutableOriginalMove(
+            TurnPlan originalPlan,
+            global::BoardManager boardManager,
+            out string uciMove)
+        {
+            uciMove = null;
+
+            if (originalPlan == null ||
+                originalPlan.MovePlan == null ||
+                string.IsNullOrWhiteSpace(originalPlan.MovePlan.UciMove) ||
+                boardManager == null)
+            {
+                return false;
+            }
+
+            string plannedMove = originalPlan.MovePlan.UciMove;
+            if (!boardManager.IsValidUciMove(plannedMove))
+                return false;
+
+            Vector3Int from = boardManager.UCIToGrid(plannedMove.Substring(0, 2));
+            Vector3Int to = boardManager.UCIToGrid(plannedMove.Substring(2, 2));
+            global::Piece piece = boardManager.GetPiece(from);
+            if (piece == null || !piece.CanMoveTo(boardManager, to))
+            {
+                Debug.LogWarning(
+                    $"[AI Turn] Planned post-card move '{plannedMove}' is no longer executable. " +
+                    "Using actual post-card MoveFilter instead.");
+                return false;
+            }
+
+            uciMove = plannedMove;
+            return true;
+        }
+
+        private static bool ShouldPreserveOriginalPostCardMove(TurnPlan originalPlan)
+        {
+            if (originalPlan == null || originalPlan.CardPlan == null)
+                return false;
+
+            if (IsImmediateMovementOverrideCard(originalPlan.CardPlan.CardId))
+                return true;
+
+            return originalPlan.CardApplicationStatus == CardEffectApplicationStatus.Exact;
+        }
+
         private UnifiedTurnPlanner CreateTurnPlanner(
             string fen,
-            UciAnalysisSnapshot snapshot)
+            UciAnalysisSnapshot snapshot,
+            string opponentReplyFen,
+            UciAnalysisSnapshot opponentReplySnapshot)
         {
             var snapshotEngine = new FairyStockfishSnapshotEngine(
                 fen,
                 snapshot,
-                FairyStockfishBridge.Instance.IsInCheck());
+                FairyStockfishBridge.Instance.IsInCheck(),
+                opponentReplyFen,
+                opponentReplySnapshot);
             var moveFilter = new MoveFilter(snapshotEngine);
             var options = new TurnPlannerOptions(
                 noCardMoveCandidateCount: variationCount,
                 cardCandidateCount: Mathf.Clamp(cardCandidateCount, 1, AiCardHand.MaxCards),
                 targetCandidateCount: Mathf.Max(1, targetCandidateCount),
                 postCardMoveCandidateCount: variationCount,
-                opponentReplyCandidateCount: 0,
+                opponentReplyCandidateCount: Mathf.Max(0, opponentReplyCandidateCount),
                 beamWidth: CalculatePlannerBeamWidth(),
                 maximumEngineCallCount: Mathf.Max(1, maximumEngineCallCount),
                 allowCoarseCardEffects: allowCoarseCardEffects);
@@ -572,6 +738,27 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 moveFilter,
                 cardTargetingModule,
                 options: options);
+        }
+
+        private static string CreateOpponentReplyFen(GameState gameState)
+        {
+            BoardState board = gameState.BoardState;
+            var opponentBoard = new BoardState(
+                board.Pieces,
+                Opponent(board.SideToMove),
+                board.CastlingRights,
+                board.EnPassantTarget,
+                board.HalfmoveClock,
+                board.FullmoveNumber);
+
+            return FenParser.Serialize(opponentBoard);
+        }
+
+        private static PieceColor Opponent(PieceColor color)
+        {
+            return color == PieceColor.White
+                ? PieceColor.Black
+                : PieceColor.White;
         }
 
         private int CalculatePlannerBeamWidth()
@@ -718,13 +905,6 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                     Debug.Log(
                         $"[AI Turn] Hand candidate target ok: card={FormatUnityCard(dataSO)}, " +
                         $"target={plan.UsePlan.Target.Kind}.");
-                    if (IsKnownAutomaticPlannerEffectUnsupported(dataSO.AiCardId))
-                    {
-                        Debug.Log(
-                            $"[AI Turn] Hand candidate automatic planning unsupported: card={FormatUnityCard(dataSO)}, " +
-                            "reason=AI effect application cannot simulate this card yet.");
-                    }
-
                     continue;
                 }
 
@@ -820,22 +1000,50 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 return selectedPlan;
             }
 
+            int handCount = ResolveCardHand()?.AvailableCards?.Count ?? 0;
+            bool handIsFull = handCount >= AiCardHand.MaxCards;
             int tolerance = Mathf.Max(0, cardUseScoreTolerance);
+            if (handIsFull)
+                tolerance = Mathf.Max(tolerance, fullHandCardUseScoreTolerance);
+
             int scoreGap = selectedPlan.Score.Total - bestCardPlan.Score.Total;
+            if (IsImmediateMovementOverrideCard(bestCardPlan.CardPlan?.CardId) && scoreGap > 0)
+            {
+                Debug.Log(
+                    $"[AI Turn] Card-biased selection kept no-card plan for immediate movement override. " +
+                    $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
+                    $"gap={scoreGap}, handFull={handIsFull}, card={bestCardPlan.CardPlan?.CardId}.");
+                return selectedPlan;
+            }
+
             if (scoreGap > tolerance)
             {
                 Debug.Log(
                     $"[AI Turn] Card-biased selection kept no-card plan. " +
                     $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
-                    $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
+                    $"gap={scoreGap}, tolerance={tolerance}, handFull={handIsFull}, card={bestCardPlan.CardPlan?.CardId}.");
                 return selectedPlan;
             }
 
             Debug.Log(
                 $"[AI Turn] Card-biased selection chose card plan within tolerance. " +
                 $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
-                $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
+                $"gap={scoreGap}, tolerance={tolerance}, handFull={handIsFull}, card={bestCardPlan.CardPlan?.CardId}.");
             return bestCardPlan;
+        }
+
+        private static bool IsImmediateMovementOverrideCard(string cardId)
+        {
+            switch (cardId)
+            {
+                case "aim":
+                case "fast_march":
+                case "sneak_pawn":
+                case "thunderclap_flash":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         private static bool HasExecutableCardPlan(TurnPlannerResult result)
@@ -942,45 +1150,6 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             string name = string.IsNullOrWhiteSpace(dataSO.CardName) ? "<unnamed>" : dataSO.CardName;
             string aiId = string.IsNullOrWhiteSpace(dataSO.AiCardId) ? "no-ai-id" : dataSO.AiCardId;
             return $"{name} [{aiId}]";
-        }
-
-        private static bool IsKnownAutomaticPlannerEffectUnsupported(string aiCardId)
-        {
-            switch (aiCardId)
-            {
-                case "agile":
-                case "aim":
-                case "arena":
-                case "caterpillar":
-                case "chaotic_knight":
-                case "charge":
-                case "checkmate_declaration":
-                case "concentration":
-                case "dark_hand":
-                case "democracy":
-                case "desperado":
-                case "destroyer_tank_cards":
-                case "dimension_disturbance":
-                case "dimension_instability":
-                case "father_enemy":
-                case "fast_march":
-                case "gaslighting":
-                case "giant":
-                case "honey_trap":
-                case "limitless":
-                case "magnet":
-                case "mutiny":
-                case "overbearing":
-                case "shuffle_board":
-                case "sneak_pawn":
-                case "stag_fight":
-                case "sunset_blade":
-                case "thunderclap_flash":
-                case "windmill":
-                    return true;
-                default:
-                    return false;
-            }
         }
 
         private static bool ContainsMappedCard(
