@@ -11275,6 +11275,8 @@ MonoBehaviour:
   - FENChar: 121
     prefab: {fileID: 3581459985047736126, guid: e517e6721a17ad247898ff2c31b3d5fd, type: 3}
   pieceSpawnTransform: {fileID: 1282597349}
+  boardRoot: {fileID: 0}
+  tileOrientationExcluded: []
   tileEffectDrawer: {fileID: 1388470026}
 --- !u!4 &1388470025
 Transform:
@@ -11316,8 +11318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f85221a7900618468e3ee16e5f36ab5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerColor: 0
-  EnemyColor: 1
+  playerColor: 0
   BlackSprites:
   - {fileID: -3998123364076545664, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
   - {fileID: 6086461264338391611, guid: 0a6f0fa984d61d444845f64a43c506ca, type: 3}
@@ -11344,6 +11345,7 @@ MonoBehaviour:
   curTurn: 1
   IsGameInput: 1
   AiAutoMoveEnabled: 1
+  turnProvider: {fileID: 0}
 --- !u!1 &1422633467
 GameObject:
   m_ObjectHideFlags: 0
