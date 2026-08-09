@@ -22,7 +22,15 @@ public class MatchMessage
 {
     public MatchMessageKind Kind;
 
-    /// <summary>이 행동이 몇 번째 턴의 것인지. 중복·역순 도착을 걸러내는 데 씁니다.</summary>
+    /// <summary>
+    /// 보낸 쪽이 부여하는 일련번호입니다. 중복·역순 도착을 걸러내는 기준입니다.
+    ///
+    /// 턴 번호로는 부족합니다. 한 턴에 카드를 쓰고 수를 두면 두 행동의 턴 번호가 같아서
+    /// 나중에 온 착수가 중복으로 오인됩니다.
+    /// </summary>
+    public int Sequence;
+
+    /// <summary>이 행동이 몇 번째 턴의 것인지. 로그와 검증에 씁니다.</summary>
     public int Turn;
 
     /// <summary>Move일 때의 착수(UCI). 예: "e2e4", 승격은 "e7e8q".</summary>
@@ -68,9 +76,9 @@ public class MatchMessage
     {
         switch (Kind)
         {
-            case MatchMessageKind.Move: return $"[T{Turn}] Move {Uci}";
-            case MatchMessageKind.Card: return $"[T{Turn}] Card {CardId}";
-            default: return $"[T{Turn}] Resign";
+            case MatchMessageKind.Move: return $"#{Sequence} [T{Turn}] Move {Uci}";
+            case MatchMessageKind.Card: return $"#{Sequence} [T{Turn}] Card {CardId}";
+            default: return $"#{Sequence} [T{Turn}] Resign";
         }
     }
 }

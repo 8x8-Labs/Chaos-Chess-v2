@@ -14,6 +14,13 @@ using UnityEngine;
 public abstract class TurnProvider : MonoBehaviour
 {
     /// <summary>
+    /// 상대 턴을 원격에서 받아오는 프로바이더인지 여부입니다.
+    /// GameManager가 게임 모드에 맞는 프로바이더를 고르는 기준이며,
+    /// 덕분에 한 씬에 AI용과 원격용을 함께 두어도 안전합니다.
+    /// </summary>
+    public virtual bool IsRemote => false;
+
+    /// <summary>
     /// 이번 턴 처리를 시도합니다.
     /// </summary>
     /// <param name="gameManager">턴을 요청한 게임 매니저</param>

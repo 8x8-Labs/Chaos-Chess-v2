@@ -110,7 +110,12 @@ public class PieceSelector : Selector<Piece>
             Targets = selectedTargets.ToList(),
             LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
-        
+
+        // 카드 효과가 턴을 넘길 수도 있으므로 적용 전에 상대에게 알립니다.
+        GameManager.Instance?.NotifyLocalCard(
+            cardData.DataSO,
+            selectedTargets.Select(target => target.Pos).ToList());
+
         // CardRandomizerManager가 없는 환경(카드 이펙트 랩 등)에서는 직접 실행해 효과가 누락되지 않도록 합니다.
         if (CardRandomizerManager.Instance != null)
             CardRandomizerManager.Instance.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));

@@ -12,10 +12,29 @@ using UnityEngine;
 /// </summary>
 public sealed class RemoteTurnProvider : TurnProvider
 {
+    public override bool IsRemote => true;
+
     private IMatchTransport transport;
 
-    // 이미 반영한 턴 번호. 중복·역순으로 도착한 메시지를 걸러냅니다.
-    private int lastAppliedTurn = -1;
+    // 상대에게서 마지막으로 반영한 일련번호. 중복·역순으로 도착한 메시지를 걸러냅니다.
+    private int lastAppliedSequence;
+
+    // 내가 보낸 행동에 매기는 일련번호입니다.
+    private int localSequence;
+
+    /// <summary>상대 행동을 기다리는 중인지 여부입니다. 대기 표시 UI가 참고합니다.</summary>
+    public bool IsWaitingForRemote { get; private set; }
+
+    /// <summary>대기 상태가 바뀔 때 발행됩니다.</summary>
+    public event Action<bool> WaitingForRemoteChanged;
+
+    private void SetWaitingForRemote(bool waiting)
+    {
+        if (IsWaitingForRemote == waiting) return;
+
+        IsWaitingForRemote = waiting;
+        WaitingForRemoteChanged?.Invoke(waiting);
+    }
 
     private void Awake()
     {
@@ -44,6 +63,7 @@ public sealed class RemoteTurnProvider : TurnProvider
             transport.StartMatch(gameManager.PlayerColor);
 
         // 상대 응답이 도착할 때까지 기다립니다. 기본 착수 경로로 넘어가면 안 되므로 true를 돌려줍니다.
+        SetWaitingForRemote(true);
         transport.NotifyRemoteTurnStarted(gameManager.CurrentTurn);
         return true;
     }
@@ -52,6 +72,7 @@ public sealed class RemoteTurnProvider : TurnProvider
     {
         if (transport == null || message == null) return;
 
+        message.Sequence = ++localSequence;
         transport.Send(message);
     }
 
@@ -59,16 +80,22 @@ public sealed class RemoteTurnProvider : TurnProvider
     {
         if (message == null) return;
 
-        // 늦게 도착했거나 이미 반영한 턴이면 버립니다. 네트워크가 붙으면 실제로 발생합니다.
-        if (message.Turn <= lastAppliedTurn)
+        // 늦게 도착했거나 이미 반영한 행동이면 버립니다. 네트워크가 붙으면 실제로 발생합니다.
+        if (message.Sequence <= lastAppliedSequence)
         {
-            Debug.LogWarning($"[Remote] 순서가 지난 메시지를 버립니다. {message} (마지막 반영 턴 {lastAppliedTurn})");
+            Debug.LogWarning($"[Remote] 순서가 지난 메시지를 버립니다. {message} (마지막 반영 #{lastAppliedSequence})");
             return;
         }
 
         GameManager gameManager = GameManager.Instance;
         if (gameManager == null || gameManager.IsEndGame) return;
         if (BoardManager.Instance == null) return;
+
+        PieceColor remoteColor = CardTargetRelationExtensions.Opposite(gameManager.PlayerColor);
+
+        // 카드는 같은 턴에 착수가 뒤따르므로, 착수를 받을 때만 대기를 해제합니다.
+        if (message.Kind != MatchMessageKind.Card)
+            SetWaitingForRemote(false);
 
         switch (message.Kind)
         {
@@ -77,13 +104,13 @@ public sealed class RemoteTurnProvider : TurnProvider
                 break;
 
             case MatchMessageKind.Resign:
-                lastAppliedTurn = message.Turn;
-                gameManager.OnSurrender(CardTargetRelationExtensions.Opposite(gameManager.PlayerColor));
+                lastAppliedSequence = message.Sequence;
+                gameManager.OnSurrender(remoteColor);
                 break;
 
             case MatchMessageKind.Card:
-                // 카드 동기화는 다음 단계에서 붙입니다.
-                Debug.Log($"[Remote] 카드 메시지는 아직 처리하지 않습니다. {message}");
+                lastAppliedSequence = message.Sequence;
+                RemoteCardExecutor.TryExecute(message, remoteColor);
                 break;
         }
     }
@@ -96,7 +123,7 @@ public sealed class RemoteTurnProvider : TurnProvider
             return;
         }
 
-        lastAppliedTurn = message.Turn;
+        lastAppliedSequence = message.Sequence;
 
         // ApplyUCIMove가 이동 연출 후 NextTurn까지 이어받으므로 턴 진행을 따로 부르지 않습니다.
         BoardManager.Instance.ApplyUCIMove(message.Uci);

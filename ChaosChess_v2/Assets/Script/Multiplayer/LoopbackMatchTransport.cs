@@ -22,6 +22,9 @@ public sealed class LoopbackMatchTransport : IMatchTransport
     // 같은 턴에 대해 중복으로 수를 요청하지 않도록 진행 중인 턴을 기억합니다.
     private int requestedTurn = -1;
 
+    // 상대가 보낸 것처럼 꾸미기 위해 이쪽에서도 일련번호를 매깁니다.
+    private int remoteSequence;
+
     public bool IsConnected => running;
 
     public event Action<MatchMessage> MessageReceived;
@@ -31,6 +34,7 @@ public sealed class LoopbackMatchTransport : IMatchTransport
         localColor = color;
         running = true;
         requestedTurn = -1;
+        remoteSequence = 0;
         Debug.Log($"[Loopback] 매치 시작. 로컬 진영: {localColor}");
     }
 
@@ -67,8 +71,11 @@ public sealed class LoopbackMatchTransport : IMatchTransport
                 // 응답을 기다리는 사이 턴이 바뀌었으면 늦게 도착한 수이므로 버립니다.
                 if (requestedTurn != turn) return;
 
-                Debug.Log($"[Loopback] 수신 [T{turn}] Move {uci}");
-                MessageReceived?.Invoke(MatchMessage.CreateMove(turn, uci));
+                MatchMessage message = MatchMessage.CreateMove(turn, uci);
+                message.Sequence = ++remoteSequence;
+
+                Debug.Log($"[Loopback] 수신 {message}");
+                MessageReceived?.Invoke(message);
             });
     }
 }

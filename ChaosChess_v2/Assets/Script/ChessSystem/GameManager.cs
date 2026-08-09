@@ -149,9 +149,7 @@ public class GameManager : MonoBehaviour
         CardSelectionState.Reset();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
-        turnProvider = turnProvider != null
-            ? turnProvider
-            : FindFirstObjectByType<TurnProvider>();
+        turnProvider = ResolveTurnProvider();
 
         FinishType = GameResult.None;
 
@@ -185,6 +183,46 @@ public class GameManager : MonoBehaviour
         // 이후 턴은 NextTurn 콜백이 이어받지만, 첫 수만은 여기서 요청해야 대국이 시작됩니다.
         if (!IsPlayerTurn)
             RequestAIMove();
+    }
+
+    /// <summary>
+    /// 게임 모드에 맞는 턴 프로바이더를 고릅니다.
+    /// 한 씬에 AI용과 원격용이 함께 있어도 모드가 결정하므로, 오브젝트를 켜고 끌 필요가 없습니다.
+    /// </summary>
+    private TurnProvider ResolveTurnProvider()
+    {
+        GameMode mode = GameCycleManager.Instance != null
+            ? GameCycleManager.Instance.CurrentMode
+            : GameMode.Run;
+        bool needRemote = mode == GameMode.Multiplayer;
+
+        TurnProvider resolved = null;
+
+        // 인스펙터로 지정한 프로바이더가 모드와 맞으면 그대로 씁니다.
+        if (turnProvider != null && turnProvider.IsRemote == needRemote)
+        {
+            resolved = turnProvider;
+        }
+        else
+        {
+            foreach (TurnProvider candidate in FindObjectsByType<TurnProvider>(FindObjectsSortMode.None))
+            {
+                if (candidate.IsRemote == needRemote)
+                {
+                    resolved = candidate;
+                    break;
+                }
+            }
+        }
+
+        Debug.Log($"[TurnProvider] 모드 {mode} " +
+                  $"(GameCycleManager {(GameCycleManager.Instance != null ? "있음" : "없음")}) " +
+                  $"→ 선택: {(resolved != null ? resolved.GetType().Name : "없음")}");
+
+        if (resolved == null && needRemote)
+            Debug.LogError("[Network] 멀티플레이 모드인데 씬에서 RemoteTurnProvider를 찾지 못했습니다.");
+
+        return resolved;
     }
 
     /// <summary>
@@ -542,6 +580,31 @@ public class GameManager : MonoBehaviour
             uci += char.ToLower(promotion);
 
         turnProvider.SendLocalAction(MatchMessage.CreateMove(CurrentTurn, uci));
+    }
+
+    /// <summary>
+    /// 로컬 플레이어가 사용한 카드를 원격에 알립니다.
+    /// 카드 효과가 턴을 넘길 수도 있으므로 효과를 적용하기 전에 불러야 합니다.
+    /// </summary>
+    public void NotifyLocalCard(CardDataSO cardSO, IReadOnlyList<Vector3Int> targets)
+    {
+        if (turnProvider == null || cardSO == null || BoardManager.Instance == null) return;
+
+        if (string.IsNullOrEmpty(cardSO.AiCardId))
+        {
+            Debug.LogWarning($"[Network] '{cardSO.CardName}'에 AiCardId가 없어 상대에게 전달할 수 없습니다.");
+            return;
+        }
+
+        string[] squares = null;
+        if (targets != null && targets.Count > 0)
+        {
+            squares = new string[targets.Count];
+            for (int i = 0; i < targets.Count; i++)
+                squares[i] = BoardManager.Instance.GridTOUCI(targets[i]);
+        }
+
+        turnProvider.SendLocalAction(MatchMessage.CreateCard(CurrentTurn, cardSO.AiCardId, squares));
     }
 
     // MoveSelected 안에서 플레이어 수 적용 후:
