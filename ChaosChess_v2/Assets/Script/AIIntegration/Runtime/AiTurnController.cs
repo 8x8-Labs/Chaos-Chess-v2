@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ChaosChess.AI.Decision;
 using ChaosChess.AI.Decision.CardTargeting;
 using ChaosChess.AI.Decision.TurnPlanning;
+using ChaosChess.AI.Domain.CardEffects;
 using ChaosChess.Unity.AIIntegration.Cards;
 using ChaosChess.Unity.AIIntegration.Engine;
 using ChaosChess.Unity.AIIntegration.Mapping;
@@ -24,6 +25,9 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
         [SerializeField] private int maximumEngineCallCount = 64;
         [SerializeField] private bool allowCoarseCardEffects = true;
         [SerializeField] private int cardUseScoreTolerance = 120;
+
+        [Header("AI 디버그")]
+        [SerializeField] private bool directCardFallbackEnabled = false;
 
         [Header("카테고리 점수")]
         [SerializeField] private int tacticalScore = 10;
@@ -244,6 +248,27 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
 
             if (!selectedPlan.UsesCard)
             {
+                if (directCardFallbackEnabled &&
+                    !HasExecutableCardPlan(result) &&
+                    TryCreateDirectFallbackCardPlan(
+                        hand,
+                        boardManager,
+                        mapping.GameState,
+                        actor,
+                        out TurnPlan directFallbackPlan))
+                {
+                    ExecuteCardPlanAndReanalyze(
+                        requestId,
+                        gameManager,
+                        boardManager,
+                        hand,
+                        directFallbackPlan,
+                        mapping.GameState,
+                        actor,
+                        fallbackMoveRequest);
+                    return;
+                }
+
                 ExecuteSelectedMoveOrFallback(
                     requestId,
                     gameManager,
@@ -539,7 +564,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 targetCandidateCount: Mathf.Max(1, targetCandidateCount),
                 postCardMoveCandidateCount: variationCount,
                 opponentReplyCandidateCount: 0,
-                beamWidth: Mathf.Max(1, variationCount),
+                beamWidth: CalculatePlannerBeamWidth(),
                 maximumEngineCallCount: Mathf.Max(1, maximumEngineCallCount),
                 allowCoarseCardEffects: allowCoarseCardEffects);
 
@@ -547,6 +572,14 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 moveFilter,
                 cardTargetingModule,
                 options: options);
+        }
+
+        private int CalculatePlannerBeamWidth()
+        {
+            int noCardCandidates = Mathf.Max(1, variationCount);
+            int cardCandidates = Mathf.Clamp(cardCandidateCount, 1, AiCardHand.MaxCards);
+            int postCardCandidates = Mathf.Max(1, variationCount);
+            return noCardCandidates + (cardCandidates * postCardCandidates);
         }
 
         private void ExecuteSelectedMoveOrFallback(
@@ -803,6 +836,85 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
                 $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
             return bestCardPlan;
+        }
+
+        private static bool HasExecutableCardPlan(TurnPlannerResult result)
+        {
+            if (result == null)
+                return false;
+
+            foreach (TurnPlanCandidate candidate in result.Candidates)
+            {
+                if (candidate != null &&
+                    candidate.HasPlan &&
+                    candidate.Plan != null &&
+                    candidate.Plan.UsesCard)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool TryCreateDirectFallbackCardPlan(
+            AiCardHand hand,
+            global::BoardManager boardManager,
+            ChaosChess.AI.Domain.GameState gameState,
+            ChaosChess.AI.Domain.PieceColor actor,
+            out TurnPlan plan)
+        {
+            plan = null;
+
+            if (hand == null || hand.AvailableCards == null)
+                return false;
+
+            foreach (GameObject cardObject in hand.AvailableCards)
+            {
+                global::CardData cardData = cardObject != null
+                    ? cardObject.GetComponent<global::CardData>()
+                    : null;
+                global::CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+                if (dataSO == null ||
+                    !dataSO.AiSupported ||
+                    string.IsNullOrWhiteSpace(dataSO.AiCardId))
+                {
+                    continue;
+                }
+
+                if (!targetPlanner.TryCreatePlan(
+                        dataSO.AiCardId,
+                        cardObject,
+                        boardManager,
+                        gameState,
+                        actor,
+                        out AiCardTargetPlan targetPlan,
+                        out AiCardExecutionStatus failureStatus,
+                        out string reason))
+                {
+                    Debug.Log(
+                        $"[AI Turn] Direct card fallback skipped: card={FormatUnityCard(dataSO)}, " +
+                        $"status={failureStatus}, reason={reason}");
+                    continue;
+                }
+
+                plan = new TurnPlan(
+                    actor,
+                    "direct-card-fallback",
+                    new TurnPlanScore(0, Array.Empty<TurnPlanScoreComponent>()),
+                    "direct-card|" + dataSO.AiCardId.ToLowerInvariant(),
+                    CardEffectApplicationStatus.Coarse,
+                    CardEffectApplicationCode.CoarseApplied,
+                    targetPlan.UsePlan,
+                    movePlan: null);
+
+                Debug.Log(
+                    $"[AI Turn] Direct card fallback selected '{dataSO.AiCardId}' because the planner produced no executable card candidates.");
+                return true;
+            }
+
+            Debug.Log("[AI Turn] Direct card fallback found no executable Unity card target.");
+            return false;
         }
 
         private static string FormatAvailableCards(IReadOnlyList<ChaosChess.AI.Domain.CardInfo> cards)
