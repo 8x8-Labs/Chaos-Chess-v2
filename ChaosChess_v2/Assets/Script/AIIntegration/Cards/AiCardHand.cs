@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +20,8 @@ namespace ChaosChess.Unity.AIIntegration.Cards
         public IReadOnlyList<GameObject> AvailableCards => CurrentCards;
         public int DefaultRemainingUses => Mathf.Max(0, defaultRemainingUses);
         public int Version => version;
+        public static event Action<AiCardHand> AnyChanged;
+        public event Action Changed;
 
         private void Awake()
         {
@@ -87,7 +90,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
 
             runtimeCardsInitialized = true;
-            version++;
+            NotifyChanged();
         }
 
         public void ReplaceRuntimeCards(IEnumerable<GameObject> cards)
@@ -106,7 +109,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             }
 
             runtimeCardsInitialized = true;
-            version++;
+            NotifyChanged();
         }
 
         private void OnValidate()
@@ -178,7 +181,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     continue;
 
                 cards.RemoveAt(i);
-                version++;
+                NotifyChanged();
                 return true;
             }
 
@@ -209,11 +212,18 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 }
 
                 cards.RemoveAt(i);
-                version++;
+                NotifyChanged();
                 return true;
             }
 
             return false;
+        }
+
+        private void NotifyChanged()
+        {
+            version++;
+            Changed?.Invoke();
+            AnyChanged?.Invoke(this);
         }
 
         public bool ContainsAiCardId(string aiCardId)
