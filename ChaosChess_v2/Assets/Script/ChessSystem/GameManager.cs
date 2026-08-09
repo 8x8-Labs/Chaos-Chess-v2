@@ -50,6 +50,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject variantUpgradeVfxPrefab;
 
     [SerializeField] private int curTurn;
+    /// <summary>현재 턴 번호입니다. 매치 메시지의 순서를 강제하는 데 씁니다.</summary>
+    public int CurrentTurn => curTurn;
+
     /// <summary>
     /// 지금이 플레이어 차례인지 여부입니다. PlayerColor가 백이면 기존의 "홀수 턴" 판정과 동일합니다.
     /// </summary>
@@ -115,6 +118,11 @@ public class GameManager : MonoBehaviour
     private Piece selectedPiece;
     private int extraPlayerActions = 0;
     private Piece lockedPiece = null;
+
+    // 승격 선택이 끝날 때까지 보류해 둔 로컬 착수입니다.
+    private Vector3Int pendingLocalMoveFrom;
+    private Vector3Int pendingLocalMoveTo;
+    private bool hasPendingLocalMove;
 
 
     private void Awake()
@@ -340,6 +348,13 @@ public class GameManager : MonoBehaviour
 
             IsGameInput = true;
 
+            // 승격 문자까지 확정됐으므로 이제 착수를 보냅니다.
+            if (hasPendingLocalMove)
+            {
+                hasPendingLocalMove = false;
+                NotifyLocalMove(pendingLocalMoveFrom, pendingLocalMoveTo, type);
+            }
+
             NextTurn(() => RequestAIMove());
         });
     }
@@ -514,6 +529,21 @@ public class GameManager : MonoBehaviour
         OnCardIntervalPauseChanged?.Invoke();
     }
 
+    /// <summary>
+    /// 로컬 착수를 원격에 알립니다. 승격은 문자가 정해진 뒤에 불러야 UCI가 완성됩니다.
+    /// 원격 대전이 아니면 프로바이더가 그대로 무시합니다.
+    /// </summary>
+    private void NotifyLocalMove(Vector3Int from, Vector3Int to, char promotion = '\0')
+    {
+        if (turnProvider == null || BoardManager.Instance == null) return;
+
+        string uci = BoardManager.Instance.GridTOUCI(from) + BoardManager.Instance.GridTOUCI(to);
+        if (promotion != '\0')
+            uci += char.ToLower(promotion);
+
+        turnProvider.SendLocalAction(MatchMessage.CreateMove(CurrentTurn, uci));
+    }
+
     // MoveSelected 안에서 플레이어 수 적용 후:
     private void MoveSelected(Vector3Int target)
     {
@@ -521,6 +551,9 @@ public class GameManager : MonoBehaviour
 
         Piece piece = selectedPiece;
         selectedPiece = null;
+
+        // MovePiece가 위치를 바꾸기 전에 출발 칸을 기록해 둡니다.
+        Vector3Int from = piece.Pos;
 
         if (BoardManager.Instance.MovePiece(piece, target))
         {
@@ -530,7 +563,15 @@ public class GameManager : MonoBehaviour
 
             // 프로모션이면 여기서 멈춤
             if (!IsGameInput)
+            {
+                // 승격 문자가 정해질 때까지 송신을 미룹니다.
+                pendingLocalMoveFrom = from;
+                pendingLocalMoveTo = target;
+                hasPendingLocalMove = true;
                 return;
+            }
+
+            NotifyLocalMove(from, target);
 
             DOVirtual.DelayedCall(Piece.MoveDuration, () =>
             {

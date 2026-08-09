@@ -24,4 +24,10 @@ public abstract class TurnProvider : MonoBehaviour
         GameManager gameManager,
         BoardManager boardManager,
         Action fallbackMoveRequest);
+
+    /// <summary>
+    /// 로컬 플레이어가 확정한 행동을 상대에게 알립니다.
+    /// 상대에게 전할 곳이 없는 프로바이더(예: AI 대전)는 그대로 무시하면 됩니다.
+    /// </summary>
+    public virtual void SendLocalAction(MatchMessage message) { }
 }
