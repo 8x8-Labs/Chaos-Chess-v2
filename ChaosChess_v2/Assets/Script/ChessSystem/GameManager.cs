@@ -59,7 +59,8 @@ public class GameManager : MonoBehaviour
     public bool IsGameInput = true;
     /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
     public bool AiAutoMoveEnabled = true;
-    [SerializeField] private AiTurnController aiTurnController;
+    /// <summary>이번 턴을 대신 둘 주체입니다. 지금은 AI 카드 컨트롤러이며, 멀티에서는 원격 프로바이더가 들어갑니다.</summary>
+    [SerializeField] private TurnProvider turnProvider;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
@@ -140,9 +141,9 @@ public class GameManager : MonoBehaviour
         CardSelectionState.Reset();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
-        aiTurnController = aiTurnController != null
-            ? aiTurnController
-            : FindFirstObjectByType<AiTurnController>();
+        turnProvider = turnProvider != null
+            ? turnProvider
+            : FindFirstObjectByType<TurnProvider>();
 
         FinishType = GameResult.None;
 
@@ -613,8 +614,8 @@ public class GameManager : MonoBehaviour
         if (!AiAutoMoveEnabled)
             return;
 
-        if (aiTurnController != null &&
-            aiTurnController.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
+        if (turnProvider != null &&
+            turnProvider.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
         {
             return;
         }
