@@ -223,7 +223,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             }
 
             string opponentReplyFen = CreateOpponentReplyFen(mapping.GameState);
-            PieceColor opponent = Opponent(UnityAiColorMapper.ToAiColor(gameManager.turnColor));
+            ChaosChess.AI.Domain.PieceColor opponent = Opponent(UnityAiColorMapper.ToAiColor(gameManager.turnColor));
 
             FairyStockfishBridge.Instance.AnalyzePositionAsync(
                 opponentReplyFen,
@@ -754,11 +754,11 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             return FenParser.Serialize(opponentBoard);
         }
 
-        private static PieceColor Opponent(PieceColor color)
+        private static ChaosChess.AI.Domain.PieceColor Opponent(ChaosChess.AI.Domain.PieceColor color)
         {
-            return color == PieceColor.White
-                ? PieceColor.Black
-                : PieceColor.White;
+            return color == ChaosChess.AI.Domain.PieceColor.White
+                ? ChaosChess.AI.Domain.PieceColor.Black
+                : ChaosChess.AI.Domain.PieceColor.White;
         }
 
         private int CalculatePlannerBeamWidth()
