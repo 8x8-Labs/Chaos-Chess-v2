@@ -15787,6 +15787,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 360a807d24539b94ab7a27782b4ad01a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugPlayAsBlack: 0
 --- !u!4 &962982684
 Transform:
   m_ObjectHideFlags: 0

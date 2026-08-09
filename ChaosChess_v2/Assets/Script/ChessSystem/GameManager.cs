@@ -163,11 +163,19 @@ public class GameManager : MonoBehaviour
         OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 
+        // 기물이 배치되기 전에 보드 시점을 먼저 확정합니다.
+        BoardManager.Instance.ApplyBoardView(PlayerColor);
+
         LoadMapManager();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+
+        // 플레이어가 흑이면 백(AI)이 선수입니다.
+        // 이후 턴은 NextTurn 콜백이 이어받지만, 첫 수만은 여기서 요청해야 대국이 시작됩니다.
+        if (!IsPlayerTurn)
+            RequestAIMove();
     }
 
     /// <summary>

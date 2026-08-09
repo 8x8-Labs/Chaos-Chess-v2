@@ -21,6 +21,13 @@ public class GameCycleManager : MonoBehaviour
     /// </summary>
     public PieceColor PlayerColor { get; private set; } = PieceColor.White;
 
+    [Header("디버그")]
+    [Tooltip("체크하면 런/연습을 흑으로 시작합니다. 보드 시점 검증용이며, 멀티 매칭이 붙으면 제거합니다.")]
+    [SerializeField] private bool debugPlayAsBlack;
+
+    /// <summary>런/연습 진입 시 사용할 기본 진영입니다. 평소에는 백입니다.</summary>
+    private PieceColor DefaultPlayerColor => debugPlayAsBlack ? PieceColor.Black : PieceColor.White;
+
     /// <summary>플레이어 진영을 지정합니다. 매치가 시작되기 전에 호출해야 합니다.</summary>
     public void SetPlayerColor(PieceColor color)
     {
@@ -43,7 +50,7 @@ public class GameCycleManager : MonoBehaviour
     public void StartGame()
     {
         CurrentMode = GameMode.Run;
-        PlayerColor = PieceColor.White;
+        PlayerColor = DefaultPlayerColor;
         PlayerState.Instance?.InitializeRun();
         MapManager.Instance?.Init();
     }
@@ -56,7 +63,7 @@ public class GameCycleManager : MonoBehaviour
     public void ContinueRun()
     {
         CurrentMode = GameMode.Run;
-        PlayerColor = PieceColor.White;
+        PlayerColor = DefaultPlayerColor;
         SaveManager.Instance.Load();
         SceneManager.sceneLoaded += OnSavedSceneLoaded;
         SceneLoadManager.Instance.LoadScene(SaveManager.Instance.GetSavedScene());
@@ -71,7 +78,7 @@ public class GameCycleManager : MonoBehaviour
     public void StartPractice(PracticeDifficulty difficulty)
     {
         CurrentMode = GameMode.Practice;
-        PlayerColor = PieceColor.White;
+        PlayerColor = DefaultPlayerColor;
         PlayerState.Instance.InitializeRun();
         GiveAllCards();
         MapManager.Instance.StartPractice(difficulty);
