@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ChaosChess.AI.Decision;
-using ChaosChess.AI.Decision.CardTargeting;
-using ChaosChess.AI.Decision.TurnPlanning;
 using ChaosChess.AI.Domain;
 using ChaosChess.AI.Fen;
 using ChaosChess.Unity.AIIntegration.Cards;
-using ChaosChess.Unity.AIIntegration.Engine;
 using ChaosChess.Unity.AIIntegration.Mapping;
 using ChaosChess.Unity.AIIntegration.Runtime;
 using UnityEditor;
@@ -27,44 +23,92 @@ public sealed class AiCardDebugWindow : EditorWindow
     [SerializeField] private AiTurnController aiTurnController;
     [SerializeField] private int selectedCatalogIndex;
     [SerializeField] private int selectedHandIndex;
-    [SerializeField] private int analysisDepth = 12;
-    [SerializeField] private int variationCount = 3;
-    [SerializeField] private int cardCandidateCount = MaxHandCards;
-    [SerializeField] private int targetCandidateCount = 32;
-    [SerializeField] private int maximumEngineCallCount = 64;
-    [SerializeField] private bool allowCoarseCardEffects = true;
-    [SerializeField] private int cardUseScoreTolerance = 120;
-    [SerializeField] private bool useEnemyColorAsActor = true;
-    [SerializeField] private global::PieceColor manualActorColor = global::PieceColor.Black;
-    [SerializeField] private bool executeNormalSelectedCard;
-    [SerializeField] private bool deterministicScanOrder = true;
-    [SerializeField] private int seed;
     [SerializeField] private string presetName = "default";
     [SerializeField] private int selectedTab;
     [SerializeField] private bool showSceneReferences;
-    [SerializeField] private bool showAdvancedSettings;
     [SerializeField] private bool showPreset;
     [SerializeField] private bool showSelectedCardDetails;
+    [SerializeField] private int allCardsBatchIndex;
 
     private readonly AiCardTargetPlanner targetPlanner = new AiCardTargetPlanner();
     private readonly AiCardExecutor cardExecutor = new AiCardExecutor();
-    private readonly CardTargetingModule cardTargetingModule = new CardTargetingModule();
     private readonly List<CardData> catalog = new List<CardData>();
     private readonly List<GameObject> handCards = new List<GameObject>();
     private readonly StringBuilder logBuilder = new StringBuilder(8192);
     private Vector2 scroll;
     private Vector2 catalogScroll;
     private Vector2 handScroll;
-    private bool isAnalysisRunning;
+    private Vector2 handPageScroll;
     private int observedHandVersion = -1;
     private string lastReferenceWarning;
     private bool shouldAutoResolveSceneReferences = true;
-    private static readonly string[] Tabs = { "Hand", "Run", "Cards", "Log" };
+    private AiCardHand subscribedHand;
+    private bool autoScanDirty = true;
+    private string lastAutoScanFingerprint;
+    private double nextAutoScanAt;
+    private static readonly string[] Tabs = { "Hand", "Cards", "Log" };
+    private static readonly TestHandPreset[] TestHandPresets =
+    {
+        new TestHandPreset(
+            "Likely Broken",
+            "Definitions or generated moves look likely to diverge from Unity behavior",
+            new[] { "charge", "gods_move", "thunderclap_flash", "overbearing" }),
+        new TestHandPreset(
+            "Coarse Piece",
+            "Piece-attached effects are not represented exactly in AI GameState",
+            new[] { "desperado", "sunset_blade", "giant", "father_enemy" }),
+        new TestHandPreset(
+            "Coarse Move",
+            "Movement overrides that do not have immediate post-card move generation",
+            new[] { "agile", "caterpillar", "concentration", "limitless" }),
+        new TestHandPreset(
+            "Immediate Move",
+            "One-turn movement overrides with direct generated post-card moves",
+            new[] { "sneak_pawn", "aim", "fast_march", "thunderclap_flash" }),
+        new TestHandPreset(
+            "Random Coarse",
+            "Random or expected-value cards where actual result can diverge after execution",
+            new[] { "gaslighting", "magnet", "arena", "honey_trap" }),
+        new TestHandPreset(
+            "Global Coarse",
+            "Ongoing global effects that are planned coarsely",
+            new[] { "checkmate_declaration", "mutiny", "stag_fight", "windmill" }),
+        new TestHandPreset(
+            "Board Coarse",
+            "Board-wide effects with coarse/random planning",
+            new[] { "democracy", "destroyer_tank_cards", "shuffle_board", "position_swap" }),
+        new TestHandPreset(
+            "Deferred Tiles",
+            "Tile effects with heuristic or deferred behavior",
+            new[] { "cobweb", "psilocybin_mushroom", "obey_order", "fire" }),
+        new TestHandPreset(
+            "Tile Verify",
+            "Tile effects that should be checked against actual movement follow-up",
+            new[] { "jumping_platform", "time_bomb", "blessing", "peace_zone" }),
+        new TestHandPreset(
+            "Target Edge",
+            "Cards with stricter target constraints or multi-target behavior",
+            new[] { "dark_hand", "dimension_disturbance", "transmigration", "weird_castling" })
+    };
 
     [Serializable]
     private sealed class PresetData
     {
         public List<string> paths = new List<string>();
+    }
+
+    private sealed class TestHandPreset
+    {
+        public TestHandPreset(string name, string description, string[] cardIds)
+        {
+            Name = name;
+            Description = description;
+            CardIds = cardIds;
+        }
+
+        public string Name { get; }
+        public string Description { get; }
+        public string[] CardIds { get; }
     }
 
     [MenuItem("Tools/Chaos Chess/AI Card Debugger")]
@@ -76,6 +120,7 @@ public sealed class AiCardDebugWindow : EditorWindow
     private void OnEnable()
     {
         EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        AiCardHand.AnyChanged += OnAnyAiCardHandChanged;
         shouldAutoResolveSceneReferences = true;
         ResolveSceneReferences();
         LoadRegistryIfNeeded();
@@ -86,16 +131,38 @@ public sealed class AiCardDebugWindow : EditorWindow
     private void OnDisable()
     {
         EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        AiCardHand.AnyChanged -= OnAnyAiCardHandChanged;
+        UnsubscribeHandChanged();
     }
 
     private void OnPlayModeStateChanged(PlayModeStateChange state)
     {
         shouldAutoResolveSceneReferences = true;
+        UnsubscribeHandChanged();
+        EditorApplication.delayCall += () =>
+        {
+            if (this == null)
+                return;
+
+            ResolveSceneReferences();
+            LoadRegistryIfNeeded();
+            RefreshCatalog();
+            RefreshHandSnapshot();
+            Repaint();
+        };
     }
 
     private void OnHierarchyChange()
     {
         shouldAutoResolveSceneReferences = true;
+    }
+
+    private void OnProjectChange()
+    {
+        LoadRegistryIfNeeded();
+        RefreshCatalog();
+        QueueAutoScan();
+        Repaint();
     }
 
     private void OnInspectorUpdate()
@@ -106,9 +173,14 @@ public sealed class AiCardDebugWindow : EditorWindow
             return;
 
         if (observedHandVersion == aiCardHand.Version && AreHandSnapshotsEqual(aiCardHand.AvailableCards))
+        {
+            TryAutoScanCandidates();
             return;
+        }
 
         RefreshHandSnapshot();
+        QueueAutoScan();
+        TryAutoScanCandidates(force: true);
         Repaint();
     }
 
@@ -118,6 +190,7 @@ public sealed class AiCardDebugWindow : EditorWindow
 
         DrawCompactHeader();
 
+        selectedTab = Mathf.Clamp(selectedTab, 0, Tabs.Length - 1);
         selectedTab = GUILayout.Toolbar(selectedTab, Tabs, GUILayout.Height(28f));
         EditorGUILayout.Space(6f);
 
@@ -127,12 +200,9 @@ public sealed class AiCardDebugWindow : EditorWindow
                 DrawCompactHandView();
                 break;
             case 1:
-                DrawCompactRunView();
-                break;
-            case 2:
                 DrawCompactCatalogView();
                 break;
-            case 3:
+            case 2:
                 DrawLogPanel();
                 break;
         }
@@ -146,18 +216,6 @@ public sealed class AiCardDebugWindow : EditorWindow
             {
                 EditorGUILayout.LabelField("AI Card Debugger", EditorStyles.boldLabel);
                 GUILayout.FlexibleSpace();
-
-                if (GUILayout.Button("Find", GUILayout.Width(64f)))
-                {
-                    ResolveSceneReferences();
-                    RefreshHandSnapshot();
-                }
-
-                if (GUILayout.Button("Refresh", GUILayout.Width(72f)))
-                {
-                    RefreshCatalog();
-                    RefreshHandSnapshot();
-                }
             }
 
             using (new EditorGUILayout.HorizontalScope())
@@ -180,11 +238,17 @@ public sealed class AiCardDebugWindow : EditorWindow
             {
                 using (new EditorGUI.IndentLevelScope())
                 {
+                    EditorGUI.BeginChangeCheck();
                     registry = (CardLabRegistrySO)EditorGUILayout.ObjectField("Registry", registry, typeof(CardLabRegistrySO), false);
                     aiCardHand = (AiCardHand)EditorGUILayout.ObjectField("AI Hand", aiCardHand, typeof(AiCardHand), true);
                     boardManager = (BoardManager)EditorGUILayout.ObjectField("Board", boardManager, typeof(BoardManager), true);
                     gameManager = (GameManager)EditorGUILayout.ObjectField("Game", gameManager, typeof(GameManager), true);
                     aiTurnController = (AiTurnController)EditorGUILayout.ObjectField("AI Turn", aiTurnController, typeof(AiTurnController), true);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        UpdateHandChangedSubscription();
+                        RefreshHandSnapshot();
+                    }
                 }
             }
         }
@@ -192,55 +256,60 @@ public sealed class AiCardDebugWindow : EditorWindow
 
     private void DrawCompactHandView()
     {
-        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        handPageScroll = EditorGUILayout.BeginScrollView(handPageScroll);
+        using (new EditorGUILayout.VerticalScope())
         {
-            using (new EditorGUILayout.HorizontalScope())
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                EditorGUILayout.LabelField("AI Hand", EditorStyles.boldLabel);
-                EditorGUILayout.LabelField(handCards.Count + "/" + MaxHandCards, GUILayout.Width(48f));
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Clear", GUILayout.Width(72f)))
-                    ClearHand();
-            }
-
-            handScroll = EditorGUILayout.BeginScrollView(handScroll, GUILayout.MinHeight(220f));
-            for (int i = 0; i < handCards.Count; i++)
-                DrawHandRow(i);
-            EditorGUILayout.EndScrollView();
-
-            if (handCards.Count == 0)
-                EditorGUILayout.HelpBox("Cards 탭에서 AI 손패에 카드를 추가하세요.", MessageType.Info);
-            else if (handCards.Count >= MaxHandCards)
-                EditorGUILayout.HelpBox("AI 손패는 최대 4장입니다.", MessageType.None);
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                using (new EditorGUI.DisabledScope(selectedHandIndex <= 0 || selectedHandIndex >= handCards.Count))
+                using (new EditorGUILayout.HorizontalScope())
                 {
-                    if (GUILayout.Button("Priority Up", GUILayout.Height(30f)))
-                        MoveHandCard(selectedHandIndex, selectedHandIndex - 1);
+                    EditorGUILayout.LabelField("AI Hand", EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(handCards.Count + "/" + MaxHandCards, GUILayout.Width(48f));
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button("Clear", GUILayout.Width(72f)))
+                        ClearHand();
+                }
+
+                handScroll = EditorGUILayout.BeginScrollView(handScroll, GUILayout.MinHeight(160f), GUILayout.MaxHeight(240f));
+                for (int i = 0; i < handCards.Count; i++)
+                    DrawHandRow(i);
+                EditorGUILayout.EndScrollView();
+
+                if (handCards.Count == 0)
+                    EditorGUILayout.HelpBox("Cards 탭에서 AI 손패에 카드를 추가하세요.", MessageType.Info);
+                else if (handCards.Count >= MaxHandCards)
+                    EditorGUILayout.HelpBox("AI 손패는 최대 4장입니다.", MessageType.None);
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    using (new EditorGUI.DisabledScope(selectedHandIndex <= 0 || selectedHandIndex >= handCards.Count))
+                    {
+                        if (GUILayout.Button("Priority Up", GUILayout.Height(30f)))
+                            MoveHandCard(selectedHandIndex, selectedHandIndex - 1);
+                    }
+                }
+
+                DrawSelectedCardExecutionControls(30f);
+                DrawForceStatusBox();
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                using (new EditorGUI.DisabledScope(aiTurnController == null || !aiTurnController.HasQueuedForcedCard))
+                {
+                    if (GUILayout.Button("Clear Queued", GUILayout.Height(26f)))
+                            aiTurnController.ClearQueuedForcedCard();
+                    }
                 }
             }
 
-            DrawSelectedCardExecutionControls(30f);
-            DrawForceStatusBox();
-
-            using (new EditorGUILayout.HorizontalScope())
+            showPreset = EditorGUILayout.Foldout(showPreset, "Preset", true);
+            if (showPreset)
             {
-                if (GUILayout.Button("Scan Candidates", GUILayout.Height(28f)))
-                    ScanCurrentHandCandidates();
-
-                if (GUILayout.Button("Capture Board", GUILayout.Height(28f)))
-                    CaptureBoardSummary();
+                using (new EditorGUI.IndentLevelScope())
+                    DrawPresetControls();
             }
         }
-
-        showPreset = EditorGUILayout.Foldout(showPreset, "Preset", true);
-        if (showPreset)
-        {
-            using (new EditorGUI.IndentLevelScope())
-                DrawPresetControls();
-        }
+        EditorGUILayout.EndScrollView();
     }
 
     private void DrawHandRow(int index)
@@ -264,65 +333,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         }
     }
 
-    private void DrawCompactRunView()
-    {
-        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-        {
-            EditorGUILayout.LabelField("Run", EditorStyles.boldLabel);
-
-            using (new EditorGUI.DisabledScope(isAnalysisRunning))
-            {
-                if (GUILayout.Button("Run Normal AI Selection", GUILayout.Height(36f)))
-                    RunNormalAiSelection();
-            }
-
-            DrawSelectedCardExecutionControls(36f);
-
-            DrawForceStatusBox();
-
-            using (new EditorGUI.DisabledScope(selectedHandIndex < 0 || selectedHandIndex >= handCards.Count))
-            {
-                if (GUILayout.Button("Check Force Conditions", GUILayout.Height(26f)))
-                    CheckSelectedForceConditions();
-            }
-
-            using (new EditorGUI.DisabledScope(aiTurnController == null || !aiTurnController.HasQueuedForcedCard))
-            {
-                if (GUILayout.Button("Clear Queued Forced Card", GUILayout.Height(26f)))
-                    aiTurnController.ClearQueuedForcedCard();
-            }
-
-            if (GUILayout.Button("Scan Current Hand Candidates", GUILayout.Height(30f)))
-                ScanCurrentHandCandidates();
-
-            showAdvancedSettings = EditorGUILayout.Foldout(showAdvancedSettings, "Advanced Settings", true);
-            if (showAdvancedSettings)
-            {
-                using (new EditorGUI.IndentLevelScope())
-                {
-                    analysisDepth = EditorGUILayout.IntField("Analysis Depth", Mathf.Max(1, analysisDepth));
-                    variationCount = EditorGUILayout.IntField("Variation Count", Mathf.Max(1, variationCount));
-                    cardCandidateCount = EditorGUILayout.IntSlider("Card Candidates", cardCandidateCount, 1, MaxHandCards);
-                    targetCandidateCount = EditorGUILayout.IntField("Target Candidates", Mathf.Max(1, targetCandidateCount));
-                    maximumEngineCallCount = EditorGUILayout.IntField("Max Engine Calls", Mathf.Max(1, maximumEngineCallCount));
-                    allowCoarseCardEffects = EditorGUILayout.Toggle("Allow Coarse Effects", allowCoarseCardEffects);
-                    cardUseScoreTolerance = EditorGUILayout.IntField("Card Use Tolerance", Mathf.Max(0, cardUseScoreTolerance));
-                    useEnemyColorAsActor = EditorGUILayout.Toggle("Use Enemy As Actor", useEnemyColorAsActor);
-                    using (new EditorGUI.DisabledScope(useEnemyColorAsActor))
-                    {
-                        manualActorColor = (global::PieceColor)EditorGUILayout.EnumPopup("Manual Actor", manualActorColor);
-                    }
-                    deterministicScanOrder = EditorGUILayout.Toggle("Deterministic", deterministicScanOrder);
-                    seed = EditorGUILayout.IntField("Seed / Run Id", seed);
-                    executeNormalSelectedCard = EditorGUILayout.Toggle("Execute Normal Card", executeNormalSelectedCard);
-                    EditorGUILayout.HelpBox(
-                        "강제 실행은 기존 AiCardExecutor.ExecutePlan 경로를 사용하므로 AI/Unity 실행 조건을 우회하지 않습니다.",
-                        MessageType.Info);
-                }
-            }
-        }
-    }
-
     private void DrawCompactCatalogView()
     {
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
@@ -332,12 +342,6 @@ public sealed class AiCardDebugWindow : EditorWindow
                 EditorGUILayout.LabelField("Cards", EditorStyles.boldLabel);
                 GUILayout.FlexibleSpace();
                 EditorGUILayout.LabelField(catalog.Count.ToString(), GUILayout.Width(40f));
-
-                if (GUILayout.Button("Scan", GUILayout.Width(72f)))
-                {
-                    ScanRegistry();
-                    RefreshCatalog();
-                }
             }
 
             catalogScroll = EditorGUILayout.BeginScrollView(catalogScroll, GUILayout.MinHeight(280f));
@@ -375,180 +379,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         }
     }
 
-    private void DrawToolbar()
-    {
-        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-        {
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                registry = (CardLabRegistrySO)EditorGUILayout.ObjectField("Registry", registry, typeof(CardLabRegistrySO), false);
-                aiCardHand = (AiCardHand)EditorGUILayout.ObjectField("AI Hand", aiCardHand, typeof(AiCardHand), true);
-            }
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                boardManager = (BoardManager)EditorGUILayout.ObjectField("Board", boardManager, typeof(BoardManager), true);
-                gameManager = (GameManager)EditorGUILayout.ObjectField("Game", gameManager, typeof(GameManager), true);
-                aiTurnController = (AiTurnController)EditorGUILayout.ObjectField("AI Turn", aiTurnController, typeof(AiTurnController), true);
-            }
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                if (GUILayout.Button("Find Scene Objects", GUILayout.Width(140f)))
-                {
-                    ResolveSceneReferences();
-                    RefreshHandSnapshot();
-                }
-
-                if (GUILayout.Button("Scan Card Prefabs", GUILayout.Width(140f)))
-                {
-                    ScanRegistry();
-                    RefreshCatalog();
-                }
-
-                if (GUILayout.Button("Refresh", GUILayout.Width(90f)))
-                {
-                    RefreshCatalog();
-                    RefreshHandSnapshot();
-                }
-
-                GUILayout.FlexibleSpace();
-                EditorGUILayout.LabelField("Scene", UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, GUILayout.Width(220f));
-            }
-        }
-    }
-
-    private void DrawCatalogPanel()
-    {
-        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox, GUILayout.Width(position.width * 0.32f)))
-        {
-            EditorGUILayout.LabelField("Card Catalog", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Prefabs", catalog.Count.ToString());
-
-            catalogScroll = EditorGUILayout.BeginScrollView(catalogScroll, GUILayout.Height(260f));
-            for (int i = 0; i < catalog.Count; i++)
-            {
-                CardData card = catalog[i];
-                CardDataSO so = card != null ? card.DataSO : null;
-                bool selected = i == selectedCatalogIndex;
-                string label = FormatCardLabel(card);
-
-                using (new EditorGUILayout.HorizontalScope(selected ? EditorStyles.helpBox : GUIStyle.none))
-                {
-                    if (GUILayout.Toggle(selected, GUIContent.none, GUILayout.Width(18f)))
-                        selectedCatalogIndex = i;
-
-                    EditorGUILayout.LabelField(label);
-                    using (new EditorGUI.DisabledScope(so == null || !so.AiSupported))
-                    {
-                        if (GUILayout.Button("+", GUILayout.Width(28f)))
-                            AddCardToHand(card);
-                    }
-                }
-            }
-            EditorGUILayout.EndScrollView();
-
-            using (new EditorGUI.DisabledScope(!HasSelectedCatalogCard()))
-            {
-                if (GUILayout.Button("Add Selected To AI Hand"))
-                    AddCardToHand(catalog[selectedCatalogIndex]);
-            }
-
-            if (HasSelectedCatalogCard())
-                DrawCardDetails(catalog[selectedCatalogIndex]);
-        }
-    }
-
-    private void DrawHandPanel()
-    {
-        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox, GUILayout.Width(position.width * 0.30f)))
-        {
-            EditorGUILayout.LabelField("AI Hand", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Cards", handCards.Count.ToString());
-
-            handScroll = EditorGUILayout.BeginScrollView(handScroll, GUILayout.Height(220f));
-            for (int i = 0; i < handCards.Count; i++)
-            {
-                GameObject cardObject = handCards[i];
-                CardData card = cardObject != null ? cardObject.GetComponent<CardData>() : null;
-                bool selected = i == selectedHandIndex;
-
-                using (new EditorGUILayout.HorizontalScope(selected ? EditorStyles.helpBox : GUIStyle.none))
-                {
-                    if (GUILayout.Toggle(selected, GUIContent.none, GUILayout.Width(18f)))
-                        selectedHandIndex = i;
-
-                    EditorGUILayout.LabelField(FormatCardLabel(card));
-                    if (GUILayout.Button("X", GUILayout.Width(28f)))
-                    {
-                        RemoveHandCard(i);
-                        GUIUtility.ExitGUI();
-                    }
-                }
-            }
-            EditorGUILayout.EndScrollView();
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                using (new EditorGUI.DisabledScope(selectedHandIndex <= 0 || selectedHandIndex >= handCards.Count))
-                {
-                    if (GUILayout.Button("Priority Up"))
-                        MoveHandCard(selectedHandIndex, selectedHandIndex - 1);
-                }
-            }
-
-            DrawSelectedCardExecutionControls(22f);
-
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                if (GUILayout.Button("Clear Hand"))
-                    ClearHand();
-
-                if (GUILayout.Button("Scan Candidates"))
-                    ScanCurrentHandCandidates();
-            }
-
-            DrawPresetControls();
-        }
-    }
-
-    private void DrawRunPanel()
-    {
-        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
-        {
-            EditorGUILayout.LabelField("Selection / Execution", EditorStyles.boldLabel);
-            analysisDepth = EditorGUILayout.IntField("Analysis Depth", Mathf.Max(1, analysisDepth));
-            variationCount = EditorGUILayout.IntField("Variation Count", Mathf.Max(1, variationCount));
-            cardCandidateCount = EditorGUILayout.IntSlider("Card Candidates", cardCandidateCount, 1, MaxHandCards);
-            targetCandidateCount = EditorGUILayout.IntField("Target Candidates", Mathf.Max(1, targetCandidateCount));
-            maximumEngineCallCount = EditorGUILayout.IntField("Max Engine Calls", Mathf.Max(1, maximumEngineCallCount));
-            allowCoarseCardEffects = EditorGUILayout.Toggle("Allow Coarse Effects", allowCoarseCardEffects);
-            cardUseScoreTolerance = EditorGUILayout.IntField("Card Use Tolerance", Mathf.Max(0, cardUseScoreTolerance));
-            useEnemyColorAsActor = EditorGUILayout.Toggle("Use Enemy As Actor", useEnemyColorAsActor);
-            using (new EditorGUI.DisabledScope(useEnemyColorAsActor))
-            {
-                manualActorColor = (global::PieceColor)EditorGUILayout.EnumPopup("Manual Actor", manualActorColor);
-            }
-            deterministicScanOrder = EditorGUILayout.Toggle("Deterministic", deterministicScanOrder);
-            seed = EditorGUILayout.IntField("Seed / Run Id", seed);
-            executeNormalSelectedCard = EditorGUILayout.Toggle("Execute Normal Card", executeNormalSelectedCard);
-
-            using (new EditorGUI.DisabledScope(isAnalysisRunning))
-            {
-                if (GUILayout.Button("Run Normal AI Selection"))
-                    RunNormalAiSelection();
-            }
-
-            if (GUILayout.Button("Capture Board Summary"))
-                CaptureBoardSummary();
-
-            EditorGUILayout.Space(8f);
-            EditorGUILayout.HelpBox(
-                "Forced execution uses AiCardExecutor.ExecutePlan and still passes AI plan validation, Unity target validation, and ICard.Execute.",
-                MessageType.Info);
-        }
-    }
-
     private void DrawSelectedCardExecutionControls(float height)
     {
         bool hasSelectedCard = selectedHandIndex >= 0 && selectedHandIndex < handCards.Count;
@@ -571,6 +401,9 @@ public sealed class AiCardDebugWindow : EditorWindow
     private void DrawPresetControls()
     {
         EditorGUILayout.Space(8f);
+        DrawQuickTestHandControls();
+
+        EditorGUILayout.Space(6f);
         EditorGUILayout.LabelField("Preset", EditorStyles.boldLabel);
         presetName = EditorGUILayout.TextField("Name", presetName);
 
@@ -581,6 +414,55 @@ public sealed class AiCardDebugWindow : EditorWindow
 
             if (GUILayout.Button("Load"))
                 LoadPreset();
+        }
+    }
+
+    private void DrawQuickTestHandControls()
+    {
+        EditorGUILayout.LabelField("Quick Test Hands", EditorStyles.boldLabel);
+        foreach (TestHandPreset preset in TestHandPresets)
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(new GUIContent(preset.Name, preset.Description), GUILayout.Width(110f));
+                if (GUILayout.Button("Load", GUILayout.Width(72f)))
+                    LoadTestHandPreset(preset);
+            }
+        }
+
+        EditorGUILayout.Space(8f);
+        DrawAllCardsBatchControls();
+    }
+
+    private void DrawAllCardsBatchControls()
+    {
+        List<CardData> testableCards = GetTestableCatalogCards();
+        int batchCount = Mathf.Max(1, Mathf.CeilToInt(testableCards.Count / (float)MaxHandCards));
+        allCardsBatchIndex = Mathf.Clamp(allCardsBatchIndex, 0, batchCount - 1);
+
+        EditorGUILayout.LabelField("All Supported Cards", EditorStyles.boldLabel);
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            EditorGUILayout.LabelField(testableCards.Count + " cards", GUILayout.Width(80f));
+            EditorGUILayout.LabelField((allCardsBatchIndex + 1) + "/" + batchCount, GUILayout.Width(56f));
+
+            using (new EditorGUI.DisabledScope(testableCards.Count == 0 || allCardsBatchIndex <= 0))
+            {
+                if (GUILayout.Button("Prev", GUILayout.Width(56f)))
+                    LoadAllCardsBatch(allCardsBatchIndex - 1);
+            }
+
+            using (new EditorGUI.DisabledScope(testableCards.Count == 0))
+            {
+                if (GUILayout.Button("Load", GUILayout.Width(56f)))
+                    LoadAllCardsBatch(allCardsBatchIndex);
+            }
+
+            using (new EditorGUI.DisabledScope(testableCards.Count == 0 || allCardsBatchIndex >= batchCount - 1))
+            {
+                if (GUILayout.Button("Next", GUILayout.Width(56f)))
+                    LoadAllCardsBatch(allCardsBatchIndex + 1);
+            }
         }
     }
 
@@ -619,7 +501,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         EditorGUILayout.LabelField("Type", so.Type.ToString());
         EditorGUILayout.LabelField("Category", so.AiCategory.ToString());
         EditorGUILayout.LabelField("Supported", so.AiSupported.ToString());
-        EditorGUILayout.LabelField("Auto Planner", IsKnownAutomaticPlannerEffectUnsupported(so.AiCardId) ? "Effect Unsupported" : "Effect Simulated");
         EditorGUILayout.LabelField("Piece Targets", so.RequiredPieceCount.ToString());
         EditorGUILayout.LabelField("Tile Targets", so.TileCount.ToString());
     }
@@ -638,22 +519,35 @@ public sealed class AiCardDebugWindow : EditorWindow
         AiCardHand controllerHand = aiTurnController != null ? aiTurnController.CardHand : null;
         if (controllerHand != null)
         {
-            if (aiCardHand != null && aiCardHand != controllerHand)
+            if (HasDontSaveFlags(controllerHand))
             {
-                string warning = "Editor AI Hand reference differed from AiTurnController.CardHand. Using controller hand.";
-                if (!string.Equals(lastReferenceWarning, warning, StringComparison.Ordinal))
-                {
-                    AppendLog(warning);
-                    lastReferenceWarning = warning;
-                }
+                RefreshHandSnapshot(controllerHand);
             }
+            else
+            {
+                if (aiCardHand != null && aiCardHand != controllerHand)
+                {
+                    string warning = "Editor AI Hand reference differed from AiTurnController.CardHand. Using controller hand.";
+                    if (!string.Equals(lastReferenceWarning, warning, StringComparison.Ordinal))
+                    {
+                        AppendLog(warning);
+                        lastReferenceWarning = warning;
+                    }
+                }
 
-            aiCardHand = controllerHand;
+                aiCardHand = controllerHand;
+            }
         }
         else if (aiCardHand == null)
         {
-            aiCardHand = UnityEngine.Object.FindFirstObjectByType<AiCardHand>();
+            AiCardHand foundHand = UnityEngine.Object.FindFirstObjectByType<AiCardHand>();
+            if (foundHand != null && !HasDontSaveFlags(foundHand))
+                aiCardHand = foundHand;
+            else if (foundHand != null)
+                RefreshHandSnapshot(foundHand);
         }
+
+        UpdateHandChangedSubscription();
     }
 
     private void EnsureAutoSceneReferences()
@@ -690,60 +584,28 @@ public sealed class AiCardDebugWindow : EditorWindow
         registry = AssetDatabase.LoadAssetAtPath<CardLabRegistrySO>(path);
     }
 
-    private void ScanRegistry()
+    private void RefreshCatalog()
     {
-        if (registry == null)
+        catalog.Clear();
+        var seen = new HashSet<CardData>();
+
+        if (registry != null && registry.Cards != null)
         {
-            AppendLog("Registry is not assigned. Create or assign CardLabRegistrySO first.");
-            return;
+            foreach (CardData card in registry.Cards)
+            {
+                if (card != null && seen.Add(card))
+                    catalog.Add(card);
+            }
         }
 
         string[] guids = AssetDatabase.FindAssets("t:Prefab", new[] { CardPrefabFolder });
-        var found = new List<CardData>();
-        var seen = new HashSet<CardData>();
-
         foreach (string guid in guids)
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             CardData card = prefab != null ? prefab.GetComponent<CardData>() : null;
             if (card != null && seen.Add(card))
-                found.Add(card);
-        }
-
-        found.Sort((a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
-
-        Undo.RecordObject(registry, "Scan AI Card Debug Registry");
-        registry.Cards = found;
-        EditorUtility.SetDirty(registry);
-        AssetDatabase.SaveAssetIfDirty(registry);
-        AppendLog("Scanned card prefabs: " + found.Count);
-    }
-
-    private void RefreshCatalog()
-    {
-        catalog.Clear();
-
-        if (registry != null && registry.Cards != null)
-        {
-            foreach (CardData card in registry.Cards)
-            {
-                if (card != null)
-                    catalog.Add(card);
-            }
-        }
-
-        if (catalog.Count == 0)
-        {
-            string[] guids = AssetDatabase.FindAssets("t:Prefab", new[] { CardPrefabFolder });
-            foreach (string guid in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                CardData card = prefab != null ? prefab.GetComponent<CardData>() : null;
-                if (card != null)
-                    catalog.Add(card);
-            }
+                catalog.Add(card);
         }
 
         catalog.Sort((a, b) => string.Compare(FormatCardLabel(a), FormatCardLabel(b), StringComparison.Ordinal));
@@ -766,6 +628,85 @@ public sealed class AiCardDebugWindow : EditorWindow
         }
 
         observedHandVersion = aiCardHand != null ? aiCardHand.Version : -1;
+        selectedHandIndex = ClampHandIndex(selectedHandIndex);
+    }
+
+    private void UpdateHandChangedSubscription()
+    {
+        if (subscribedHand == aiCardHand)
+            return;
+
+        UnsubscribeHandChanged();
+
+        subscribedHand = aiCardHand;
+        if (subscribedHand != null)
+            subscribedHand.Changed += OnAiCardHandChanged;
+    }
+
+    private void UnsubscribeHandChanged()
+    {
+        if (subscribedHand == null)
+            return;
+
+        subscribedHand.Changed -= OnAiCardHandChanged;
+        subscribedHand = null;
+    }
+
+    private void OnAiCardHandChanged()
+    {
+        RefreshHandSnapshot();
+        QueueAutoScan();
+        EditorApplication.QueuePlayerLoopUpdate();
+        Repaint();
+    }
+
+    private void OnAnyAiCardHandChanged(AiCardHand changedHand)
+    {
+        if (changedHand == null)
+            return;
+
+        if (HasDontSaveFlags(changedHand))
+        {
+            if (aiCardHand == null || aiCardHand == changedHand)
+            {
+                RefreshHandSnapshot(changedHand);
+                QueueAutoScan();
+            }
+
+            EditorApplication.QueuePlayerLoopUpdate();
+            Repaint();
+            return;
+        }
+
+        if (aiCardHand != null && aiCardHand != changedHand)
+            return;
+
+        if (aiCardHand == null)
+            aiCardHand = changedHand;
+
+        UpdateHandChangedSubscription();
+        RefreshHandSnapshot();
+        QueueAutoScan();
+        EditorApplication.QueuePlayerLoopUpdate();
+        Repaint();
+    }
+
+    private void RefreshHandSnapshot(AiCardHand sourceHand)
+    {
+        handCards.Clear();
+
+        if (sourceHand != null && sourceHand.AvailableCards != null)
+        {
+            foreach (GameObject card in sourceHand.AvailableCards)
+            {
+                if (handCards.Count >= MaxHandCards)
+                    break;
+
+                handCards.Add(card);
+            }
+        }
+
+        observedHandVersion = sourceHand != null ? sourceHand.Version : -1;
         selectedHandIndex = ClampHandIndex(selectedHandIndex);
     }
 
@@ -822,8 +763,143 @@ public sealed class AiCardDebugWindow : EditorWindow
         handCards.Add(prefab);
         ApplyHandCardsToComponent();
         RefreshHandSnapshot();
+        QueueAutoScan();
+        TryAutoScanCandidates(force: true);
         selectedHandIndex = handCards.Count - 1;
         AppendLog("Added card to AI hand: " + FormatCardLabel(card));
+    }
+
+    private void LoadTestHandPreset(TestHandPreset preset)
+    {
+        if (preset == null)
+            return;
+
+        if (catalog.Count == 0)
+            RefreshCatalog();
+
+        handCards.Clear();
+        var missing = new List<string>();
+
+        foreach (string cardId in preset.CardIds)
+        {
+            GameObject prefab = FindCardPrefabByAiCardId(cardId);
+            if (prefab == null)
+            {
+                missing.Add(cardId);
+                continue;
+            }
+
+            if (handCards.Count >= MaxHandCards)
+                break;
+
+            handCards.Add(prefab);
+        }
+
+        selectedHandIndex = ClampHandIndex(0);
+        ApplyHandCardsToComponent();
+        RefreshHandSnapshot();
+        QueueAutoScan();
+        TryAutoScanCandidates(force: true);
+
+        AppendLog(
+            "Loaded quick test hand '" + preset.Name + "': " +
+            FormatHandList(handCards) +
+            (missing.Count > 0 ? ", missing=" + string.Join(", ", missing) : string.Empty));
+    }
+
+    private void LoadAllCardsBatch(int batchIndex)
+    {
+        List<CardData> testableCards = GetTestableCatalogCards();
+        if (testableCards.Count == 0)
+        {
+            AppendLog("No AI-supported cards with AiCardId were found.");
+            return;
+        }
+
+        int batchCount = Mathf.Max(1, Mathf.CeilToInt(testableCards.Count / (float)MaxHandCards));
+        allCardsBatchIndex = Mathf.Clamp(batchIndex, 0, batchCount - 1);
+        int start = allCardsBatchIndex * MaxHandCards;
+
+        handCards.Clear();
+        for (int i = start; i < testableCards.Count && handCards.Count < MaxHandCards; i++)
+        {
+            GameObject prefab = GetPrefabObject(testableCards[i]);
+            if (prefab != null && !ContainsSameCard(handCards, prefab))
+                handCards.Add(prefab);
+        }
+
+        selectedHandIndex = ClampHandIndex(0);
+        ApplyHandCardsToComponent();
+        RefreshHandSnapshot();
+        QueueAutoScan();
+        TryAutoScanCandidates(force: true);
+
+        AppendLog(
+            "Loaded all-card test batch " + (allCardsBatchIndex + 1) + "/" + batchCount +
+            ": " + FormatHandList(handCards));
+    }
+
+    private List<CardData> GetTestableCatalogCards()
+    {
+        if (catalog.Count == 0)
+            RefreshCatalog();
+
+        var cards = new List<CardData>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (CardData card in catalog)
+        {
+            CardDataSO so = card != null ? card.DataSO : null;
+            if (so == null ||
+                !so.AiSupported ||
+                string.IsNullOrWhiteSpace(so.AiCardId) ||
+                !seen.Add(so.AiCardId))
+            {
+                continue;
+            }
+
+            cards.Add(card);
+        }
+
+        cards.Sort((a, b) => string.Compare(FormatCardLabel(a), FormatCardLabel(b), StringComparison.Ordinal));
+        return cards;
+    }
+
+    private GameObject FindCardPrefabByAiCardId(string cardId)
+    {
+        if (string.IsNullOrWhiteSpace(cardId))
+            return null;
+
+        foreach (CardData card in catalog)
+        {
+            CardDataSO so = card != null ? card.DataSO : null;
+            if (so == null ||
+                string.IsNullOrWhiteSpace(so.AiCardId) ||
+                !string.Equals(so.AiCardId, cardId, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            string path = AssetDatabase.GetAssetPath(card.gameObject);
+            if (string.IsNullOrWhiteSpace(path))
+                return null;
+
+            return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        }
+
+        return null;
+    }
+
+    private static GameObject GetPrefabObject(CardData card)
+    {
+        if (card == null)
+            return null;
+
+        string path = AssetDatabase.GetAssetPath(card.gameObject);
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
     }
 
     private void RemoveHandCard(int index)
@@ -835,6 +911,8 @@ public sealed class AiCardDebugWindow : EditorWindow
         handCards.RemoveAt(index);
         ApplyHandCardsToComponent();
         RefreshHandSnapshot();
+        QueueAutoScan();
+        TryAutoScanCandidates(force: true);
         selectedHandIndex = ClampHandIndex(index);
         AppendLog("Removed card from AI hand: " + FormatCardLabel(GetCardData(removed)));
     }
@@ -849,6 +927,8 @@ public sealed class AiCardDebugWindow : EditorWindow
         handCards.Insert(to, card);
         ApplyHandCardsToComponent();
         RefreshHandSnapshot();
+        QueueAutoScan();
+        TryAutoScanCandidates(force: true);
         selectedHandIndex = ClampHandIndex(to);
         AppendLog("Moved card priority: " + FormatCardLabel(GetCardData(card)) + " -> " + to);
     }
@@ -858,6 +938,8 @@ public sealed class AiCardDebugWindow : EditorWindow
         handCards.Clear();
         ApplyHandCardsToComponent();
         RefreshHandSnapshot();
+        QueueAutoScan();
+        TryAutoScanCandidates(force: true);
         AppendLog("Cleared AI hand.");
     }
 
@@ -866,6 +948,23 @@ public sealed class AiCardDebugWindow : EditorWindow
         if (aiCardHand == null)
         {
             AppendLog("AI Card Hand is not assigned.");
+            return;
+        }
+
+        if (HasDontSaveFlags(aiCardHand))
+        {
+            if (EditorApplication.isPlaying)
+            {
+                aiCardHand.ReplaceRuntimeCards(handCards);
+                RefreshHandSnapshot();
+                ClearQueuedForcedCardIfMissing();
+                AppendLog("Applied runtime AI hand: " + FormatHandList(aiCardHand.AvailableCards));
+            }
+            else
+            {
+                AppendLog("AI Card Hand cannot be edited because it is marked DontSave.");
+            }
+
             return;
         }
 
@@ -916,7 +1015,50 @@ public sealed class AiCardDebugWindow : EditorWindow
         AppendLog("clearedQueuedForcedCard=notInHand, card=" + queuedCardId);
     }
 
-    private void ScanCurrentHandCandidates()
+    private void QueueAutoScan()
+    {
+        autoScanDirty = true;
+    }
+
+    private void TryAutoScanCandidates(bool force = false)
+    {
+        if (!EditorApplication.isPlaying ||
+            aiCardHand == null ||
+            boardManager == null ||
+            gameManager == null ||
+            handCards.Count == 0)
+        {
+            return;
+        }
+
+        double now = EditorApplication.timeSinceStartup;
+        if (!force && now < nextAutoScanAt)
+            return;
+
+        string fingerprint = CreateAutoScanFingerprint();
+        if (!force &&
+            !autoScanDirty &&
+            string.Equals(fingerprint, lastAutoScanFingerprint, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        lastAutoScanFingerprint = fingerprint;
+        autoScanDirty = false;
+        nextAutoScanAt = now + 0.75d;
+        ScanCurrentHandCandidates("auto");
+    }
+
+    private string CreateAutoScanFingerprint()
+    {
+        string fen = boardManager != null ? boardManager.GetFEN() : string.Empty;
+        return FormatTurnStatus() + "|" +
+               GetActorColor() + "|" +
+               fen + "|" +
+               FormatHandList(handCards);
+    }
+
+    private void ScanCurrentHandCandidates(string source = "manual")
     {
         if (!EnsureRuntimeContext())
             return;
@@ -926,15 +1068,10 @@ public sealed class AiCardDebugWindow : EditorWindow
         if (mapping == null)
             return;
 
-        AppendLog("=== AI card candidate scan ===");
+        AppendLog("=== AI card candidate scan (" + source + ") ===");
         AppendLog(FormatStateSummary(mapping));
-        AppendLog("deterministic=" + deterministicScanOrder + ", seed=" + seed);
 
-        IEnumerable<GameObject> cards = deterministicScanOrder
-            ? SortedHandCards()
-            : handCards;
-
-        foreach (GameObject cardObject in cards)
+        foreach (GameObject cardObject in handCards)
             LogCandidatePlan(cardObject, mapping.GameState, actor);
     }
 
@@ -1011,61 +1148,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         }
 
         return "Ready to force: 즉시 targetPlan 검증 후 실행합니다. 실패하면 Log에 CardCondition/TargetUnavailable 같은 reject reason이 표시됩니다.";
-    }
-
-    private void CheckSelectedForceConditions()
-    {
-        if (!EnsureRuntimeContext())
-            return;
-
-        if (selectedHandIndex < 0 || selectedHandIndex >= handCards.Count)
-        {
-            AppendLog("forceCheck=blocked, reason=No selected hand card.");
-            return;
-        }
-
-        GameObject cardObject = handCards[selectedHandIndex];
-        CardData cardData = GetCardData(cardObject);
-        CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
-        if (dataSO == null || string.IsNullOrWhiteSpace(dataSO.AiCardId))
-        {
-            AppendLog("forceCheck=blocked, reason=Selected card has no AI card id.");
-            return;
-        }
-
-        AiPieceColor actor = GetActor();
-        UnityGameStateMappingResult mapping = CaptureMapping(actor);
-        if (mapping == null)
-            return;
-
-        AppendLog("=== Forced AI card condition check ===");
-        AppendLog(FormatStateSummary(mapping));
-        AppendLog("forceCheckCard=" + FormatCardLabel(cardData) + ", actor=" + actor);
-
-        if (!IsCurrentAiTurn())
-        {
-            AppendLog("forceCheckMode=queued, reason=NotAiTurn, " + FormatTurnStatus() + ". Actual validation will run on next AI turn.");
-        }
-        else
-        {
-            AppendLog("forceCheckMode=immediate");
-        }
-
-        if (!targetPlanner.TryCreatePlan(
-                dataSO.AiCardId,
-                cardObject,
-                boardManager,
-                mapping.GameState,
-                actor,
-                out AiCardTargetPlan plan,
-                out AiCardExecutionStatus failureStatus,
-                out string reason))
-        {
-            AppendLog("forceCheck=rejected, status=" + failureStatus + ", kind=" + ClassifyFailure(reason) + ", reason=" + reason);
-            return;
-        }
-
-        AppendLog("forceCheck=accepted, " + FormatPlan(plan));
     }
 
     private void ForceSelectedCard()
@@ -1176,206 +1258,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         AppendLog("queuedForcedCard=" + dataSO.CardName + " [" + dataSO.AiCardId + "], will execute on next AI turn.");
     }
 
-    private void RunNormalAiSelection()
-    {
-        if (!EnsureRuntimeContext())
-            return;
-
-        AiPieceColor perspective = GetActor();
-        UnityGameStateMappingResult mapping = CaptureMapping(perspective);
-        if (mapping == null)
-            return;
-
-        if (FairyStockfishBridge.Instance == null)
-        {
-            AppendLog("FairyStockfishBridge is missing.");
-            return;
-        }
-
-        isAnalysisRunning = true;
-        AppendLog("=== Normal AI selection ===");
-        AppendLog(FormatStateSummary(mapping));
-        AppendLog("analysisDepth=" + analysisDepth + ", variationCount=" + variationCount + ", actor=" + perspective + ", executeCard=" + executeNormalSelectedCard);
-
-        foreach (GameObject cardObject in SortedHandCards())
-            LogCandidatePlan(cardObject, mapping.GameState, perspective);
-
-        FairyStockfishBridge.Instance.AnalyzePositionAsync(
-            mapping.Fen,
-            analysisDepth,
-            variationCount,
-            perspective,
-            onComplete: (_, snapshot) =>
-            {
-                isAnalysisRunning = false;
-
-                try
-                {
-                    HandleNormalAnalysisComplete(mapping, snapshot, perspective);
-                }
-                catch (Exception ex)
-                {
-                    AppendLog("normalSelection=failed, reason=" + ex.Message);
-                }
-
-                Repaint();
-            },
-            onError: (_, error) =>
-            {
-                isAnalysisRunning = false;
-                AppendLog("normalSelection=analysisFailed, reason=" + error);
-                Repaint();
-            });
-    }
-
-    private void HandleNormalAnalysisComplete(
-        UnityGameStateMappingResult mapping,
-        UciAnalysisSnapshot snapshot,
-        AiPieceColor actor)
-    {
-        if (snapshot == null || !snapshot.HasMoves)
-        {
-            AppendLog("normalSelection=no engine move candidates.");
-            return;
-        }
-
-        UnifiedTurnPlanner planner = CreateTurnPlanner(mapping.Fen, snapshot);
-        TurnPlannerResult result = planner.PlanTurn(mapping.GameState);
-        LogTurnPlannerTrace(result);
-
-        TurnPlan selectedPlan = SelectCardBiasedPlan(result);
-        if (selectedPlan == null)
-        {
-            AppendLog("selectedPlan=null");
-            return;
-        }
-
-        AppendLog(
-            "selectedPlan rank=" + selectedPlan.DeterministicRankKey +
-            ", usesCard=" + selectedPlan.UsesCard +
-            ", hasMove=" + selectedPlan.HasMove +
-            ", score=" + selectedPlan.Score.Total);
-
-        if (selectedPlan.MovePlan != null)
-            AppendLog("selectedMove=" + selectedPlan.MovePlan.UciMove);
-
-        if (!selectedPlan.UsesCard || selectedPlan.CardPlan == null)
-        {
-            AppendLog("selectedCard=none");
-            return;
-        }
-
-        AppendLog("selectedCard=" + selectedPlan.CardPlan.CardId + ", target=" + FormatTarget(selectedPlan.CardPlan.Target));
-
-        GameObject selectedCardObject = FindHandCardByAiId(selectedPlan.CardPlan.CardId);
-        if (selectedCardObject == null)
-        {
-            AppendLog("selectedCardExecution=blocked, status=CardNotInHand");
-            return;
-        }
-
-        if (!targetPlanner.TryCreatePlan(
-                selectedPlan.CardPlan,
-                selectedCardObject,
-                boardManager,
-                mapping.GameState,
-                actor,
-                out AiCardTargetPlan plan,
-                out AiCardExecutionStatus failureStatus,
-                out string reason))
-        {
-            AppendLog("selectedTargetPlan=rejected, status=" + failureStatus + ", kind=" + ClassifyFailure(reason) + ", reason=" + reason);
-            return;
-        }
-
-        AppendLog("selectedTargetPlan=accepted, " + FormatPlan(plan));
-
-        if (!executeNormalSelectedCard)
-            return;
-
-        AiCardExecutionResult execution = cardExecutor.ExecutePlan(
-            selectedPlan.CardPlan,
-            aiCardHand,
-            boardManager,
-            mapping.GameState,
-            actor);
-
-        AppendLog("normalExecution=" + FormatExecution(execution));
-        RefreshHandSnapshot();
-    }
-
-    private UnifiedTurnPlanner CreateTurnPlanner(string fen, UciAnalysisSnapshot snapshot)
-    {
-        var snapshotEngine = new FairyStockfishSnapshotEngine(
-            fen,
-            snapshot,
-            FairyStockfishBridge.Instance.IsInCheck());
-        var moveFilter = new MoveFilter(snapshotEngine);
-        var options = new TurnPlannerOptions(
-            noCardMoveCandidateCount: variationCount,
-            cardCandidateCount: Mathf.Clamp(cardCandidateCount, 1, MaxHandCards),
-            targetCandidateCount: Mathf.Max(1, targetCandidateCount),
-            postCardMoveCandidateCount: variationCount,
-            opponentReplyCandidateCount: 0,
-            beamWidth: Mathf.Max(1, variationCount),
-            maximumEngineCallCount: Mathf.Max(1, maximumEngineCallCount),
-            allowCoarseCardEffects: allowCoarseCardEffects,
-            seed: deterministicScanOrder ? seed : null);
-
-        return new UnifiedTurnPlanner(
-            moveFilter,
-            cardTargetingModule,
-            options: options);
-    }
-
-    private TurnPlan SelectCardBiasedPlan(TurnPlannerResult result)
-    {
-        if (result == null || !result.HasPlan)
-            return null;
-
-        TurnPlan selectedPlan = result.SelectedPlan;
-        if (selectedPlan == null)
-            return selectedPlan;
-
-        TurnPlan bestCardPlan = null;
-        foreach (TurnPlanCandidate candidate in result.Candidates)
-        {
-            if (candidate == null || !candidate.HasPlan || candidate.Plan == null || !candidate.Plan.UsesCard)
-                continue;
-
-            TurnPlan candidatePlan = candidate.Plan;
-            if (bestCardPlan == null || candidatePlan.Score.Total > bestCardPlan.Score.Total)
-                bestCardPlan = candidatePlan;
-        }
-
-        if (bestCardPlan == null)
-        {
-            AppendLog("cardBias=noExecutableCardPlan");
-            return selectedPlan;
-        }
-
-        int tolerance = Mathf.Max(0, cardUseScoreTolerance);
-        int scoreGap = selectedPlan.Score.Total - bestCardPlan.Score.Total;
-        if (scoreGap > tolerance)
-        {
-            AppendLog(
-                "cardBias=skippedCardPlan, noCardScore=" + selectedPlan.Score.Total +
-                ", cardScore=" + bestCardPlan.Score.Total +
-                ", gap=" + scoreGap +
-                ", tolerance=" + tolerance +
-                ", card=" + (bestCardPlan.CardPlan != null ? bestCardPlan.CardPlan.CardId : "<none>"));
-            return selectedPlan;
-        }
-
-        AppendLog(
-            "cardBias=selectedCardPlan, noCardScore=" + selectedPlan.Score.Total +
-            ", cardScore=" + bestCardPlan.Score.Total +
-            ", gap=" + scoreGap +
-            ", tolerance=" + tolerance +
-            ", card=" + (bestCardPlan.CardPlan != null ? bestCardPlan.CardPlan.CardId : "<none>"));
-        return bestCardPlan;
-    }
-
     private void LogCandidatePlan(
         GameObject cardObject,
         GameState gameState,
@@ -1462,16 +1344,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         return new UnityGameStateMappingResult(fen, gameState, mapping.Warnings);
     }
 
-    private void CaptureBoardSummary()
-    {
-        if (!EnsureRuntimeContext())
-            return;
-
-        UnityGameStateMappingResult mapping = CaptureMapping(GetActor());
-        if (mapping != null)
-            AppendLog(FormatStateSummary(mapping));
-    }
-
     private bool EnsureRuntimeContext()
     {
         ResolveSceneReferences();
@@ -1517,10 +1389,10 @@ public sealed class AiCardDebugWindow : EditorWindow
 
     private global::PieceColor GetActorColor()
     {
-        if (useEnemyColorAsActor && gameManager != null)
+        if (gameManager != null)
             return gameManager.EnemyColor;
 
-        return manualActorColor;
+        return global::PieceColor.Black;
     }
 
     private bool IsCurrentAiTurn()
@@ -1540,29 +1412,6 @@ public sealed class AiCardDebugWindow : EditorWindow
                 : "Unknown";
 
         return gameManager.turnColor + " / " + side;
-    }
-
-    private IEnumerable<GameObject> SortedHandCards()
-    {
-        var sorted = new List<GameObject>(handCards);
-        sorted.Sort((a, b) => string.Compare(FormatCardLabel(GetCardData(a)), FormatCardLabel(GetCardData(b)), StringComparison.Ordinal));
-        return sorted;
-    }
-
-    private GameObject FindHandCardByAiId(string aiCardId)
-    {
-        if (string.IsNullOrWhiteSpace(aiCardId))
-            return null;
-
-        foreach (GameObject cardObject in handCards)
-        {
-            CardData cardData = GetCardData(cardObject);
-            CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
-            if (dataSO != null && string.Equals(dataSO.AiCardId, aiCardId, StringComparison.OrdinalIgnoreCase))
-                return cardObject;
-        }
-
-        return null;
     }
 
     private static CardData GetCardData(GameObject cardObject)
@@ -1627,6 +1476,16 @@ public sealed class AiCardDebugWindow : EditorWindow
             && string.Equals(aSO.AiCardId, bSO.AiCardId, StringComparison.OrdinalIgnoreCase);
     }
 
+    private static bool HasDontSaveFlags(UnityEngine.Object obj)
+    {
+        if (obj == null)
+            return false;
+
+        return (obj.hideFlags & HideFlags.DontSave) != 0 ||
+               (obj.hideFlags & HideFlags.DontSaveInEditor) != 0 ||
+               (obj.hideFlags & HideFlags.DontSaveInBuild) != 0;
+    }
+
     private static string FormatCardLabel(CardData card)
     {
         if (card == null)
@@ -1639,45 +1498,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         string name = string.IsNullOrWhiteSpace(so.CardName) ? card.name : so.CardName;
         string aiId = string.IsNullOrWhiteSpace(so.AiCardId) ? "no-ai-id" : so.AiCardId;
         return name + " [" + so.Type + ", " + aiId + "]";
-    }
-
-    private static bool IsKnownAutomaticPlannerEffectUnsupported(string aiCardId)
-    {
-        switch (aiCardId)
-        {
-            case "agile":
-            case "aim":
-            case "arena":
-            case "caterpillar":
-            case "chaotic_knight":
-            case "charge":
-            case "checkmate_declaration":
-            case "concentration":
-            case "dark_hand":
-            case "democracy":
-            case "desperado":
-            case "destroyer_tank_cards":
-            case "dimension_disturbance":
-            case "dimension_instability":
-            case "father_enemy":
-            case "fast_march":
-            case "gaslighting":
-            case "giant":
-            case "honey_trap":
-            case "limitless":
-            case "magnet":
-            case "mutiny":
-            case "overbearing":
-            case "shuffle_board":
-            case "sneak_pawn":
-            case "stag_fight":
-            case "sunset_blade":
-            case "thunderclap_flash":
-            case "windmill":
-                return true;
-            default:
-                return false;
-        }
     }
 
     private static string FormatStateSummary(UnityGameStateMappingResult mapping)
@@ -1858,25 +1678,6 @@ public sealed class AiCardDebugWindow : EditorWindow
         if (lower.Contains("not contain"))
             return "CardNotInHand";
         return "ExecutionBoundary";
-    }
-
-    private void LogTurnPlannerTrace(TurnPlannerResult result)
-    {
-        if (result == null)
-        {
-            AppendLog("plannerTrace=<null>");
-            return;
-        }
-
-        TurnPlannerTraceSummary trace = result.TraceSummary;
-        AppendLog(
-            "plannerTrace selected=" + trace.SelectedCandidateCount +
-            ", skipped=" + trace.SkippedCandidateCount +
-            ", rootMoves=" + trace.RootNoCardMoveCandidateCount +
-            ", consideredCards=" + trace.ConsideredCardCandidateCount +
-            ", postCardMoves=" + trace.PostCardMoveCandidateCount +
-            ", engineCalls=" + trace.EngineCallCount + "/" + trace.MaximumEngineCallCount +
-            ", beamPruned=" + trace.BeamPrunedCandidateCount);
     }
 
     private bool HasSelectedCatalogCard()
