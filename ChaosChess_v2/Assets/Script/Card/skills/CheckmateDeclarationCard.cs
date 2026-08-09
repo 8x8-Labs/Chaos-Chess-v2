@@ -10,8 +10,11 @@ public class CheckmateDeclarationCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
-        CheckmateDeclarationEffect effect = 
-            CreateGlobalEffector<CheckmateDeclarationEffect>();
+        CheckmateDeclarationEffect effect =
+            CreateGlobalEffector<CheckmateDeclarationEffect>(args);
+        effect.SetCasterColor(args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor());
 
         effect.Apply();
     }
@@ -19,6 +22,14 @@ public class CheckmateDeclarationCard : CardData, ICard
 
 public class CheckmateDeclarationEffect : GlobalEffector
 {
+    // 파괴 대상은 시전자의 상대 진영입니다. 지속 중 턴이 바뀌어도 대상이 뒤집히지 않도록 고정합니다.
+    private PieceColor casterColor = PieceColor.White;
+
+    public void SetCasterColor(PieceColor color)
+    {
+        casterColor = color;
+    }
+
     protected override void OnApply()
     {
         GameManager.Instance.OnPlayerCheckStateChanged += PlayerCheck;
@@ -40,8 +51,9 @@ public class CheckmateDeclarationEffect : GlobalEffector
     {
         if (isPlayerInCheck)
         {
+            PieceColor targetColor = CardTargetRelationExtensions.Opposite(casterColor);
             List<Piece> list = BoardManager.Instance.GetAllPieces()
-                .Where(p => p.Color == GameManager.Instance.EnemyColor
+                .Where(p => p.Color == targetColor
                          && p.Type != PieceType.King
                          && p.Type != PieceType.Queen)
                 .ToList();
