@@ -13,7 +13,10 @@ public class DemocracyCard : CardData, ICard
         Debug.Log("[Democracy] Card executed.");
 
         DemocracyEffect effect =
-            CreateGlobalEffector<DemocracyEffect>();
+            CreateGlobalEffector<DemocracyEffect>(args);
+        effect.SetCasterColor(args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor());
 
         effect.Apply();
         effect.CheckCondition();
@@ -22,6 +25,14 @@ public class DemocracyCard : CardData, ICard
 
 public class DemocracyEffect : GlobalEffector
 {
+    // 혁명 판정 대상은 시전자의 상대 진영입니다. 지속 중 턴이 바뀌어도 대상이 뒤집히지 않도록 고정합니다.
+    private PieceColor casterColor = PieceColor.White;
+
+    public void SetCasterColor(PieceColor color)
+    {
+        casterColor = color;
+    }
+
     protected override void OnApply()
     {
         GameManager.Instance.OnTurnChanged += CheckCondition;
@@ -43,12 +54,13 @@ public class DemocracyEffect : GlobalEffector
     public void CheckCondition()
     {
         List<Piece> allPieces = BoardManager.Instance.GetAllPieces();
+        PieceColor targetColor = CardTargetRelationExtensions.Opposite(casterColor);
         int pawnCount = 0;
         int otherCount = 0;
 
         foreach (Piece piece in allPieces)
         {
-            if (piece.Color == GameManager.Instance.EnemyColor)
+            if (piece.Color == targetColor)
             {
                 if (piece.Type == PieceType.Pawn)
                 {
@@ -64,7 +76,7 @@ public class DemocracyEffect : GlobalEffector
         if (pawnCount >= 2 * otherCount)
         {
             Debug.Log($"[Democracy] Condition met: Pawns={pawnCount}, Others={otherCount}");
-            GameManager.Instance.OnSurrender(GameManager.Instance.EnemyColor);
+            GameManager.Instance.OnSurrender(targetColor);
             Revert();
         }
     }
