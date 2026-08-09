@@ -203,13 +203,20 @@ public class WatchEffector : GlobalEffector
 | `CardDataSO` 필드 | 반영 대상 |
 |---|---|
 | `PieceType` | `watchType` |
-| `NeedTargetColor` + `GlobalTargetColor` | `watchColor` |
+| `NeedTargetColor` + `GlobalTargetRelation` | `watchColor` |
 | `HasLimit` + `LimitTurn` | `duration` |
+
+`GlobalTargetRelation`은 절대 색상이 아니라 **시전자 기준 관계**(`Self`/`Opponent`/`Any`)입니다.
+`CreateGlobalEffector`가 생성 시점에 시전자 색으로 해소해 `watchColor`(절대 색상)로 고정하므로,
+효과가 지속되는 동안 턴이 바뀌어도 감시 대상은 뒤집히지 않습니다.
+
+시전자는 `args`가 있으면 `args.ResolveCasterColor()`, 없으면 현재 턴 색입니다.
+**AI도 카드를 쓰므로 `args`를 받는 카드라면 반드시 넘겨주세요.**
 
 ```csharp
 public void Execute(CardEffectArgs args)
 {
-    var effector = CreateGlobalEffector<WatchEffector>();
+    var effector = CreateGlobalEffector<WatchEffector>(args);
     effector.Apply();
 }
 ```

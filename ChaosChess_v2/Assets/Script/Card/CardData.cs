@@ -38,11 +38,20 @@ public abstract class CardData : MonoBehaviour
         return effectors;
     }
 
-    /// <summary>DataSO의 전역 설정을 기반으로 GlobalEffector를 생성합니다. 새 GameObject에 부착됩니다.</summary>
-    protected T CreateGlobalEffector<T>() where T : GlobalEffector
+    /// <summary>
+    /// DataSO의 전역 설정을 기반으로 GlobalEffector를 생성합니다. 새 GameObject에 부착됩니다.
+    /// 감시 대상 진영은 시전자 기준으로 해소해 생성 시점에 고정합니다.
+    /// (지속 중 턴이 바뀌어도 감시 대상이 뒤집히면 안 되므로 관계가 아니라 색으로 확정해 넘깁니다.)
+    /// </summary>
+    /// <param name="args">시전자를 특정할 실행 인자. 생략하면 현재 턴 색을 시전자로 봅니다.</param>
+    protected T CreateGlobalEffector<T>(CardEffectArgs args = null) where T : GlobalEffector
     {
+        PieceColor caster = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+
         ApplyType color = DataSO.NeedTargetColor
-            ? (ApplyType)DataSO.GlobalTargetColor
+            ? DataSO.GlobalTargetRelation.ToApplyType(caster)
             : ApplyType.All;
         int duration = DataSO.HasLimit ? DataSO.LimitTurn : -1;
 

@@ -42,13 +42,19 @@ public class CardTargetUI : MonoBehaviour
 
     private void ShowPieceIcons(CardDataSO data)
     {
+        // 도감은 항상 플레이어 시점으로 보여줍니다. 진영 무관 카드는 아군 아이콘으로 대표 표시합니다.
+        PieceColor playerColor = GameManager.Instance != null
+            ? GameManager.Instance.PlayerColor
+            : PieceColor.White;
+        PieceColor iconColor = data.PieceTargetRelation.Resolve(playerColor) ?? playerColor;
+
         int slotIndex = 0;
         foreach (PieceType flag in PieceOrder)
         {
             if (slotIndex >= pieceIconSlots.Length) break;
             if ((data.PieceType & flag) == 0) continue;
 
-            Sprite icon = pieceIconSet != null ? pieceIconSet.GetIcon(flag, data.PieceTargetColor) : null;
+            Sprite icon = pieceIconSet != null ? pieceIconSet.GetIcon(flag, iconColor) : null;
             if (icon == null) continue;
 
             if (pieceIconSlots[slotIndex] != null)

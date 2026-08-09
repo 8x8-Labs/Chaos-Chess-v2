@@ -11,6 +11,8 @@ public class PieceSelector : Selector<Piece>
     private readonly List<PieceEffector> pieceEffectorBuffer = new();
     private IPieceCard skillCard;
     private IPieceTargetFilter targetFilter;
+    // 대상 진영 판정의 기준이 되는 시전자 색. 선택 중에는 턴이 넘어가지 않으므로 선택 시작 시점에 고정합니다.
+    private PieceColor casterColor;
     private bool executable => isExecute();
 
     public override void DeselectFirstTarget()
@@ -150,6 +152,7 @@ public class PieceSelector : Selector<Piece>
         cardData = data;
         skillCard = cardData.GetComponent<IPieceCard>();
         targetFilter = cardData.GetComponent<IPieceTargetFilter>();
+        casterColor = CardEffectArgs.ResolveDefaultCasterColor();
         selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
@@ -201,7 +204,7 @@ public class PieceSelector : Selector<Piece>
         if ((piece.Type & cardData.DataSO.PieceType) == 0)
             return false;
 
-        if (piece.Color != cardData.DataSO.PieceTargetColor)
+        if (!cardData.DataSO.PieceTargetRelation.Matches(piece.Color, casterColor))
             return false;
 
         return targetFilter == null || targetFilter.CanSelectPiece(piece);
