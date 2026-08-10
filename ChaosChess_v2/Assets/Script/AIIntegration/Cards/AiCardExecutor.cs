@@ -259,7 +259,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     $"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}), " +
                     $"caster={FormatCaster(plan)}, target={plan.UsePlan.Target.Kind}, " +
                     $"squares={FormatTargetSquares(plan)}.");
-                return AiCardExecutionResult.Success(recommendation, plan.CardData.DataSO);
+                return AiCardExecutionResult.Success(recommendation, plan.CardData.DataSO, plan.UsePlan);
             }
             catch (Exception ex)
             {
@@ -268,7 +268,8 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     $"Card '{plan.CardData.DataSO.CardName}' execution failed: {ex.Message}",
                     recommendation,
                     plan.CardData.DataSO,
-                    ex);
+                    usePlan: plan.UsePlan,
+                    exception: ex);
             }
         }
 

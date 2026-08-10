@@ -466,6 +466,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                             boardManager,
                             actualMapping,
                             selectedPlan,
+                            execution.UsePlan,
                             postCardSnapshot,
                             fallbackMoveRequest);
                     }
@@ -561,6 +562,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                             boardManager,
                             actualMapping,
                             originalPlan: null,
+                            executedCardPlan: execution.UsePlan,
                             postCardSnapshot,
                             fallbackMoveRequest);
                     }
@@ -590,6 +592,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             global::BoardManager boardManager,
             UnityGameStateMappingResult actualMapping,
             TurnPlan originalPlan,
+            CardUsePlan executedCardPlan,
             UciAnalysisSnapshot postCardSnapshot,
             Action fallbackMoveRequest)
         {
@@ -625,12 +628,15 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             MoveFilterResult moveResult = moveFilter.GetFilteredMoves(
                 actualMapping.GameState,
                 variationCount);
+            CardUsePlan committedCardPlan = originalPlan?.CardPlan ?? executedCardPlan;
 
             if (ShouldPreserveOriginalPostCardMove(originalPlan) &&
                 TryGetExecutableOriginalMove(
                     originalPlan,
                     boardManager,
-                    out string plannedMove))
+                    out string plannedMove) &&
+                IsAllowedCommittedCardMove(committedCardPlan, plannedMove) &&
+                !gameManager.ShouldRejectCardAwareAIMove(plannedMove))
             {
                 if (moveResult.HasRecommendations &&
                     !string.Equals(moveResult.Recommendations[0].Candidate.UciMove, plannedMove, StringComparison.OrdinalIgnoreCase))
@@ -648,6 +654,22 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                     fallbackMoveRequest,
                     "post-card planned TurnPlan");
                 return;
+            }
+            else if (ShouldPreserveOriginalPostCardMove(originalPlan) &&
+                originalPlan?.MovePlan != null &&
+                !IsAllowedCommittedCardMove(committedCardPlan, originalPlan.MovePlan.UciMove))
+            {
+                Debug.Log(
+                    $"[AI Turn] Planned post-card move '{originalPlan.MovePlan.UciMove}' does not move the committed " +
+                    $"card target for '{committedCardPlan?.CardId}'. Using the next engine-filtered recommendation.");
+            }
+            else if (ShouldPreserveOriginalPostCardMove(originalPlan) &&
+                originalPlan?.MovePlan != null &&
+                gameManager.ShouldRejectCardAwareAIMove(originalPlan.MovePlan.UciMove))
+            {
+                Debug.Log(
+                    $"[AI Turn] Planned post-card move '{originalPlan.MovePlan.UciMove}' was rejected by card-aware safety. " +
+                    "Using the next engine-filtered recommendation.");
             }
 
             if (originalPlan != null &&
@@ -668,7 +690,32 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 return;
             }
 
-            MoveRecommendation recommendation = moveResult.Recommendations[0];
+            if (!TrySelectCardAwareRecommendation(gameManager, committedCardPlan, moveResult, out MoveRecommendation recommendation))
+            {
+                if (TrySelectCommittedTargetLegalMove(
+                    committedCardPlan,
+                    boardManager,
+                    FairyStockfishBridge.Instance,
+                    gameManager,
+                    out string committedTargetMove))
+                {
+                    ExecuteUciMoveOrFallback(
+                        requestId,
+                        gameManager,
+                        boardManager,
+                        committedTargetMove,
+                        fallbackMoveRequest,
+                        "post-card committed target legal fallback");
+                    return;
+                }
+
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    "Post-card MoveFilter recommendations were all rejected by card-aware safety.");
+                return;
+            }
+
             if (originalPlan != null &&
                 originalPlan.MovePlan != null &&
                 !string.Equals(originalPlan.MovePlan.UciMove, recommendation.Candidate.UciMove, StringComparison.OrdinalIgnoreCase))
@@ -685,6 +732,153 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 recommendation.Candidate.UciMove,
                 fallbackMoveRequest,
                 "post-card actual MoveFilter");
+        }
+
+        private static bool TrySelectCardAwareRecommendation(
+            global::GameManager gameManager,
+            CardUsePlan committedCardPlan,
+            MoveFilterResult moveResult,
+            out MoveRecommendation recommendation)
+        {
+            recommendation = null;
+
+            if (moveResult == null || !moveResult.HasRecommendations)
+                return false;
+
+            foreach (MoveRecommendation candidate in moveResult.Recommendations)
+            {
+                string uciMove = candidate?.Candidate?.UciMove;
+                if (string.IsNullOrWhiteSpace(uciMove))
+                    continue;
+
+                if (!IsAllowedCommittedCardMove(committedCardPlan, uciMove))
+                {
+                    Debug.Log(
+                        $"[AI Turn] Skipped engine-filtered move '{uciMove}' because it does not move the committed " +
+                        $"card target for '{committedCardPlan?.CardId}'.");
+                    continue;
+                }
+
+                if (gameManager.ShouldRejectCardAwareAIMove(uciMove))
+                {
+                    Debug.Log(
+                        $"[AI Turn] Skipped engine-filtered move '{uciMove}' because card-aware safety rejected it.");
+                    continue;
+                }
+
+                recommendation = candidate;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool TrySelectCommittedTargetLegalMove(
+            CardUsePlan cardPlan,
+            global::BoardManager boardManager,
+            FairyStockfishBridge stockfish,
+            global::GameManager gameManager,
+            out string selectedMove)
+        {
+            selectedMove = null;
+
+            if (!RequiresCommittedTargetMove(cardPlan) ||
+                boardManager == null ||
+                stockfish == null ||
+                gameManager == null)
+            {
+                return false;
+            }
+
+            string targetSource = cardPlan.Target.Piece?.Square.ToString();
+            if (string.IsNullOrWhiteSpace(targetSource))
+                return false;
+
+            string[] legalMoves = stockfish.GetLegalMoves();
+            if (legalMoves == null || legalMoves.Length == 0)
+                return false;
+
+            string firstLegal = null;
+            string bestCapture = null;
+            int bestCaptureValue = int.MinValue;
+
+            foreach (string move in legalMoves)
+            {
+                if (!boardManager.IsValidUciMove(move) ||
+                    !gameManager.IsMoveAllowedByExtraAction(move) ||
+                    !IsAllowedCommittedCardMove(cardPlan, move) ||
+                    gameManager.ShouldRejectCardAwareAIMove(move))
+                {
+                    continue;
+                }
+
+                firstLegal ??= move;
+
+                Vector3Int destination = boardManager.UCIToGrid(move.Substring(2, 2));
+                global::Piece capturedPiece = boardManager.GetPiece(destination);
+                if (capturedPiece == null)
+                    continue;
+
+                int captureValue = GetRuntimePieceValue(capturedPiece.Type);
+                if (captureValue > bestCaptureValue)
+                {
+                    bestCaptureValue = captureValue;
+                    bestCapture = move;
+                }
+            }
+
+            selectedMove = bestCapture ?? firstLegal;
+            if (selectedMove == null)
+                return false;
+
+            Debug.Log(
+                $"[AI Turn] Using committed card target legal fallback '{selectedMove}' for '{cardPlan.CardId}'.");
+            return true;
+        }
+
+        private static int GetRuntimePieceValue(global::PieceType type)
+        {
+            switch (type)
+            {
+                case global::PieceType.Pawn:
+                    return 100;
+                case global::PieceType.Knight:
+                case global::PieceType.Bishop:
+                case global::PieceType.King:
+                    return 320;
+                case global::PieceType.Rook:
+                    return 500;
+                case global::PieceType.KnightRider:
+                    return 700;
+                case global::PieceType.Queen:
+                case global::PieceType.Chancellor:
+                    return 900;
+                case global::PieceType.Amazon:
+                    return 1300;
+                default:
+                    return 0;
+            }
+        }
+
+        private static bool IsAllowedCommittedCardMove(CardUsePlan cardPlan, string uciMove)
+        {
+            if (!RequiresCommittedTargetMove(cardPlan))
+                return true;
+
+            if (string.IsNullOrWhiteSpace(uciMove) || uciMove.Length < 2)
+                return false;
+
+            string targetSource = cardPlan.Target.Piece?.Square.ToString();
+            return !string.IsNullOrWhiteSpace(targetSource) &&
+                string.Equals(uciMove.Substring(0, 2), targetSource, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool RequiresCommittedTargetMove(CardUsePlan cardPlan)
+        {
+            if (cardPlan == null || cardPlan.Target?.Piece == null)
+                return false;
+
+            return IsEffectMoveCommitmentCard(cardPlan.CardId);
         }
 
         private static bool TryGetExecutableOriginalMove(
@@ -887,9 +1081,35 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 return;
             }
 
-            Debug.Log($"[AI Turn] Executing {source} move '{uciMove}'.");
+            string moveToExecute = uciMove;
+            if (gameManager.TrySelectCardAwareAIMove(uciMove, out string cardAwareMove) &&
+                boardManager.IsValidUciMove(cardAwareMove))
+            {
+                moveToExecute = cardAwareMove;
+                Debug.Log($"[AI Turn] Card-aware move post-processor replaced '{uciMove}' with '{moveToExecute}'.");
+            }
+
+            if (!gameManager.IsMoveAllowedByExtraAction(moveToExecute))
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"{source} selected extra-action-blocked move '{moveToExecute}'.");
+                return;
+            }
+
+            if (gameManager.ShouldRejectCardAwareAIMove(moveToExecute))
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"{source} selected card-aware rejected move '{moveToExecute}'.");
+                return;
+            }
+
+            Debug.Log($"[AI Turn] Executing {source} move '{moveToExecute}'.");
             CompleteRequest(requestId);
-            boardManager.ApplyUCIMove(uciMove);
+            boardManager.ApplyUCIMove(moveToExecute);
         }
 
         private void CompleteAndRequestFallback(
@@ -1249,6 +1469,12 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             }
 
             CompleteRequest(requestId);
+            if (global::GameManager.Instance != null &&
+                global::GameManager.Instance.FinishType == global::GameResult.None &&
+                !global::GameManager.Instance.IsEndGame)
+            {
+                global::GameManager.Instance.NextTurn(() => global::GameManager.Instance.RequestAIMove());
+            }
         }
 
         private static bool IsImmediateMovementOverrideCard(string cardId)

@@ -8,6 +8,7 @@ using DG.Tweening;
 public class GameManager : MonoBehaviour
 {
     private const int AiMoveTimeMs = 5000;
+    private readonly AiCardMovePostProcessor aiCardMovePostProcessor = new AiCardMovePostProcessor();
 
     // 모바일에서는 엔진이 즉시 수를 반환해 AI가 너무 빠르게 두는 느낌을 주므로,
     // 수를 적용하기 전 최소한의 연출 딜레이를 보장한다 (초 단위).
@@ -683,8 +684,15 @@ public class GameManager : MonoBehaviour
                     if (IsEndGame)
                         return;
 
+                    if (TrySelectCardAwareAIMove(uciMove, out string cardAwareMove))
+                    {
+                        BoardManager.Instance.ApplyUCIMove(cardAwareMove);
+                        return;
+                    }
+
                     if (BoardManager.Instance.IsValidUciMove(uciMove) &&
-                        IsMoveAllowedByExtraAction(uciMove))
+                        IsMoveAllowedByExtraAction(uciMove) &&
+                        !ShouldRejectCardAwareAIMove(uciMove))
                     {
                         BoardManager.Instance.ApplyUCIMove(uciMove);
                         return;
@@ -695,6 +703,27 @@ public class GameManager : MonoBehaviour
                 });
             }
         );
+    }
+
+    public bool TrySelectCardAwareAIMove(string uciMove, out string selectedMove)
+    {
+        return aiCardMovePostProcessor.TrySelectMove(
+            uciMove,
+            BoardManager.Instance,
+            FairyStockfishBridge.Instance,
+            lockedPiece,
+            extraPlayerActions,
+            IsMoveAllowedByExtraAction,
+            out selectedMove);
+    }
+
+    public bool ShouldRejectCardAwareAIMove(string uciMove)
+    {
+        return aiCardMovePostProcessor.ShouldRejectMove(
+            uciMove,
+            BoardManager.Instance,
+            lockedPiece,
+            extraPlayerActions);
     }
 
     // 엔진 응답이 최소 연출 시간보다 빨리 도착하면 남은 시간만큼 지연 후 실행한다.
@@ -728,6 +757,9 @@ public class GameManager : MonoBehaviour
             {
                 if (lockedPiece != null)
                 {
+                    if (TryEndBlockedDesperadoExtraAction())
+                        return;
+
                     Debug.LogWarning("[AI] No valid locked-piece extra action move found. Ending extra action and advancing turn.");
                     extraPlayerActions = 0;
                     lockedPiece = null;
@@ -745,6 +777,28 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    private bool TryEndBlockedDesperadoExtraAction()
+    {
+        if (lockedPiece == null || !lockedPiece)
+            return false;
+
+        DesperadoEffect desperado = lockedPiece.GetComponent<DesperadoEffect>();
+        if (desperado == null)
+            return false;
+
+        Piece pieceToDestroy = lockedPiece;
+        extraPlayerActions = 0;
+        lockedPiece = null;
+
+        Debug.LogWarning(
+            "[AI] Desperado extra action had no profitable capture. Destroying the desperado piece and advancing turn.");
+
+        desperado.Revert();
+        BoardManager.Instance.DestroyPiece(pieceToDestroy);
+        NextTurn(() => RequestAIMove());
+        return true;
+    }
+
     private string ChooseRandomLegalMove(string[] moves)
     {
         string selectedMove = "none";
@@ -756,6 +810,9 @@ public class GameManager : MonoBehaviour
                 continue;
 
             if (!IsMoveAllowedByExtraAction(move))
+                continue;
+
+            if (ShouldRejectCardAwareAIMove(move))
                 continue;
 
             count++;
