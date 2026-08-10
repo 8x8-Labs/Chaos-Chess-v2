@@ -281,6 +281,70 @@ public class GameManager : MonoBehaviour
         lockedPiece = piece;
     }
 
+    public bool IsMoveAllowedByExtraAction(string uciMove)
+    {
+        if (lockedPiece == null)
+            return true;
+
+        if (!lockedPiece)
+        {
+            extraPlayerActions = 0;
+            lockedPiece = null;
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(uciMove) || uciMove.Length < 2 || BoardManager.Instance == null)
+            return false;
+
+        string lockedSource = BoardManager.Instance.GridTOUCI(lockedPiece.Pos);
+        return string.Equals(
+            uciMove.Substring(0, 2),
+            lockedSource,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void CompleteAutomatedMove()
+    {
+        if (extraPlayerActions > 0)
+        {
+            if (TryApplyImmediateOpponentCheckmate())
+                return;
+
+            extraPlayerActions--;
+            RefreshCurrentTurnAfterExtraAction();
+            return;
+        }
+
+        if (!IsArenaMode) lockedPiece = null;
+        NextTurn(() => RequestAIMove());
+    }
+
+    private void RefreshCurrentTurnAfterExtraAction()
+    {
+        BoardManager.Instance.UpdateFEN();
+        string fen = BoardManager.Instance.GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
+        {
+            EvaluateGameState(moves);
+            ApplyGameResult();
+            BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+            BoardManager.Instance.RefreshMoves();
+
+            if (IsEndGame)
+                return;
+
+            if (turnColor == EnemyColor)
+            {
+                RequestAIMove();
+            }
+            else
+            {
+                OnPlayerTurnStarted?.Invoke();
+            }
+        });
+    }
+
     private void RefreshPlayerTurn()
     {
         BoardManager.Instance.UpdateFEN();
@@ -619,13 +683,14 @@ public class GameManager : MonoBehaviour
                     if (IsEndGame)
                         return;
 
-                    if (BoardManager.Instance.IsValidUciMove(uciMove))
+                    if (BoardManager.Instance.IsValidUciMove(uciMove) &&
+                        IsMoveAllowedByExtraAction(uciMove))
                     {
                         BoardManager.Instance.ApplyUCIMove(uciMove);
                         return;
                     }
 
-                    Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
+                    Debug.LogWarning($"[AI] Stockfish returned invalid or extra-action-blocked move '{uciMove}'. Using random legal fallback.");
                     ApplyFallbackLegalAIMove();
                 });
             }
@@ -661,6 +726,15 @@ public class GameManager : MonoBehaviour
             string randomMove = ChooseRandomLegalMove(moves);
             if (randomMove == "none")
             {
+                if (lockedPiece != null)
+                {
+                    Debug.LogWarning("[AI] No valid locked-piece extra action move found. Ending extra action and advancing turn.");
+                    extraPlayerActions = 0;
+                    lockedPiece = null;
+                    NextTurn(() => RequestAIMove());
+                    return;
+                }
+
                 Debug.LogWarning("[AI] No valid legal moves found after filtering. Ending game.");
                 EvaluateGameState(Array.Empty<string>());
                 ApplyGameResult();
@@ -679,6 +753,9 @@ public class GameManager : MonoBehaviour
         foreach (string move in moves)
         {
             if (!BoardManager.Instance.IsValidUciMove(move))
+                continue;
+
+            if (!IsMoveAllowedByExtraAction(move))
                 continue;
 
             count++;

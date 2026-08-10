@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using ChaosChess.AI.Decision;
 using ChaosChess.AI.Decision.CardTargeting;
 using ChaosChess.AI.Decision.TurnPlanning;
@@ -317,6 +318,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             LogPlannerCardCandidates(result);
 
             TurnPlan selectedPlan = SelectCardBiasedPlan(result);
+            selectedPlan = SelectExtraActionConstrainedPlan(result, selectedPlan, gameManager);
             if (selectedPlan == null)
             {
                 CompleteAndRequestFallback(
@@ -329,6 +331,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             Debug.Log(
                 $"[AI Turn] Selected TurnPlan rank='{selectedPlan.DeterministicRankKey}', " +
                 $"usesCard={selectedPlan.UsesCard}, hasMove={selectedPlan.HasMove}, score={selectedPlan.Score.Total}.");
+            LogSelectedPlanScoreComponents(selectedPlan);
 
             if (!selectedPlan.UsesCard)
             {
@@ -700,6 +703,29 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             return true;
         }
 
+        private static void LogSelectedPlanScoreComponents(TurnPlan selectedPlan)
+        {
+            if (selectedPlan == null || selectedPlan.Score == null)
+                return;
+
+            var builder = new StringBuilder();
+            builder.Append("[AI Turn] Selected TurnPlan scoreComponents=");
+
+            var components = selectedPlan.Score.Components;
+            for (int i = 0; i < components.Count; i++)
+            {
+                if (i > 0)
+                    builder.Append(", ");
+
+                TurnPlanScoreComponent component = components[i];
+                builder.Append(component.Code);
+                builder.Append(':');
+                builder.Append(component.Value);
+            }
+
+            Debug.Log(builder.ToString());
+        }
+
         private static bool ShouldPreserveOriginalPostCardMove(TurnPlan originalPlan)
         {
             if (originalPlan == null || originalPlan.CardPlan == null)
@@ -708,7 +734,23 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             if (IsImmediateMovementOverrideCard(originalPlan.CardPlan.CardId))
                 return true;
 
+            if (IsEffectMoveCommitmentCard(originalPlan.CardPlan.CardId))
+                return true;
+
             return originalPlan.CardApplicationStatus == CardEffectApplicationStatus.Exact;
+        }
+
+        private static bool IsEffectMoveCommitmentCard(string cardId)
+        {
+            switch (cardId)
+            {
+                case "desperado":
+                case "sunset_blade":
+                case "giant":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         private UnifiedTurnPlanner CreateTurnPlanner(
@@ -1000,36 +1042,66 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 return selectedPlan;
             }
 
-            int handCount = ResolveCardHand()?.AvailableCards?.Count ?? 0;
-            bool handIsFull = handCount >= AiCardHand.MaxCards;
-            int tolerance = Mathf.Max(0, cardUseScoreTolerance);
-            if (handIsFull)
-                tolerance = Mathf.Max(tolerance, fullHandCardUseScoreTolerance);
-
             int scoreGap = selectedPlan.Score.Total - bestCardPlan.Score.Total;
-            if (IsImmediateMovementOverrideCard(bestCardPlan.CardPlan?.CardId) && scoreGap > 0)
+            if (!selectedPlan.UsesCard && bestCardPlan.Score.Total <= 0)
             {
                 Debug.Log(
-                    $"[AI Turn] Card-biased selection kept no-card plan for immediate movement override. " +
+                    $"[AI Turn] Card-biased selection kept no-card plan because best card score is not positive. " +
                     $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
-                    $"gap={scoreGap}, handFull={handIsFull}, card={bestCardPlan.CardPlan?.CardId}.");
+                    $"gap={scoreGap}, card={bestCardPlan.CardPlan?.CardId}.");
                 return selectedPlan;
             }
 
-            if (scoreGap > tolerance)
+            if (!selectedPlan.UsesCard && scoreGap >= 0)
             {
                 Debug.Log(
-                    $"[AI Turn] Card-biased selection kept no-card plan. " +
+                    $"[AI Turn] Card-biased selection kept no-card plan because card plan did not beat it. " +
                     $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
-                    $"gap={scoreGap}, tolerance={tolerance}, handFull={handIsFull}, card={bestCardPlan.CardPlan?.CardId}.");
+                    $"gap={scoreGap}, card={bestCardPlan.CardPlan?.CardId}.");
                 return selectedPlan;
             }
 
             Debug.Log(
-                $"[AI Turn] Card-biased selection chose card plan within tolerance. " +
+                $"[AI Turn] Card-biased selection chose higher-scoring card plan. " +
                 $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
-                $"gap={scoreGap}, tolerance={tolerance}, handFull={handIsFull}, card={bestCardPlan.CardPlan?.CardId}.");
+                $"gap={scoreGap}, card={bestCardPlan.CardPlan?.CardId}.");
             return bestCardPlan;
+        }
+
+        private static TurnPlan SelectExtraActionConstrainedPlan(
+            TurnPlannerResult result,
+            TurnPlan selectedPlan,
+            global::GameManager gameManager)
+        {
+            if (result == null || selectedPlan == null || gameManager == null)
+                return selectedPlan;
+
+            if (selectedPlan.MovePlan != null &&
+                gameManager.IsMoveAllowedByExtraAction(selectedPlan.MovePlan.UciMove))
+            {
+                return selectedPlan;
+            }
+
+            foreach (TurnPlanCandidate candidate in result.Candidates)
+            {
+                TurnPlan candidatePlan = candidate?.Plan;
+                if (candidatePlan == null ||
+                    candidatePlan.MovePlan == null ||
+                    !gameManager.IsMoveAllowedByExtraAction(candidatePlan.MovePlan.UciMove))
+                {
+                    continue;
+                }
+
+                Debug.Log(
+                    $"[AI Turn] Extra action constrained move selection from '{selectedPlan.MovePlan?.UciMove ?? "<none>"}' " +
+                    $"to '{candidatePlan.MovePlan.UciMove}'.");
+                return candidatePlan;
+            }
+
+            Debug.LogWarning(
+                $"[AI Turn] Extra action had no candidate move for the locked piece. " +
+                $"selected={selectedPlan.MovePlan?.UciMove ?? "<none>"}.");
+            return selectedPlan;
         }
 
         private static bool IsImmediateMovementOverrideCard(string cardId)
