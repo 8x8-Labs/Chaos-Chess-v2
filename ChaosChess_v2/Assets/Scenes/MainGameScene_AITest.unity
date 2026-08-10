@@ -7037,17 +7037,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingCards:
-  - {fileID: 4601155060638207739, guid: 637a7fbd081d0764bbe7206a09b55888, type: 3}
-  - {fileID: 990817728151631320, guid: 4572d7b66f9ce7246ab7eacaaaf27583, type: 3}
-  - {fileID: 700798449936675633, guid: 35ebe9e2de661ef4c9204f7da21ae4a2, type: 3}
-  - {fileID: 6352077095358507004, guid: 7de6ba864f2d30b41b9b190af97fb463, type: 3}
+  - {fileID: 3605416856650468344, guid: 6d91e8b65e8966c428f3b9843e37e07d, type: 3}
+  - {fileID: 2175964123843911041, guid: 863300bbe4f485546955c80a16c13338, type: 3}
+  - {fileID: 9151154777825484287, guid: 87449a7e9ed977243b750c870fa05def, type: 3}
+  - {fileID: 9145880191192428411, guid: f74d37e8174312344b4f7b7bfd043ef5, type: 3}
   defaultRemainingUses: 1
   useEditorConfiguredStartingCards: 1
   editorStartingCardPrefabPaths:
-  - Assets/Prefab/Skill/GaslightingCard.prefab
-  - Assets/Prefab/Skill/MagnetCard.prefab
-  - Assets/Prefab/Skill/CheckmateDeclarationCard.prefab
-  - Assets/Prefab/Skill/OverbearingCard.prefab
+  - Assets/Prefab/Skill/DesperadoCard.prefab
+  - Assets/Prefab/Skill/SunsetBladeCard.prefab
+  - Assets/Prefab/Skill/GiantCard.prefab
+  - Assets/Prefab/Skill/FatherEnemyCard.prefab
 --- !u!1 &938165604
 GameObject:
   m_ObjectHideFlags: 0

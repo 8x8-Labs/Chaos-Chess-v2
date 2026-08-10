@@ -50,45 +50,53 @@ public sealed class AiCardDebugWindow : EditorWindow
     private static readonly TestHandPreset[] TestHandPresets =
     {
         new TestHandPreset(
-            "Likely Broken",
-            "Definitions or generated moves look likely to diverge from Unity behavior",
-            new[] { "charge", "gods_move", "thunderclap_flash", "overbearing" }),
+            "정의가 애매함",
+            "AI 효과 정의가 너무 대충이라 실제 카드 효과와 어긋나기 쉬운 카드",
+            new[] { "charge", "gods_move", "overbearing", "destroyer_tank_cards" }),
         new TestHandPreset(
-            "Coarse Piece",
-            "Piece-attached effects are not represented exactly in AI GameState",
+            "기물 상태",
+            "기물에 붙은 특수 상태를 AI가 보드 정보로 오래 들고 가기 어려운 카드",
             new[] { "desperado", "sunset_blade", "giant", "father_enemy" }),
         new TestHandPreset(
-            "Coarse Move",
-            "Movement overrides that do not have immediate post-card move generation",
+            "행마 변경",
+            "행마가 바뀌지만 AI가 실제 후속 이동을 충분히 보지 못하는 카드",
             new[] { "agile", "caterpillar", "concentration", "limitless" }),
         new TestHandPreset(
-            "Immediate Move",
-            "One-turn movement overrides with direct generated post-card moves",
-            new[] { "sneak_pawn", "aim", "fast_march", "thunderclap_flash" }),
+            "한 턴 행마",
+            "한 턴만 행마가 바뀌어서 바로 움직이는지와 원복 타이밍을 봐야 하는 카드",
+            new[] { "sneak_pawn", "aim", "fast_march", "dark_hand" }),
         new TestHandPreset(
-            "Random Coarse",
-            "Random or expected-value cards where actual result can diverge after execution",
+            "지속 무력화 위험",
+            "무력화와 행마 변경이 턴 경계에서 너무 빨리 풀리거나 오래 남는지 봐야 하는 카드",
+            new[] { "cobweb", "psilocybin_mushroom", "dark_hand", "concentration" }),
+        new TestHandPreset(
+            "지속 상태 위험",
+            "전역 행마 변경이 반턴/턴 경계와 AI 후속 판단에 맞게 유지되는지 봐야 하는 카드",
+            new[] { "mutiny", "windmill" }),
+        new TestHandPreset(
+            "랜덤 결과",
+            "실제 결과는 랜덤인데 AI는 사용 전 평균값으로만 보는 카드",
             new[] { "gaslighting", "magnet", "arena", "honey_trap" }),
         new TestHandPreset(
-            "Global Coarse",
-            "Ongoing global effects that are planned coarsely",
+            "전역 상태",
+            "전역 효과가 남지만 AI가 상태를 정확히 들고 가지 못하는 카드",
             new[] { "checkmate_declaration", "mutiny", "stag_fight", "windmill" }),
         new TestHandPreset(
-            "Board Coarse",
-            "Board-wide effects with coarse/random planning",
-            new[] { "democracy", "destroyer_tank_cards", "shuffle_board", "position_swap" }),
+            "보드 랜덤",
+            "보드 전체가 흔들리거나 섞여서 계획과 실제가 달라지기 쉬운 카드",
+            new[] { "democracy", "shuffle_board", "position_swap", "dimension_disturbance" }),
         new TestHandPreset(
-            "Deferred Tiles",
-            "Tile effects with heuristic or deferred behavior",
+            "약한 타일 판단",
+            "타일 효과가 보류되거나 대략적인 점수로만 반영되는 카드",
             new[] { "cobweb", "psilocybin_mushroom", "obey_order", "fire" }),
         new TestHandPreset(
-            "Tile Verify",
-            "Tile effects that should be checked against actual movement follow-up",
-            new[] { "jumping_platform", "time_bomb", "blessing", "peace_zone" }),
+            "타일 후속수",
+            "타일을 밟은 뒤 위치와 후속수를 실제 플레이로 확인해야 하는 카드",
+            new[] { "jumping_platform", "blessing", "at_mine", "peace_zone" }),
         new TestHandPreset(
-            "Target Edge",
-            "Cards with stricter target constraints or multi-target behavior",
-            new[] { "dark_hand", "dimension_disturbance", "transmigration", "weird_castling" })
+            "타겟 까다로움",
+            "좋은 대상이 없거나 조건이 빡빡해서 실패하기 쉬운 카드",
+            new[] { "transmigration", "weird_castling", "dimension_instability", "chaotic_knight" })
     };
 
     [Serializable]
@@ -316,6 +324,7 @@ public sealed class AiCardDebugWindow : EditorWindow
     {
         GameObject cardObject = handCards[index];
         CardData card = GetCardData(cardObject);
+        CardDataSO so = card != null ? card.DataSO : null;
         bool selected = index == selectedHandIndex;
 
         using (new EditorGUILayout.HorizontalScope(selected ? EditorStyles.helpBox : GUIStyle.none))
@@ -325,12 +334,27 @@ public sealed class AiCardDebugWindow : EditorWindow
 
             EditorGUILayout.LabelField(FormatCardLabel(card));
 
+            using (new EditorGUI.DisabledScope(so == null))
+            {
+                if (GUILayout.Button(new GUIContent("SO", "Select this card's CardDataSO in the Inspector."), GUILayout.Width(34f)))
+                    SelectCardDataSO(so);
+            }
+
             if (GUILayout.Button("X", GUILayout.Width(28f)))
             {
                 RemoveHandCard(index);
                 GUIUtility.ExitGUI();
             }
         }
+    }
+
+    private static void SelectCardDataSO(CardDataSO dataSO)
+    {
+        if (dataSO == null)
+            return;
+
+        Selection.activeObject = dataSO;
+        EditorGUIUtility.PingObject(dataSO);
     }
 
     private void DrawCompactCatalogView()
