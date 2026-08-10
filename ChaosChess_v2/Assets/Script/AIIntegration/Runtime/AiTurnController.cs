@@ -333,6 +333,24 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 $"usesCard={selectedPlan.UsesCard}, hasMove={selectedPlan.HasMove}, score={selectedPlan.Score.Total}.");
             LogSelectedPlanScoreComponents(selectedPlan);
 
+            if (TrySelectAwakenedUpgradeAction(
+                    boardManager,
+                    gameManager,
+                    gameManager.turnColor,
+                    selectedPlan,
+                    out global::FatherEnemyEffector awakenedUpgrade,
+                    out string awakenedUpgradeSummary,
+                    out int awakenedUpgradeScore))
+            {
+                ExecuteAwakenedUpgradeAction(
+                    requestId,
+                    awakenedUpgrade,
+                    awakenedUpgradeSummary,
+                    awakenedUpgradeScore,
+                    fallbackMoveRequest);
+                return;
+            }
+
             if (!selectedPlan.UsesCard)
             {
                 if (directCardFallbackEnabled &&
@@ -1102,6 +1120,135 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 $"[AI Turn] Extra action had no candidate move for the locked piece. " +
                 $"selected={selectedPlan.MovePlan?.UciMove ?? "<none>"}.");
             return selectedPlan;
+        }
+
+        private static bool TrySelectAwakenedUpgradeAction(
+            global::BoardManager boardManager,
+            global::GameManager gameManager,
+            global::PieceColor actorColor,
+            TurnPlan selectedPlan,
+            out global::FatherEnemyEffector selectedEffector,
+            out string selectedSummary,
+            out int selectedScore)
+        {
+            selectedEffector = null;
+            selectedSummary = null;
+            selectedScore = int.MinValue;
+
+            if (boardManager == null || gameManager == null)
+                return false;
+
+            IReadOnlyList<global::Piece> pieces = boardManager.GetAllPieces();
+            if (pieces == null || pieces.Count == 0)
+                return false;
+
+            foreach (global::Piece piece in pieces)
+            {
+                if (piece == null ||
+                    piece.Color != actorColor ||
+                    !piece.IsAwakened)
+                {
+                    continue;
+                }
+
+                global::FatherEnemyEffector effector = piece.GetComponent<global::FatherEnemyEffector>();
+                if (effector == null ||
+                    !effector.TryGetNextUpgradeType(out global::PieceType nextType))
+                {
+                    continue;
+                }
+
+                string sourceSquare = boardManager.GridTOUCI(piece.Pos);
+                if (!gameManager.IsMoveAllowedByExtraAction(sourceSquare + sourceSquare))
+                    continue;
+
+                int score = EstimateAwakenedUpgradeScore(piece.Type, nextType);
+                string summary = $"{sourceSquare}:{piece.Type}->{nextType}";
+                Debug.Log(
+                    $"[AI Turn] Awakened upgrade candidate {summary}, " +
+                    $"score={score}, selectedTurnPlanScore={selectedPlan?.Score?.Total ?? 0}.");
+
+                if (score > selectedScore)
+                {
+                    selectedEffector = effector;
+                    selectedSummary = summary;
+                    selectedScore = score;
+                }
+            }
+
+            if (selectedEffector == null)
+                return false;
+
+            int selectedPlanScore = selectedPlan?.Score?.Total ?? int.MinValue;
+            return selectedScore > selectedPlanScore;
+        }
+
+        private static int EstimateAwakenedUpgradeScore(
+            global::PieceType currentType,
+            global::PieceType nextType)
+        {
+            int materialGain = GetAwakenedUpgradePieceValue(nextType) -
+                GetAwakenedUpgradePieceValue(currentType);
+            int progressionBonus = nextType == global::PieceType.Queen ? 160 : 120;
+            return materialGain + progressionBonus;
+        }
+
+        private static int GetAwakenedUpgradePieceValue(global::PieceType type)
+        {
+            switch (type)
+            {
+                case global::PieceType.Pawn:
+                    return 100;
+                case global::PieceType.Knight:
+                case global::PieceType.Bishop:
+                    return 320;
+                case global::PieceType.Queen:
+                    return 900;
+                default:
+                    return 0;
+            }
+        }
+
+        private void ExecuteAwakenedUpgradeAction(
+            int requestId,
+            global::FatherEnemyEffector effector,
+            string summary,
+            int score,
+            Action fallbackMoveRequest)
+        {
+            if (!IsActiveRequest(requestId))
+                return;
+
+            if (effector == null)
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    "Selected awakened upgrade action has no active FatherEnemy effector.");
+                return;
+            }
+
+            Debug.Log(
+                $"[AI Turn] Executing awakened Father Enemy upgrade action {summary}, score={score}.");
+
+            if (!effector.TryUpgradePiece())
+            {
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    "Selected awakened upgrade action was no longer executable.");
+                return;
+            }
+
+            if (global::BoardManager.Instance != null)
+            {
+                global::BoardManager.Instance.UpdateFEN();
+                string upgradedFen = global::BoardManager.Instance.GetFEN();
+                FairyStockfishBridge.Instance.SetPosition(upgradedFen);
+                Debug.Log($"[AI Turn] Awakened upgrade state recaptured. FEN: {upgradedFen}");
+            }
+
+            CompleteRequest(requestId);
         }
 
         private static bool IsImmediateMovementOverrideCard(string cardId)
