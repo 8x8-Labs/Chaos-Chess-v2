@@ -50,53 +50,25 @@ public sealed class AiCardDebugWindow : EditorWindow
     private static readonly TestHandPreset[] TestHandPresets =
     {
         new TestHandPreset(
-            "정의가 애매함",
-            "AI 효과 정의가 너무 대충이라 실제 카드 효과와 어긋나기 쉬운 카드",
-            new[] { "charge", "gods_move", "overbearing", "destroyer_tank_cards" }),
+            "턴 종료 경계",
+            "카드 자체가 NextTurn 계열 흐름을 건드려 AI 카드 사용 후 재분석/턴 진행이 꼬이기 쉬운 카드",
+            new[] { "gaslighting", "position_swap", "weird_castling", "revive" }),
         new TestHandPreset(
-            "기물 상태",
-            "기물에 붙은 특수 상태를 AI가 보드 정보로 오래 들고 가기 어려운 카드",
-            new[] { "desperado", "sunset_blade", "giant", "father_enemy" }),
+            "카드 후 강제 이동",
+            "카드 사용 직후 선택한 기물이 실제로 움직여야 해서 AI 후속 이동/턴 넘김을 확인해야 하는 카드",
+            new[] { "aim", "fast_march", "sneak_pawn", "thunderclap_flash" }),
         new TestHandPreset(
-            "행마 변경",
-            "행마가 바뀌지만 AI가 실제 후속 이동을 충분히 보지 못하는 카드",
-            new[] { "agile", "caterpillar", "concentration", "limitless" }),
+            "지속 이펙터",
+            "기물에 붙은 효과가 턴 경계에서 너무 빨리 풀리거나 턴을 중복으로 넘길 수 있는 카드",
+            new[] { "desperado", "sunset_blade", "father_enemy", "overbearing" }),
         new TestHandPreset(
-            "한 턴 행마",
-            "한 턴만 행마가 바뀌어서 바로 움직이는지와 원복 타이밍을 봐야 하는 카드",
-            new[] { "sneak_pawn", "aim", "fast_march", "dark_hand" }),
+            "보드 급변",
+            "카드 효과 후 실제 보드와 AI 재분석 상태가 크게 달라져 후속 이동 실패가 나기 쉬운 카드",
+            new[] { "shuffle_board", "dimension_disturbance", "time_reversal", "transmigration" }),
         new TestHandPreset(
-            "지속 무력화 위험",
-            "무력화와 행마 변경이 턴 경계에서 너무 빨리 풀리거나 오래 남는지 봐야 하는 카드",
-            new[] { "cobweb", "psilocybin_mushroom", "dark_hand", "concentration" }),
-        new TestHandPreset(
-            "지속 상태 위험",
-            "전역 행마 변경이 반턴/턴 경계와 AI 후속 판단에 맞게 유지되는지 봐야 하는 카드",
-            new[] { "mutiny", "windmill" }),
-        new TestHandPreset(
-            "랜덤 결과",
-            "실제 결과는 랜덤인데 AI는 사용 전 평균값으로만 보는 카드",
-            new[] { "gaslighting", "magnet", "arena", "honey_trap" }),
-        new TestHandPreset(
-            "전역 상태",
-            "전역 효과가 남지만 AI가 상태를 정확히 들고 가지 못하는 카드",
-            new[] { "checkmate_declaration", "mutiny", "stag_fight", "windmill" }),
-        new TestHandPreset(
-            "보드 랜덤",
-            "보드 전체가 흔들리거나 섞여서 계획과 실제가 달라지기 쉬운 카드",
-            new[] { "democracy", "shuffle_board", "position_swap", "dimension_disturbance" }),
-        new TestHandPreset(
-            "약한 타일 판단",
-            "타일 효과가 보류되거나 대략적인 점수로만 반영되는 카드",
-            new[] { "cobweb", "psilocybin_mushroom", "obey_order", "fire" }),
-        new TestHandPreset(
-            "타일 후속수",
-            "타일을 밟은 뒤 위치와 후속수를 실제 플레이로 확인해야 하는 카드",
-            new[] { "jumping_platform", "blessing", "at_mine", "peace_zone" }),
-        new TestHandPreset(
-            "타겟 까다로움",
-            "좋은 대상이 없거나 조건이 빡빡해서 실패하기 쉬운 카드",
-            new[] { "transmigration", "weird_castling", "dimension_instability", "chaotic_knight" })
+            "타겟 실패 후보",
+            "초기 보드나 조건에 따라 AI가 쓸 수 있는 대상이 부족해 실패하기 쉬운 카드",
+            new[] { "sync", "obey_order", "chaotic_knight", "dimension_instability" })
     };
 
     [Serializable]
