@@ -28,6 +28,7 @@ public class FairyStockfishBridge : MonoBehaviour
     private StreamWriter _input;
     private volatile bool _isThinking = false;
     private volatile bool _isAnalyzing = false;
+    private volatile bool _isGettingLegalMoves = false;
     private string _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     private string _currentMoves = "";
 
@@ -35,6 +36,18 @@ public class FairyStockfishBridge : MonoBehaviour
     private Queue<string> _outputQueue = new Queue<string>();
     private object _queueLock = new object();
 #endif
+
+    public bool IsBusy
+    {
+        get
+        {
+#if UNITY_ANDROID && !UNITY_EDITOR
+            return false;
+#else
+            return _isThinking || _isAnalyzing || _isGettingLegalMoves;
+#endif
+        }
+    }
 
     void Awake()
     {
@@ -284,11 +297,29 @@ public class FairyStockfishBridge : MonoBehaviour
         string[] moves = GetLegalMoves();
         callback?.Invoke(moves);
 #else
+        _isGettingLegalMoves = true;
         Thread thread = new Thread(() =>
         {
-            string[] moves = GetLegalMoves();
+            string[] moves = Array.Empty<string>();
+            string error = null;
+            try
+            {
+                moves = GetLegalMoves();
+            }
+            catch (Exception e)
+            {
+                error = e.Message;
+            }
+            finally
+            {
+                _isGettingLegalMoves = false;
+            }
+
             UnityMainThreadDispatcher.Instance().Enqueue(() =>
             {
+                if (!string.IsNullOrEmpty(error))
+                    UnityEngine.Debug.LogError("[Fairy] GetLegalMovesAsync failed: " + error);
+
                 callback?.Invoke(moves);
             });
         });
