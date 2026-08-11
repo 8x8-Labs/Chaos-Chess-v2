@@ -36,21 +36,22 @@ public class OverbearingEffector : GlobalEffector
 
     protected override void OnApply()
     {
-        List<Piece> pieces = BoardManager.Instance.GetAllPieces();
-        foreach (Piece piece in pieces)
+        List<Piece> targets = BoardManager.Instance.GetAllPieces()
+            .FindAll(piece => piece.Color != casterColor);
+
+        targets.Sort((a, b) =>
         {
-            Debug.Log(piece.Type);
-            if (piece.Color == casterColor)
-                continue;
+            return a.Color == PieceColor.White
+                ? a.Pos.y.CompareTo(b.Pos.y)
+                : b.Pos.y.CompareTo(a.Pos.y);
+        });
+
+        foreach (Piece piece in targets)
+        {
             Vector3Int cur = piece.Pos;
             Vector3Int nx = new Vector3Int(cur.x, cur.y + (piece.Color == PieceColor.White ? -1 : 1), cur.z);
             if (BoardManager.Instance.IsInside(nx) && !IsOccupied(nx))
                 BoardManager.Instance.ForceTeleport(piece, nx);
-            else
-            {
-                //Debug.Log(BoardManager.Instance.IsInside(nx));
-                Debug.Log(IsOccupied(nx));
-            }
         }
         BoardManager.Instance.RefreshMoves();
         if (!suppressAutomaticTurnEnd)
