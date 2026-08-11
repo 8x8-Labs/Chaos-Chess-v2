@@ -313,11 +313,38 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
 
             var actor = UnityAiColorMapper.ToAiColor(gameManager.turnColor);
             UnifiedTurnPlanner planner = CreateTurnPlanner(mapping.Fen, snapshot, opponentReplyFen, opponentReplySnapshot);
-            TurnPlannerResult result = planner.PlanTurn(mapping.GameState);
+            Debug.Log(
+                $"[AI Turn] PlanTurn start: request={requestId}, actor={actor}, " +
+                $"fen={mapping.Fen}, hand={FormatAvailableCards(mapping.GameState.AvailableCards)}, " +
+                $"depth={analysisDepth}, variations={variationCount}, cardCandidates={cardCandidateCount}, " +
+                $"targetCandidates={targetCandidateCount}, opponentReplies={opponentReplyCandidateCount}, " +
+                $"maxEngineCalls={maximumEngineCallCount}, allowCoarse={allowCoarseCardEffects}.");
+
+            System.Diagnostics.Stopwatch planTimer = System.Diagnostics.Stopwatch.StartNew();
+            TurnPlannerResult result;
+            try
+            {
+                result = planner.PlanTurn(mapping.GameState);
+            }
+            catch (Exception ex)
+            {
+                planTimer.Stop();
+                CompleteAndRequestFallback(
+                    requestId,
+                    fallbackMoveRequest,
+                    $"UnifiedTurnPlanner.PlanTurn failed after {planTimer.ElapsedMilliseconds}ms: {ex.Message}");
+                return;
+            }
+
+            planTimer.Stop();
+            Debug.Log(
+                $"[AI Turn] PlanTurn done: request={requestId}, elapsedMs={planTimer.ElapsedMilliseconds}, " +
+                $"resultNull={result == null}, hasPlan={result != null && result.HasPlan}, " +
+                $"candidates={GetPlannerCandidateCount(result)}, selected={FormatTurnPlanSummary(result?.SelectedPlan)}.");
             LogTurnPlannerTrace(result);
             LogPlannerCardCandidates(result);
 
-            TurnPlan selectedPlan = SelectCardBiasedPlan(result);
+            TurnPlan selectedPlan = SelectCardBiasedPlan(result, mapping.GameState.AvailableCards.Count);
             selectedPlan = SelectExtraActionConstrainedPlan(result, selectedPlan, gameManager);
             if (selectedPlan == null)
             {
@@ -1254,7 +1281,23 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
                 Debug.Log("[AI Turn] Planner had no skipped candidate details.");
         }
 
-        private TurnPlan SelectCardBiasedPlan(TurnPlannerResult result)
+        private static int GetPlannerCandidateCount(TurnPlannerResult result)
+        {
+            return result?.Candidates != null ? result.Candidates.Count : 0;
+        }
+
+        private static string FormatTurnPlanSummary(TurnPlan plan)
+        {
+            if (plan == null)
+                return "<none>";
+
+            string card = plan.CardPlan != null ? plan.CardPlan.CardId : "<none>";
+            string move = plan.MovePlan != null ? plan.MovePlan.UciMove : "<none>";
+            int score = plan.Score != null ? plan.Score.Total : 0;
+            return $"usesCard={plan.UsesCard}, card={card}, move={move}, score={score}, rank='{plan.DeterministicRankKey}'";
+        }
+
+        private TurnPlan SelectCardBiasedPlan(TurnPlannerResult result, int availableCardCount)
         {
             if (result == null || !result.HasPlan)
                 return null;
@@ -1292,10 +1335,22 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
 
             if (!selectedPlan.UsesCard && scoreGap >= 0)
             {
+                int tolerance = availableCardCount >= AiCardHand.MaxCards
+                    ? fullHandCardUseScoreTolerance
+                    : cardUseScoreTolerance;
+                if (bestCardPlan.Score.Total > 0 && scoreGap <= tolerance)
+                {
+                    Debug.Log(
+                        $"[AI Turn] Card-biased selection chose positive card plan within tolerance. " +
+                        $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
+                        $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
+                    return bestCardPlan;
+                }
+
                 Debug.Log(
                     $"[AI Turn] Card-biased selection kept no-card plan because card plan did not beat it. " +
                     $"noCardScore={selectedPlan.Score.Total}, cardScore={bestCardPlan.Score.Total}, " +
-                    $"gap={scoreGap}, card={bestCardPlan.CardPlan?.CardId}.");
+                    $"gap={scoreGap}, tolerance={tolerance}, card={bestCardPlan.CardPlan?.CardId}.");
                 return selectedPlan;
             }
 
@@ -1312,6 +1367,9 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             global::GameManager gameManager)
         {
             if (result == null || selectedPlan == null || gameManager == null)
+                return selectedPlan;
+
+            if (selectedPlan.MovePlan == null)
                 return selectedPlan;
 
             if (selectedPlan.MovePlan != null &&
