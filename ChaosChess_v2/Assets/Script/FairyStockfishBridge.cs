@@ -11,6 +11,8 @@ public class FairyStockfishBridge : MonoBehaviour
 {
     private static FairyStockfishBridge _instance;
     private int _analysisRequestSequence = 0;
+    private string _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    private string _currentMoves = "";
     public static FairyStockfishBridge Instance
     {
         get
@@ -29,8 +31,6 @@ public class FairyStockfishBridge : MonoBehaviour
     private volatile bool _isThinking = false;
     private volatile bool _isAnalyzing = false;
     private volatile bool _isGettingLegalMoves = false;
-    private string _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    private string _currentMoves = "";
 
     // 비동기 출력 큐
     private Queue<string> _outputQueue = new Queue<string>();
@@ -136,12 +136,17 @@ public class FairyStockfishBridge : MonoBehaviour
     // ── 포지션 설정 ──────────────────────────────────────
     public void SetPosition(string fen, string moves = "")
     {
+        _currentFen = fen;
+        _currentMoves = moves ?? "";
+        ApplyPosition(_currentFen, _currentMoves);
+    }
+
+    // ── 포지션 전송 (상태 저장 없이 엔진에만 반영) ─────────────────
+    private void ApplyPosition(string fen, string moves = "")
+    {
 #if UNITY_ANDROID && !UNITY_EDITOR
         _fairyInstance?.Call("setPosition", fen, moves);
 #else
-        _currentFen = fen;
-        _currentMoves = moves;
-
         string cmd = "position fen " + fen;
         if (!string.IsNullOrEmpty(moves))
             cmd += " moves " + moves;
@@ -150,15 +155,10 @@ public class FairyStockfishBridge : MonoBehaviour
     }
 
     // ── 포지션 복구 (내부용) ─────────────────────────────
-#if !UNITY_ANDROID || UNITY_EDITOR
     private void RestorePosition()
     {
-        string cmd = "position fen " + _currentFen;
-        if (!string.IsNullOrEmpty(_currentMoves))
-            cmd += " moves " + _currentMoves;
-        SendCommand(cmd);
+        ApplyPosition(_currentFen, _currentMoves);
     }
-#endif
 
     // ── 최선의 수 (비동기) ───────────────────────────────
     public void GetBestMoveAsync(int depth, int moveTimeMs, Action<string> callback)
@@ -384,10 +384,31 @@ public class FairyStockfishBridge : MonoBehaviour
     // ── 체크 확인 ─────────────────
     public bool IsInCheck()
     {
+        return IsInCheck(_currentFen, _currentMoves);
+    }
+
+    public bool IsInCheck(string fen)
+    {
+        return IsInCheck(fen, "");
+    }
+
+    private bool IsInCheck(string fen, string moves)
+    {
 #if UNITY_ANDROID && !UNITY_EDITOR
-    // Android: Java 쪽 엔진 API 호출
-    if (_fairyInstance == null) return false;
-    return _fairyInstance.Call<bool>("isInCheck");
+        // Android: Java 쪽 엔진 API 호출
+        if (_fairyInstance == null) return false;
+
+        string previousFen = _currentFen;
+        string previousMoves = _currentMoves;
+        try
+        {
+            _fairyInstance.Call("setPosition", fen, moves ?? "");
+            return _fairyInstance.Call<bool>("isInCheck");
+        }
+        finally
+        {
+            _fairyInstance.Call("setPosition", previousFen, previousMoves ?? "");
+        }
 
 #else
         // PC: UCI "d" 명령으로 체크 상태 파싱
@@ -396,8 +417,8 @@ public class FairyStockfishBridge : MonoBehaviour
         SendCommand("isready");
         WaitForOutput("readyok", 3000);
 
-        // 현재 포지션 복구
-        RestorePosition();
+        // 요청한 포지션 설정
+        ApplyPosition(fen, moves);
 
         // 디버그 정보 요청 (Checkers 포함)
         SendCommand("d");

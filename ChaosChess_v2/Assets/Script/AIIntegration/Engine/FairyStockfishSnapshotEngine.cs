@@ -13,6 +13,7 @@ namespace ChaosChess.Unity.AIIntegration.Engine
         private readonly string opponentReplyFen;
         private readonly UciAnalysisSnapshot opponentReplySnapshot;
         private readonly bool isInCheck;
+        private readonly bool opponentReplyIsInCheck;
 
         public FairyStockfishSnapshotEngine(
             string fen,
@@ -27,7 +28,8 @@ namespace ChaosChess.Unity.AIIntegration.Engine
             UciAnalysisSnapshot snapshot,
             bool isInCheck,
             string opponentReplyFen,
-            UciAnalysisSnapshot opponentReplySnapshot)
+            UciAnalysisSnapshot opponentReplySnapshot,
+            bool? opponentReplyIsInCheck = null)
         {
             if (string.IsNullOrWhiteSpace(fen))
                 throw new ArgumentException("FEN cannot be empty.", nameof(fen));
@@ -48,6 +50,7 @@ namespace ChaosChess.Unity.AIIntegration.Engine
                 BoardState opponentBoardState = FenParser.Parse(opponentReplyFen);
                 this.opponentReplyFen = FenParser.Serialize(opponentBoardState);
                 this.opponentReplySnapshot = opponentReplySnapshot;
+                this.opponentReplyIsInCheck = opponentReplyIsInCheck ?? isInCheck;
             }
         }
 
@@ -79,21 +82,30 @@ namespace ChaosChess.Unity.AIIntegration.Engine
 
         public bool IsInCheck(BoardState boardState)
         {
-            ResolveSnapshot(boardState);
-            return isInCheck;
+            ResolveSnapshot(boardState, out bool isOpponentReply);
+            return isOpponentReply ? opponentReplyIsInCheck : isInCheck;
         }
 
         private UciAnalysisSnapshot ResolveSnapshot(BoardState boardState)
         {
+            return ResolveSnapshot(boardState, out _);
+        }
+
+        private UciAnalysisSnapshot ResolveSnapshot(BoardState boardState, out bool isOpponentReply)
+        {
             if (boardState == null)
                 throw new ArgumentNullException(nameof(boardState));
 
+            isOpponentReply = false;
             string requestedFen = FenParser.Serialize(boardState);
             if (!string.Equals(requestedFen, canonicalFen, StringComparison.Ordinal))
             {
                 if (opponentReplySnapshot != null &&
                     string.Equals(requestedFen, opponentReplyFen, StringComparison.Ordinal))
+                {
+                    isOpponentReply = true;
                     return opponentReplySnapshot;
+                }
 
                 throw new InvalidOperationException("Analysis snapshot does not match the requested board state.");
             }

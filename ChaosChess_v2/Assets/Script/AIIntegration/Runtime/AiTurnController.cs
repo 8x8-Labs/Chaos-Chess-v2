@@ -650,7 +650,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             var snapshotEngine = new FairyStockfishSnapshotEngine(
                 actualMapping.Fen,
                 postCardSnapshot,
-                FairyStockfishBridge.Instance.IsInCheck());
+                FairyStockfishBridge.Instance.IsInCheck(actualMapping.Fen));
             var moveFilter = new MoveFilter(snapshotEngine);
             MoveFilterResult moveResult = moveFilter.GetFilteredMoves(
                 actualMapping.GameState,
@@ -998,12 +998,18 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             string opponentReplyFen,
             UciAnalysisSnapshot opponentReplySnapshot)
         {
+            bool isInCheck = FairyStockfishBridge.Instance.IsInCheck(fen);
+            bool? opponentReplyIsInCheck = null;
+            if (!string.IsNullOrWhiteSpace(opponentReplyFen) && opponentReplySnapshot != null)
+                opponentReplyIsInCheck = FairyStockfishBridge.Instance.IsInCheck(opponentReplyFen);
+
             var snapshotEngine = new FairyStockfishSnapshotEngine(
                 fen,
                 snapshot,
-                FairyStockfishBridge.Instance.IsInCheck(),
+                isInCheck,
                 opponentReplyFen,
-                opponentReplySnapshot);
+                opponentReplySnapshot,
+                opponentReplyIsInCheck);
             var moveFilter = new MoveFilter(snapshotEngine);
             var options = new TurnPlannerOptions(
                 noCardMoveCandidateCount: variationCount,
