@@ -25,7 +25,7 @@ public class GaslightingCard : CardData, IPieceCard
         PieceColor casterColor = args != null
             ? args.ResolveCasterColor()
             : CardEffectArgs.ResolveDefaultCasterColor();
-        Piece p = GetRandomPiece(casterColor);
+        Piece p = GetTargetPiece(args, casterColor);
         if (p == null) return;
 
         Vector3Int pos = p.Pos;
@@ -39,7 +39,8 @@ public class GaslightingCard : CardData, IPieceCard
         // 적용 VFX가 생략됨) 변환된 기물 위치에 적용 VFX를 직접 재생한다.
         PlayApplyVFX(pos);
 
-        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+        if (args == null || args.ShouldEndTurnAfterExecution())
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
 
     /// <summary>변환된 기물 위치에 DataSO.VFX의 적용 연출(파티클 버스트 + 펀치 + 효과음)을 1회 재생합니다.</summary>
@@ -62,6 +63,14 @@ public class GaslightingCard : CardData, IPieceCard
             SoundManager.Instance.SFXPlay(DataSO.CardName, vfx.ApplySFX, vfx.SFXVolume);
     }
 
+    private Piece GetTargetPiece(CardEffectArgs args, PieceColor casterColor)
+    {
+        if (args?.Targets != null && args.Targets.Count > 0 && IsValidTarget(args.Targets[0], casterColor))
+            return args.Targets[0];
+
+        return GetRandomPiece(casterColor);
+    }
+
     private Piece GetRandomPiece(PieceColor casterColor)
     {
         Piece selectedPiece = null;
@@ -72,7 +81,7 @@ public class GaslightingCard : CardData, IPieceCard
 
         foreach (Piece p in BoardManager.Instance.GetAllPieces())
         {
-            if (p.Color == targetColor && (DataSO.PieceType & p.Type) != 0)
+            if (p.Color == targetColor && IsConvertiblePiece(p))
             {
                 count++;
                 if (Random.Range(0, count) == 0)
@@ -81,5 +90,26 @@ public class GaslightingCard : CardData, IPieceCard
         }
 
         return selectedPiece;
+    }
+
+    private bool IsValidTarget(Piece piece, PieceColor casterColor)
+    {
+        if (piece == null)
+            return false;
+
+        if (piece.Color == casterColor)
+            return false;
+
+        return IsConvertiblePiece(piece);
+    }
+
+    private bool IsConvertiblePiece(Piece piece)
+    {
+        return piece != null
+            && piece.Type != PieceType.King
+            && piece.Type != PieceType.Queen
+            && piece.Type != PieceType.Rook
+            && piece.Type != PieceType.Wall
+            && (DataSO.PieceType & piece.Type) != 0;
     }
 }

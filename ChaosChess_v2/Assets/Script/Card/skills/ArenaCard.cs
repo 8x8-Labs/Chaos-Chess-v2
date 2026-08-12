@@ -31,6 +31,6 @@ public class ArenaCard : CardData, ICard
         }
 
         List<Piece> arenaOpponents = opponents.GetRange(0, Mathf.Min(3, opponents.Count));
-        ArenaManager.Instance.StartArena(arenaOpponents, DataSO);
+        ArenaManager.Instance.StartArena(arenaOpponents, DataSO, casterColor);
     }
 }

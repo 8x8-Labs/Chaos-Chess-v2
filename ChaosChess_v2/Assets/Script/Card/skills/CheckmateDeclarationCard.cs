@@ -12,6 +12,10 @@ public class CheckmateDeclarationCard : CardData, ICard
     {
         CheckmateDeclarationEffect effect = 
             CreateGlobalEffector<CheckmateDeclarationEffect>();
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        effect.SetCasterColor(casterColor);
 
         effect.Apply();
     }
@@ -19,14 +23,23 @@ public class CheckmateDeclarationCard : CardData, ICard
 
 public class CheckmateDeclarationEffect : GlobalEffector
 {
+    private PieceColor casterColor = PieceColor.White;
+
+    public void SetCasterColor(PieceColor color)
+    {
+        casterColor = color;
+    }
+
     protected override void OnApply()
     {
-        GameManager.Instance.OnPlayerCheckStateChanged += PlayerCheck;
+        GameManager.Instance.OnHalfTurnChanged += CheckCasterCheckState;
+        CheckCasterCheckState();
     }
 
     protected override void OnRevert()
     {
-        GameManager.Instance.OnPlayerCheckStateChanged -= PlayerCheck;
+        if (GameManager.Instance != null)
+            GameManager.Instance.OnHalfTurnChanged -= CheckCasterCheckState;
         Destroy(gameObject);
     }
 
@@ -36,27 +49,31 @@ public class CheckmateDeclarationEffect : GlobalEffector
         base.OnDestroy();
     }
 
-    public void PlayerCheck(bool isPlayerInCheck)
+    public void CheckCasterCheckState()
     {
-        if (isPlayerInCheck)
+        if (GameManager.Instance == null
+            || FairyStockfishBridge.Instance == null
+            || GameManager.Instance.turnColor != casterColor
+            || !FairyStockfishBridge.Instance.IsInCheck())
+            return;
+
+        PieceColor opponentColor = CardEffectArgs.OpponentOf(casterColor);
+        List<Piece> list = BoardManager.Instance.GetAllPieces()
+            .Where(p => p.Color == opponentColor
+                     && p.Type != PieceType.King
+                     && p.Type != PieceType.Queen)
+            .ToList();
+
+        List<Piece> targets = new();
+        for (int i = 0; i < 5 && list.Count > 0; i++)
         {
-            List<Piece> list = BoardManager.Instance.GetAllPieces()
-                .Where(p => p.Color == GameManager.Instance.EnemyColor
-                         && p.Type != PieceType.King
-                         && p.Type != PieceType.Queen)
-                .ToList();
-
-            List<Piece> targets = new();
-            for (int i = 0; i < 5 && list.Count > 0; i++)
-            {
-                int rand = Random.Range(0, list.Count);
-                targets.Add(list[rand]);
-                list.RemoveAt(rand);
-            }
-
-            BoardManager.Instance.DestroyPieces(targets, false);
-            Revert();
-            GameManager.Instance.ReevaluateGameState();
+            int rand = Random.Range(0, list.Count);
+            targets.Add(list[rand]);
+            list.RemoveAt(rand);
         }
+
+        BoardManager.Instance.DestroyPieces(targets, false);
+        Revert();
+        GameManager.Instance.ReevaluateGameState();
     }
 }

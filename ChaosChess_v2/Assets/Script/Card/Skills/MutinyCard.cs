@@ -24,8 +24,13 @@ public class MutinyCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        PieceColor targetColor = CardEffectArgs.OpponentOf(casterColor);
+
         List<Queen> queens = BoardManager.Instance.GetPiece<Queen>
-            (GameManager.Instance.EnemyColor);
+            (targetColor);
 
         if (queens == null || queens.Count == 0)
         {

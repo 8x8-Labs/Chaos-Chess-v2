@@ -10,10 +10,10 @@ public class WindmillCard : CardData, ICard
     public void Execute(CardEffectArgs args = null)
     {
         var effector = CreateGlobalEffector<WindmillEffector>();
-        ApplyType casterColor = GameManager.Instance.turnColor == PieceColor.White
-            ? ApplyType.White
-            : ApplyType.Black;
-        effector.Init(DataSO.PieceType, casterColor, DataSO.PieceLimitTurn);
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        effector.Init(DataSO.PieceType, CardEffectArgs.ToApplyType(casterColor), DataSO.PieceLimitTurn);
         effector.Apply();
 
     }

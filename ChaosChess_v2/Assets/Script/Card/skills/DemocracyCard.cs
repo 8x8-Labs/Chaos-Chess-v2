@@ -14,6 +14,10 @@ public class DemocracyCard : CardData, ICard
 
         DemocracyEffect effect =
             CreateGlobalEffector<DemocracyEffect>();
+        PieceColor casterColor = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+        effect.SetTargetColor(CardEffectArgs.OpponentOf(casterColor));
 
         effect.Apply();
         effect.CheckCondition();
@@ -22,6 +26,13 @@ public class DemocracyCard : CardData, ICard
 
 public class DemocracyEffect : GlobalEffector
 {
+    private PieceColor targetColor = PieceColor.Black;
+
+    public void SetTargetColor(PieceColor color)
+    {
+        targetColor = color;
+    }
+
     protected override void OnApply()
     {
         GameManager.Instance.OnTurnChanged += CheckCondition;
@@ -48,7 +59,7 @@ public class DemocracyEffect : GlobalEffector
 
         foreach (Piece piece in allPieces)
         {
-            if (piece.Color == GameManager.Instance.EnemyColor)
+            if (piece.Color == targetColor)
             {
                 if (piece.Type == PieceType.Pawn)
                 {
@@ -64,7 +75,7 @@ public class DemocracyEffect : GlobalEffector
         if (pawnCount >= 2 * otherCount)
         {
             Debug.Log($"[Democracy] Condition met: Pawns={pawnCount}, Others={otherCount}");
-            GameManager.Instance.OnSurrender(GameManager.Instance.EnemyColor);
+            GameManager.Instance.OnSurrender(targetColor);
             Revert();
         }
     }

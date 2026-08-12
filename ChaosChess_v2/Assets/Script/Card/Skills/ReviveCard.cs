@@ -26,6 +26,8 @@ public class ReviveCard : CardData, ITileCard
         Vector3Int targetPos = args.TargetPos[0];
 
         ReviveEffector effector = CreateTileEffector<ReviveEffector>(targetPos);
+        effector.SetCasterColor(args.ResolveCasterColor());
+        effector.SetSuppressAutomaticTurnEnd(args.SuppressAutomaticTurnEnd);
         effector.Apply();
 
         // 부활한 기물 위치에 레벨업 연출을 1회 재생합니다.
@@ -39,6 +41,19 @@ public class ReviveCard : CardData, ITileCard
 
 public class ReviveEffector : TileEffector
 {
+    private PieceColor casterColor = PieceColor.White;
+    private bool suppressAutomaticTurnEnd;
+
+    public void SetCasterColor(PieceColor color)
+    {
+        casterColor = color;
+    }
+
+    public void SetSuppressAutomaticTurnEnd(bool value)
+    {
+        suppressAutomaticTurnEnd = value;
+    }
+
     private PieceValue GetValue(PieceType type)
     {
         return type switch
@@ -75,7 +90,7 @@ public class ReviveEffector : TileEffector
     }
     protected override void OnApply()
     {
-        PieceColor tc = GameManager.Instance.turnColor;
+        PieceColor tc = casterColor;
         List<PieceType> pieces = null;
         if (tc == PieceColor.White)
             pieces = BoardManager.Instance.WhiteDeadPieces;
@@ -102,9 +117,10 @@ public class ReviveEffector : TileEffector
             pieces.Remove(res);
         }
 
-        BoardManager.Instance.ChangePiece(TilePos, GameManager.Instance.turnColor, TypeToChar(res));
+        BoardManager.Instance.ChangePiece(TilePos, tc, TypeToChar(res));
         Revert();
-        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+        if (!suppressAutomaticTurnEnd)
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
     }
 
     protected override void OnRevert()
