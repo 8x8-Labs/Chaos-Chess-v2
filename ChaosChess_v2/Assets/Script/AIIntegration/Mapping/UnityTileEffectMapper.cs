@@ -128,17 +128,17 @@ namespace ChaosChess.Unity.AIIntegration.Mapping
             else if (effector is global::CobwebEffector)
             {
                 effectType = "Cobweb";
-                AddCoverageWarning(warnings, effectType, effector, "Deferred", "AI v0.8.0 carries this DTO but does not apply path stop or movement lock.");
+                AddCoverageWarning(warnings, effectType, effector, "Deferred", $"AI {ChaosChessAiVersion.Tag} carries this DTO but does not apply path stop or movement lock.");
             }
             else if (effector is global::PsilocybinMushroomTileEffect)
             {
                 effectType = "PsilocybinMushroom";
-                AddCoverageWarning(warnings, effectType, effector, "Deferred", "AI v0.8.0 carries this DTO but does not apply movement override.");
+                AddCoverageWarning(warnings, effectType, effector, "Deferred", $"AI {ChaosChessAiVersion.Tag} carries this DTO but does not apply movement override.");
             }
             else if (effector is global::ObeyOrderEffect)
             {
                 effectType = "ObeyOrder";
-                AddCoverageWarning(warnings, effectType, effector, "Deferred", "AI v0.8.0 carries this DTO but does not apply command state.");
+                AddCoverageWarning(warnings, effectType, effector, "Deferred", $"AI {ChaosChessAiVersion.Tag} carries this DTO but does not apply command state.");
             }
             else if (effector is global::ObeyDestEffect)
             {
