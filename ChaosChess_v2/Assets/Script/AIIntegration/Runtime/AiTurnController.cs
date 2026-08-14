@@ -87,13 +87,27 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             if (gameManager == null || boardManager == null)
                 return false;
 
+            AiCardHand hand = ResolveCardHand();
+            hand?.PrepareForAiTurn(gameManager);
+
+            if (!global::CardUseRules.CanUseForAi(
+                    gameManager,
+                    gameManager.turnColor,
+                    cardSO: null,
+                    requireCardInHand: false,
+                    containsCard: null,
+                    out global::CardBlockReason blockReason))
+            {
+                Debug.Log($"[AI Turn] Card planning skipped: {blockReason}.");
+                return false;
+            }
+
             if (isRequestRunning)
             {
                 Debug.LogWarning("[AI Turn] Ignored duplicate AI turn request while card analysis is running.");
                 return true;
             }
 
-            AiCardHand hand = ResolveCardHand();
             if (hand == null || hand.AvailableCards == null || hand.AvailableCards.Count == 0)
                 return false;
 

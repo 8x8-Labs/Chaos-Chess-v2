@@ -213,6 +213,12 @@ public class SaveManager : MonoBehaviour
                 {
                     elo = node.ELO,
                     fen = node.FEN,
+                    aiDeckId = !string.IsNullOrWhiteSpace(node.AiDeckId)
+                        ? node.AiDeckId
+                        : node.AiDeckConfig != null ? node.AiDeckConfig.DeckId : null,
+                    aiRuntimeDeckCardIds = node.AiRuntimeDeckCardIds != null
+                        ? new List<string>(node.AiRuntimeDeckCardIds)
+                        : new List<string>(),
                     mapName = node.MapName,
                     isCleared = node.isCleared,
                     floor = node.floor,

@@ -1,6 +1,7 @@
 using System;
 using ChaosChess.AI.Decision;
 using ChaosChess.AI.Domain;
+using ChaosChess.Unity.AIIntegration.Mapping;
 using UnityEngine;
 using AiPieceColor = ChaosChess.AI.Domain.PieceColor;
 
@@ -86,6 +87,22 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     recommendation);
             }
 
+            global::CardDataSO cardSO = GetCardDataSO(cardObject);
+            if (!global::CardUseRules.CanUseForAi(
+                    global::GameManager.Instance,
+                    UnityAiColorMapper.ToUnityColor(actor),
+                    cardSO,
+                    requireCardInHand: true,
+                    containsCard: aiCardHand.Contains,
+                    out global::CardBlockReason blockReason))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardUseBlocked,
+                    $"Card use blocked by shared rules: {blockReason}.",
+                    recommendation,
+                    cardSO);
+            }
+
             AiCardTargetPlan plan;
             AiCardExecutionStatus failureStatus;
             string reason;
@@ -152,6 +169,22 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     $"AI hand does not contain card id '{usePlan.CardId}'.");
             }
 
+            global::CardDataSO cardSO = GetCardDataSO(cardObject);
+            if (!global::CardUseRules.CanUseForAi(
+                    global::GameManager.Instance,
+                    UnityAiColorMapper.ToUnityColor(actor),
+                    cardSO,
+                    requireCardInHand: true,
+                    containsCard: aiCardHand.Contains,
+                    out global::CardBlockReason blockReason))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardUseBlocked,
+                    $"Card use blocked by shared rules: {blockReason}.",
+                    recommendation: null,
+                    cardSO: cardSO);
+            }
+
             if (!targetPlanner.TryCreatePlan(
                     usePlan,
                     cardObject,
@@ -201,6 +234,22 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                 return AiCardExecutionResult.Failure(
                     AiCardExecutionStatus.CardNotInHand,
                     $"AI hand does not contain card id '{cardId}'.");
+            }
+
+            global::CardDataSO cardSO = GetCardDataSO(cardObject);
+            if (!global::CardUseRules.CanUseForAi(
+                    global::GameManager.Instance,
+                    UnityAiColorMapper.ToUnityColor(actor),
+                    cardSO,
+                    requireCardInHand: true,
+                    containsCard: aiCardHand.Contains,
+                    out global::CardBlockReason blockReason))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardUseBlocked,
+                    $"Card use blocked by shared rules: {blockReason}.",
+                    recommendation: null,
+                    cardSO: cardSO);
             }
 
             if (!targetPlanner.TryCreatePlan(
