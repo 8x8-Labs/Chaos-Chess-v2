@@ -20,6 +20,7 @@ public sealed class AiCardDebugWindow : EditorWindow
     [SerializeField] private AiCardHand aiCardHand;
     [SerializeField] private BoardManager boardManager;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private MapManager mapManager;
     [SerializeField] private AiTurnController aiTurnController;
     [SerializeField] private int selectedCatalogIndex;
     [SerializeField] private int selectedHandIndex;
@@ -28,6 +29,7 @@ public sealed class AiCardDebugWindow : EditorWindow
     [SerializeField] private bool showSceneReferences;
     [SerializeField] private bool showPreset;
     [SerializeField] private bool showSelectedCardDetails;
+    [SerializeField] private bool showAllNodeDecks = true;
     [SerializeField] private int allCardsBatchIndex;
 
     private readonly AiCardTargetPlanner targetPlanner = new AiCardTargetPlanner();
@@ -37,6 +39,7 @@ public sealed class AiCardDebugWindow : EditorWindow
     private readonly StringBuilder logBuilder = new StringBuilder(8192);
     private Vector2 scroll;
     private Vector2 catalogScroll;
+    private Vector2 deckScroll;
     private Vector2 handScroll;
     private Vector2 handPageScroll;
     private int observedHandVersion = -1;
@@ -46,7 +49,7 @@ public sealed class AiCardDebugWindow : EditorWindow
     private bool autoScanDirty = true;
     private string lastAutoScanFingerprint;
     private double nextAutoScanAt;
-    private static readonly string[] Tabs = { "Hand", "Cards", "Log" };
+    private static readonly string[] Tabs = { "Hand", "Cards", "Decks", "Log" };
     private static readonly TestHandPreset[] TestHandPresets =
     {
         new TestHandPreset(
@@ -183,6 +186,9 @@ public sealed class AiCardDebugWindow : EditorWindow
                 DrawCompactCatalogView();
                 break;
             case 2:
+                DrawDecksView();
+                break;
+            case 3:
                 DrawLogPanel();
                 break;
         }
@@ -223,6 +229,7 @@ public sealed class AiCardDebugWindow : EditorWindow
                     aiCardHand = (AiCardHand)EditorGUILayout.ObjectField("AI Hand", aiCardHand, typeof(AiCardHand), true);
                     boardManager = (BoardManager)EditorGUILayout.ObjectField("Board", boardManager, typeof(BoardManager), true);
                     gameManager = (GameManager)EditorGUILayout.ObjectField("Game", gameManager, typeof(GameManager), true);
+                    mapManager = (MapManager)EditorGUILayout.ObjectField("Map", mapManager, typeof(MapManager), true);
                     aiTurnController = (AiTurnController)EditorGUILayout.ObjectField("AI Turn", aiTurnController, typeof(AiTurnController), true);
                     if (EditorGUI.EndChangeCheck())
                     {
@@ -462,6 +469,152 @@ public sealed class AiCardDebugWindow : EditorWindow
         }
     }
 
+    private void DrawDecksView()
+    {
+        deckScroll = EditorGUILayout.BeginScrollView(deckScroll);
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("AI Runtime Decks", EditorStyles.boldLabel);
+                GUILayout.FlexibleSpace();
+
+                if (GUILayout.Button("Refresh", GUILayout.Width(80f)))
+                {
+                    ResolveSceneReferences();
+                    Repaint();
+                }
+            }
+
+            mapManager = (MapManager)EditorGUILayout.ObjectField("Map Manager", mapManager, typeof(MapManager), true);
+
+            if (mapManager == null)
+            {
+                EditorGUILayout.HelpBox("MapManager가 없어서 노드별 AI 덱을 볼 수 없습니다. 런 또는 연습모드를 시작한 뒤 확인하세요.", MessageType.Info);
+                EditorGUILayout.EndScrollView();
+                return;
+            }
+
+            EditorGUILayout.LabelField("Mode", GameCycleManager.Instance != null ? GameCycleManager.Instance.CurrentMode.ToString() : "Unknown");
+            EditorGUILayout.LabelField("Maps", mapManager.maps != null ? mapManager.maps.Count.ToString() : "0");
+        }
+
+        if (mapManager.curMap != null)
+        {
+            DrawMapDeck("Current Node", mapManager.curMap, true);
+            EditorGUILayout.Space(6f);
+        }
+
+        showAllNodeDecks = EditorGUILayout.Foldout(showAllNodeDecks, "All Nodes", true);
+        if (showAllNodeDecks)
+        {
+            foreach (Map map in GetDeckViewMaps())
+                DrawMapDeck(FormatMapNodeLabel(map), map, false);
+        }
+
+        EditorGUILayout.EndScrollView();
+    }
+
+    private void DrawMapDeck(string title, Map map, bool showCopyButton)
+    {
+        if (map == null)
+            return;
+
+        IReadOnlyList<GameObject> deckCards = mapManager != null
+            ? mapManager.ResolveAiRuntimeDeckCards(map)
+            : Array.Empty<GameObject>();
+        List<string> deckIds = map.AiRuntimeDeckCardIds ?? new List<string>();
+
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.LabelField(deckCards.Count + " cards", GUILayout.Width(72f));
+
+                if (showCopyButton && GUILayout.Button("Copy IDs", GUILayout.Width(76f)))
+                {
+                    EditorGUIUtility.systemCopyBuffer = string.Join(", ", deckIds);
+                    AppendLog("Copied current AI runtime deck ids: " + deckIds.Count);
+                }
+            }
+
+            EditorGUILayout.LabelField("Node", FormatMapNodeLabel(map));
+            EditorGUILayout.LabelField("Config", map.AiDeckConfig != null ? map.AiDeckConfig.DeckId : "<runtime>");
+            EditorGUILayout.LabelField("Ids", deckIds.Count > 0 ? string.Join(", ", deckIds) : "<empty>");
+
+            if (deckCards.Count == 0)
+            {
+                EditorGUILayout.HelpBox("이 노드에 표시할 AI 런타임 덱 카드가 없습니다.", MessageType.Warning);
+                return;
+            }
+
+            for (int i = 0; i < deckCards.Count; i++)
+                DrawDeckCardRow(i, deckCards[i]);
+        }
+    }
+
+    private void DrawDeckCardRow(int index, GameObject cardObject)
+    {
+        CardData card = GetCardData(cardObject);
+        CardDataSO so = card != null ? card.DataSO : null;
+
+        using (new EditorGUILayout.HorizontalScope())
+        {
+            EditorGUILayout.LabelField((index + 1).ToString(), GUILayout.Width(28f));
+            EditorGUILayout.LabelField(FormatCardLabel(card));
+
+            using (new EditorGUI.DisabledScope(so == null))
+            {
+                if (GUILayout.Button(new GUIContent("SO", "Select this card's CardDataSO in the Inspector."), GUILayout.Width(34f)))
+                    SelectCardDataSO(so);
+            }
+
+            using (new EditorGUI.DisabledScope(cardObject == null))
+            {
+                if (GUILayout.Button(new GUIContent("Prefab", "Select this card prefab in the Project window."), GUILayout.Width(58f)))
+                {
+                    Selection.activeObject = cardObject;
+                    EditorGUIUtility.PingObject(cardObject);
+                }
+            }
+        }
+    }
+
+    private IEnumerable<Map> GetDeckViewMaps()
+    {
+        if (mapManager == null)
+            yield break;
+
+        if (mapManager.mapGrid != null && mapManager.mapGrid.Count > 0)
+        {
+            foreach (MapFloor floor in mapManager.mapGrid)
+            {
+                if (floor?.nodes == null)
+                    continue;
+
+                foreach (Map node in floor.nodes)
+                {
+                    if (node != null)
+                        yield return node;
+                }
+            }
+
+            yield break;
+        }
+
+        if (mapManager.maps == null)
+            yield break;
+
+        foreach (Map map in mapManager.maps)
+        {
+            if (map != null)
+                yield return map;
+        }
+    }
+
     private void DrawLogPanel()
     {
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
@@ -508,6 +661,9 @@ public sealed class AiCardDebugWindow : EditorWindow
 
         if (gameManager == null)
             gameManager = GameManager.Instance != null ? GameManager.Instance : UnityEngine.Object.FindFirstObjectByType<GameManager>();
+
+        if (mapManager == null)
+            mapManager = MapManager.Instance != null ? MapManager.Instance : UnityEngine.Object.FindFirstObjectByType<MapManager>();
 
         if (aiTurnController == null)
             aiTurnController = UnityEngine.Object.FindFirstObjectByType<AiTurnController>();
@@ -564,6 +720,7 @@ public sealed class AiCardDebugWindow : EditorWindow
         return aiCardHand == null ||
                boardManager == null ||
                gameManager == null ||
+               mapManager == null ||
                aiTurnController == null;
     }
 
@@ -1494,6 +1651,15 @@ public sealed class AiCardDebugWindow : EditorWindow
         string name = string.IsNullOrWhiteSpace(so.CardName) ? card.name : so.CardName;
         string aiId = string.IsNullOrWhiteSpace(so.AiCardId) ? "no-ai-id" : so.AiCardId;
         return name + " [" + so.Type + ", " + aiId + "]";
+    }
+
+    private static string FormatMapNodeLabel(Map map)
+    {
+        if (map == null)
+            return "<null>";
+
+        string name = string.IsNullOrWhiteSpace(map.MapName) ? "<unnamed>" : map.MapName;
+        return name + " (" + map.nodeType + ", floor=" + map.floor + ", column=" + map.column + ")";
     }
 
     private static string FormatStateSummary(UnityGameStateMappingResult mapping)

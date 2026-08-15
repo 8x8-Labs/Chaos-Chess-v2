@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using ChaosChess.Unity.AIIntegration.Cards;
 using ChaosChess.Unity.AIIntegration.Runtime;
 using UnityEngine;
 using DG.Tweening;
@@ -35,10 +36,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int curTurn;
     public bool IsPlayerTurn => (curTurn % 2 == 1);
     public bool IsPlayerInCheck { get; private set; }
+    public bool IsCurrentTurnInCheck { get; private set; }
+    public int CurrentTurn => curTurn;
 
     public bool IsGameInput = true;
     /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
     public bool AiAutoMoveEnabled = true;
+    [SerializeField] private bool autoCreateAiCardController = true;
     [SerializeField] private AiTurnController aiTurnController;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
@@ -118,6 +122,7 @@ public class GameManager : MonoBehaviour
         aiTurnController = aiTurnController != null
             ? aiTurnController
             : FindFirstObjectByType<AiTurnController>();
+        EnsureAiCardController();
 
         FinishType = GameResult.None;
 
@@ -650,6 +655,8 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        EnsureAiCardController();
+
         if (aiTurnController != null &&
             aiTurnController.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
         {
@@ -657,6 +664,22 @@ public class GameManager : MonoBehaviour
         }
 
         RequestStockfishAIMove();
+    }
+
+    private void EnsureAiCardController()
+    {
+        if (!autoCreateAiCardController)
+            return;
+
+        AiCardHand hand = FindFirstObjectByType<AiCardHand>();
+        if (hand == null)
+        {
+            GameObject systemObject = new GameObject("AI Card System (Runtime)");
+            hand = systemObject.AddComponent<AiCardHand>();
+        }
+
+        if (aiTurnController == null)
+            aiTurnController = hand.gameObject.AddComponent<AiTurnController>();
     }
 
     private void RequestStockfishAIMove()
@@ -833,12 +856,14 @@ public class GameManager : MonoBehaviour
                 ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
                 ResetActions();
             }
+            IsCurrentTurnInCheck = false;
             UpdatePlayerCheckState(false);
             return;
         }
 
         if (FinishType != GameResult.None)
         {
+            IsCurrentTurnInCheck = false;
             UpdatePlayerCheckState(false);
             return;
         }
@@ -851,6 +876,7 @@ public class GameManager : MonoBehaviour
             FinishType = GameResult.Draw;
         }
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
+        IsCurrentTurnInCheck = isCheck;
         UpdatePlayerCheckState(IsPlayerTurn && isCheck);
 
         if (cancelCurrentGameStateEvaluation)

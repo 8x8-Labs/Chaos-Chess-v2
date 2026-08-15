@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using ChaosChess.Unity.AIIntegration.Cards;
 
 public enum PracticeDifficulty
 {
@@ -26,6 +27,15 @@ public class MapManager : MonoBehaviour
     public List<string> Boss1FEN = new();
     public List<string> Boss2FEN = new();
 
+    [Header("AI Deck")]
+    [SerializeField] private AiDeckConfig defaultAiDeckConfig;
+    [SerializeField] private AiDeckConfig normalAiDeckConfig;
+    [SerializeField] private AiDeckConfig eliteAiDeckConfig;
+    [SerializeField] private AiDeckConfig bossAiDeckConfig;
+    [SerializeField] private List<AiDeckConfig> aiDeckRegistry = new();
+    [SerializeField] private bool generateRandomAiDeckPerNode = true;
+    [SerializeField, Min(1)] private int randomAiDeckCardCount = 8;
+
     [Header("Practice")]
     [SerializeField] private int easyPracticeELO = 900;
     [SerializeField] private int normalPracticeELO = 1200;
@@ -33,6 +43,9 @@ public class MapManager : MonoBehaviour
     [SerializeField] private string easyPracticeFEN;
     [SerializeField] private string normalPracticeFEN;
     [SerializeField] private string hardPracticeFEN;
+    [SerializeField] private AiDeckConfig easyPracticeAiDeckConfig;
+    [SerializeField] private AiDeckConfig normalPracticeAiDeckConfig;
+    [SerializeField] private AiDeckConfig hardPracticeAiDeckConfig;
 
     [Header("Graph Map")]
     public int nodesPerFloorMin = 1;
@@ -80,7 +93,10 @@ public class MapManager : MonoBehaviour
             for (int col = 0; col < nodesPerFloor[floor]; col++)
             {
                 bool isBoss = floor == totalFloors - 1;
-                mapGrid[floor].nodes.Add(new Map
+                NodeType nodeType = isBoss ? NodeType.Boss
+                               : (Random.value < 0.3f ? NodeType.Elite : NodeType.Normal);
+                AiDeckConfig aiDeck = SelectAiDeckConfig(nodeType);
+                Map node = new Map
                 {
                     // 층이 높을수록 ELO 150씩 상승 → AI 강도 선형 증가
                     ELO = startELO + 150 * floor,
@@ -90,12 +106,15 @@ public class MapManager : MonoBehaviour
                     // 0층 노드만 초기에 접근 가능
                     isAccessible = floor == 0,
                     // 보스층이면 Boss, 30% 확률로 Elite, 나머지는 Normal
-                    nodeType = isBoss ? NodeType.Boss
-                               : (Random.value < 0.3f ? NodeType.Elite : NodeType.Normal),
+                    nodeType = nodeType,
                     MapName = isBoss ? $"{floor + 1}구간 보스" :
                                 $"{floor + 1}구간 - ",
-                    FEN = SelectFEN(floor, isBoss)
-                });
+                    FEN = SelectFEN(floor, isBoss),
+                    AiDeckConfig = aiDeck,
+                    AiDeckId = GetDeckId(aiDeck)
+                };
+                AssignRandomRuntimeDeck(node);
+                mapGrid[floor].nodes.Add(node);
                 if (mapGrid[floor].nodes[col].nodeType == NodeType.Elite)
                     // 추후 문자열 최적화 시 개선
                     mapGrid[floor].nodes[col].MapName += "엘리트 노드";
@@ -217,6 +236,241 @@ public class MapManager : MonoBehaviour
     {
         map.ELO = GetPracticeElo(difficulty);
         map.FEN = GetPracticeFen(difficulty);
+        map.AiDeckConfig = null;
+        map.AiDeckId = null;
+        AssignRandomRuntimeDeck(map, useAllCards: true);
+    }
+
+    public AiDeckConfig ResolveAiDeckConfig(Map map)
+    {
+        if (map == null)
+            return defaultAiDeckConfig;
+
+        if (GameCycleManager.Instance != null && GameCycleManager.Instance.IsPracticeMode)
+            return null;
+
+        if (map.AiDeckConfig != null)
+            return map.AiDeckConfig;
+
+        map.AiDeckConfig = FindAiDeckConfig(map.AiDeckId) ?? SelectAiDeckConfig(map.nodeType);
+        map.AiDeckId = GetDeckId(map.AiDeckConfig);
+        return map.AiDeckConfig;
+    }
+
+    public IReadOnlyList<GameObject> ResolveAiRuntimeDeckCards(Map map)
+    {
+        if (map == null)
+            return System.Array.Empty<GameObject>();
+
+        if (map.AiRuntimeDeckCards == null)
+            map.AiRuntimeDeckCards = new List<GameObject>();
+
+        map.AiRuntimeDeckCards.RemoveAll(card => card == null);
+        if (map.AiRuntimeDeckCards.Count > 0)
+            return map.AiRuntimeDeckCards;
+
+        if (map.AiRuntimeDeckCardIds != null && map.AiRuntimeDeckCardIds.Count > 0)
+        {
+            foreach (string cardId in map.AiRuntimeDeckCardIds)
+            {
+                GameObject card = FindAiSupportedCardById(cardId);
+                if (card != null && !ContainsSameCard(map.AiRuntimeDeckCards, card))
+                    map.AiRuntimeDeckCards.Add(card);
+            }
+        }
+
+        if (map.AiRuntimeDeckCards.Count == 0)
+            AssignRandomRuntimeDeck(map);
+
+        return map.AiRuntimeDeckCards;
+    }
+
+    public string GetRuntimeDeckKey(Map map)
+    {
+        if (map == null)
+            return "runtime_no_map";
+
+        string ids = map.AiRuntimeDeckCardIds != null
+            ? string.Join(",", map.AiRuntimeDeckCardIds)
+            : string.Empty;
+        return $"runtime_node:{map.floor}:{map.column}:{ids}";
+    }
+
+    private AiDeckConfig SelectAiDeckConfig(NodeType nodeType)
+    {
+        AiDeckConfig selected = null;
+        switch (nodeType)
+        {
+            case NodeType.Elite:
+                selected = eliteAiDeckConfig;
+                break;
+            case NodeType.Boss:
+                selected = bossAiDeckConfig;
+                break;
+            default:
+                selected = normalAiDeckConfig;
+                break;
+        }
+
+        return selected != null ? selected : defaultAiDeckConfig;
+    }
+
+    private AiDeckConfig GetPracticeAiDeckConfig(PracticeDifficulty difficulty)
+    {
+        AiDeckConfig selected = null;
+        switch (difficulty)
+        {
+            case PracticeDifficulty.Easy:
+                selected = easyPracticeAiDeckConfig;
+                break;
+            case PracticeDifficulty.Normal:
+                selected = normalPracticeAiDeckConfig;
+                break;
+            case PracticeDifficulty.Hard:
+                selected = hardPracticeAiDeckConfig;
+                break;
+        }
+
+        return selected != null ? selected : defaultAiDeckConfig;
+    }
+
+    private AiDeckConfig FindAiDeckConfig(string deckId)
+    {
+        if (string.IsNullOrWhiteSpace(deckId))
+            return null;
+
+        AiDeckConfig found = MatchesDeckId(defaultAiDeckConfig, deckId) ? defaultAiDeckConfig : null;
+        found ??= MatchesDeckId(normalAiDeckConfig, deckId) ? normalAiDeckConfig : null;
+        found ??= MatchesDeckId(eliteAiDeckConfig, deckId) ? eliteAiDeckConfig : null;
+        found ??= MatchesDeckId(bossAiDeckConfig, deckId) ? bossAiDeckConfig : null;
+        found ??= MatchesDeckId(easyPracticeAiDeckConfig, deckId) ? easyPracticeAiDeckConfig : null;
+        found ??= MatchesDeckId(normalPracticeAiDeckConfig, deckId) ? normalPracticeAiDeckConfig : null;
+        found ??= MatchesDeckId(hardPracticeAiDeckConfig, deckId) ? hardPracticeAiDeckConfig : null;
+
+        if (found != null)
+            return found;
+
+        foreach (AiDeckConfig config in aiDeckRegistry)
+        {
+            if (MatchesDeckId(config, deckId))
+                return config;
+        }
+
+        return null;
+    }
+
+    private static bool MatchesDeckId(AiDeckConfig config, string deckId)
+    {
+        return config != null && config.DeckId == deckId;
+    }
+
+    private static string GetDeckId(AiDeckConfig config)
+    {
+        return config != null ? config.DeckId : null;
+    }
+
+    private void AssignRandomRuntimeDeck(Map map, bool useAllCards = false)
+    {
+        if (map == null || !generateRandomAiDeckPerNode)
+            return;
+
+        List<GameObject> candidates = GetAllAiSupportedCards();
+        Shuffle(candidates);
+
+        int count = useAllCards ? candidates.Count : Mathf.Min(Mathf.Max(1, randomAiDeckCardCount), candidates.Count);
+        map.AiRuntimeDeckCards = new List<GameObject>(count);
+        map.AiRuntimeDeckCardIds = new List<string>(count);
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject card = candidates[i];
+            if (card == null || !TryGetAiCardId(card, out string cardId))
+                continue;
+
+            map.AiRuntimeDeckCards.Add(card);
+            map.AiRuntimeDeckCardIds.Add(cardId);
+        }
+    }
+
+    private static List<GameObject> GetAllAiSupportedCards()
+    {
+        var cards = new List<GameObject>();
+        CardRandomizerManager manager = CardRandomizerManager.Instance;
+        if (manager == null || manager.AllCards == null)
+            return cards;
+
+        foreach (GameObject card in manager.AllCards)
+        {
+            if (card != null &&
+                TryGetAiCardId(card, out _) &&
+                !ContainsSameCard(cards, card))
+            {
+                cards.Add(card);
+            }
+        }
+
+        return cards;
+    }
+
+    private static GameObject FindAiSupportedCardById(string cardId)
+    {
+        if (string.IsNullOrWhiteSpace(cardId))
+            return null;
+
+        CardRandomizerManager manager = CardRandomizerManager.Instance;
+        if (manager == null || manager.AllCards == null)
+            return null;
+
+        foreach (GameObject card in manager.AllCards)
+        {
+            if (TryGetAiCardId(card, out string candidateId) && candidateId == cardId)
+                return card;
+        }
+
+        return null;
+    }
+
+    private static bool TryGetAiCardId(GameObject card, out string cardId)
+    {
+        cardId = null;
+        CardData cardData = card != null ? card.GetComponent<CardData>() : null;
+        CardDataSO dataSO = cardData != null ? cardData.DataSO : null;
+        if (dataSO == null ||
+            !dataSO.AiSupported ||
+            string.IsNullOrWhiteSpace(dataSO.AiCardId) ||
+            dataSO.AiCategory == AiCardCategory.Unknown)
+        {
+            return false;
+        }
+
+        cardId = dataSO.AiCardId;
+        return true;
+    }
+
+    private static bool ContainsSameCard(IEnumerable<GameObject> cards, GameObject card)
+    {
+        if (cards == null || card == null)
+            return false;
+
+        foreach (GameObject existing in cards)
+        {
+            if (ChaosChess.Unity.AIIntegration.Cards.AiCardHand.IsSameCard(existing, card))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void Shuffle(List<GameObject> cards)
+    {
+        if (cards == null)
+            return;
+
+        for (int i = cards.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (cards[i], cards[j]) = (cards[j], cards[i]);
+        }
     }
 
     /// <summary>
@@ -254,7 +508,10 @@ public class MapManager : MonoBehaviour
                         nextColumns = nodeData.nextColumns != null ? new System.Collections.Generic.List<int>(nodeData.nextColumns) : new System.Collections.Generic.List<int>(),
                         isAccessible = nodeData.isAccessible,
                         uiPosition = new UnityEngine.Vector2(nodeData.uiPositionX, nodeData.uiPositionY),
-                        nodeType = (NodeType)nodeData.nodeType
+                        nodeType = (NodeType)nodeData.nodeType,
+                        AiDeckId = nodeData.aiDeckId,
+                        AiDeckConfig = FindAiDeckConfig(nodeData.aiDeckId),
+                        AiRuntimeDeckCardIds = nodeData.aiRuntimeDeckCardIds != null ? new List<string>(nodeData.aiRuntimeDeckCardIds) : new List<string>()
                     });
                 }
                 mapGrid.Add(floor);

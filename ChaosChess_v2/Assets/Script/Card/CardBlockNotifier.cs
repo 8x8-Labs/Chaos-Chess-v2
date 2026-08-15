@@ -3,13 +3,18 @@ using UnityEngine;
 /// <summary>카드를 사용할 수 없는 사유.</summary>
 public enum CardBlockReason
 {
+    None,
     NoTargetPiece,        // 조건에 맞는 대상 기물이 없음
     AllPiecesAffected,    // 대상 기물에 이미 모든 효과가 적용됨
     NoSelectableTile,     // 카드를 놓을 빈 칸이 없음
     SelectionInProgress,  // 다른 카드 선택이 진행 중
     PlayerInCheck,        // 플레이어가 체크 상태
+    InCheck,              // 현재 카드 사용자 진영이 체크 상태
     NotPlayerTurn,        // 플레이어 턴이 아님
     ArenaInProgress,      // 투기장 진행 중
+    GameEnded,            // 게임이 종료됨
+    MissingCardData,      // 카드 데이터가 없음
+    CardNotInHand,        // 손패에 없는 카드
 }
 
 /// <summary>
@@ -30,7 +35,10 @@ public static class CardBlockNotifier
     {
         GameManager gm = GameManager.Instance;
         if (gm == null) return CardBlockReason.NotPlayerTurn;
+        if (gm.IsEndGame || gm.FinishType != GameResult.None) return CardBlockReason.GameEnded;
         if (gm.IsArenaMode) return CardBlockReason.ArenaInProgress;
+        if (CardSelectionState.IsLocked) return CardBlockReason.SelectionInProgress;
+        if (!gm.IsPlayerTurn) return CardBlockReason.NotPlayerTurn;
         if (gm.IsPlayerInCheck) return CardBlockReason.PlayerInCheck;
         return CardBlockReason.NotPlayerTurn;
     }
@@ -50,13 +58,108 @@ public static class CardBlockNotifier
             case CardBlockReason.SelectionInProgress:
                 return "다른 카드를 사용하는 중입니다.";
             case CardBlockReason.PlayerInCheck:
+            case CardBlockReason.InCheck:
                 return "체크 상태에서는 카드를 사용할 수 없습니다.";
             case CardBlockReason.NotPlayerTurn:
                 return "상대 턴에는 카드를 사용할 수 없습니다.";
             case CardBlockReason.ArenaInProgress:
                 return "투기장 진행 중에는 카드를 사용할 수 없습니다.";
+            case CardBlockReason.GameEnded:
+                return "게임이 종료되어 카드를 사용할 수 없습니다.";
+            case CardBlockReason.MissingCardData:
+                return "카드 데이터가 없어 사용할 수 없습니다.";
+            case CardBlockReason.CardNotInHand:
+                return "손패에 없는 카드는 사용할 수 없습니다.";
             default:
                 return "카드를 사용할 수 없습니다.";
         }
+    }
+}
+
+public enum CardUseActor
+{
+    Player,
+    AI
+}
+
+public static class CardUseRules
+{
+    public static bool CanUseForCurrentPlayer(CardDataSO cardSO, bool requireCardInHand, System.Func<CardDataSO, bool> containsCard, out CardBlockReason reason)
+    {
+        GameManager gameManager = GameManager.Instance;
+        return CanUse(gameManager, gameManager != null ? gameManager.PlayerColor : PieceColor.White, CardUseActor.Player, cardSO, requireCardInHand, containsCard, out reason);
+    }
+
+    public static bool CanUseForAi(GameManager gameManager, PieceColor actorColor, CardDataSO cardSO, bool requireCardInHand, System.Func<CardDataSO, bool> containsCard, out CardBlockReason reason)
+    {
+        return CanUse(gameManager, actorColor, CardUseActor.AI, cardSO, requireCardInHand, containsCard, out reason);
+    }
+
+    public static bool CanUse(
+        GameManager gameManager,
+        PieceColor actorColor,
+        CardUseActor actor,
+        CardDataSO cardSO,
+        bool requireCardInHand,
+        System.Func<CardDataSO, bool> containsCard,
+        out CardBlockReason reason)
+    {
+        reason = CardBlockReason.None;
+
+        if (gameManager == null)
+        {
+            reason = CardBlockReason.NotPlayerTurn;
+            return false;
+        }
+
+        if (gameManager.IsEndGame || gameManager.FinishType != GameResult.None)
+        {
+            reason = CardBlockReason.GameEnded;
+            return false;
+        }
+
+        if (gameManager.IsArenaMode)
+        {
+            reason = CardBlockReason.ArenaInProgress;
+            return false;
+        }
+
+        if (gameManager.turnColor != actorColor)
+        {
+            reason = CardBlockReason.NotPlayerTurn;
+            return false;
+        }
+
+        if (actor == CardUseActor.Player && CardSelectionState.IsLocked)
+        {
+            reason = CardBlockReason.SelectionInProgress;
+            return false;
+        }
+
+        if (actor == CardUseActor.Player && gameManager.IsPlayerInCheck)
+        {
+            reason = CardBlockReason.InCheck;
+            return false;
+        }
+
+        if (actor == CardUseActor.AI && gameManager.IsCurrentTurnInCheck)
+        {
+            reason = CardBlockReason.InCheck;
+            return false;
+        }
+
+        if (cardSO == null && requireCardInHand)
+        {
+            reason = CardBlockReason.MissingCardData;
+            return false;
+        }
+
+        if (cardSO != null && requireCardInHand && (containsCard == null || !containsCard(cardSO)))
+        {
+            reason = CardBlockReason.CardNotInHand;
+            return false;
+        }
+
+        return true;
     }
 }

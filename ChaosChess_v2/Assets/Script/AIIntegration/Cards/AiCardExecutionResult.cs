@@ -13,6 +13,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
         MissingExecutor,
         UnsupportedCardType,
         TargetUnavailable,
+        CardUseBlocked,
         ExecutionFailed
     }
 

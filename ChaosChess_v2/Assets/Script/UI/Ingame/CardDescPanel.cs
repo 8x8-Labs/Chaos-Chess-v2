@@ -94,6 +94,11 @@ public class CardDescPanel : ButtonPanel
                 if (gameManager == null) gameManager = GameManager.Instance;
                 gameManager?.CancelCurrentSelectionForBoardTransition();
                 DisablePanel();
+                if (!CardUseRules.CanUseForCurrentPlayer(data.DataSO, requireCardInHand: false, containsCard: null, out CardBlockReason reason))
+                {
+                    CardBlockNotifier.Notify(reason, data.DataSO != null ? data.DataSO.CardName : null);
+                    return;
+                }
                 cardExecute?.Invoke();
             }
         );
