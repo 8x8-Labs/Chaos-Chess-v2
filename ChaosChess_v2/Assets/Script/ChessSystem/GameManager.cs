@@ -255,6 +255,20 @@ public class GameManager : MonoBehaviour
     private void LoadMapManager()
     {
         FairyStockfishBridge.Instance.InitEngine("chaoschess");
+
+        // 원격 대전이면 초기 판을 합의된 값으로 씁니다.
+        // 맵은 클라이언트마다 따로 생성되므로 각자 뽑으면 서로 다른 판에서 두게 됩니다.
+        //
+        // 엘리트 변형은 적용하지 않습니다. 대상이 EnemyColor 기준이라 두 클라이언트가
+        // 서로 반대 진영을 변형시키고, 애초에 엘리트는 런 전용 개념입니다(설계문서 8-1).
+        // ELO도 AI 난이도라 원격 대전에서는 의미가 없습니다.
+        MatchSetup setup = GameCycleManager.Instance?.MatchSetup;
+        if (setup != null)
+        {
+            BoardManager.Instance.LoadFEN(setup.InitialFen);
+            return;
+        }
+
         if (MapManager.Instance != null && MapManager.Instance.curMap != null)
         {
             int elo = MapManager.Instance.curMap.ELO;

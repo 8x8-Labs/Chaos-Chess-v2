@@ -62,6 +62,19 @@ public class GameCycleManager : MonoBehaviour
         PlayerColor = color;
     }
 
+    /// <summary>
+    /// 이번 매치의 초기 상태입니다. 원격 대전에서만 채워지며, 없으면 각자 뽑던 기존 방식대로 갑니다.
+    /// GameManager가 매치 시작 시 읽어가므로 씬이 로드되기 전에 넣어야 합니다.
+    /// </summary>
+    public MatchSetup MatchSetup { get; private set; }
+
+    /// <summary>합의된 초기 상태를 넣습니다. null을 넣으면 기존 방식(각자 뽑기)으로 돌아갑니다.</summary>
+    public void SetMatchSetup(MatchSetup setup)
+    {
+        MatchSetup = setup;
+        Debug.Log($"[Match] 초기 상태 지정: {(setup != null ? setup.ToString() : "없음")}");
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -79,6 +92,11 @@ public class GameCycleManager : MonoBehaviour
     {
         CurrentMode = ResolveMode(GameMode.Run);
         PlayerColor = DefaultPlayerColor;
+
+        // 지난 매치의 초기 상태가 남아 있으면 새 매치가 엉뚱한 판으로 시작합니다.
+        // 원격 대전에서는 핸드셰이크가 끝난 뒤 SetMatchSetup으로 다시 채웁니다.
+        MatchSetup = null;
+
         PlayerState.Instance?.InitializeRun();
         MapManager.Instance?.Init();
     }
