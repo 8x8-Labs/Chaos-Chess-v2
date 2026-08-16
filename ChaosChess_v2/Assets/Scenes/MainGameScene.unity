@@ -4844,6 +4844,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f556cdfceb97e8e4dac22e1f2e93194a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  transportKind: 1
+  relayRole: 0
+  relayJoinCode: 
+  remoteCardPresentationSeconds: 1.2
 --- !u!1 &584636417
 GameObject:
   m_ObjectHideFlags: 0
@@ -11190,6 +11194,7 @@ GameObject:
   - component: {fileID: 1302918975}
   - component: {fileID: 1302918979}
   - component: {fileID: 1302918980}
+  - component: {fileID: 1302918981}
   m_Layer: 5
   m_Name: ProfileUI
   m_TagString: Untagged
@@ -11309,6 +11314,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   remoteThinkingRoot: {fileID: 1057639808}
   remoteTurnProvider: {fileID: 577897747}
+--- !u!114 &1302918981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1302918974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 940188a5193fa6a43aa6f9673b9e3f90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerProfile: {fileID: 1787242911}
+  enemyProfile: {fileID: 755726923}
+  authoredPlayerColor: 0
 --- !u!1 &1309221202
 GameObject:
   m_ObjectHideFlags: 0
