@@ -10,5 +10,12 @@ namespace ChaosChess.Unity.AIIntegration.Mapping
                 ? AiPieceColor.White
                 : AiPieceColor.Black;
         }
+
+        public static global::PieceColor ToUnityColor(AiPieceColor color)
+        {
+            return color == AiPieceColor.White
+                ? global::PieceColor.White
+                : global::PieceColor.Black;
+        }
     }
 }

@@ -55,9 +55,21 @@ public class CardAnim : MonoBehaviour
 
     public void EnableCardDataUI()
     {
+        if (cardData == null || cardData.DataSO == null)
+        {
+            CardBlockNotifier.Notify(CardBlockReason.MissingCardData);
+            return;
+        }
+
         if (CardSelectionState.IsLocked)
         {
             CardBlockNotifier.Notify(CardBlockReason.SelectionInProgress);
+            return;
+        }
+
+        if (!CardUseRules.CanUseForCurrentPlayer(cardData.DataSO, requireCardInHand: false, containsCard: null, out CardBlockReason reason))
+        {
+            CardBlockNotifier.Notify(reason);
             return;
         }
 

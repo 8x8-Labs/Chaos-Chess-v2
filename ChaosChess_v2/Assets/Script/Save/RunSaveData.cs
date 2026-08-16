@@ -25,6 +25,8 @@ public class MapNodeSaveData
 {
     public int elo;
     public string fen;
+    public string aiDeckId;
+    public List<string> aiRuntimeDeckCardIds = new();
     public string mapName;
     public bool isCleared;
     public int floor;

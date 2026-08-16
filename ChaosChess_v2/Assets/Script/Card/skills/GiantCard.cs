@@ -70,14 +70,15 @@ public class GiantEffector : PieceEffector
                     GiantStunEffector stun = target.gameObject.AddComponent<GiantStunEffector>();
                     stun.CardSO = CardSO;
                     stun.SetVFXConfig(CardSO.PieceEffectVFX);
-                    stun.Init(target, 1);
-                    stun.Apply();
+                    stun.InitForHalfTurns(target, 2);
+                    stun.Apply(true);
                 }
             }
         }
 
         Revert();
     }
+
     protected override void OnRevert()
     {
         scaleTween?.Kill();
@@ -91,6 +92,14 @@ public class GiantEffector : PieceEffector
 
 public class GiantStunEffector : PieceEffector, IMovementOverrideEffect
 {
+    private int remainingHalfTurns;
+
+    public void InitForHalfTurns(Piece piece, int halfTurns)
+    {
+        Init(piece, -1);
+        remainingHalfTurns = Mathf.Max(1, halfTurns);
+    }
+
     protected override void OnApply()
     {
         target.MoveFenOverride = "a";
@@ -103,5 +112,12 @@ public class GiantStunEffector : PieceEffector, IMovementOverrideEffect
             target.MoveFenOverride = null;
         BoardManager.Instance.RefreshMoves();
         Destroy(this);
+    }
+
+    protected override void OnHalfTurnChanged()
+    {
+        remainingHalfTurns--;
+        if (remainingHalfTurns <= 0)
+            Revert();
     }
 }

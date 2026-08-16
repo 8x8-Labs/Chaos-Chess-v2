@@ -1,6 +1,7 @@
 using System;
 using ChaosChess.AI.Decision;
 using ChaosChess.AI.Domain;
+using ChaosChess.Unity.AIIntegration.Mapping;
 using UnityEngine;
 using AiPieceColor = ChaosChess.AI.Domain.PieceColor;
 
@@ -86,6 +87,22 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     recommendation);
             }
 
+            global::CardDataSO cardSO = GetCardDataSO(cardObject);
+            if (!global::CardUseRules.CanUseForAi(
+                    global::GameManager.Instance,
+                    UnityAiColorMapper.ToUnityColor(actor),
+                    cardSO,
+                    requireCardInHand: true,
+                    containsCard: aiCardHand.Contains,
+                    out global::CardBlockReason blockReason))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardUseBlocked,
+                    $"Card use blocked by shared rules: {blockReason}.",
+                    recommendation,
+                    cardSO);
+            }
+
             AiCardTargetPlan plan;
             AiCardExecutionStatus failureStatus;
             string reason;
@@ -152,6 +169,22 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     $"AI hand does not contain card id '{usePlan.CardId}'.");
             }
 
+            global::CardDataSO cardSO = GetCardDataSO(cardObject);
+            if (!global::CardUseRules.CanUseForAi(
+                    global::GameManager.Instance,
+                    UnityAiColorMapper.ToUnityColor(actor),
+                    cardSO,
+                    requireCardInHand: true,
+                    containsCard: aiCardHand.Contains,
+                    out global::CardBlockReason blockReason))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardUseBlocked,
+                    $"Card use blocked by shared rules: {blockReason}.",
+                    recommendation: null,
+                    cardSO: cardSO);
+            }
+
             if (!targetPlanner.TryCreatePlan(
                     usePlan,
                     cardObject,
@@ -170,6 +203,70 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     reason,
                     recommendation: null,
                     cardSO: failedCardSO);
+            }
+
+            return ExecuteUnityPlan(plan, aiCardHand, boardManager, recommendation: null);
+        }
+
+        public AiCardExecutionResult ExecuteCardId(
+            string cardId,
+            AiCardHand aiCardHand,
+            global::BoardManager boardManager,
+            GameState gameState,
+            AiPieceColor actor)
+        {
+            if (string.IsNullOrWhiteSpace(cardId))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.NoRecommendation,
+                    "Card id is empty.");
+            }
+
+            if (aiCardHand == null)
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardNotInHand,
+                    "AI card hand is null.");
+            }
+
+            if (!aiCardHand.TryFindByAiCardId(cardId, out GameObject cardObject))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardNotInHand,
+                    $"AI hand does not contain card id '{cardId}'.");
+            }
+
+            global::CardDataSO cardSO = GetCardDataSO(cardObject);
+            if (!global::CardUseRules.CanUseForAi(
+                    global::GameManager.Instance,
+                    UnityAiColorMapper.ToUnityColor(actor),
+                    cardSO,
+                    requireCardInHand: true,
+                    containsCard: aiCardHand.Contains,
+                    out global::CardBlockReason blockReason))
+            {
+                return AiCardExecutionResult.Failure(
+                    AiCardExecutionStatus.CardUseBlocked,
+                    $"Card use blocked by shared rules: {blockReason}.",
+                    recommendation: null,
+                    cardSO: cardSO);
+            }
+
+            if (!targetPlanner.TryCreatePlan(
+                    cardId,
+                    cardObject,
+                    boardManager,
+                    gameState,
+                    actor,
+                    out AiCardTargetPlan plan,
+                    out AiCardExecutionStatus failureStatus,
+                    out string reason))
+            {
+                return AiCardExecutionResult.Failure(
+                    failureStatus,
+                    reason,
+                    recommendation: null,
+                    cardSO: GetCardDataSO(cardObject));
             }
 
             return ExecuteUnityPlan(plan, aiCardHand, boardManager, recommendation: null);
@@ -194,14 +291,24 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             try
             {
                 cardExecutor.Execute(plan.Args);
-                aiCardHand.Consume(plan.CardData.DataSO);
+                bool consumed = aiCardHand.Consume(plan.CardData.DataSO);
+                if (!consumed)
+                    consumed = aiCardHand.ConsumeAiCardId(plan.UsePlan.CardId);
+
                 boardManager?.RefreshMoves();
+
+                if (!consumed)
+                {
+                    Debug.LogWarning(
+                        $"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}) " +
+                        "but could not remove it from the AI hand.");
+                }
 
                 Debug.Log(
                     $"[AI Card] Executed '{plan.CardData.DataSO.CardName}' ({plan.UsePlan.CardId}), " +
                     $"caster={FormatCaster(plan)}, target={plan.UsePlan.Target.Kind}, " +
                     $"squares={FormatTargetSquares(plan)}.");
-                return AiCardExecutionResult.Success(recommendation, plan.CardData.DataSO);
+                return AiCardExecutionResult.Success(recommendation, plan.CardData.DataSO, plan.UsePlan);
             }
             catch (Exception ex)
             {
@@ -210,7 +317,8 @@ namespace ChaosChess.Unity.AIIntegration.Cards
                     $"Card '{plan.CardData.DataSO.CardName}' execution failed: {ex.Message}",
                     recommendation,
                     plan.CardData.DataSO,
-                    ex);
+                    usePlan: plan.UsePlan,
+                    exception: ex);
             }
         }
 

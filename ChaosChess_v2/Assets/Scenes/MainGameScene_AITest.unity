@@ -6960,6 +6960,103 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1309221203}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &913000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 913000002}
+  - component: {fileID: 913000003}
+  - component: {fileID: 913000004}
+  m_Layer: 0
+  m_Name: P6_AI_TestHarness
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &913000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 913000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &913000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 913000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63021decd671d547a647e836ff3027f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  aiCardUsageEnabled: 1
+  aiCardHand: {fileID: 913000004}
+  analysisDepth: 6
+  variationCount: 3
+  cardCandidateCount: 4
+  targetCandidateCount: 32
+  opponentReplyCandidateCount: 1
+  maximumEngineCallCount: 64
+  allowCoarseCardEffects: 1
+  cardUseScoreTolerance: 120
+  fullHandCardUseScoreTolerance: 1000
+  directCardFallbackEnabled: 0
+  tacticalScore: 10
+  defensiveScore: 8
+  mobilityScore: 8
+  boardControlScore: 10
+  summonScore: 7
+  transformationScore: 7
+  utilityScore: 5
+--- !u!114 &913000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 913000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04c29f31ef20e71469adc58e9542365f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startingCards:
+  - {fileID: 3605416856650468344, guid: 6d91e8b65e8966c428f3b9843e37e07d, type: 3}
+  - {fileID: 2175964123843911041, guid: 863300bbe4f485546955c80a16c13338, type: 3}
+  - {fileID: 9151154777825484287, guid: 87449a7e9ed977243b750c870fa05def, type: 3}
+  - {fileID: 9145880191192428411, guid: f74d37e8174312344b4f7b7bfd043ef5, type: 3}
+  defaultRemainingUses: 1
+  useEditorConfiguredStartingCards: 1
+  editorStartingCardPrefabPaths:
+  - Assets/Prefab/Skill/DesperadoCard.prefab
+  - Assets/Prefab/Skill/SunsetBladeCard.prefab
+  - Assets/Prefab/Skill/GiantCard.prefab
+  - Assets/Prefab/Skill/FatherEnemyCard.prefab
+  useDeckRuntime: 1
+  deckConfigOverride: {fileID: 0}
+  useMapDeckConfig: 1
+  useAllSupportedCardsWhenDeckMissing: 1
+  fallbackInitialHandCount: 4
+  fallbackDrawIntervalTurns: 5
+  fallbackDrawCount: 1
+  fallbackReshuffleUsedPileWhenEmpty: 0
+  logDeckState: 0
 --- !u!1 &938165604
 GameObject:
   m_ObjectHideFlags: 0
@@ -11526,6 +11623,8 @@ MonoBehaviour:
   curTurn: 1
   IsGameInput: 1
   AiAutoMoveEnabled: 1
+  autoCreateAiCardController: 1
+  aiTurnController: {fileID: 0}
 --- !u!1 &1388570847
 GameObject:
   m_ObjectHideFlags: 0
@@ -14090,7 +14189,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -330.69998, y: -344.99988}
+  m_AnchoredPosition: {x: -330.69998, y: -344.99976}
   m_SizeDelta: {x: 1097.5, y: 470}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1609166961
@@ -23887,134 +23986,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9506e1705d13bc4dac603f4316b26bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &913000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 913000002}
-  - component: {fileID: 913000003}
-  - component: {fileID: 913000004}
-  m_Layer: 0
-  m_Name: P6_AI_TestHarness
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &913000002
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913000001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &913000003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c63021decd671d547a647e836ff3027f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  aiCardUsageEnabled: 1
-  aiCardHand: {fileID: 913000004}
-  analysisDepth: 6
-  variationCount: 3
-  minimumCardScoreGain: 1
-  tacticalScore: 10
-  defensiveScore: 8
-  mobilityScore: 8
-  boardControlScore: 10
-  summonScore: 7
-  transformationScore: 7
-  utilityScore: 5
---- !u!114 &913000004
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 913000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04c29f31ef20e71469adc58e9542365f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startingCards:
-  - {fileID: 5300482997993883823, guid: a9f0c2fc742dce043b5105c637073dea, type: 3}
-  - {fileID: 6652349515846844929, guid: 2c0e57b5a067b124d9189cd9bec5af86, type: 3}
-  - {fileID: 7634445145627062371, guid: 59fda4040feb71549a7b1e33e6dac203, type: 3}
-  - {fileID: 7277216013543518613, guid: e0c217151b18b46438129d9b4a8a45ee, type: 3}
-  - {fileID: 540433377832424254, guid: dfd2eb2d9c92d1441bcc7831375fc9c9, type: 3}
-  defaultRemainingUses: 1
-  useEditorConfiguredStartingCards: 1
-  editorStartingCardPrefabPaths:
-  - Assets/Prefab/Skill/AgileCard.prefab
-  - Assets/Prefab/Skill/AimCard.prefab
-  - Assets/Prefab/Skill/ArenaCard.prefab
-  - Assets/Prefab/Skill/ATMineCard.prefab
-  - Assets/Prefab/Skill/BlessingCard.prefab
-  - Assets/Prefab/Skill/CastleKnightCard.prefab
-  - Assets/Prefab/Skill/CaterpillarCard.prefab
-  - Assets/Prefab/Skill/ChaoticKnightCard.prefab
-  - Assets/Prefab/Skill/ChargeCard.prefab
-  - Assets/Prefab/Skill/CheckmateDeclarationCard.prefab
-  - Assets/Prefab/Skill/CobwebCard.prefab
-  - Assets/Prefab/Skill/ConcentrationCard.prefab
-  - Assets/Prefab/Skill/DarkHandCard.prefab
-  - Assets/Prefab/Skill/DemocracyCard.prefab
-  - Assets/Prefab/Skill/DesperadoCard.prefab
-  - Assets/Prefab/Skill/DestroyerTankCards.prefab
-  - Assets/Prefab/Skill/DimensionDisturbanceCard.prefab
-  - Assets/Prefab/Skill/DimensionInstabilityCard.prefab
-  - Assets/Prefab/Skill/FastMarchCard.prefab
-  - Assets/Prefab/Skill/FatherEnemyCard.prefab
-  - Assets/Prefab/Skill/FireCard.prefab
-  - Assets/Prefab/Skill/GaslightingCard.prefab
-  - Assets/Prefab/Skill/GiantCard.prefab
-  - Assets/Prefab/Skill/GodsMoveCard.prefab
-  - Assets/Prefab/Skill/HoneytrapCard.prefab
-  - Assets/Prefab/Skill/JumpingPlatformCard.prefab
-  - Assets/Prefab/Skill/LimitlessCard.prefab
-  - Assets/Prefab/Skill/MagnetCard.prefab
-  - Assets/Prefab/Skill/MissingPromotionCard.prefab
-  - Assets/Prefab/Skill/MutinyCard.prefab
-  - Assets/Prefab/Skill/ObeyOrderCard.prefab
-  - Assets/Prefab/Skill/OverbearingCard.prefab
-  - Assets/Prefab/Skill/PeaceZoneCard.prefab
-  - Assets/Prefab/Skill/PortalSkill.prefab
-  - Assets/Prefab/Skill/PositionSwapCard.prefab
-  - Assets/Prefab/Skill/PsilocybinMushroomCard.prefab
-  - Assets/Prefab/Skill/RampartCard.prefab
-  - Assets/Prefab/Skill/ReviveCard.prefab
-  - Assets/Prefab/Skill/ShuffleBoardCard.prefab
-  - Assets/Prefab/Skill/SneakPawnCard.prefab
-  - Assets/Prefab/Skill/StagFightCard.prefab
-  - Assets/Prefab/Skill/SunsetBladeCard.prefab
-  - Assets/Prefab/Skill/SyncCard.prefab
-  - Assets/Prefab/Skill/TeleportCard.prefab
-  - Assets/Prefab/Skill/ThunderclapFlashCard.prefab
-  - Assets/Prefab/Skill/TimeBombCard.prefab
-  - Assets/Prefab/Skill/TimeReversalCard.prefab
-  - Assets/Prefab/Skill/TransmigrationCard.prefab
-  - Assets/Prefab/Skill/WeirdCastling.prefab
-  - Assets/Prefab/Skill/WindmillCard.prefab
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

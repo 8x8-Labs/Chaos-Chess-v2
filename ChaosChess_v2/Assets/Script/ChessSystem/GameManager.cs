@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using ChaosChess.Unity.AIIntegration.Cards;
 using ChaosChess.Unity.AIIntegration.Runtime;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -9,6 +10,7 @@ using DG.Tweening;
 public class GameManager : MonoBehaviour
 {
     private const int AiMoveTimeMs = 5000;
+    private readonly AiCardMovePostProcessor aiCardMovePostProcessor = new AiCardMovePostProcessor();
 
     // 모바일에서는 엔진이 즉시 수를 반환해 AI가 너무 빠르게 두는 느낌을 주므로,
     // 수를 적용하기 전 최소한의 연출 딜레이를 보장한다 (초 단위).
@@ -58,12 +60,17 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public bool IsPlayerTurn => turnColor == PlayerColor;
     public bool IsPlayerInCheck { get; private set; }
+    public bool IsCurrentTurnInCheck { get; private set; }
 
     public bool IsGameInput = true;
     /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
     public bool AiAutoMoveEnabled = true;
     /// <summary>이번 턴을 대신 둘 주체입니다. 지금은 AI 카드 컨트롤러이며, 멀티에서는 원격 프로바이더가 들어갑니다.</summary>
     [SerializeField] private TurnProvider turnProvider;
+    /// <summary>씬에 AI 카드 시스템이 없을 때 런타임에 만들어 줄지 여부입니다.</summary>
+    [SerializeField] private bool autoCreateAiCardController = true;
+    /// <summary>자동 생성한 AI 컨트롤러를 담아 둡니다. 턴 디스패치는 turnProvider가 담당합니다.</summary>
+    [SerializeField] private AiTurnController aiTurnController;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
     public bool IsCardIntervalPaused => cardIntervalPauseCount > 0;
@@ -215,6 +222,14 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        // 싱글플레이인데 씬에 AI 컨트롤러가 없으면 여기서 만들어 씁니다.
+        // RequestAIMove에서 만들면 이미 씬에 붙어 있는 컨트롤러 위에 하나를 더 얹게 됩니다.
+        if (resolved == null && !needRemote)
+        {
+            EnsureAiCardController();
+            resolved = aiTurnController;
+        }
+
         Debug.Log($"[TurnProvider] 모드 {mode} " +
                   $"(GameCycleManager {(GameCycleManager.Instance != null ? "있음" : "없음")}) " +
                   $"→ 선택: {(resolved != null ? resolved.GetType().Name : "없음")}");
@@ -360,6 +375,70 @@ public class GameManager : MonoBehaviour
     {
         extraPlayerActions++;
         lockedPiece = piece;
+    }
+
+    public bool IsMoveAllowedByExtraAction(string uciMove)
+    {
+        if (lockedPiece == null)
+            return true;
+
+        if (!lockedPiece)
+        {
+            extraPlayerActions = 0;
+            lockedPiece = null;
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(uciMove) || uciMove.Length < 2 || BoardManager.Instance == null)
+            return false;
+
+        string lockedSource = BoardManager.Instance.GridTOUCI(lockedPiece.Pos);
+        return string.Equals(
+            uciMove.Substring(0, 2),
+            lockedSource,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void CompleteAutomatedMove()
+    {
+        if (extraPlayerActions > 0)
+        {
+            if (TryApplyImmediateOpponentCheckmate())
+                return;
+
+            extraPlayerActions--;
+            RefreshCurrentTurnAfterExtraAction();
+            return;
+        }
+
+        if (!IsArenaMode) lockedPiece = null;
+        NextTurn(() => RequestAIMove());
+    }
+
+    private void RefreshCurrentTurnAfterExtraAction()
+    {
+        BoardManager.Instance.UpdateFEN();
+        string fen = BoardManager.Instance.GetFEN();
+        FairyStockfishBridge.Instance.SetPosition(fen);
+        FairyStockfishBridge.Instance.GetLegalMovesAsync(moves =>
+        {
+            EvaluateGameState(moves);
+            ApplyGameResult();
+            BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+            BoardManager.Instance.RefreshMoves();
+
+            if (IsEndGame)
+                return;
+
+            if (turnColor == EnemyColor)
+            {
+                RequestAIMove();
+            }
+            else
+            {
+                OnPlayerTurnStarted?.Invoke();
+            }
+        });
     }
 
     private void RefreshPlayerTurn()
@@ -718,6 +797,12 @@ public class GameManager : MonoBehaviour
         if (!AiAutoMoveEnabled)
             return;
 
+        if (turnColor != EnemyColor)
+        {
+            Debug.LogWarning($"[AI] Ignored AI move request because current turn is {turnColor}, enemy is {EnemyColor}.");
+            return;
+        }
+
         if (turnProvider != null &&
             turnProvider.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
         {
@@ -725,6 +810,22 @@ public class GameManager : MonoBehaviour
         }
 
         RequestStockfishAIMove();
+    }
+
+    private void EnsureAiCardController()
+    {
+        if (!autoCreateAiCardController)
+            return;
+
+        AiCardHand hand = FindFirstObjectByType<AiCardHand>();
+        if (hand == null)
+        {
+            GameObject systemObject = new GameObject("AI Card System (Runtime)");
+            hand = systemObject.AddComponent<AiCardHand>();
+        }
+
+        if (aiTurnController == null)
+            aiTurnController = hand.gameObject.AddComponent<AiTurnController>();
     }
 
     private void RequestStockfishAIMove()
@@ -752,17 +853,46 @@ public class GameManager : MonoBehaviour
                     if (IsEndGame)
                         return;
 
-                    if (BoardManager.Instance.IsValidUciMove(uciMove))
+                    if (TrySelectCardAwareAIMove(uciMove, out string cardAwareMove))
+                    {
+                        BoardManager.Instance.ApplyUCIMove(cardAwareMove);
+                        return;
+                    }
+
+                    if (BoardManager.Instance.IsValidUciMove(uciMove) &&
+                        IsMoveAllowedByExtraAction(uciMove) &&
+                        !ShouldRejectCardAwareAIMove(uciMove))
                     {
                         BoardManager.Instance.ApplyUCIMove(uciMove);
                         return;
                     }
 
-                    Debug.LogWarning($"[AI] Stockfish returned invalid move '{uciMove}'. Using random legal fallback.");
+                    Debug.LogWarning($"[AI] Stockfish returned invalid or extra-action-blocked move '{uciMove}'. Using random legal fallback.");
                     ApplyFallbackLegalAIMove();
                 });
             }
         );
+    }
+
+    public bool TrySelectCardAwareAIMove(string uciMove, out string selectedMove)
+    {
+        return aiCardMovePostProcessor.TrySelectMove(
+            uciMove,
+            BoardManager.Instance,
+            FairyStockfishBridge.Instance,
+            lockedPiece,
+            extraPlayerActions,
+            IsMoveAllowedByExtraAction,
+            out selectedMove);
+    }
+
+    public bool ShouldRejectCardAwareAIMove(string uciMove)
+    {
+        return aiCardMovePostProcessor.ShouldRejectMove(
+            uciMove,
+            BoardManager.Instance,
+            lockedPiece,
+            extraPlayerActions);
     }
 
     // 엔진 응답이 최소 연출 시간보다 빨리 도착하면 남은 시간만큼 지연 후 실행한다.
@@ -794,6 +924,18 @@ public class GameManager : MonoBehaviour
             string randomMove = ChooseRandomLegalMove(moves);
             if (randomMove == "none")
             {
+                if (lockedPiece != null)
+                {
+                    if (TryEndBlockedDesperadoExtraAction())
+                        return;
+
+                    Debug.LogWarning("[AI] No valid locked-piece extra action move found. Ending extra action and advancing turn.");
+                    extraPlayerActions = 0;
+                    lockedPiece = null;
+                    NextTurn(() => RequestAIMove());
+                    return;
+                }
+
                 Debug.LogWarning("[AI] No valid legal moves found after filtering. Ending game.");
                 EvaluateGameState(Array.Empty<string>());
                 ApplyGameResult();
@@ -804,6 +946,28 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    private bool TryEndBlockedDesperadoExtraAction()
+    {
+        if (lockedPiece == null || !lockedPiece)
+            return false;
+
+        DesperadoEffect desperado = lockedPiece.GetComponent<DesperadoEffect>();
+        if (desperado == null)
+            return false;
+
+        Piece pieceToDestroy = lockedPiece;
+        extraPlayerActions = 0;
+        lockedPiece = null;
+
+        Debug.LogWarning(
+            "[AI] Desperado extra action had no profitable capture. Destroying the desperado piece and advancing turn.");
+
+        desperado.Revert();
+        BoardManager.Instance.DestroyPiece(pieceToDestroy);
+        NextTurn(() => RequestAIMove());
+        return true;
+    }
+
     private string ChooseRandomLegalMove(string[] moves)
     {
         string selectedMove = "none";
@@ -812,6 +976,12 @@ public class GameManager : MonoBehaviour
         foreach (string move in moves)
         {
             if (!BoardManager.Instance.IsValidUciMove(move))
+                continue;
+
+            if (!IsMoveAllowedByExtraAction(move))
+                continue;
+
+            if (ShouldRejectCardAwareAIMove(move))
                 continue;
 
             count++;
@@ -832,12 +1002,14 @@ public class GameManager : MonoBehaviour
                 ArenaManager.Instance.EndArena(ArenaResult.OpponentCheckmated);
                 ResetActions();
             }
+            IsCurrentTurnInCheck = false;
             UpdatePlayerCheckState(false);
             return;
         }
 
         if (FinishType != GameResult.None)
         {
+            IsCurrentTurnInCheck = false;
             UpdatePlayerCheckState(false);
             return;
         }
@@ -850,6 +1022,7 @@ public class GameManager : MonoBehaviour
             FinishType = GameResult.Draw;
         }
         bool isCheck = FairyStockfishBridge.Instance.IsInCheck();
+        IsCurrentTurnInCheck = isCheck;
         UpdatePlayerCheckState(IsPlayerTurn && isCheck);
 
         if (cancelCurrentGameStateEvaluation)

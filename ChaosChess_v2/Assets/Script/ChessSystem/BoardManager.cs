@@ -382,7 +382,7 @@ public class BoardManager : MonoBehaviour
         if (piece != null)
             MovePiece(piece, to, promotion);
 
-        DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.NextTurn());
+        DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.CompleteAutomatedMove());
     }
 
     public bool IsValidUciMove(string move)

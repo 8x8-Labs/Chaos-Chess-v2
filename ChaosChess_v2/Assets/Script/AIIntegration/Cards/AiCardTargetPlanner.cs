@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ChaosChess.AI.Domain;
 using UnityEngine;
@@ -347,7 +348,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
 
                         case CardTargetKind.PieceAtSquare:
                         case CardTargetKind.OrderedPieces:
-                            if (Mathf.Max(0, dataSO.RequiredPieceCount) != definition.RequiredTargetCount)
+                            if (!MatchesRequiredPieceTargetCount(dataSO, definition.RequiredTargetCount))
                             {
                                 reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
                                 return false;
@@ -681,7 +682,7 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             reason = string.Empty;
 
             global::CardDataSO dataSO = cardData.DataSO;
-            if (Mathf.Max(0, dataSO.RequiredPieceCount) != requiredCount)
+            if (!MatchesRequiredPieceTargetCount(dataSO, requiredCount))
             {
                 reason = $"Card '{dataSO.CardName}' target count differs from AI contract.";
                 return false;
@@ -836,7 +837,8 @@ namespace ChaosChess.Unity.AIIntegration.Cards
             return new global::CardEffectArgs
             {
                 HasCasterColor = true,
-                CasterColor = ToUnityColor(usePlan.Actor)
+                CasterColor = ToUnityColor(usePlan.Actor),
+                SuppressAutomaticTurnEnd = true
             };
         }
 
@@ -893,6 +895,24 @@ namespace ChaosChess.Unity.AIIntegration.Cards
 
             object value = property != null ? property.GetValue(definition, null) : null;
             return value != null ? value.ToString() : "Self";
+        }
+
+        private static bool MatchesRequiredPieceTargetCount(global::CardDataSO dataSO, int requiredCount)
+        {
+            if (dataSO == null)
+                return false;
+
+            int unityRequiredCount = Mathf.Max(0, dataSO.RequiredPieceCount);
+            if (unityRequiredCount == requiredCount)
+                return true;
+
+            return IsAiImplicitPieceTargetCard(dataSO) && unityRequiredCount == 0 && requiredCount == 1;
+        }
+
+        private static bool IsAiImplicitPieceTargetCard(global::CardDataSO dataSO)
+        {
+            return dataSO != null
+                && string.Equals(dataSO.AiCardId, "gaslighting", StringComparison.OrdinalIgnoreCase);
         }
 
         private bool HasActivePieceEffector(global::Piece piece)

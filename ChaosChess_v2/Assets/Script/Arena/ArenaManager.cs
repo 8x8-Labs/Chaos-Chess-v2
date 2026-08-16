@@ -16,13 +16,13 @@ public enum ArenaResult { PlayerWon, Timeout, OpponentCheckmated }
 ///    양쪽 King만 남겨 Stockfish가 정상적으로 수를 계산할 수 있도록 유지합니다.
 /// 2. King은 IsInvincible 상태로 설정해 포획되지 않도록 하며,
 ///    매 반턴(OnHalfTurnChanged)마다 무적을 갱신합니다.
-/// 3. 플레이어 기물 전체가 이동 가능하며, 상대 기물은 Stockfish가 조종합니다.
+/// 3. 시전자 기물 전체와 상대 투기장 기물이 남습니다.
 /// 4. 승패 조건이 충족되거나 8턴이 초과되면 EndArena()로 결과를 처리합니다.
 ///
 /// [승패 조건]
 /// - PlayerWon        : 상대 투기장 기물 3개 모두 포획 → 해당 기물만 영구 제거
-/// - Timeout          : 8 플레이어 턴 초과 → 무효, 기물 복원 후 메인 게임 재개
-/// - OpponentCheckmated : 투기장 내 체크메이트 → 플레이어 게임 승리
+/// - Timeout          : 8 시전자 턴 초과 → 무효, 기물 복원 후 메인 게임 재개
+/// - OpponentCheckmated : 투기장 내 체크메이트 → 상대 항복 처리
 /// </summary>
 public class ArenaManager : MonoBehaviour
 {
@@ -49,8 +49,10 @@ public class ArenaManager : MonoBehaviour
     // Stockfish 호환을 위해 보드에 남기는 King 참조
     private Piece playerKing;
     private Piece opponentKing;
+    private PieceColor arenaCasterColor;
+    private PieceColor arenaOpponentColor;
 
-    private int playerMoveCount;  // 플레이어가 투기장에서 이동한 횟수 (최대 8)
+    private int playerMoveCount;  // 시전자가 투기장에서 이동한 횟수 (최대 8)
     private bool isArenaActive;   // 중복 StartArena / EndArena 호출 방지용 플래그
 
     // Timeout 복원용: 아레나 시작 시점의 모든 기물 위치 스냅샷
@@ -71,7 +73,10 @@ public class ArenaManager : MonoBehaviour
     /// 투기장을 시작합니다.
     /// </summary>
     /// <param name="opponents">투기장에 참여할 상대 기물 목록 (최대 3개)</param>
-    public void StartArena(List<Piece> opponents, CardDataSO arenaCardSO = null)
+    public void StartArena(
+        List<Piece> opponents,
+        CardDataSO arenaCardSO = null,
+        PieceColor? casterColor = null)
     {
         if (isArenaActive) return;
         isArenaActive = true;
@@ -82,6 +87,10 @@ public class ArenaManager : MonoBehaviour
         gm.PushCardIntervalPause();
         gm.CancelCurrentSelectionForBoardTransition();
 
+        arenaCasterColor = casterColor ?? gm.PlayerColor;
+        arenaOpponentColor = arenaCasterColor == PieceColor.White
+            ? PieceColor.Black
+            : PieceColor.White;
         opponentArenaPieces = opponents;
         playerMoveCount = 0;
         hiddenPieces.Clear();
@@ -105,15 +114,15 @@ public class ArenaManager : MonoBehaviour
             bm.TileEffectDrawer.ClearAllTileEffects();
 
         // 양쪽 King 참조 저장 — Stockfish 연산에 필요
-        playerKing = allPiece.Find(p => p.Color == gm.PlayerColor && p.Type == PieceType.King);
-        opponentKing = allPiece.Find(p => p.Color == gm.EnemyColor && p.Type == PieceType.King);
+        playerKing = allPiece.Find(p => p.Color == arenaCasterColor && p.Type == PieceType.King);
+        opponentKing = allPiece.Find(p => p.Color == arenaOpponentColor && p.Type == PieceType.King);
 
-        // 플레이어 전체 기물 + 상대 arena 3개 + 상대 King 외 모든 기물을 보드에서 숨김
+        // 시전자 전체 기물 + 상대 arena 3개 + 상대 King 외 모든 기물을 보드에서 숨김
         // — 숨겨진 기물은 SetActive(false) + 보드 배열 제거로 Stockfish FEN에 포함되지 않음
         HashSet<Piece> keepPieces = new HashSet<Piece>(
-            bm.GetAllPieces().FindAll(p => p.Color == gm.PlayerColor));
+            bm.GetAllPieces().FindAll(p => p.Color == arenaCasterColor));
         keepPieces.UnionWith(opponents);
-        keepPieces.Add(opponentKing); // playerKing은 플레이어 기물로 이미 포함됨
+        keepPieces.Add(opponentKing); // playerKing은 시전자 기물로 이미 포함됨
         // HidePiece가 Pieces 리스트(GetAllPieces 원본)를 수정하므로 스냅샷으로 순회
         foreach (Piece p in new List<Piece>(allPiece))
         {
@@ -129,7 +138,7 @@ public class ArenaManager : MonoBehaviour
         playerKing?.SetInvincible();
         opponentKing?.SetInvincible();
 
-        // 투기장 모드 활성화 — 플레이어 기물 전체 이동 가능 (lockedPiece 없음)
+        // 투기장 모드 활성화 — 시전자 기물 전체 이동 가능 (lockedPiece 없음)
         // — IsArenaMode: EvaluateGameState()의 체크메이트/스테일메이트 판정 건너뜀
         gm.IsArenaMode = true;
         gm.SetLockedPiece(null);
@@ -162,9 +171,10 @@ public class ArenaManager : MonoBehaviour
             return;
         }
 
-        // AI 턴이 시작됐다는 것은 플레이어가 한 수를 뒀다는 의미
-        // — IsPlayerTurn이 false이면 방금 플레이어 반턴이 끝난 것
-        if (!GameManager.Instance.IsPlayerTurn)
+        PieceColor justMovedColor = GameManager.Instance.turnColor == PieceColor.White
+            ? PieceColor.Black
+            : PieceColor.White;
+        if (justMovedColor == arenaCasterColor)
         {
             playerMoveCount++;
             ArenaRemainingTurnsChanged?.Invoke(RemainingPlayerMoves);
@@ -236,7 +246,7 @@ public class ArenaManager : MonoBehaviour
         {
             case ArenaResult.PlayerWon:
                 // 상대 투기장 기물은 이미 DestroyPiece()로 제거된 상태이므로 추가 처리 불필요
-                Debug.Log("[Arena] 플레이어 승리 — 상대 투기장 기물 제거됨");
+                Debug.Log($"[Arena] 시전자 승리({arenaCasterColor}) — 상대 투기장 기물 제거됨");
                 // RequestAIMove는 MoveSelected()가 NextTurn() 완료 후 호출 — 여기서 호출 시 GetLegalMoves와 충돌
                 break;
 
@@ -246,8 +256,8 @@ public class ArenaManager : MonoBehaviour
                 break;
 
             case ArenaResult.OpponentCheckmated:
-                Debug.Log("[Arena] 투기장 내 체크메이트 — 플레이어 게임 승리");
-                gm.OnSurrender(gm.EnemyColor);
+                Debug.Log($"[Arena] 투기장 내 체크메이트 — 상대 항복({arenaOpponentColor})");
+                gm.OnSurrender(arenaOpponentColor);
                 break;
         }
     }

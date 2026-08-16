@@ -11811,6 +11811,8 @@ MonoBehaviour:
   IsGameInput: 1
   AiAutoMoveEnabled: 1
   turnProvider: {fileID: 0}
+  autoCreateAiCardController: 1
+  aiTurnController: {fileID: 0}
 --- !u!1 &1388570847
 GameObject:
   m_ObjectHideFlags: 0
@@ -16581,6 +16583,95 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1837571695}
   m_CullTransparentMesh: 1
+--- !u!1 &1844013817
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1844013820}
+  - component: {fileID: 1844013819}
+  - component: {fileID: 1844013818}
+  m_Layer: 0
+  m_Name: AI Card System
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1844013818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844013817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63021decd671d547a647e836ff3027f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  aiCardUsageEnabled: 1
+  aiCardHand: {fileID: 1844013819}
+  analysisDepth: 12
+  variationCount: 3
+  cardCandidateCount: 4
+  targetCandidateCount: 32
+  opponentReplyCandidateCount: 1
+  maximumEngineCallCount: 64
+  allowCoarseCardEffects: 1
+  cardUseScoreTolerance: 120
+  fullHandCardUseScoreTolerance: 1000
+  directCardFallbackEnabled: 0
+  tacticalScore: 10
+  defensiveScore: 8
+  mobilityScore: 8
+  boardControlScore: 10
+  summonScore: 7
+  transformationScore: 7
+  utilityScore: 5
+--- !u!114 &1844013819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844013817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04c29f31ef20e71469adc58e9542365f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startingCards: []
+  defaultRemainingUses: 1
+  useEditorConfiguredStartingCards: 0
+  editorStartingCardPrefabPaths: []
+  useDeckRuntime: 1
+  deckConfigOverride: {fileID: 0}
+  useMapDeckConfig: 1
+  useAllSupportedCardsWhenDeckMissing: 1
+  fallbackInitialHandCount: 4
+  fallbackDrawIntervalTurns: 5
+  fallbackDrawCount: 1
+  fallbackReshuffleUsedPileWhenEmpty: 0
+  logDeckState: 0
+--- !u!4 &1844013820
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1844013817}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1860162442
 GameObject:
   m_ObjectHideFlags: 0
@@ -24307,3 +24398,4 @@ SceneRoots:
   - {fileID: 980504690}
   - {fileID: 1957615140}
   - {fileID: 577897746}
+  - {fileID: 1844013820}

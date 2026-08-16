@@ -10,12 +10,26 @@ namespace ChaosChess.Unity.AIIntegration.Engine
     {
         private readonly string canonicalFen;
         private readonly UciAnalysisSnapshot snapshot;
+        private readonly string opponentReplyFen;
+        private readonly UciAnalysisSnapshot opponentReplySnapshot;
         private readonly bool isInCheck;
+        private readonly bool opponentReplyIsInCheck;
 
         public FairyStockfishSnapshotEngine(
             string fen,
             UciAnalysisSnapshot snapshot,
             bool isInCheck)
+            : this(fen, snapshot, isInCheck, null, null)
+        {
+        }
+
+        public FairyStockfishSnapshotEngine(
+            string fen,
+            UciAnalysisSnapshot snapshot,
+            bool isInCheck,
+            string opponentReplyFen,
+            UciAnalysisSnapshot opponentReplySnapshot,
+            bool? opponentReplyIsInCheck = null)
         {
             if (string.IsNullOrWhiteSpace(fen))
                 throw new ArgumentException("FEN cannot be empty.", nameof(fen));
@@ -30,48 +44,73 @@ namespace ChaosChess.Unity.AIIntegration.Engine
             canonicalFen = FenParser.Serialize(boardState);
             this.snapshot = snapshot;
             this.isInCheck = isInCheck;
+
+            if (!string.IsNullOrWhiteSpace(opponentReplyFen) && opponentReplySnapshot != null)
+            {
+                BoardState opponentBoardState = FenParser.Parse(opponentReplyFen);
+                this.opponentReplyFen = FenParser.Serialize(opponentBoardState);
+                this.opponentReplySnapshot = opponentReplySnapshot;
+                this.opponentReplyIsInCheck = opponentReplyIsInCheck ?? isInCheck;
+            }
         }
 
         public IReadOnlyList<MoveCandidate> GetTopMoves(BoardState boardState, int variationCount)
         {
-            EnsureMatchingBoard(boardState);
+            UciAnalysisSnapshot resolvedSnapshot = ResolveSnapshot(boardState);
 
             if (variationCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(variationCount), variationCount, "Variation count must be positive.");
 
-            int count = Math.Min(variationCount, snapshot.Moves.Count);
+            int count = Math.Min(variationCount, resolvedSnapshot.Moves.Count);
             var result = new List<MoveCandidate>(count);
 
             for (int i = 0; i < count; i++)
-                result.Add(snapshot.Moves[i].ToMoveCandidate());
+                result.Add(resolvedSnapshot.Moves[i].ToMoveCandidate());
 
             return result.AsReadOnly();
         }
 
         public PositionEvaluation EvaluatePosition(BoardState boardState, int depth)
         {
-            EnsureMatchingBoard(boardState);
+            UciAnalysisSnapshot resolvedSnapshot = ResolveSnapshot(boardState);
 
             if (depth <= 0)
                 throw new ArgumentOutOfRangeException(nameof(depth), depth, "Evaluation depth must be positive.");
 
-            return snapshot.ToPositionEvaluation();
+            return resolvedSnapshot.ToPositionEvaluation();
         }
 
         public bool IsInCheck(BoardState boardState)
         {
-            EnsureMatchingBoard(boardState);
-            return isInCheck;
+            ResolveSnapshot(boardState, out bool isOpponentReply);
+            return isOpponentReply ? opponentReplyIsInCheck : isInCheck;
         }
 
-        private void EnsureMatchingBoard(BoardState boardState)
+        private UciAnalysisSnapshot ResolveSnapshot(BoardState boardState)
+        {
+            return ResolveSnapshot(boardState, out _);
+        }
+
+        private UciAnalysisSnapshot ResolveSnapshot(BoardState boardState, out bool isOpponentReply)
         {
             if (boardState == null)
                 throw new ArgumentNullException(nameof(boardState));
 
+            isOpponentReply = false;
             string requestedFen = FenParser.Serialize(boardState);
             if (!string.Equals(requestedFen, canonicalFen, StringComparison.Ordinal))
+            {
+                if (opponentReplySnapshot != null &&
+                    string.Equals(requestedFen, opponentReplyFen, StringComparison.Ordinal))
+                {
+                    isOpponentReply = true;
+                    return opponentReplySnapshot;
+                }
+
                 throw new InvalidOperationException("Analysis snapshot does not match the requested board state.");
+            }
+
+            return snapshot;
         }
     }
 }

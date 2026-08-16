@@ -23,18 +23,40 @@ public class FatherEnemyCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
-        Create(args.Targets[0]);
+        Create(args.Targets[0], args != null && args.SuppressAutomaticTurnEnd);
     }
 
-    public void Create(Piece piece)
+    public void Create(Piece piece, bool suppressAutomaticTurnEnd = false)
     {
         var effector = CreatePieceEffector<FatherEnemyEffector>(piece);
+        effector.SetSuppressAutomaticTurnEnd(suppressAutomaticTurnEnd);
         effector.Apply();
     }
 }
 
 public class FatherEnemyEffector : PieceEffector
 {
+    private bool suppressAutomaticTurnEnd;
+
+    public void SetSuppressAutomaticTurnEnd(bool value)
+    {
+        suppressAutomaticTurnEnd = value;
+    }
+
+    public bool TryGetNextUpgradeType(out PieceType nextType)
+    {
+        nextType = PieceType.None;
+
+        if (target == null || !target.IsAwakened)
+            return false;
+
+        if (!TryGetNextType(target, out char nextFen))
+            return false;
+
+        nextType = GetPieceType(nextFen);
+        return nextType != PieceType.None;
+    }
+
     private void OnPieceSelected(Piece piece)
     {
         if (piece != target) return;
@@ -53,7 +75,8 @@ public class FatherEnemyEffector : PieceEffector
     {
         GameManager.Instance.OnAwakenedPieceSelected -= OnPieceSelected;
 
-        GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
+        if (!suppressAutomaticTurnEnd)
+            GameManager.Instance.NextTurn(() => GameManager.Instance.RequestAIMove());
 
         Destroy(this);
     }
@@ -68,31 +91,20 @@ public class FatherEnemyEffector : PieceEffector
 
     public void UpgradePiece()
     {
-        if (!target.IsAwakened) return;
+        TryUpgradePiece();
+    }
+
+    public bool TryUpgradePiece()
+    {
+        if (target == null || !target.IsAwakened) return false;
 
         GameManager.Instance.CancelCurrentSelectionForBoardTransition();
 
         Vector3Int pos = target.Pos;
         PieceColor color = target.Color;
 
-        char nextType = ' ';
-
-        switch (target.GetFen().ToLower())
-        {
-            case "p":
-                nextType = 'n';
-                break;
-
-            case "n":
-                nextType = 'b';
-                break;
-
-            case "b":
-                nextType = 'q';
-                break;
-            default:
-                return;
-        }
+        if (!TryGetNextType(target, out char nextType))
+            return false;
 
         BoardManager.Instance.ChangePiece(pos, color, nextType);
         target = BoardManager.Instance.GetPiece(pos);
@@ -107,6 +119,50 @@ public class FatherEnemyEffector : PieceEffector
             ApplyAwakening(target);
         }
 
+        return true;
+    }
+
+    private static bool TryGetNextType(Piece piece, out char nextType)
+    {
+        nextType = ' ';
+
+        if (piece == null)
+            return false;
+
+        switch (piece.GetFen().ToLower())
+        {
+            case "p":
+                nextType = 'n';
+                return true;
+
+            case "n":
+                nextType = 'b';
+                return true;
+
+            case "b":
+                nextType = 'q';
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private static PieceType GetPieceType(char fen)
+    {
+        switch (char.ToLower(fen))
+        {
+            case 'p':
+                return PieceType.Pawn;
+            case 'n':
+                return PieceType.Knight;
+            case 'b':
+                return PieceType.Bishop;
+            case 'q':
+                return PieceType.Queen;
+            default:
+                return PieceType.None;
+        }
     }
 
     private void ApplyAwakening(Piece piece)
@@ -116,6 +172,7 @@ public class FatherEnemyEffector : PieceEffector
         var effector = piece.gameObject.AddComponent<FatherEnemyEffector>();
         effector.CardSO = CardSO;
         effector.Init(piece, CardSO != null ? CardSO.PieceLimitTurn : RemainingTurns);
+        effector.SetSuppressAutomaticTurnEnd(suppressAutomaticTurnEnd);
         effector.Apply();
     }
 
