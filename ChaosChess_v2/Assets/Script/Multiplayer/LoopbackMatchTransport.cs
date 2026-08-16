@@ -53,6 +53,9 @@ public sealed class LoopbackMatchTransport : IMatchTransport
         Debug.Log($"[Loopback] 송신 {message}");
     }
 
+    // 엔진 콜백이 알아서 도착하므로 프레임마다 펌핑할 것이 없습니다.
+    public void Tick() { }
+
     public void NotifyRemoteTurnStarted(int turn)
     {
         if (!running) return;

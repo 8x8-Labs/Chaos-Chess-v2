@@ -14,6 +14,9 @@ public sealed class RemoteTurnProvider : TurnProvider
 {
     public override bool IsRemote => true;
 
+    [Tooltip("어느 전송 계층으로 대전할지 고릅니다. Loopback은 네트워크 없이 흐름만 검증합니다.")]
+    [SerializeField] private MatchTransportKind transportKind = MatchTransportKind.Loopback;
+
     private IMatchTransport transport;
 
     // 상대에게서 마지막으로 반영한 일련번호. 중복·역순으로 도착한 메시지를 걸러냅니다.
@@ -38,8 +41,14 @@ public sealed class RemoteTurnProvider : TurnProvider
 
     private void Awake()
     {
-        transport = new LoopbackMatchTransport();
+        transport = CreateTransport(transportKind);
         transport.MessageReceived += HandleMessageReceived;
+    }
+
+    private void Update()
+    {
+        // UnityTransport처럼 프레임마다 수신을 꺼내야 하는 구현을 위해 돌려줍니다.
+        transport?.Tick();
     }
 
     private void OnDestroy()
@@ -48,6 +57,23 @@ public sealed class RemoteTurnProvider : TurnProvider
 
         transport.MessageReceived -= HandleMessageReceived;
         transport.StopMatch();
+    }
+
+    /// <summary>
+    /// 인스펙터에서 고른 종류로 전송 계층을 만듭니다.
+    /// 게임 로직은 IMatchTransport만 알기 때문에 여기서 바꿔 끼우면 나머지는 그대로 갑니다.
+    /// </summary>
+    private static IMatchTransport CreateTransport(MatchTransportKind kind)
+    {
+        switch (kind)
+        {
+            case MatchTransportKind.Relay:
+                Debug.LogError("[Network] Relay 전송이 아직 구현되지 않아 루프백으로 대체합니다.");
+                return new LoopbackMatchTransport();
+
+            default:
+                return new LoopbackMatchTransport();
+        }
     }
 
     public override bool TryRequestTurn(

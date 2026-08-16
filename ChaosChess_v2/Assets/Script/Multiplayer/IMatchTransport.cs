@@ -31,4 +31,12 @@ public interface IMatchTransport
     /// 루프백 구현은 이 신호를 받아 상대 수를 만들어냅니다.
     /// </summary>
     void NotifyRemoteTurnStarted(int turn);
+
+    /// <summary>
+    /// 매 프레임 호출됩니다. 소유자(RemoteTurnProvider)가 Update에서 돌려줍니다.
+    ///
+    /// UnityTransport처럼 프레임마다 드라이버를 돌리고 수신 이벤트를 꺼내야 하는 구현을 위한 자리입니다.
+    /// 펌핑이 필요 없는 구현(루프백 등)은 비워두면 됩니다.
+    /// </summary>
+    void Tick();
 }
