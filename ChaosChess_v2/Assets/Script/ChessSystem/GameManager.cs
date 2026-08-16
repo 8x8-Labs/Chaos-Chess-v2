@@ -794,7 +794,12 @@ public class GameManager : MonoBehaviour
         if (IsEndGame)
             return;
 
-        if (!AiAutoMoveEnabled)
+        // AiAutoMoveEnabled는 "엔진이 대신 두는 것"을 끄는 스위치입니다(카드 이펙트 랩 전용).
+        // 원격 대전에서는 상대가 사람이라 이 스위치와 무관하게 수신을 기다려야 하므로,
+        // 원격 프로바이더가 붙어 있으면 게이트를 통과시킵니다.
+        // (엔진 착수 자체는 RequestStockfishAIMove에서 같은 플래그로 다시 막힙니다.)
+        bool remoteOpponent = turnProvider != null && turnProvider.IsRemote;
+        if (!AiAutoMoveEnabled && !remoteOpponent)
             return;
 
         if (turnColor != EnemyColor)
