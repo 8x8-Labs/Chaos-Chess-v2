@@ -29,8 +29,23 @@ public class GameCycleManager : MonoBehaviour
     [Tooltip("체크하면 런/연습을 멀티플레이 모드로 시작해 RemoteTurnProvider를 사용합니다. 매칭이 붙으면 제거합니다.")]
     [SerializeField] private bool debugMultiplayerMode;
 
-    /// <summary>런/연습 진입 시 사용할 기본 진영입니다. 평소에는 백입니다.</summary>
-    private PieceColor DefaultPlayerColor => debugPlayAsBlack ? PieceColor.Black : PieceColor.White;
+    /// <summary>
+    /// 런/연습 진입 시 사용할 기본 진영입니다. 평소에는 백입니다.
+    ///
+    /// 멀티 모드에서는 두 인스턴스가 서로 다른 색을 잡아야 하는데, MPPM은 씬 에셋을 공유해서
+    /// debugPlayAsBlack으로는 갈라낼 수 없습니다. 그래서 역할(호스트/게스트)에서 색을 파생시킵니다.
+    /// 실제 매칭이 붙으면 서버가 배정한 색을 SetPlayerColor로 넣게 됩니다.
+    /// </summary>
+    private PieceColor DefaultPlayerColor
+    {
+        get
+        {
+            if (CurrentMode == GameMode.Multiplayer && MppmMatchRole.IsAvailable)
+                return MppmMatchRole.Color;
+
+            return debugPlayAsBlack ? PieceColor.Black : PieceColor.White;
+        }
+    }
 
     /// <summary>
     /// 진입할 모드를 결정합니다. 디버그 토글이 켜져 있으면 멀티로 시작해 RemoteTurnProvider를 태웁니다.
