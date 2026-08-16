@@ -350,8 +350,31 @@ Windows 바이너리다. 룰 판정이 양 플랫폼에서 동일하게 나오�
 
 ### 테스트 방법
 
-MPPM으로 가상 플레이어 두 개를 띄운다. Lobby가 없으므로 한쪽 화면의 join code를
-복사해 다른 쪽에 붙여넣는 방식으로 연결한다.
+MPPM으로 가상 플레이어 두 개를 띄운다. **`Assets/Scenes/MainScene.unity`에서 Play한다** —
+`GameCycleManager`가 이 씬에만 있고, 여기서 모드와 진영이 정해진 뒤 `DontDestroyOnLoad`로
+`MainGameScene`까지 넘어간다. `MainGameScene`을 직접 Play하면 모드가 `Run`으로 떨어져
+`AiTurnController`가 잡힌다.
+
+MPPM 가상 플레이어는 씬 에셋을 공유해서 인스펙터 값으로는 두 인스턴스를 구분할 수 없다.
+`MppmMatchRole`이 `CurrentPlayer.IsMainEditor`로 갈라낸다.
+
+| 인스턴스 | 역할 | 진영 |
+|---|---|---|
+| 메인 에디터 | Host | 백 |
+| 클론(Player 2) | Guest | 흑 |
+
+join code는 UI가 없으므로 호스트가 OS 임시 폴더에 파일로 남기고 게스트가 읽는다.
+
+**설정**
+
+- `MainScene` → `GameCycleManager.debugMultiplayerMode` 체크
+- `MainGameScene` → `RemoteTurnProvider.transportKind = Relay`
+
+**주의: 1층 일반 노드로만 테스트할 것.**
+`MapManager.SelectFEN()`은 보스 층(2·5층)에서만 FEN을 랜덤으로 고르고 그 외에는 `DefaultFEN`을
+돌려준다. 맵 그래프는 클라이언트마다 랜덤이라 같은 노드를 고를 수 없으므로, 보스 층에 가면
+양쪽 초기 판이 달라져 로크스텝이 깨진다. 서버가 초기 상태를 내려주는 것은 3단계다.
+(카드 풀이 양쪽에서 다른 것도 같은 이유로 3단계 전까지는 정상이다.)
 
 ---
 
@@ -359,6 +382,9 @@ MPPM으로 가상 플레이어 두 개를 띄운다. Lobby가 없으므로 한�
 
 | 대상 | 내용 |
 |---|---|
+| `MppmMatchRole` | MPPM 두 인스턴스에 역할·진영을 자동 배정하고 join code를 임시 파일로 주고받는 **에디터 전용 테스트 보조**. 연결 UI가 붙으면 파일째 제거 |
+| `RemoteTurnProvider.relayRole` / `relayJoinCode` | 에디터 밖(빌드) 폴백용 인스펙터 값. 연결 UI가 붙으면 제거 |
+| `GameCycleManager.DefaultPlayerColor`의 멀티 분기 | 역할에서 진영을 파생시키는 우회. 매칭이 붙으면 서버가 배정한 색을 `SetPlayerColor`로 넣는다 |
 | `GameCycleManager.debugPlayAsBlack` | 흑 플레이 검증용. 실제 매칭이 붙으면 제거 |
 | `GameCycleManager.debugMultiplayerMode` | 멀티 모드 진입용. 매칭이 붙으면 제거 |
 | `GameManager.AiAutoMoveEnabled` | 이름과 역할이 어긋났다. "상대 턴 자동 진행"과 "로컬 입력 제한"이 한 변수에 묶여 있어, 카드 랩에서 원격 테스트를 하려면 분리해야 한다 |
