@@ -378,9 +378,13 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
+        // 아래 두 경우 모두 기물은 그대로인데 턴만 넘어갑니다.
+        // 조용히 지나가면 양쪽 판이 어긋난 채로 대국이 이어지므로 반드시 드러냅니다.
         Piece piece = GetPiece(from);
-        if (piece != null)
-            MovePiece(piece, to, promotion);
+        if (piece == null)
+            Debug.LogError($"[Board] '{uciMove}'의 출발 칸 {uciMove.Substring(0, 2)}에 기물이 없습니다. 판이 어긋났습니다.");
+        else if (!MovePiece(piece, to, promotion))
+            Debug.LogError($"[Board] '{uciMove}'를 적용하지 못했습니다. {piece.name}이(가) 해당 칸으로 갈 수 없습니다.");
 
         DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.CompleteAutomatedMove());
     }

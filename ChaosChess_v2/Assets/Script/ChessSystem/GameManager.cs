@@ -62,6 +62,15 @@ public class GameManager : MonoBehaviour
     public bool IsPlayerInCheck { get; private set; }
     public bool IsCurrentTurnInCheck { get; private set; }
 
+    /// <summary>
+    /// 턴 전환에 딸린 비동기 갱신(합법수 조회 → 이동 가능 위치 반영)이 끝났는지 여부입니다.
+    ///
+    /// false인 동안 기물의 CanMovePos는 아직 이전 턴 기준입니다.
+    /// 이때 원격 착수를 적용하면 합법수 판정이 어긋나 수가 조용히 버려집니다.
+    /// 원격 수신부는 이 값이 true가 될 때까지 적용을 미뤄야 합니다.
+    /// </summary>
+    public bool IsTurnStateReady { get; private set; } = true;
+
     public bool IsGameInput = true;
     /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
     public bool AiAutoMoveEnabled = true;
@@ -511,6 +520,11 @@ public class GameManager : MonoBehaviour
     public void NextTurn(Action onComplete = null)
     {
         curTurn += 1;
+
+        // 턴 번호는 지금 올라가지만 기물의 이동 가능 위치는 엔진 응답을 받아야 갱신됩니다.
+        // 그 사이에 원격 착수가 도착하면 옛 목록으로 합법성을 따져 수가 조용히 버려집니다.
+        IsTurnStateReady = false;
+
         BoardManager.Instance.UpdateFEN(); // 디버깅
         string fen = BoardManager.Instance.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
@@ -539,6 +553,10 @@ public class GameManager : MonoBehaviour
             FairyStockfishBridge.Instance.GetLegalMovesAsync(moves2 =>
             {
                 EvaluateGameState(moves2);
+
+                // 여기까지 와야 이동 가능 위치가 이번 턴 기준으로 확정됩니다.
+                IsTurnStateReady = true;
+
                 onComplete?.Invoke();
             });
         });
