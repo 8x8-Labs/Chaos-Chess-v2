@@ -220,12 +220,29 @@ S = 승 1.0 / 무 0.5 / 패 0.0
 
 ```
 com.unity.services.authentication
-com.unity.services.lobby
-com.unity.services.relay
+com.unity.services.multiplayer     // Relay + Lobby + Matchmaker 통합
+com.unity.transport                // Relay 위에서 직접 바이트를 흘린다
 com.unity.services.cloudcode
 com.unity.services.leaderboards
-com.unity.netcode.gameobjects   // Relay 위에서 raw 메시지만 쓴다면 생략 가능
+com.unity.multiplayer.playmode     // MPPM 테스트용
 ```
+
+> **2026-08 갱신 — 패키지 통합.**
+> Unity 6에서 `com.unity.services.relay` / `lobby` / `matchmaker` 세 개가 deprecated 되고
+> **`com.unity.services.multiplayer`(Multiplayer Services SDK)** 하나로 합쳐졌다.
+> `com.unity.services.authentication`은 그대로 별도 패키지다.
+>
+> - ⚠️ **구 `com.unity.services.relay`를 같이 설치하면 ambiguous reference 컴파일 에러가 난다.**
+>   통합 패키지만 넣을 것.
+> - 설계에는 영향이 없다. UTP는 netcode-agnostic이라 **NGO 없이 Relay + UTP** 조합이 그대로 지원된다.
+>   커맨드 릴레이 방식과 `IMatchTransport` 구조는 손댈 필요가 없다.
+> - 바뀌는 것은 `RelayMatchTransport` 안쪽 API 두 군데뿐이다.
+>   `new RelayServerData(alloc, type)` → `AllocationUtils.ToRelayServerData(alloc, type)`,
+>   `Relay.Instance` → `RelayService.Instance`.
+> - Lobby가 통합 패키지에 이미 들어 있으므로 3단계 매칭에서 패키지를 더 넣을 필요가 없다.
+>
+> 참고: [마이그레이션 가이드](https://docs.unity.com/ugs/en-us/manual/mps-sdk/manual/migration-path) ·
+> [Relay + UTP](https://docs.unity.com/en-us/relay/relay-and-utp)
 
 ---
 
@@ -320,9 +337,15 @@ Windows 바이너리다. 룰 판정이 양 플랫폼에서 동일하게 나오�
 ### 착수 전 체크리스트
 
 - [x] UGS 대시보드에서 프로젝트 생성 및 에디터 연결
-- [ ] 패키지 설치 — `com.unity.services.authentication`, `com.unity.services.relay`, `com.unity.multiplayer.playmode`
-- [ ] **Android 엔진 커버리지 확인** (8-3 함정) — 로크스텝은 양쪽 룰 판정이 같아야 성립한다.
-      `Assets/Plugins/ChaosChess.AI`가 Android를 지원하지 않으면 설계를 다시 짜야 한다
+- [ ] 패키지 설치 — `com.unity.services.authentication`, `com.unity.services.multiplayer`,
+      `com.unity.transport`, `com.unity.multiplayer.playmode` (구 `services.relay`는 설치 금지)
+- [x] **Android 엔진 커버리지 확인** (8-3 함정) — 정적으로는 해소됐다.
+      `Assets/Plugins/Android/libs/fairystockfish-release.aar`가 있고 `FairyStockfishBridge`가
+      `#if UNITY_ANDROID` 분기로 JNI(`com.example.chessaiv2.FairyStockfish`)를 쓴다.
+      양쪽 다 `InitEngine("chaoschess")`로 같은 variant를 넘긴다.
+      **남은 확인:** PC는 `VariantPath`로 `variants.ini` 경로를 명시하는데 Android 경로에는 그 호출이 없다.
+      APK 안의 StreamingAssets는 파일 경로로 못 여니, chaoschess 변형이 실기기에서 실제로 적용되는지 봐야 한다.
+      2단계는 MPPM(양쪽 Windows 에디터)이라 막히지 않는다. **3단계 핸드셰이크 전까지** 확인하면 된다
 - [ ] `RelayMatchTransport : IMatchTransport` 구현 — 게임 로직은 변경 없음
 
 ### 테스트 방법
