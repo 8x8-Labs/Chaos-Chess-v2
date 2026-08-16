@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,12 @@ using UnityEngine;
 /// </summary>
 public static class RemoteCardExecutor
 {
+    /// <summary>
+    /// 상대 카드를 적용하기 직전에 발행됩니다.
+    /// 카드 연출을 더 크게 보여주고 싶은 UI가 여기에 붙으면 됩니다.
+    /// </summary>
+    public static event Action<CardDataSO> CardApplying;
+
     public static bool TryExecute(MatchMessage message, PieceColor casterColor)
     {
         if (message == null || string.IsNullOrEmpty(message.CardId))
@@ -33,6 +40,10 @@ public static class RemoteCardExecutor
         if (!TryBuildArgs(dataSO, message.Targets, casterColor, out CardEffectArgs args))
             return false;
 
+        // 무엇 때문에 판이 바뀌었는지 알려주지 않으면 기물이 제멋대로 움직이는 것처럼 보입니다.
+        // 효과를 적용하기 전에 먼저 알립니다.
+        AnnounceToPlayer(dataSO);
+
         // CardRandomizerManager가 없는 환경(카드 이펙트 랩 등)에서는 직접 실행합니다.
         if (CardRandomizerManager.Instance != null)
             CardRandomizerManager.Instance.ExecuteCard(dataSO, () => card.Execute(args));
@@ -42,6 +53,22 @@ public static class RemoteCardExecutor
         BoardManager.Instance?.RefreshMoves();
         Debug.Log($"[Remote] 상대 카드 적용: '{dataSO.CardName}' ({message.CardId})");
         return true;
+    }
+
+    /// <summary>
+    /// 상대가 어떤 카드를 썼는지 화면에 알립니다.
+    ///
+    /// 토스트는 CardBlockNotifier와 같은 방식으로 직접 부릅니다.
+    /// 더 큰 연출이 필요하면 CardApplying에 UI를 붙이면 됩니다.
+    /// </summary>
+    private static void AnnounceToPlayer(CardDataSO dataSO)
+    {
+        string cardName = string.IsNullOrWhiteSpace(dataSO.CardName)
+            ? dataSO.name
+            : dataSO.CardName;
+
+        IngameToastUI.Instance?.Show($"상대가 {cardName} 사용");
+        CardApplying?.Invoke(dataSO);
     }
 
     /// <summary>AiCardId로 카드 프리팹의 CardData를 찾습니다. 인스턴스화하지 않고 프리팹 컴포넌트를 그대로 씁니다.</summary>
