@@ -10365,12 +10365,22 @@ MonoBehaviour:
   - 8/8/pppppppp/rnbqkbnr/pppppppp/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   - pppqkppp/pppppppp/pppppppp/pppppppp/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   - rzzqkzzr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  defaultAiDeckConfig: {fileID: 0}
+  normalAiDeckConfig: {fileID: 0}
+  eliteAiDeckConfig: {fileID: 0}
+  bossAiDeckConfig: {fileID: 0}
+  aiDeckRegistry: []
+  generateRandomAiDeckPerNode: 1
+  randomAiDeckCardCount: 8
   easyPracticeELO: 1000
   normalPracticeELO: 1500
   hardPracticeELO: 1800
   easyPracticeFEN: 1nb1kbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   normalPracticeFEN: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
   hardPracticeFEN: rnbqkbnr/pppppppp/2pppp2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+  easyPracticeAiDeckConfig: {fileID: 0}
+  normalPracticeAiDeckConfig: {fileID: 0}
+  hardPracticeAiDeckConfig: {fileID: 0}
   nodesPerFloorMin: 1
   nodesPerFloorMax: 3
   mapGrid: []
@@ -10378,6 +10388,10 @@ MonoBehaviour:
   curMap:
     ELO: 0
     FEN: 
+    AiDeckConfig: {fileID: 0}
+    AiDeckId: 
+    AiRuntimeDeckCardIds: []
+    AiRuntimeDeckCards: []
     MapName: 
     isCleared: 0
     floor: 0
@@ -15788,6 +15802,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugPlayAsBlack: 0
+  debugMultiplayerMode: 1
 --- !u!4 &962982684
 Transform:
   m_ObjectHideFlags: 0
