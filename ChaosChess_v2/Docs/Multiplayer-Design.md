@@ -1,7 +1,7 @@
 # 멀티플레이 대전 모드 설계 문서
 
-- **작성일:** 2026-08-09 (최종 갱신 2026-08-16)
-- **상태:** **0·1·2단계 구현 완료 / 3단계 진행 중**
+- **작성일:** 2026-08-09 (최종 갱신 2026-08-19)
+- **상태:** **3단계까지 구현 완료(검증 대기) / 다음은 연결 UI → 프로필**
 - **작업 브랜치:** `feature/multiplayer-step0` · **추적 이슈:** #305
 - **환경:** Unity 6000.0.68f1
 - **목표:** 구글 로그인 → 매칭 → 카드 N장 랜덤 배분 → 대국 → Elo 레이팅 반영
@@ -221,10 +221,17 @@ S = 승 1.0 / 무 0.5 / 패 0.0
 | **0** | `GameMode.Multiplayer` 추가 + **`LocalColor` 도입(흑 플레이 가능화)** + 턴 프로바이더 인터페이스 추상화 | ✅ 완료 | 네트워크 없이 검증 가능. 여기서 버그를 다 잡고 가야 함. **이걸 안 하면 나중에 전부 다시 손대야 한다** |
 | **1** | `IMatchTransport` 추상화 + 로컬 루프백 구현 | ✅ 완료 | 에디터 1개에서 양쪽 시뮬레이션 |
 | **2** | UGS Auth + Relay 실제 2인 연결 | ✅ 완료 | 여기서 처음 진짜 통신 |
-| **3** | 서버 시드/카드 배분 + 매치 시작 핸드셰이크(엔진 버전·카드 DB 해시 검증) | 🔶 **진행 중** | 3a 이음매 완료 / 3b 핸드셰이크·3c 연결 시점 이동 남음 |
+| **3** | 서버 시드/카드 배분 + 매치 시작 핸드셰이크(엔진 버전·카드 DB 해시 검증) | 🔶 **구현 완료·검증 대기** | 3a·3b·3c 전부 구현됨. 현황은 10절 |
+| **3.5** | **연결 UI + 프로필 표시** | ⬜ | 원래 5단계에 묶여 있었으나 앞당김. 아래 참고 |
 | **4** | 체스 시계 + 이탈/재접속 처리 | ⬜ | |
 | **5** | Cloud Code 레이팅 + Leaderboards + 티어 UI | ⬜ | |
 | **6** | (선택) 서버 측 수 검증 | ⬜ | 랭크가 실질적 의미를 갖기 시작하면 |
+
+> **2026-08-19 — 3.5단계를 새로 끼워 넣었다.**
+> 연결 UI와 프로필 표시는 원래 5단계(매칭)의 일부였다. 그런데 지금은 join code를 임시 파일로
+> 주고받는 MPPM 전용 경로뿐이라 **에디터 밖에서는 대전을 시작할 방법 자체가 없다.**
+> 매칭 서버를 붙이기 전에 사람이 방을 만들고 들어갈 수단이 먼저 필요하다.
+> 3b의 핸드셰이크가 상태(`MatchSessionState`)와 실패 사유를 이미 내놓으므로 얹을 자리도 마련됐다.
 
 ### 추가 필요 패키지
 
@@ -279,15 +286,138 @@ GPGS를 쓰므로 타깃은 Android인데 `Assets/StreamingAssets/fairy-stockfis
 Windows 바이너리다. 룰 판정이 양 플랫폼에서 동일하게 나오는 것이 로크스텝의 전제이므로,
 `Assets/Plugins/ChaosChess.AI`의 플랫폼 커버리지를 착수 전에 확인할 것.
 
+> **2026-08-17 해소.** Android는 `fairystockfish-release.aar`를 JNI로 쓰고,
+> `chaoschess` 변형이 그 라이브러리에 내장돼 있다. PC처럼 `variants.ini`를 파일 경로로
+> 읽힐 필요가 없으므로 APK 안의 StreamingAssets 문제도 발생하지 않는다.
+
+### 8-4. 드라이버가 멈추면 Relay가 끊는다
+
+`NetworkDriver`는 `MatchSession.Update`에서만 돈다. **메인 스레드가 멈추면 Relay 핑도 멈추고**,
+Relay는 조용한 쪽을 잘라낸다.
+
+```
+Received error message from Relay: player timed out due to inactivity.
+Relay allocation is invalid.
+[Relay] 연결되지 않아 전송하지 못했습니다: #1 [T1] Move d2d4
+```
+
+**3c가 새로 드러낸 문제다.** 이전에는 연결이 매치 씬 안에서, 즉 무거운 초기화가 **끝난 뒤에**
+열렸다. 연결을 씬 밖으로 옮기면서 그 구간이 연결 안으로 들어왔다.
+
+멈추는 원인은 둘이었다.
+
+#### (1) 창 포커스 — MPPM의 함정
+
+`Run In Background`가 꺼져 있으면 포커스를 잃은 인스턴스는 플레이어 루프가 멈춘다.
+**MPPM 테스트는 두 창을 번갈아 조작해야 하므로 한쪽은 항상 멈춰 있다.**
+창을 10초 넘게 만지면 그쪽 연결이 죽는다.
+
+**대응 — 세션이 열려 있는 동안만 런타임에 켠다.**
+`MatchSession.Begin()`이 `Application.runInBackground = true`로 바꾸고,
+`EndMatch()`에서 원래 값으로 되돌린다.
+
+> **프로젝트 설정(Player → Run In Background)은 켜지 않는다.**
+> `ProjectSettings.asset`의 `runInBackground`는 플랫폼 공통 값이라 Android 빌드까지 따라간다.
+> 모바일이 백그라운드에서 계속 도는 것은 배터리 낭비이고, 애초에 OS가 앱을 재우므로 얻는 것도 없다.
+> 필요한 것은 "원격 대전 중인 데스크톱 창"뿐이라 범위를 거기에 맞춘다.
+
+모바일에서 대국 중 앱이 백그라운드로 가면 OS가 재우므로 연결은 어차피 끊긴다.
+그쪽은 이 설정으로 풀 문제가 아니라 **4단계의 이탈·재접속 처리**가 받아야 한다.
+
+#### (2) 엔진의 동기 호출
+
+`FairyStockfishBridge`의 초기화와 조회는 **메인 스레드를 블로킹한다.**
+
+| 호출 | 최대 대기 |
+|---|---|
+| `InitEngine` — 프로세스 기동 + `readyok` | 5000ms |
+| `GetLegalMoves` — `isready` + `go perft 1` | 3000 + 8000ms |
+| `IsInCheck` — `isready` + `Checkers:` | 3000 + 3000ms |
+
+전부 `Thread.Sleep(10)` 루프다. `GameManager.Start()`가 매치 씬 첫 프레임에 이것들을
+연달아 부르므로, 그 프레임 동안 드라이버가 멈춘다.
+
+**대응**
+
+- `InitEngine`에 **재사용 가드**를 넣었다. 같은 변형으로 살아 있으면 다시 띄우지 않는다.
+  (매치마다 새 프로세스를 띄우고 이전 것을 정리하지 않던 누수도 함께 사라진다.)
+- `MatchSession.Begin()`이 **연결보다 먼저** 엔진을 깨운다. 매치 씬의 `InitEngine`은
+  재사용으로 떨어져 멈추지 않는다.
+- `WaitForOutput`이 500ms를 넘기거나 타임아웃까지 가면 경고를 남긴다.
+  전에는 타임아웃이 조용히 부분 결과를 돌려줘 흔적이 없었다.
+
+> 근본 해결은 엔진 조회를 전부 비동기로 바꾸는 것이다. 매치 계층 전반을 건드리는 일이라
+> 여기서는 하지 않았다. 4단계(시계·이탈 처리)에서 재접속을 붙일 때 다시 볼 것.
+
+#### 진단
+
+`MatchSession`이 프레임 간격을 재서 2초 이상 끊기면 씬 이름·세션 상태와 함께 에러를 남긴다.
+Relay 오류는 끊긴 **결과**만 보여주므로, 원인을 보려면 이 로그를 먼저 본다.
+
+| 로그 | 읽는 법 |
+|---|---|
+| 스톨만 뜨고 `[Fairy]` 경고 없음 | 포커스 전환이거나 씬 활성화 프레임 |
+| 직전에 `[Fairy] '...' 대기에 N ms` | 엔진 동기 호출이 원인 |
+| `[Fairy] PC 프로세스 초기화 성공`이 매치마다 반복 | 재사용 가드가 안 먹고 있다 |
+
 ---
 
 ## 9. 다음 액션
 
-3b(핸드셰이크 송수신)와 3c(연결 시점 이동)로 진행한다. 준비 사항은 11절에 정리했다.
+3단계(3a·3b·3c)는 구현이 끝났다. **먼저 검증하고**, 통과하면 연결 UI → 프로필 순으로 간다.
+
+### 9-1. 검증 (선행)
+
+3b 검증 시나리오는 11-8에 있다. 특히 두 가지를 본다.
+
+- **서로 다른 노드 선택** — 같은 판에서 시작하는가. 3b가 노린 제약 해제다.
+- **카드 DB 불일치** — 한쪽 `AiCardId`를 임시로 바꿔 Ack 거부가 나는가.
+  확인 후 **반드시 되돌릴 것.** 안 되돌리면 이후 모든 매치가 거부된다.
+
+### 9-2. 연결 UI (3.5단계)
+
+지금은 방을 만들고 들어가는 수단이 MPPM 전용 임시 파일뿐이라 **에디터 밖에서는 대전을
+시작할 수 없다.** 매칭 서버(5단계)를 붙이기 전에 사람이 직접 방을 여닫을 UI가 필요하다.
+
+| 화면 | 내용 |
+|---|---|
+| 진입 | "방 만들기" / "코드로 참가" 선택 |
+| 호스트 | 발급된 join code 표시(`MatchSession.HostJoinCode`) + 복사 |
+| 게스트 | join code 입력 |
+| 대기 | `MatchSessionState`에 따른 진행 표시 (`Connecting` / `Handshaking`) |
+| 실패 | `MatchSession.FailureReason` 표시 후 되돌아가기 |
+
+**필요한 코드 쪽 정리**
+
+- `MatchSessionConfig.FallbackRole` / `FallbackJoinCode`는 UI가 정한 값을 받는 통로가 된다.
+  이름을 폴백이 아니라 실제 입력으로 바꾼다.
+- `MppmMatchRole`은 에디터 테스트 보조로만 남기고, UI 입력이 있으면 그쪽이 우선하도록 뒤집는다.
+- `GameCycleManager.debugMultiplayerMode` / `debugPlayAsBlack`을 UI 진입으로 대체한다.
+
+> ⚠️ **씬·프리팹 작업이 필요하다.** Canvas·버튼·InputField 배치는 에디터에서 직접 해야 하고,
+> 코드 쪽은 상태 구독과 입력 처리까지만 맡는다. 분업이 전제다.
+
+### 9-3. 프로필 취득·표시
+
+`MatchProfile`은 3b에서 이미 왕복에 실려 오간다. 지금은 이름만, 그것도 GPGS가 있을 때만 채워진다.
+
+| 작업 | 내용 |
+|---|---|
+| 아바타 URL 취득 | `GooglePlayAuthManager`에 `GetUserImageUrl()` 캐싱 추가 |
+| 아바타 로드 | URL → `UnityWebRequestTexture` → `Sprite`, 세션 캐시 |
+| 표시 | `MatchProfileView`에 이름·이미지 슬롯 추가, `MatchSession.RemoteProfile` 구독 |
+
+**제약**
+
+- GPGS는 `#if UNITY_ANDROID && !UNITY_EDITOR` 안에만 있어 **에디터에서는 프로필을 가져올 수 없다.**
+  실제 확인은 실기기 2대로만 가능하고, 그전까지는 `MatchProfile.CreateFallback`이 쓰인다.
+- 아바타 URL이 상대 기기에서 열리는지는 정적으로 확인할 수 없다. 실기 확인 항목.
+- `Docs/Google-Account-Features.md` 3.4가 같은 작업을 다룬다. 그 문서는 7절에서 멀티플레이를
+  범위 밖으로 두고 있으므로, **아바타 취득은 그쪽, 교환·표시는 이쪽**으로 갈라 둔다.
 
 ---
 
-## 10. 구현 현황 (0·1·2단계 + 3a)
+## 10. 구현 현황 (0·1·2·3단계)
 
 ### 0단계 — "플레이어 = 백" 전제 제거
 
@@ -320,6 +450,9 @@ Windows 바이너리다. 룰 판정이 양 플랫폼에서 동일하게 나오�
 
 - 선택 UI(`PieceSelector`/`TileSelector`)는 카드를 쓰는 쪽의 로컬 UI다. 수신 측은 열지 않고
   대상을 복원해 `ICard.Execute`를 직접 부른다 — AI가 카드를 쓸 때와 같은 경로다.
+  > **예외가 하나 있었다 — 여러 단계로 대상을 고르는 카드.** 텔레포트는 `Execute`가 1단계에서
+  > `LoadTileSelector()`를 불러 스스로 UI를 연다. 수신 측이 그 `Execute`를 부르면 **상대 화면에
+  > 선택 UI가 열린다.** `CardEffectArgs.TargetsPreselected`로 UI를 건너뛰게 했다. 아래 참조.
 - 카드 송신은 **효과 적용 전**에 한다. 가스라이팅처럼 카드가 직접 `NextTurn`을 부르면
   적용 후에는 턴 번호가 이미 넘어가 있다.
 - 승격은 `MoveSelected`에서 이동만 하고 멈추므로, UCI 5번째 문자가 정해질 때까지
@@ -385,32 +518,337 @@ Windows 바이너리다. 룰 판정이 양 플랫폼에서 동일하게 나오�
 > 변형시킨다. 절대 색을 따로 실어도 되지만, 엘리트와 ELO는 런 전용 개념이라 원격 대전이
 > 의존해서는 안 된다(8-1).
 
+### 3b — 초기 상태 합의 (제어 채널 + 핸드셰이크)
+
+| 클래스 | 역할 |
+|---|---|
+| `MatchChannel` / `MatchControlMessage` | 채널 상수 + `Setup`/`SetupAck`. 행동과 섞지 않는다 |
+| `MatchSetupFactory` | 호스트가 `MatchSetup` 두 벌을 만든다. 초기 FEN 상수, 카드 큐 64장 블록 셔플 |
+| `MatchProfile` | 표시용 이름·아바타 URL. Setup/Ack 양쪽에 동봉해 왕복 한 번으로 교환 |
+
+**설계 요점**
+
+- **와이어에 채널 바이트를 둔다.** `[byte channel][ushort length][payload]`.
+  행동은 `RemoteTurnProvider`가 `Sequence` 필터를 태워 받고 제어는 `MatchSession`이 받는다.
+  한 타입에 섞으면 순서 체계가 다른 둘이 같은 필터를 타게 된다.
+- **카드 큐는 두 벌을 따로 뽑는다.** 한 벌을 나눠 쓰거나 시드만 내려주면 상대 손패를 계산할 수 있다.
+- **큐 생성은 블록 셔플.** 전체 id를 섞은 블록을 이어 붙인다. 매번 독립적으로 뽑으면 같은 카드가
+  연달아 나오는데, 정하는 쪽은 받는 쪽 손패를 몰라 기존 중복 회피를 할 수 없다.
+- **프로필은 `MatchSetup`에 넣지 않는다.** 규칙 합의는 불일치 시 매치를 거부하는 대상인데
+  프로필은 달라야 정상이다. 검증 대상과 표시 대상을 섞으면 안 된다.
+- **실패는 몇 틱 미룬다.** 거부 `Ack`는 다음 드라이버 갱신에서야 나가는데 곧바로 `StopMatch`하면
+  드라이버가 Dispose되어 **사유가 상대에게 도착하지 못한다.** 상대는 15초 타임아웃만 보게 된다.
+- **`Fail`은 연결만 정리하고 상태는 `Failed`로 남긴다.** `EndMatch`처럼 `Idle`로 되돌리면
+  표시할 사유가 사라진다.
+- 진입은 `Ready`를 기다린다. `GameCycleManager`가 `StateChanged`를 구독해 합의 후 `MapManager.Init()`.
+  루프백은 `Begin` 안에서 이미 `Ready`까지 가므로 기다리지 않는다.
+
+> **테스트 제약이 풀렸다.** 초기 판과 카드 큐를 호스트가 내려주므로 **양쪽이 서로 다른 노드를
+> 골라도 같은 판에서 시작한다.** 보스 층 제약도 사라진다.
+
 ---
 
-## 11. 3단계 남은 작업
+### 3c — 연결 소유권을 씬 밖으로
 
-### 3b — 핸드셰이크 송수신
+| 클래스 | 역할 |
+|---|---|
+| `MatchSession` | `DontDestroyOnLoad` 싱글턴. 트랜스포트 생성·연결 시작·join code 대기·`Tick()` 펌핑·미구독 메시지 버퍼. 상태는 `Idle → Connecting → Handshaking → Ready → Failed` |
+| `MatchSessionConfig` | 전송 종류·로컬 진영·빌드용 폴백 역할/join code. `GameCycleManager`가 채워 넘긴다 |
 
-호스트가 `MatchSetup`을 만들어 보내고 게스트가 `TryValidate()` 후 적용한다.
+`RemoteTurnProvider`는 연결을 소유하지 않고 세션에서 통로를 빌려 **구독만** 한다.
+메시지를 보드에 반영하는 일은 그대로 남는다.
 
-- 매치 이전 단계 메시지를 `MatchMessage`에 종류로 추가할지, 별도 경로로 태울지 정할 것.
-  `MatchMessage`는 "한 턴의 행동"이라는 의미라 초기 상태를 섞으면 어색하다.
-- 호스트가 카드 큐를 두 벌 뽑되 **게스트에게는 게스트 몫만** 보낸다.
-- 검증 실패(엔진 버전·카드 DB 해시 불일치) 시 매치를 열지 않고 사유를 표시한다.
+| 책임 | 전 | 후 |
+|---|---|---|
+| 트랜스포트 생성·연결 시작 | `RemoteTurnProvider.Awake/Start` (매치 씬) | `MatchSession.Begin()` (MainScene, `GameCycleManager.StartGame`) |
+| join code 대기 · `Tick()` | `RemoteTurnProvider.Update` | `MatchSession.Update` |
+| 종료 | `RemoteTurnProvider.OnDestroy` (전송 직접 정리) | `MatchSession.EndMatch()` (프로바이더가 호출) |
+| 인스펙터 설정 | `MainGameScene`의 `RemoteTurnProvider` | `MainScene`의 `GameCycleManager` |
 
-### 3c — 연결 시점 이동
+**설계 요점**
 
-지금은 순서가 뒤집혀 있다.
+- **구독자가 없는 동안 도착한 메시지를 버퍼링한다.** 씬 로드 중에는 `RemoteTurnProvider`가 없다.
+  호스트가 백이면 첫 수를 게스트의 씬 로드 중에 보낼 수 있는데, 예전 구조에서는 그 메시지가
+  그냥 사라졌다. 세션이 큐에 담아 두었다가 구독 시점에 순서대로 흘려준다.
+- **구독을 세션이 중개한다.** `StopMatch()`가 `MessageReceived = null`로 구독을 통째로 날리던
+  문제가 여기서 정리된다. 프로바이더는 트랜스포트가 아니라 세션에 붙는다.
+- **세션은 런타임에 생성한다.** 씬에 오브젝트를 추가하지 않아도 되도록 `EnsureInstance()`가
+  `DontDestroyOnLoad` 오브젝트를 만든다.
+- 3c 단계에서는 **연결을 열어 두기만 하고 진입을 막지 않는다.** 핸드셰이크 완료를 기다렸다가
+  맵을 초기화하는 것(11-6)은 3b에서 붙인다.
+
+**함께 고친 문제**
+
+- `MainGameScene`을 직접 Play하면 모드가 `Run`인데도 씬에 있는 `RemoteTurnProvider`가
+  `Awake`에서 Relay 연결을 열었다. 이제 세션이 없으면 프로바이더는 아무것도 하지 않는다.
+- **엔진 기동이 연결을 죽였다.** 연결을 씬 밖으로 옮기자 `GameManager.Start()`의 블로킹
+  엔진 초기화가 연결된 구간 안으로 들어와 Relay가 이쪽을 비활성으로 끊었다. 상세는 8-4.
+- **게스트가 join code를 영영 못 받았다.** `MppmMatchRole.SessionStartUtc`가 static 필드
+  초기화 시점(= 그 인스턴스가 클래스를 처음 건드린 때)으로 잡혀 있었다. 방을 여는 시점이
+  매치 씬에서 MainScene으로 당겨지면서, 호스트가 먼저 시작하면 게스트 쪽 기준 시각이 파일보다
+  나중이 되어 **이번 판의 코드를 지난 판의 잔재로 오인해 무시했다.**
+  `[RuntimeInitializeOnLoadMethod]`로 기준을 Play 시작 시점에 못박았다.
+
+### 다단계 선택 카드 (텔레포트)
+
+`TeleportCard.Execute`는 1단계에서 `LoadTileSelector()`를 불러 **자기가 선택 UI를 연다.**
+원격 적용은 `Execute`를 직접 부르므로 상대 화면에 그 UI가 열렸고, `PieceSelector`와
+`TileSelector`가 각각 알리는 바람에 **메시지도 두 번** 갔다. 받는 쪽은 카드 종류 하나로만
+좌표를 해석하니 두 번째 메시지의 타일 좌표를 기물로 찾다가 실패했다.
+
+| 지점 | 조치 |
+|---|---|
+| `CardEffectArgs.TargetsPreselected` | "대상이 이미 다 정해졌다"는 표시. `RemoteCardExecutor`가 켠다 |
+| `TeleportCard.Execute` | 그 경우 UI를 건너뛰고 기물+목표 칸을 한 번에 처리 |
+| `GameManager.NotifyLocalCard` | `Type == Piece && TileCount > 0`이면 1단계를 보류했다가 2단계에서 **기물 좌표 뒤에 타일 좌표를 이어 붙여** 한 번만 보낸다. 단계 구분은 `CardSelectionState.CurrentOwner`로 한다 |
+| `RemoteCardExecutor.TryBuildArgs` | 앞 `RequiredPieceCount`개는 기물, 나머지는 타일로 가른다 |
+
+`TeleportCard.pieceSelected`가 프리팹 컴포넌트에 남아 다음 사용까지 이어지던 것도 함께 고쳤다.
+
+> **AI 경로는 확인하지 않았다.** AI가 텔레포트를 쓸 때도 `TargetsPreselected` 없이
+> `Execute`를 부르면 같은 이유로 플레이어 화면에 선택 UI가 열린다. 원격 대전과 무관한
+> 기존 단일 플레이 경로라 이번 범위에서 제외했다.
+
+---
+
+## 11. 3단계 설계 근거 (3b·3c)
+
+> **3단계는 전부 구현됐다.** 아래는 그 근거와 결과를 남긴 기록이다.
+> 남은 것은 검증(11-8)이고, 그다음 할 일은 9절에 있다.
+
+### 11-0. 순서를 뒤집는다 — 3c를 먼저
+
+원래는 3b(핸드셰이크) → 3c(연결 시점 이동) 순서로 적었지만, **의존이 반대다.**
 
 ```
-GameManager.Awake()        PlayerColor 읽음
-GameManager.Start()        ApplyBoardView → LoadMapManager()   ← 보드가 이미 깔림
-RemoteTurnProvider.Start()  이제서야 연결 시작
+GameManager.Awake()         GameCycleManager.PlayerColor 읽음
+GameManager.Start()         ApplyBoardView → LoadMapManager()   ← MatchSetup.InitialFen을 여기서 쓴다
+Player.Start()              초기 카드 4장 지급                   ← MatchSetup.CardQueue를 여기서 쓴다
+RemoteTurnProvider.Start()  이제서야 연결 시작                   ← 핸드셰이크가 시작조차 안 된 시점
 ```
 
-핸드셰이크 결과를 쓰려면 **보드 초기화 전에 연결이 끝나 있어야** 한다.
-연결·핸드셰이크를 매치 씬 진입 전으로 옮긴다(`연결 → 색 배정 → 씬 로드`).
-5단계 매칭이 붙으면 어차피 이 순서가 되므로 지금 맞춰 둔다.
+게스트가 받은 `MatchSetup`은 **보드가 깔리기 전에 `GameCycleManager`에 들어가 있어야** 한다.
+연결이 매치 씬 안에서 시작되는 한 3b는 성립할 수 없으므로, 소유권을 씬 밖으로 옮기는 3c를 먼저 하고
+그 위에 3b를 얹는다. 5단계 매칭이 붙으면 어차피 `연결 → 색 배정 → 씬 로드` 순서가 되므로
+지금 맞춰 두는 편이 낫다.
+
+---
+
+### 11-1. 소유권 이동 — `MatchSession` (3c)
+
+연결의 수명이 **매치 씬보다 길어야** 하므로, 트랜스포트를 씬 오브젝트가 아니라
+`GameCycleManager`와 같은 `DontDestroyOnLoad` 오브젝트가 들고 있게 한다.
+
+| 책임 | 지금 | 바꾼 뒤 |
+|---|---|---|
+| 트랜스포트 생성 | `RemoteTurnProvider.Awake` | `MatchSession` |
+| 연결 시작 | `RemoteTurnProvider.Start` (매치 씬) | `MatchSession.Begin()` (MainScene) |
+| join code 대기 | `RemoteTurnProvider.Update` | `MatchSession` |
+| `Tick()` 펌핑 | `RemoteTurnProvider.Update` | `MatchSession.Update` |
+| 종료 | `RemoteTurnProvider.OnDestroy` | 매치 종료 시 `MatchSession` |
+| 메시지 적용 | `RemoteTurnProvider` | 그대로 (`MatchSession.Transport`를 빌려 구독) |
+
+```
+MatchSessionState : Idle → Connecting → Handshaking → Ready → Failed
+```
+
+**주의할 점 두 가지.**
+
+- **`Tick()`을 세션이 돌린다.** 지금은 `RemoteTurnProvider.Update`가 유일한 펌프라서
+  매치 씬 밖에서는 수신이 멈춘다. 핸드셰이크는 매치 씬 밖에서 오가므로 세션이 돌려야 한다.
+- **구독자가 없는 동안 도착한 Action 메시지를 버퍼링한다.** 씬 로드 중에는 `RemoteTurnProvider`가
+  아직 없다. 호스트가 백이면 첫 수를 게스트보다 먼저 둘 수 있고, 그 메시지가 게스트의 씬 로드
+  중에 도착하면 지금 구조에서는 그냥 사라진다. 세션이 큐에 담아 두었다가 구독 시점에 흘려준다.
+  (`RelayMatchTransport.StopMatch`가 `MessageReceived = null`로 구독을 통째로 날리는 것도
+  세션 소유로 바뀌면서 정리된다.)
+
+---
+
+### 11-2. 제어 메시지 채널 (3b)
+
+**결정: `MatchMessage`에 섞지 않고 별도 타입 + 전송 프레임의 채널 바이트로 가른다.**
+`MatchMessage`는 "한 턴의 행동"이고 `Sequence` 기반 중복 필터를 타는데, 핸드셰이크는
+행동도 아니고 순서 체계도 다르며 수신자도 다르다(`MatchSession` vs `RemoteTurnProvider`).
+
+**와이어 프레임**
+
+```
+[byte channel][ushort length][payload json]
+   0 = Action  → MatchMessage
+   1 = Control → MatchControlMessage
+```
+
+`MaxPayloadBytes` 1024 → **2048**. 카드 큐 64개 id + 해시 64자 + FEN까지 700B 안팎이라
+1024도 아슬아슬하게 들어가지만 여유를 둔다. (제어 메시지를 `MatchMessage` 안에 JSON 문자열로
+중첩하지 않는 이유이기도 하다 — `JsonUtility`가 따옴표를 이스케이프하면서 크기가 배로 뛴다.)
+
+```csharp
+public enum MatchControlKind { Setup = 0, SetupAck = 1 }
+
+[Serializable]
+public class MatchControlMessage
+{
+    public MatchControlKind Kind;
+    public MatchSetup Setup;   // Setup일 때
+    public bool Accepted;      // SetupAck일 때
+    public string Reason;      // 거부 사유
+}
+```
+
+**`IMatchTransport` 추가분**
+
+```csharp
+void SendControl(MatchControlMessage message);
+event Action<MatchControlMessage> ControlReceived;
+event Action Connected;        // 핸드셰이크를 시작할 시점 신호
+```
+
+`Connected`가 따로 필요한 이유: 지금은 연결 성립이 `RelayMatchTransport` 내부 상태로만 남고
+밖으로 알려지지 않는다. `IsConnected`를 폴링해도 되지만 핸드셰이크 시작은 한 번뿐인 사건이라
+이벤트가 맞다.
+
+**루프백 구현.** 상대가 로컬 엔진이라 합의할 대상이 없다. `SendControl`은 no-op,
+`Connected`는 `StartMatch` 직후 즉시 발행하고, `MatchSession`은 Loopback이면 핸드셰이크를
+건너뛰고 바로 `Ready`로 간다. `MatchSetup`은 null로 남아 기존 단일 플레이 경로로 떨어진다.
+
+---
+
+### 11-3. 핸드셰이크 시퀀스
+
+```
+호스트                                          게스트
+  │                                              │
+  ├──────────── Relay 연결 성립 ──────────────────┤
+  │                                              │
+MatchSetupFactory.Build()                        │
+  ├─ Control{Setup, 게스트 몫 큐} ───────────────►│
+  │                                          TryValidate()
+  │                                              │
+  │◄──────────── Control{SetupAck, ok} ──────────┤
+  │                                        SetMatchSetup(받은 것)
+SetMatchSetup(호스트 몫)                          │
+SetPlayerColor(White)                      SetPlayerColor(Black)
+  │                                              │
+  └──────────── 매치 씬 로드 ────────────────────┘
+```
+
+**Ack가 필요한 이유.** 불일치를 감지할 수 있는 쪽은 **게스트뿐**이다. Ack 없이 호스트가 먼저
+씬을 열면 호스트만 대국 화면에 들어가 오지 않을 상대를 영영 기다린다.
+
+**타임아웃.** `HandshakeTimeoutSeconds = 15f`. 연결 성립·Setup 수신·Ack 수신 각 구간에 건다.
+초과하면 `Failed(사유)`.
+
+**실패 처리.** 양쪽 `StopMatch()` → 씬을 로드하지 않고 사유를 표시 → MainScene에 머문다.
+표시는 최소한으로 간다(로그 + 기존 팝업 재사용). 전용 연결 UI는 5단계 매칭의 몫이다.
+
+| 실패 | 사유 문구 출처 |
+|---|---|
+| 엔진 버전 불일치 | `MatchSetup.TryValidate` |
+| 카드 DB 해시 불일치 | `MatchSetup.TryValidate` |
+| 초기 FEN 비어 있음 | `MatchSetup.TryValidate` |
+| Relay 연결 실패 | `RelayMatchTransport.ConnectionFailed` |
+| 15초 무응답 | `MatchSession` |
+
+---
+
+### 11-4. `MatchSetupFactory` — 호스트가 정하는 값
+
+| 항목 | 규칙 |
+|---|---|
+| `InitialFen` | 멀티 전용 시작 FEN **상수**. 지금은 표준 초기 배치 하나. `MapManager.DefaultFEN`을 읽지 않는다 — 멀티가 런 전용 상태에 의존하면 안 된다(8-1) |
+| `EngineVersion` | `ChaosChessAiVersion.Version` |
+| `CardDatabaseHash` | `MatchSetup.ComputeCardDatabaseHash()` (3a에서 구현됨) |
+| `CardQueue` | 아래 |
+
+**카드 큐**
+
+- **소스는 `CardRandomizerManager.AllCards` 중 `AiCardId`가 있는 카드 전부.**
+  멀티에는 런 카드풀 개념이 없다. `StartGame()`이 `PlayerState.InitializeRun()`으로 `CardPool`을
+  비우므로, 지금 멀티 테스트에서 카드가 나오는 **유일한 경로가 이 큐다.**
+- 길이 `CardQueueLength = 64`. 초기 지급 4장(`DefaultMaxCardCount`) + 5턴(`DefaultCardInterval`)마다
+  1장이므로 300턴 분량이다. 바닥나면 `CardRandomizer`가 경고만 남기고 더 주지 않는다(3a 구현).
+- **생성은 블록 셔플.** 전체 id 목록을 셔플해 이어 붙인다. 한 블록(=DB 크기) 안에서는 중복이 없다.
+  매번 독립적으로 뽑으면 같은 카드가 연달아 나온다 — 기존 `GetRandomCardsFromPool`은 손패와의
+  중복을 피하지만, 호스트는 게스트의 손패 상태를 알 수 없어 같은 보장을 할 수 없다.
+- **두 벌을 뽑아 호스트 몫은 로컬 `SetMatchSetup`, 게스트 몫만 전송.**
+  상대가 무슨 카드를 쥐게 될지 미리 알 수 없게 하기 위해서다(5절이 시드 방식을 버린 이유).
+
+---
+
+### 11-5. 진영 배정
+
+지금처럼 `MppmMatchRole`(호스트=백)에서 파생시키되, **호출 지점만 `MatchSession`으로 모은다.**
+핸드셰이크가 끝난 뒤 세션이 `GameCycleManager.SetPlayerColor()`를 부른다.
+5단계에서 서버 배정으로 바뀔 때 이 한 줄만 갈아끼우면 된다.
+
+색을 `MatchSetup`에 실을 필요는 없다. 양쪽이 같은 규칙(역할 → 색)을 쓰기 때문이다.
+서버가 색을 정하는 5단계에서 `MatchSetup`에 넣는다.
+
+---
+
+### 11-6. 진입 흐름
+
+```
+StartGame()
+  CurrentMode = ResolveMode(Run)
+  멀티면:
+     MatchSession.Begin()                   // 연결 → 핸드셰이크
+     Ready  → SetPlayerColor / SetMatchSetup → MapManager.Init()
+     Failed → 사유 표시, 진입 취소
+  아니면 지금 그대로
+```
+
+맵 노드 선택은 **그대로 둔다.** 초기 판을 `MatchSetup`이 정하므로 양쪽이 서로 다른 노드를 골라도
+판이 갈리지 않는다 — 아래 테스트 제약(1층 일반 노드 한정)이 여기서 풀린다.
+맵을 완전히 걷어내는 것은 5단계 매칭 UI의 몫이다.
+
+---
+
+### 11-7. 파일별 작업 목록
+
+**신규**
+
+| 파일 | 내용 | 상태 |
+|---|---|---|
+| `Multiplayer/MatchSession.cs` | 트랜스포트 소유, 연결·핸드셰이크 상태 기계, 씬 밖 `Tick()`, 미구독 메시지 버퍼 | ✅ |
+| `Multiplayer/MatchControlMessage.cs` | `MatchControlKind` + `MatchControlMessage` + 채널 상수 | ✅ |
+| `Multiplayer/MatchSetupFactory.cs` | 호스트가 `MatchSetup` 두 벌을 만든다 | ✅ |
+
+**수정**
+
+| 파일 | 내용 | 상태 |
+|---|---|---|
+| `IMatchTransport.cs` | `SendControl` / `ControlReceived` / `Connected` 추가 | ✅ |
+| `RelayMatchTransport.cs` | 채널 바이트 프레이밍, `Connected` 발행, `MaxPayloadBytes` 2048 | ✅ |
+| `LoopbackMatchTransport.cs` | 제어 no-op, `Connected` 즉시 발행 | ✅ |
+| `RemoteTurnProvider.cs` | 트랜스포트 생성·연결·join code 대기·`Tick` 제거. 세션에서 빌려 구독만 한다 | ✅ |
+| `GameCycleManager.cs` | `StartGame` 멀티 분기 + 핸드셰이크 완료 후 맵 초기화 | ✅ |
+| `MppmMatchRole.cs` | 파일은 유지, 호출부만 `MatchSession`으로 이동 | ✅ |
+
+**작업 순서**
+
+1. ✅ `MatchSession`으로 소유권 이동(3c). 이 단계까지는 루프백·Relay 모두 **기존과 똑같이** 동작해야 한다.
+2. ✅ 제어 채널 프레이밍 추가. 아직 아무도 제어 메시지를 안 보내므로 회귀만 확인한다.
+3. ✅ `Setup`/`SetupAck` 왕복 + `MatchSetupFactory`(3b).
+4. 🔶 실패 사유 표시 — 로그 + 토스트까지. 전용 연결 UI는 다음 작업으로 뺐다.
+
+각 단계가 독립적으로 검증 가능하도록 잘랐다. 3을 먼저 짜면 1의 회귀와 3의 버그가 섞인다.
+
+---
+
+### 11-8. 검증 시나리오
+
+| 시나리오 | 기대 |
+|---|---|
+| 정상 대국 | 양쪽 손패가 **같은 순서로** 나오고, 초기 판이 같다 |
+| 카드 DB 불일치 | 한쪽 `AiCardId`를 임시로 바꿔 두면 Ack 거부 + 사유 표시, 씬 진입 안 함 |
+| 게스트가 먼저 뜸 | join code 대기 후 정상 연결 |
+| 게스트가 안 옴 | 15초 뒤 타임아웃 실패 |
+| 서로 다른 노드 선택 | 같은 판에서 시작 (제약 해제 확인) |
+| 단일 플레이 회귀 | 런/연습이 `MatchSetup` 없이 기존대로 동작 |
+| 루프백 회귀 | 핸드셰이크를 건너뛰고 기존대로 동작 |
+
+---
 
 ### 착수 전 체크리스트
 
@@ -419,13 +857,13 @@ RemoteTurnProvider.Start()  이제서야 연결 시작
       `com.unity.services.multiplayer` 2.3.0, `com.unity.multiplayer.playmode` 1.6.3
       (`com.unity.transport` 2.7.3은 의존성으로 함께 들어옴)
 - [x] `RelayMatchTransport : IMatchTransport` 구현 — 게임 로직 변경 없음
-- [ ] **Android 엔진 커버리지 — 실기기 확인** (8-3 함정). 정적으로는 해소됐다.
+- [x] **Android 엔진 커버리지** (8-3 함정) — **해소.**
       `Assets/Plugins/Android/libs/fairystockfish-release.aar`가 있고 `FairyStockfishBridge`가
       `#if UNITY_ANDROID` 분기로 JNI(`com.example.chessaiv2.FairyStockfish`)를 쓰며,
       양쪽 다 `InitEngine("chaoschess")`로 같은 variant를 넘긴다.
-      **남은 확인:** PC는 `VariantPath`로 `variants.ini` 경로를 명시하는데 Android 경로에는 그 호출이 없다.
-      APK 안의 StreamingAssets는 파일 경로로 못 여니, chaoschess 변형이 실기기에서 적용되는지 봐야 한다.
-      **3b의 엔진 버전 검증을 붙이기 전에 확인할 것**
+      PC는 `VariantPath`로 `variants.ini`를 명시하는데 Android 경로에는 그 호출이 없어
+      실기기 확인이 필요해 보였으나, **`chaoschess` 변형이 AAR 라이브러리에 내장돼 있어
+      `variants.ini`를 따로 읽힐 필요가 없다.** 로크스텝의 전제는 충족된다. (2026-08-17 확인)
 - [ ] `com.unity.transport`를 manifest에 명시 — 직접 `using` 하므로 MPS 의존성 변경에 대비
 - [ ] 체크메이트 종료 시 양쪽 승패 일치 검증 (관련 UI 작업 후)
 
@@ -439,6 +877,14 @@ MPPM으로 가상 플레이어 두 개를 띄운다. **`Assets/Scenes/MainScene.
 MPPM 가상 플레이어는 씬 에셋을 공유해서 인스펙터 값으로는 두 인스턴스를 구분할 수 없다.
 `MppmMatchRole`이 `CurrentPlayer.IsMainEditor`로 갈라낸다.
 
+> **포커스를 잃은 창은 멈춘다(8-4).** 두 창을 번갈아 조작해야 하는데, 멈춘 쪽은 Relay
+> 핑이 나가지 않아 연결이 끊긴다. `MatchSession`이 세션 중에만 `runInBackground`를 켜므로
+> 프로젝트 설정은 그대로 두면 된다.
+>
+> 그래도 스톨 로그가 뜬다면 런타임 설정이 이 에디터 버전에서 Play Mode에 반영되지 않는
+> 경우이니, **테스트하는 동안만** Player Settings의 `Run In Background`를 켜고
+> 커밋하지 말 것.
+
 | 인스턴스 | 역할 | 진영 |
 |---|---|---|
 | 메인 에디터 | Host | 백 |
@@ -446,18 +892,23 @@ MPPM 가상 플레이어는 씬 에셋을 공유해서 인스펙터 값으로는
 
 join code는 UI가 없으므로 호스트가 OS 임시 폴더에 파일로 남기고 게스트가 읽는다.
 
-**설정**
+**설정** — 3c 이후로 `MainScene` 한 곳에서 끝난다.
 
-- `MainScene` → `GameCycleManager.debugMultiplayerMode` 체크
-- `MainGameScene` → `RemoteTurnProvider.transportKind = Relay`
+`MainScene` → `GameCycleManager`
 
-**주의: 1층 일반 노드로만 테스트할 것.**
-`MapManager.SelectFEN()`은 보스 층(2·5층)에서만 FEN을 랜덤으로 고르고 그 외에는 `DefaultFEN`을
-돌려준다. 맵 그래프는 클라이언트마다 랜덤이라 같은 노드를 고를 수 없으므로, 보스 층에 가면
-양쪽 초기 판이 달라져 로크스텝이 깨진다. 카드 풀이 양쪽에서 다른 것도 같은 이유다.
+- `debugMultiplayerMode` 체크
+- `multiplayerTransport = Relay` (새 필드의 기본값이 `Relay`라 그대로 두면 된다)
 
-**3a로 이음매는 만들었지만 아직 채우는 쪽(3b)이 없어 이 제약은 그대로다.**
-3b가 붙으면 초기 판과 카드 큐를 호스트가 내려주므로 노드를 맞출 필요가 없어진다.
+> `MainGameScene`의 `RemoteTurnProvider`에는 이제 설정할 값이 없다.
+> 씬 YAML에 남아 있는 옛 `transportKind` / `relayRole` / `relayJoinCode` 값은
+> 대응하는 필드가 사라졌으므로 Unity가 무시한다. 씬을 다시 저장하면 정리된다.
+
+**노드 제약은 3b로 풀렸다.** 초기 판과 카드 큐를 호스트가 정해 내려주므로
+양쪽이 서로 다른 노드를 골라도 같은 판에서 시작한다. 보스 층도 상관없다.
+(예전에는 `MapManager.SelectFEN()`이 보스 층에서 FEN을 랜덤으로 고르고 맵 그래프도
+클라이언트마다 달라서, 1층 일반 노드로만 테스트해야 했다.)
+
+→ **검증 시나리오에 "서로 다른 노드 선택"을 넣어 이 해제를 확인할 것.**
 
 ---
 
@@ -466,11 +917,14 @@ join code는 UI가 없으므로 호스트가 OS 임시 폴더에 파일로 남�
 | 대상 | 내용 |
 |---|---|
 | `MppmMatchRole` | MPPM 두 인스턴스에 역할·진영을 자동 배정하고 join code를 임시 파일로 주고받는 **에디터 전용 테스트 보조**. 연결 UI가 붙으면 파일째 제거 |
-| `RemoteTurnProvider.relayRole` / `relayJoinCode` | 에디터 밖(빌드) 폴백용 인스펙터 값. 연결 UI가 붙으면 제거 |
+| `GameCycleManager.fallbackRelayRole` / `fallbackRelayJoinCode` | 에디터 밖(빌드) 폴백용 인스펙터 값. 연결 UI가 붙으면 제거 |
 | `GameCycleManager.DefaultPlayerColor`의 멀티 분기 | 역할에서 진영을 파생시키는 우회. 매칭이 붙으면 서버가 배정한 색을 `SetPlayerColor`로 넣는다 |
 | 호스트 권위 (`MatchSetup`을 호스트가 결정) | 서버가 없어서 택한 임시 구조. 호스트가 자기 유리하게 카드를 뽑을 수 있다. 6단계 서버 검증에서 대체 |
-| `MatchTransportKind`가 씬에 `Relay`로 고정 | 2단계 검증 설정. 브랜치를 받으면 곧바로 Relay로 진입한다 |
+| `GameCycleManager.multiplayerTransport` 기본값이 `Relay` | 2단계 검증 설정. 브랜치를 받으면 곧바로 Relay로 진입한다. 매칭이 붙으면 서버가 정한다 |
 | `MatchMessage.CreateResign` | 수신부만 있고 **송신하는 곳이 없다.** 항복 UI 자체가 아직 없어 죽은 경로다. 4단계에서 이탈 처리와 함께 붙일 것 |
+| `RemoteTurnProvider.OnDestroy` → `MatchSession.EndMatch()` | 매치 씬을 떠나면 연결을 끊는다. 씬 밖으로 소유권을 옮긴 뒤에도 종료 시점만은 씬에 남아 있는 셈이다. 재접속(4단계)이 붙으면 세션이 스스로 판단해야 한다 |
+| `MatchProfile`을 클라이언트가 자기 신고 | 상대가 보낸 이름·아바타를 그대로 믿는다. 사칭이 가능하다. 표시 전용이고 레이팅에 쓰이지 않아 지금은 감수하지만, 4절의 "클라이언트가 보낸 신원을 믿지 않는다" 원칙과 어긋난다. 서버가 신원을 검증하는 6단계에서 대체 |
+| `MatchSetupFactory.MultiplayerInitialFen` | 시작 판이 표준 배치 하나로 고정돼 있다. 판 종류를 고르게 하려면 서버나 UI가 정해야 한다 |
 | `GameCycleManager.debugPlayAsBlack` | 흑 플레이 검증용. 실제 매칭이 붙으면 제거 |
 | `GameCycleManager.debugMultiplayerMode` | 멀티 모드 진입용. 매칭이 붙으면 제거 |
 | `GameManager.AiAutoMoveEnabled` | 이름과 역할이 어긋났다. "상대 턴 자동 진행"과 "로컬 입력 제한"이 한 변수에 묶여 있어, 카드 랩에서 원격 테스트를 하려면 분리해야 한다 |
