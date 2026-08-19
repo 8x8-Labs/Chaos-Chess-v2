@@ -72,6 +72,15 @@ public class CardEffectArgs
     public PieceColor CasterColor;          // 카드를 시전한 색상
     public bool SuppressAutomaticTurnEnd;   // AI 실행 경로처럼 카드 후 별도 이동 처리가 있을 때 true
 
+    /// <summary>
+    /// 대상이 이미 전부 정해져 있어 선택 UI를 열 필요가 없으면 true입니다.
+    ///
+    /// 원격 적용 경로처럼 화면에서 고르지 않고 좌표만 받아 실행할 때 켭니다.
+    /// 텔레포트처럼 <b>여러 단계로 대상을 고르는 카드</b>는 이 값을 보고 UI를 건너뛰어야 합니다.
+    /// 그러지 않으면 상대 화면에 선택 UI가 열립니다.
+    /// </summary>
+    public bool TargetsPreselected;
+
     public PieceColor ResolveCasterColor()
     {
         if (HasCasterColor)

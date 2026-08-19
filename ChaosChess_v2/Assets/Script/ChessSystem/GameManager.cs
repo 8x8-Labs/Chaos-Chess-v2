@@ -163,6 +163,7 @@ public class GameManager : MonoBehaviour
         IsEndGame = false;
         CardRandomizerManager.Instance?.ClearActiveCards();
         CardSelectionState.Reset();
+        ClearPendingCard();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
         turnProvider = ResolveTurnProvider();
@@ -693,6 +694,10 @@ public class GameManager : MonoBehaviour
         turnProvider.SendLocalAction(MatchMessage.CreateMove(CurrentTurn, uci));
     }
 
+    // 기물 → 타일 두 단계로 대상을 고르는 카드의 1단계 좌표를 잠시 들고 있습니다.
+    private CardDataSO pendingCardSO;
+    private readonly List<string> pendingCardSquares = new List<string>();
+
     /// <summary>
     /// 로컬 플레이어가 사용한 카드를 원격에 알립니다.
     /// 카드 효과가 턴을 넘길 수도 있으므로 효과를 적용하기 전에 불러야 합니다.
@@ -707,15 +712,68 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        string[] squares = null;
-        if (targets != null && targets.Count > 0)
+        List<string> squares = new List<string>();
+        if (targets != null)
         {
-            squares = new string[targets.Count];
-            for (int i = 0; i < targets.Count; i++)
-                squares[i] = BoardManager.Instance.GridTOUCI(targets[i]);
+            foreach (Vector3Int target in targets)
+                squares.Add(BoardManager.Instance.GridTOUCI(target));
         }
 
-        turnProvider.SendLocalAction(MatchMessage.CreateCard(CurrentTurn, cardSO.AiCardId, squares));
+        if (!TryMergeMultiStageCard(cardSO, squares))
+            return;
+
+        turnProvider.SendLocalAction(
+            MatchMessage.CreateCard(CurrentTurn, cardSO.AiCardId, squares.ToArray()));
+    }
+
+    /// <summary>
+    /// 두 단계로 대상을 고르는 카드(텔레포트)를 한 메시지로 합칩니다.
+    ///
+    /// 이런 카드는 PieceSelector와 TileSelector가 각각 이 함수를 부르므로 그대로 두면 메시지가
+    /// 두 번 갑니다. 받는 쪽은 카드 종류(Piece/Tile) 하나로만 좌표를 해석하므로 두 번째 메시지를
+    /// 잘못 읽고, 무엇보다 대상이 덜 정해진 상태로 Execute가 불려 **상대 화면에 선택 UI가 열립니다.**
+    /// 그래서 1단계는 보류했다가 2단계에서 <b>기물 좌표 뒤에 타일 좌표를 이어 붙여</b> 한 번만 보냅니다.
+    ///
+    /// 단계 구분은 지금 잠금을 쥔 selector로 판단합니다. 취소하고 다시 시작하면 다시 Piece가 되므로
+    /// 보류분이 자연스럽게 덮어써집니다.
+    /// </summary>
+    /// <returns>지금 보내야 하면 true, 다음 단계까지 보류하면 false</returns>
+    private bool TryMergeMultiStageCard(CardDataSO cardSO, List<string> squares)
+    {
+        // 기물 카드인데 타일도 고르게 되어 있으면 두 단계 카드입니다.
+        bool multiStage = cardSO.Type == CardType.Piece && cardSO.TileCount > 0;
+        if (!multiStage)
+        {
+            ClearPendingCard();
+            return true;
+        }
+
+        if (CardSelectionState.CurrentOwner == CardSelectionOwner.Piece)
+        {
+            pendingCardSO = cardSO;
+            pendingCardSquares.Clear();
+            pendingCardSquares.AddRange(squares);
+            return false;
+        }
+
+        // 2단계인데 1단계가 없으면 보낼 수 없습니다. 반쪽짜리를 보내면 상대 보드가 어긋납니다.
+        if (pendingCardSO != cardSO)
+        {
+            Debug.LogError(
+                $"[Network] '{cardSO.CardName}'의 기물 선택 단계가 기록되지 않아 전달하지 못했습니다.");
+            ClearPendingCard();
+            return false;
+        }
+
+        squares.InsertRange(0, pendingCardSquares);
+        ClearPendingCard();
+        return true;
+    }
+
+    private void ClearPendingCard()
+    {
+        pendingCardSO = null;
+        pendingCardSquares.Clear();
     }
 
     // MoveSelected 안에서 플레이어 수 적용 후:

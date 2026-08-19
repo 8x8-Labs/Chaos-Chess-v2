@@ -102,7 +102,11 @@ public static class RemoteCardExecutor
         args = new CardEffectArgs
         {
             HasCasterColor = true,
-            CasterColor = casterColor
+            CasterColor = casterColor,
+
+            // 선택 UI를 여는 대신 좌표만으로 실행합니다. 여러 단계로 대상을 고르는 카드가
+            // 이 값을 보고 UI를 건너뜁니다.
+            TargetsPreselected = true
         };
 
         BoardManager boardManager = BoardManager.Instance;
@@ -118,15 +122,29 @@ public static class RemoteCardExecutor
                 if (targets == null)
                     break;
 
-                foreach (string square in targets)
+                // 텔레포트처럼 기물에 이어 타일까지 고르는 카드는 앞쪽 RequiredPieceCount개가
+                // 기물 좌표이고 나머지가 타일 좌표입니다. 송신 측이 그 순서로 이어 붙입니다.
+                int pieceCount = dataSO.TileCount > 0
+                    ? Mathf.Min(dataSO.RequiredPieceCount, targets.Length)
+                    : targets.Length;
+
+                for (int i = 0; i < targets.Length; i++)
                 {
-                    Vector3Int pos = boardManager.UCIToGrid(square);
+                    Vector3Int pos = boardManager.UCIToGrid(targets[i]);
+
+                    if (i >= pieceCount)
+                    {
+                        args.TargetPos ??= new List<Vector3Int>();
+                        args.TargetPos.Add(pos);
+                        continue;
+                    }
+
                     Piece piece = boardManager.GetPiece(pos);
 
                     // 대상 기물이 없다면 양쪽 보드가 어긋난 것이므로 적용하지 않습니다.
                     if (piece == null)
                     {
-                        Debug.LogError($"[Remote] 대상 칸 {square}에 기물이 없습니다. 보드 상태가 어긋났습니다.");
+                        Debug.LogError($"[Remote] 대상 칸 {targets[i]}에 기물이 없습니다. 보드 상태가 어긋났습니다.");
                         return false;
                     }
 
