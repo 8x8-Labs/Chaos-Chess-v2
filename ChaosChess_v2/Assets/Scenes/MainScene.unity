@@ -15802,7 +15802,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugPlayAsBlack: 0
-  debugMultiplayerMode: 1
+  debugMultiplayerMode: 0
+  multiplayerTransport: 1
+  fallbackRelayRole: 0
+  fallbackRelayJoinCode: 
 --- !u!4 &962982684
 Transform:
   m_ObjectHideFlags: 0

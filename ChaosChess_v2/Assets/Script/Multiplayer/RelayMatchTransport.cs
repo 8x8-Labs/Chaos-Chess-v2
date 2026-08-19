@@ -34,8 +34,9 @@ public sealed class RelayMatchTransport : IMatchTransport
     // Relay는 UDP/DTLS/WSS를 지원합니다. 에디터·데스크톱 검증에는 UDP가 가장 단순합니다.
     private const RelayProtocol Protocol = RelayProtocol.UDP;
 
-    // 커맨드 릴레이라 한 메시지가 100바이트 안쪽입니다. 넉넉히 잡아도 이 정도면 충분합니다.
-    private const int MaxPayloadBytes = 1024;
+    // 행동 메시지는 100바이트 안쪽이지만, 제어 메시지에는 카드 큐 64개 id와 해시·FEN이 실립니다.
+    // 700B 안팎이라 1024도 들어가지만 여유를 둡니다.
+    private const int MaxPayloadBytes = 2048;
 
     // 상대 응답이 이 시간을 넘기면 경고를 남깁니다. 끊김을 눈치채기 위한 최소한의 장치입니다.
     private const float RemoteResponseTimeoutSeconds = 60f;
@@ -65,6 +66,13 @@ public sealed class RelayMatchTransport : IMatchTransport
     public bool IsConnected => state == ConnectionState.Connected && connection.IsCreated;
 
     public event Action<MatchMessage> MessageReceived;
+
+    public event Action Connected;
+
+    public event Action<MatchControlMessage> ControlReceived;
+
+    // 연결 성립은 한 번뿐인 사건입니다. 재접속으로 두 번 발행되지 않도록 기억해 둡니다.
+    private bool connectedAnnounced;
 
     /// <summary>호스트가 발급받은 join code입니다. 게스트에게 전달할 값입니다.</summary>
     public string HostJoinCode { get; private set; }
@@ -101,6 +109,9 @@ public sealed class RelayMatchTransport : IMatchTransport
     public void StopMatch()
     {
         MessageReceived = null;
+        ControlReceived = null;
+        Connected = null;
+        connectedAnnounced = false;
 
         if (connection.IsCreated)
         {
@@ -118,38 +129,59 @@ public sealed class RelayMatchTransport : IMatchTransport
 
     public void Send(MatchMessage message)
     {
+        if (message == null) return;
+
+        SendFramed(MatchChannel.Action, JsonUtility.ToJson(message), message.ToString());
+    }
+
+    public void SendControl(MatchControlMessage message)
+    {
+        if (message == null) return;
+
+        SendFramed(MatchChannel.Control, JsonUtility.ToJson(message), message.ToString());
+    }
+
+    /// <summary>
+    /// 채널 바이트와 길이를 앞에 붙여 한 프레임으로 보냅니다.
+    ///
+    /// 채널로 가르는 이유는 받는 쪽이 다르기 때문입니다. 행동은 RemoteTurnProvider가
+    /// Sequence 필터를 태워 받고, 제어는 MatchSession이 핸드셰이크로 받습니다.
+    /// 길이를 붙여 두면 수신 측이 스트림 길이에 의존하지 않아도 됩니다.
+    /// </summary>
+    private void SendFramed(byte channel, string json, string label)
+    {
         if (!IsConnected)
         {
-            Debug.LogError($"[Relay] 연결되지 않아 전송하지 못했습니다: {message}");
+            Debug.LogError($"[Relay] 연결되지 않아 전송하지 못했습니다: {label}");
             return;
         }
 
-        byte[] payload = Encoding.UTF8.GetBytes(JsonUtility.ToJson(message));
+        byte[] payload = Encoding.UTF8.GetBytes(json);
         if (payload.Length > MaxPayloadBytes)
         {
-            Debug.LogError($"[Relay] 메시지가 너무 큽니다({payload.Length}B): {message}");
+            Debug.LogError($"[Relay] 메시지가 너무 큽니다({payload.Length}B): {label}");
             return;
         }
 
         int result = driver.BeginSend(reliablePipeline, connection, out DataStreamWriter writer);
         if (result < 0)
         {
-            Debug.LogError($"[Relay] 전송 시작 실패(코드 {result}): {message}");
+            Debug.LogError($"[Relay] 전송 시작 실패(코드 {result}): {label}");
             return;
         }
 
-        // 길이를 앞에 붙여 두면 수신 측이 스트림 길이에 의존하지 않아도 됩니다.
+        writer.WriteByte(channel);
         writer.WriteUShort((ushort)payload.Length);
         writer.WriteBytes(new Span<byte>(payload));
 
         result = driver.EndSend(writer);
         if (result < 0)
         {
-            Debug.LogError($"[Relay] 전송 실패(코드 {result}): {message}");
+            Debug.LogError($"[Relay] 전송 실패(코드 {result}): {label}");
             return;
         }
 
-        Debug.Log($"[Relay] 송신 {message}");
+        Debug.Log($"[Relay] 송신 {label}");
     }
 
     public void NotifyRemoteTurnStarted(int turn)
@@ -261,7 +293,22 @@ public sealed class RelayMatchTransport : IMatchTransport
             connection = accepted;
             state = ConnectionState.Connected;
             Debug.Log("[Relay] 상대가 접속했습니다.");
+            AnnounceConnected();
         }
+    }
+
+    /// <summary>
+    /// 연결이 성립했음을 한 번만 알립니다.
+    ///
+    /// 호스트는 Accept로, 게스트는 Connect 이벤트로 이어지므로 발행 지점이 둘입니다.
+    /// 핸드셰이크를 시작하는 신호라 중복 발행되면 Setup을 두 번 보내게 됩니다.
+    /// </summary>
+    private void AnnounceConnected()
+    {
+        if (connectedAnnounced) return;
+
+        connectedAnnounced = true;
+        Connected?.Invoke();
     }
 
     // ── 수신 ────────────────────────────────────────────
@@ -279,6 +326,7 @@ public sealed class RelayMatchTransport : IMatchTransport
                     connection = from;
                     state = ConnectionState.Connected;
                     Debug.Log("[Relay] 호스트에 접속했습니다.");
+                    AnnounceConnected();
                     break;
 
                 case NetworkEvent.Type.Data:
@@ -297,6 +345,8 @@ public sealed class RelayMatchTransport : IMatchTransport
 
     private void HandleData(DataStreamReader reader)
     {
+        byte channel = reader.ReadByte();
+
         ushort length = reader.ReadUShort();
         if (length == 0 || length > MaxPayloadBytes)
         {
@@ -307,28 +357,64 @@ public sealed class RelayMatchTransport : IMatchTransport
         reader.ReadBytes(new Span<byte>(receiveBuffer, 0, length));
         string json = Encoding.UTF8.GetString(receiveBuffer, 0, length);
 
-        MatchMessage message;
-        try
+        switch (channel)
         {
-            message = JsonUtility.FromJson<MatchMessage>(json);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"[Relay] 메시지 해석 실패: {e.Message} / 원문: {json}");
-            return;
-        }
+            case MatchChannel.Action:
+                HandleActionPayload(json);
+                break;
 
-        if (message == null)
-        {
-            Debug.LogError($"[Relay] 빈 메시지를 받았습니다. 원문: {json}");
-            return;
+            case MatchChannel.Control:
+                HandleControlPayload(json);
+                break;
+
+            default:
+                Debug.LogError($"[Relay] 모르는 채널({channel})의 메시지를 받았습니다. 원문: {json}");
+                break;
         }
+    }
+
+    private void HandleActionPayload(string json)
+    {
+        if (!TryParse(json, out MatchMessage message))
+            return;
 
         remoteTurnStartedAt = -1f;
         Debug.Log($"[Relay] 수신 {message}");
 
         // Tick()은 Update에서 불리므로 이미 메인 스레드입니다.
         MessageReceived?.Invoke(message);
+    }
+
+    private void HandleControlPayload(string json)
+    {
+        if (!TryParse(json, out MatchControlMessage message))
+            return;
+
+        Debug.Log($"[Relay] 제어 수신 {message}");
+        ControlReceived?.Invoke(message);
+    }
+
+    private static bool TryParse<T>(string json, out T message) where T : class
+    {
+        message = null;
+
+        try
+        {
+            message = JsonUtility.FromJson<T>(json);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[Relay] 메시지 해석 실패: {e.Message} / 원문: {json}");
+            return false;
+        }
+
+        if (message == null)
+        {
+            Debug.LogError($"[Relay] 빈 메시지를 받았습니다. 원문: {json}");
+            return false;
+        }
+
+        return true;
     }
 
     private void CheckRemoteTimeout()

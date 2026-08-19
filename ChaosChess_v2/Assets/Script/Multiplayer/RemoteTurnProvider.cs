@@ -6,7 +6,9 @@ using UnityEngine;
 /// 상대 턴을 원격에서 받아 적용하는 프로바이더입니다.
 ///
 /// 자기가 수를 계산하지 않고, 트랜스포트로 도착한 메시지를 보드에 반영하기만 합니다.
-/// 지금은 검증용 LoopbackMatchTransport를 쓰고, 실제 전송이 붙으면 그 자리만 교체됩니다.
+///
+/// 연결은 이 프로바이더가 소유하지 않습니다. 매치 씬보다 오래 살아야 하는 자원이라
+/// MatchSession이 들고 있고, 여기서는 세션에서 통로를 빌려 구독만 합니다.
 ///
 /// 씬에서 AiTurnController와 함께 두면 GameManager가 어느 쪽을 집을지 알 수 없으므로,
 /// 둘 중 하나만 활성화해야 합니다.
@@ -15,23 +17,11 @@ public sealed class RemoteTurnProvider : TurnProvider
 {
     public override bool IsRemote => true;
 
-    [Tooltip("어느 전송 계층으로 대전할지 고릅니다. Loopback은 네트워크 없이 흐름만 검증합니다.")]
-    [SerializeField] private MatchTransportKind transportKind = MatchTransportKind.Loopback;
-
-    [Header("Relay 검증용 (연결 UI가 붙으면 제거)")]
-    [Tooltip("에디터에서는 MPPM 역할(메인=Host / 클론=Guest)이 우선합니다. 아래 값은 빌드용 폴백입니다.")]
-    [SerializeField] private MatchRole relayRole = MatchRole.Host;
-
-    [Tooltip("Guest일 때 호스트에게 받은 join code. 에디터에서는 임시 파일로 자동 전달됩니다.")]
-    [SerializeField] private string relayJoinCode;
-
     [Tooltip("상대 카드를 적용한 뒤 뒤따르는 착수를 미룰 시간(초). 무슨 카드가 무엇을 했는지 볼 여유를 줍니다.")]
     [SerializeField] private float remoteCardPresentationSeconds = 1.2f;
 
-    private IMatchTransport transport;
-
-    // 게스트가 호스트의 join code가 나올 때까지 기다리는 중인지 여부입니다.
-    private bool waitingForJoinCode;
+    /// <summary>세션이 들고 있는 전송 계층입니다. 세션이 없으면 null입니다.</summary>
+    private IMatchTransport Transport => MatchSession.Instance?.Transport;
 
     // 도착한 메시지를 바로 적용하지 않고 줄 세웁니다.
     // 카드와 착수는 한 턴에 연달아 오는데, 같은 프레임에 적용하면 판이 두 번 튀어 무슨 일이
@@ -49,15 +39,14 @@ public sealed class RemoteTurnProvider : TurnProvider
     private float stalledSince = -1f;
     private bool stalledWarned;
 
-    /// <summary>이번 인스턴스가 맡은 역할입니다. 에디터에서는 MPPM 판정이 인스펙터 값을 덮습니다.</summary>
-    private MatchRole ResolvedRole =>
-        MppmMatchRole.IsAvailable ? MppmMatchRole.Role : relayRole;
-
     // 상대에게서 마지막으로 반영한 일련번호. 중복·역순으로 도착한 메시지를 걸러냅니다.
     private int lastAppliedSequence;
 
     // 내가 보낸 행동에 매기는 일련번호입니다.
     private int localSequence;
+
+    // 세션에 구독자로 붙은 적이 있는지 여부입니다. AI 대전에서는 끝까지 false로 남습니다.
+    private bool sessionJoined;
 
     /// <summary>상대 행동을 기다리는 중인지 여부입니다. 대기 표시 UI가 참고합니다.</summary>
     public bool IsWaitingForRemote { get; private set; }
@@ -73,54 +62,48 @@ public sealed class RemoteTurnProvider : TurnProvider
         WaitingForRemoteChanged?.Invoke(waiting);
     }
 
-    private void Awake()
+    private void OnEnable()
     {
-        transport = CreateTransport(transportKind);
-        transport.MessageReceived += HandleMessageReceived;
+        // 연결은 MainScene에서 이미 열려 있습니다. 여기서는 받을 사람으로 등록만 합니다.
+        // 씬 로드 중에 도착해 세션이 버퍼에 담아 둔 메시지도 이 시점에 함께 넘어옵니다.
+        if (MatchSession.Instance == null)
+        {
+            // 멀티 모드가 아니면 세션이 없는 것이 정상입니다. 이 프로바이더는 씬에 남아 있어도
+            // GameManager가 고르지 않으므로 조용히 놀립니다.
+            if (GameCycleManager.Instance != null &&
+                GameCycleManager.Instance.CurrentMode == GameMode.Multiplayer)
+            {
+                Debug.LogError("[Remote] 멀티플레이 모드인데 매치 세션이 열려 있지 않습니다.");
+            }
+
+            return;
+        }
+
+        MatchSession.Instance.Subscribe(HandleMessageReceived);
+        sessionJoined = true;
+
+        // 연결이 안 된 채로 대국에 들어가면 첫 수를 둘 때가 되어서야 드러납니다.
+        // 원인에서 멀어지므로 씬에 들어오는 시점에 먼저 알립니다.
+        if (Transport == null || !Transport.IsConnected)
+        {
+            Debug.LogError(
+                $"[Remote] 상대와 연결되지 않은 채 매치에 들어왔습니다. (세션 상태: {MatchSession.Instance.State}) " +
+                "이대로면 착수를 보낼 수 없습니다.");
+        }
     }
 
-    /// <summary>
-    /// 호스트가 발급받은 join code입니다. 아직 없으면 빈 문자열입니다.
-    /// 연결 UI가 붙기 전까지는 이 값을 Console 로그에서 확인해 게스트에게 전달합니다.
-    /// </summary>
-    public string HostJoinCode =>
-        transport is RelayMatchTransport relay ? relay.HostJoinCode : string.Empty;
-
-    private void Start()
+    private void OnDisable()
     {
-        // 지연 연결(TryRequestTurn 시점)은 루프백에서만 통합니다.
-        // 실제 전송에서는 백을 잡은 쪽이 첫 수를 두기 전까지 방이 열리지 않아
-        // 상대가 join code를 받을 수 없습니다. 그래서 매치 시작 시점에 미리 엽니다.
-        if (transportKind == MatchTransportKind.Loopback) return;
-        if (transport == null || transport.IsConnected) return;
+        if (!sessionJoined) return;
 
-        if (GameManager.Instance == null)
-        {
-            Debug.LogError("[Network] GameManager가 없어 매치를 열지 못했습니다.");
-            return;
-        }
-
-        // 게스트는 호스트가 방을 열어야 join code를 알 수 있습니다.
-        // 코드가 나올 때까지 Update에서 기다렸다가 접속합니다.
-        if (ResolvedRole == MatchRole.Guest && MppmMatchRole.IsAvailable)
-        {
-            waitingForJoinCode = true;
-            Debug.Log("[Network] 호스트가 방을 열기를 기다립니다.");
-            return;
-        }
-
-        transport.StartMatch(GameManager.Instance.PlayerColor);
+        MatchSession.Instance?.Unsubscribe(HandleMessageReceived);
     }
 
     private void Update()
     {
-        if (waitingForJoinCode)
-            TryStartAsGuest();
-
-        // UnityTransport처럼 프레임마다 수신을 꺼내야 하는 구현을 위해 돌려줍니다.
-        // 먼저 받고 나서 적용해야 도착한 메시지가 같은 프레임에 반영됩니다.
-        transport?.Tick();
-
+        // Tick() 펌핑은 세션이 맡습니다. 매치 씬 밖에서도 수신이 멈추면 안 되기 때문입니다.
+        // 세션은 [DefaultExecutionOrder(-100)]으로 먼저 돌므로 이번 프레임에 도착한 메시지가
+        // 여기서 곧바로 적용됩니다.
         DrainPendingMessages();
     }
 
@@ -168,66 +151,13 @@ public sealed class RemoteTurnProvider : TurnProvider
             $"대기 중인 메시지 {pendingMessages.Count}개. 엔진 응답이 돌아오지 않았을 수 있습니다.");
     }
 
-    /// <summary>호스트가 join code를 남겼으면 접속을 시작합니다. (MPPM 테스트 전용 경로)</summary>
-    private void TryStartAsGuest()
-    {
-        if (GameManager.Instance == null) return;
-
-        if (!MppmMatchRole.TryReadJoinCode(out string code))
-            return;
-
-        waitingForJoinCode = false;
-
-        if (transport is RelayMatchTransport relay)
-            relay.Configure(MatchRole.Guest, code);
-
-        Debug.Log($"[Network] join code를 받아 접속합니다: {code}");
-        transport.StartMatch(GameManager.Instance.PlayerColor);
-    }
-
     private void OnDestroy()
     {
-        if (transport == null) return;
+        // 매치 씬을 떠나면 연결도 끝냅니다. 재접속 처리는 4단계의 몫입니다.
+        // 세션에 붙은 적이 없으면(= AI 대전이면) 남의 연결을 끊지 않도록 건너뜁니다.
+        if (!sessionJoined) return;
 
-        transport.MessageReceived -= HandleMessageReceived;
-        transport.StopMatch();
-    }
-
-    /// <summary>
-    /// 인스펙터에서 고른 종류로 전송 계층을 만듭니다.
-    /// 게임 로직은 IMatchTransport만 알기 때문에 여기서 바꿔 끼우면 나머지는 그대로 갑니다.
-    /// </summary>
-    private IMatchTransport CreateTransport(MatchTransportKind kind)
-    {
-        switch (kind)
-        {
-            case MatchTransportKind.Relay:
-                MatchRole role = ResolvedRole;
-                Debug.Log($"[Network] Relay 역할: {role}" +
-                          $"{(MppmMatchRole.IsAvailable ? " (MPPM 자동 배정)" : " (인스펙터 값)")}");
-
-                // 지난 판에서 남은 join code를 게스트가 집어 가지 않도록 방을 열기 전에 지웁니다.
-                if (role == MatchRole.Host && MppmMatchRole.IsAvailable)
-                    MppmMatchRole.ClearJoinCode();
-
-                RelayMatchTransport relay = new RelayMatchTransport();
-                relay.Configure(role, relayJoinCode);
-
-                relay.JoinCodeIssued += code =>
-                {
-                    Debug.Log($"[Network] 게스트에게 전달할 join code: {code}");
-                    if (MppmMatchRole.IsAvailable)
-                        MppmMatchRole.PublishJoinCode(code);
-                };
-
-                relay.ConnectionFailed += reason =>
-                    Debug.LogError($"[Network] Relay 연결 실패: {reason}");
-
-                return relay;
-
-            default:
-                return new LoopbackMatchTransport();
-        }
+        MatchSession.Instance?.EndMatch();
     }
 
     public override bool TryRequestTurn(
@@ -238,22 +168,35 @@ public sealed class RemoteTurnProvider : TurnProvider
         if (gameManager == null || boardManager == null)
             return false;
 
-        // GameManager보다 먼저 초기화됐을 수 있으므로 첫 요청 시점에 매치를 엽니다.
-        if (!transport.IsConnected)
-            transport.StartMatch(gameManager.PlayerColor);
-
         // 상대 응답이 도착할 때까지 기다립니다. 기본 착수 경로로 넘어가면 안 되므로 true를 돌려줍니다.
         SetWaitingForRemote(true);
-        transport.NotifyRemoteTurnStarted(gameManager.CurrentTurn);
+
+        IMatchTransport current = Transport;
+        if (current == null)
+        {
+            // false를 돌려주면 로컬 엔진이 상대 대신 수를 둬 판이 조용히 갈립니다.
+            // 진행을 멈추고 로그로 드러내는 편이 낫습니다.
+            Debug.LogError("[Remote] 매치 세션이 열려 있지 않아 상대 턴을 기다릴 수 없습니다.");
+            return true;
+        }
+
+        current.NotifyRemoteTurnStarted(gameManager.CurrentTurn);
         return true;
     }
 
     public override void SendLocalAction(MatchMessage message)
     {
-        if (transport == null || message == null) return;
+        if (message == null) return;
+
+        IMatchTransport current = Transport;
+        if (current == null)
+        {
+            Debug.LogError($"[Remote] 매치 세션이 없어 전송하지 못했습니다: {message}");
+            return;
+        }
 
         message.Sequence = ++localSequence;
-        transport.Send(message);
+        current.Send(message);
     }
 
     private void HandleMessageReceived(MatchMessage message)

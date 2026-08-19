@@ -29,6 +29,16 @@ public class GameCycleManager : MonoBehaviour
     [Tooltip("체크하면 런/연습을 멀티플레이 모드로 시작해 RemoteTurnProvider를 사용합니다. 매칭이 붙으면 제거합니다.")]
     [SerializeField] private bool debugMultiplayerMode;
 
+    [Header("멀티플레이 연결 (매칭이 붙으면 제거)")]
+    [Tooltip("어느 전송 계층으로 대전할지 고릅니다. Loopback은 네트워크 없이 흐름만 검증합니다.")]
+    [SerializeField] private MatchTransportKind multiplayerTransport = MatchTransportKind.Relay;
+
+    [Tooltip("에디터에서는 MPPM 역할(메인=Host / 클론=Guest)이 우선합니다. 아래 값은 빌드용 폴백입니다.")]
+    [SerializeField] private MatchRole fallbackRelayRole = MatchRole.Host;
+
+    [Tooltip("Guest일 때 호스트에게 받은 join code. 에디터에서는 임시 파일로 자동 전달됩니다.")]
+    [SerializeField] private string fallbackRelayJoinCode;
+
     /// <summary>
     /// 런/연습 진입 시 사용할 기본 진영입니다. 평소에는 백입니다.
     ///
@@ -98,7 +108,82 @@ public class GameCycleManager : MonoBehaviour
         MatchSetup = null;
 
         PlayerState.Instance?.InitializeRun();
+
+        // 원격 대전은 초기 상태 합의가 끝난 뒤에 맵을 엽니다.
+        if (PrepareMatchSession())
+            return;
+
         MapManager.Instance?.Init();
+    }
+
+    /// <summary>
+    /// 모드에 맞춰 원격 연결을 준비합니다.
+    ///
+    /// 연결을 매치 씬이 아니라 여기서 여는 이유는, 게스트가 받을 초기 상태(MatchSetup)가
+    /// 보드가 깔리기 전에 들어가 있어야 하기 때문입니다. 연결이 매치 씬 안에서 시작되면
+    /// 그 시점에는 이미 늦습니다.
+    /// </summary>
+    /// <returns>합의를 기다려야 해서 진입을 미뤘으면 true</returns>
+    private bool PrepareMatchSession()
+    {
+        if (CurrentMode != GameMode.Multiplayer)
+        {
+            // 지난 원격 대전의 연결이 남아 있으면 정리합니다.
+            MatchSession.Instance?.EndMatch();
+            return false;
+        }
+
+        MatchSession session = MatchSession.EnsureInstance();
+
+        session.StateChanged -= OnMatchSessionStateChanged;
+        session.StateChanged += OnMatchSessionStateChanged;
+
+        session.Begin(new MatchSessionConfig
+        {
+            TransportKind = multiplayerTransport,
+            LocalColor = PlayerColor,
+            FallbackRole = fallbackRelayRole,
+            FallbackJoinCode = fallbackRelayJoinCode
+        });
+
+        // 루프백은 합의할 대상이 없어 Begin 안에서 이미 Ready까지 갑니다.
+        if (session.State == MatchSessionState.Ready)
+        {
+            session.StateChanged -= OnMatchSessionStateChanged;
+            return false;
+        }
+
+        Debug.Log("[Match] 상대와 초기 상태를 맞추는 중입니다.");
+        return true;
+    }
+
+    /// <summary>
+    /// 합의가 끝나면 맵을 열고, 실패하면 진입을 취소합니다.
+    ///
+    /// 실패 표시는 최소한으로 갑니다. 전용 연결 UI는 매칭이 붙을 때의 몫입니다.
+    /// </summary>
+    private void OnMatchSessionStateChanged(MatchSessionState state)
+    {
+        MatchSession session = MatchSession.Instance;
+
+        switch (state)
+        {
+            case MatchSessionState.Ready:
+                if (session != null)
+                    session.StateChanged -= OnMatchSessionStateChanged;
+
+                // 진영은 세션이 합의 결과로 정해 넣어 줍니다.
+                MapManager.Instance?.Init();
+                break;
+
+            case MatchSessionState.Failed:
+                if (session != null)
+                    session.StateChanged -= OnMatchSessionStateChanged;
+
+                Debug.LogError($"[Match] 매치를 시작하지 못했습니다: {session?.FailureReason}");
+                IngameToastUI.Instance?.Show($"매치 실패: {session?.FailureReason}");
+                break;
+        }
     }
 
     /// <summary>
@@ -110,6 +195,7 @@ public class GameCycleManager : MonoBehaviour
     {
         CurrentMode = ResolveMode(GameMode.Run);
         PlayerColor = DefaultPlayerColor;
+        PrepareMatchSession();
         SaveManager.Instance.Load();
         SceneManager.sceneLoaded += OnSavedSceneLoaded;
         SceneLoadManager.Instance.LoadScene(SaveManager.Instance.GetSavedScene());
@@ -125,6 +211,7 @@ public class GameCycleManager : MonoBehaviour
     {
         CurrentMode = ResolveMode(GameMode.Practice);
         PlayerColor = DefaultPlayerColor;
+        PrepareMatchSession();
         PlayerState.Instance.InitializeRun();
         GiveAllCards();
         MapManager.Instance.StartPractice(difficulty);

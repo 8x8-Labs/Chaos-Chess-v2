@@ -29,6 +29,11 @@ public sealed class LoopbackMatchTransport : IMatchTransport
 
     public event Action<MatchMessage> MessageReceived;
 
+    public event Action Connected;
+
+    // 상대가 로컬 엔진이라 합의할 대상이 없습니다. 제어 메시지는 오지도 가지도 않습니다.
+    public event Action<MatchControlMessage> ControlReceived;
+
     public void StartMatch(PieceColor color)
     {
         localColor = color;
@@ -36,6 +41,9 @@ public sealed class LoopbackMatchTransport : IMatchTransport
         requestedTurn = -1;
         remoteSequence = 0;
         Debug.Log($"[Loopback] 매치 시작. 로컬 진영: {localColor}");
+
+        // 기다릴 상대가 없으므로 곧바로 이어진 것으로 봅니다.
+        Connected?.Invoke();
     }
 
     public void StopMatch()
@@ -43,6 +51,16 @@ public sealed class LoopbackMatchTransport : IMatchTransport
         running = false;
         requestedTurn = -1;
         MessageReceived = null;
+        ControlReceived = null;
+        Connected = null;
+    }
+
+    /// <summary>합의할 상대가 없으므로 아무것도 하지 않습니다.</summary>
+    public void SendControl(MatchControlMessage message)
+    {
+        if (!running || message == null) return;
+
+        Debug.Log($"[Loopback] 제어 메시지는 보낼 곳이 없어 무시합니다: {message}");
     }
 
     public void Send(MatchMessage message)

@@ -28,7 +28,27 @@ public static class MppmMatchRole
         Path.Combine(Path.GetTempPath(), "chaoschess_relay_joincode.txt");
 
     // 지난 판에서 남은 join code를 새 판의 것으로 오인하지 않기 위한 기준 시각입니다.
+    //
+    // static 필드는 클래스에 처음 접근할 때 초기화되므로, 그대로 두면 기준 시각이
+    // "이 인스턴스가 MppmMatchRole을 처음 건드린 때"가 됩니다. 그러면 호스트가 게스트보다
+    // 먼저 게임을 시작해 join code를 남긴 경우, 게스트 쪽 기준 시각이 파일보다 나중이라
+    // **이번 판의 코드를 지난 판의 잔재로 오인해 영영 무시합니다.**
+    // 3c에서 방을 여는 시점이 매치 씬에서 MainScene으로 당겨지면서 이 순서가 실제로 벌어집니다.
+    //
+    // 그래서 Play 시작 시점에 못박습니다. 두 인스턴스 모두 그때 기준이 잡히므로
+    // 이후에 쓰인 파일은 항상 이번 판의 것입니다.
     private static readonly DateTime SessionStartUtc = DateTime.UtcNow;
+
+    // 오래된 파일을 무시했다고 한 번만 알리기 위한 플래그입니다.
+    private static bool staleFileWarned;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void CaptureSessionStart()
+    {
+        // 값을 읽는 것만으로 static 초기화가 일어납니다.
+        if (SessionStartUtc == default)
+            Debug.LogWarning("[MPPM] 세션 시작 시각을 잡지 못했습니다.");
+    }
 
     /// <summary>에디터에서 도는 중이라 역할 자동 배정을 쓸 수 있는지 여부입니다.</summary>
     public static bool IsAvailable
@@ -98,9 +118,20 @@ public static class MppmMatchRole
             if (!File.Exists(JoinCodePath))
                 return false;
 
-            // 이번 판이 시작되기 전에 쓰인 파일이면 지난 판의 잔재입니다.
+            // 이번 Play 세션이 시작되기 전에 쓰인 파일이면 지난 판의 잔재입니다.
             if (File.GetLastWriteTimeUtc(JoinCodePath) < SessionStartUtc)
+            {
+                // 계속 무시하면 게스트가 영영 접속하지 못하므로 한 번은 드러냅니다.
+                if (!staleFileWarned)
+                {
+                    staleFileWarned = true;
+                    Debug.LogWarning(
+                        "[MPPM] join code 파일이 이번 Play 세션보다 오래됐습니다. " +
+                        "지난 판의 잔재로 보고 무시합니다.");
+                }
+
                 return false;
+            }
 
             string text = File.ReadAllText(JoinCodePath).Trim();
             if (string.IsNullOrEmpty(text))
