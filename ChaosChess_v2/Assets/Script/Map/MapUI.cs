@@ -5,6 +5,8 @@ using TMPro;
 
 public class MapUI : MonoBehaviour
 {
+    public static MapUI Instance { get; private set; }
+
     [SerializeField] private RectTransform mapContainer;
     [SerializeField] private GameObject mapButtonPrefab;
     // Image + RectTransform을 가진 라인 프리팹. DrawLine()에서 new GameObject + AddComponent<Image> 대신 Instantiate로 재사용한다.
@@ -47,6 +49,17 @@ public class MapUI : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     private void Start()
     {
         Refresh();
@@ -73,6 +86,17 @@ public class MapUI : MonoBehaviour
 
         foreach (var kvp in _nodeObjects)
             ApplyState(kvp.Value, kvp.Key);
+    }
+
+    /// <summary>
+    /// mapGrid가 통째로 다시 만들어졌을 때(멀티플레이 핸드셰이크 완료 후) 강제로 처음부터 다시 짓는다.
+    /// Refresh()는 기존 노드 오브젝트에 상태만 덧씌우므로, Map 객체 자체가 전부 새로 생성된 경우에는
+    /// 맞지 않는다.
+    /// </summary>
+    public void Rebuild()
+    {
+        _built = false;
+        Refresh();
     }
 
     // 노드 버튼과 연결선을 최초 1회 생성하고 캐싱한다.
@@ -183,7 +207,7 @@ public class MapUI : MonoBehaviour
         }
 
         if (obj.TryGetComponent<Button>(out var btn))
-            btn.interactable = !map.isCleared && map.isAccessible;
+            btn.interactable = !map.isCleared && map.isAccessible && !IsMultiplayerHandshakePending();
 
         if (_effectVisuals.TryGetValue(map, out var effectVisual))
         {
@@ -196,6 +220,19 @@ public class MapUI : MonoBehaviour
                 SetEffectColor(effectVisual, effectColor);
             }
         }
+    }
+
+    // MapManager.Awake()가 씬 로드 즉시 임시 맵을 만들어 놓기 때문에(초기화 순서상 어쩔 수 없음),
+    // 멀티플레이에서는 핸드셰이크가 Ready로 끝나 GameCycleManager가 진짜 맵으로 다시 만들 때까지
+    // 노드를 눌러 대국 씬으로 넘어갈 수 없게 막는다. Ready가 되면 GameCycleManager가 Rebuild()를
+    // 불러 다시 활성화한다.
+    private static bool IsMultiplayerHandshakePending()
+    {
+        GameCycleManager cycle = GameCycleManager.Instance;
+        if (cycle == null || cycle.CurrentMode != GameMode.Multiplayer)
+            return false;
+
+        return MatchSession.Instance == null || MatchSession.Instance.State != MatchSessionState.Ready;
     }
 
     private void SetEffectColor(EffectVisual effectVisual, Color color)
