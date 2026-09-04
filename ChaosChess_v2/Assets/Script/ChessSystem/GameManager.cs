@@ -1226,9 +1226,23 @@ public class GameManager : MonoBehaviour
     {
         IsEndGame = true;
 
-        UI.ShowEndGame(FinishType);
+        // FinishType은 실제 색(백/흑) 기준의 절대 결과입니다. UI·보상·전적 집계는
+        // "WhiteWin = 플레이어 승리"로 해석하므로, 플레이어가 흑일 때는 뒤집어 전달해야 합니다.
+        GameResult playerRelativeResult = ToPlayerRelativeResult(FinishType);
+
+        UI.ShowEndGame(playerRelativeResult);
         if (GameCycleManager.Instance != null && !GameCycleManager.Instance.IsPracticeMode)
-            PlayerState.Instance?.EndGame(FinishType);
+            PlayerState.Instance?.EndGame(playerRelativeResult);
+    }
+
+    private GameResult ToPlayerRelativeResult(GameResult absoluteResult)
+    {
+        if (absoluteResult == GameResult.Draw || absoluteResult == GameResult.None)
+            return absoluteResult;
+
+        bool whiteWon = absoluteResult == GameResult.WhiteWin;
+        bool playerWon = whiteWon == (PlayerColor == PieceColor.White);
+        return playerWon ? GameResult.WhiteWin : GameResult.BlackWin;
     }
 
     /// <summary>
