@@ -33,11 +33,19 @@ public class GameCycleManager : MonoBehaviour
     [Tooltip("어느 전송 계층으로 대전할지 고릅니다. Loopback은 네트워크 없이 흐름만 검증합니다.")]
     [SerializeField] private MatchTransportKind multiplayerTransport = MatchTransportKind.Relay;
 
-    [Tooltip("에디터에서는 MPPM 역할(메인=Host / 클론=Guest)이 우선합니다. 아래 값은 빌드용 폴백입니다.")]
-    [SerializeField] private MatchRole fallbackRelayRole = MatchRole.Host;
+    [Tooltip("연결 UI로 정한 역할이 여기 반영됩니다. UI 없이 인스펙터 값으로 바로 테스트할 때도 이 값이 쓰이고, " +
+             "에디터에서 MPPM으로 띄웠으면 MPPM 판정이 대신 우선합니다.")]
+    [SerializeField] private MatchRole multiplayerRole = MatchRole.Host;
 
-    [Tooltip("Guest일 때 호스트에게 받은 join code. 에디터에서는 임시 파일로 자동 전달됩니다.")]
-    [SerializeField] private string fallbackRelayJoinCode;
+    [Tooltip("Guest일 때 접속할 join code입니다. 연결 UI가 입력받은 값이 여기 채워집니다. " +
+             "에디터에서 MPPM으로 띄웠으면 임시 파일로 자동 전달되는 값이 대신 쓰입니다.")]
+    [SerializeField] private string multiplayerJoinCode;
+
+    /// <summary>
+    /// 연결 UI(StartMultiplayerAsHost/AsGuest)를 통해 역할·join code가 명시적으로 정해졌는지 여부입니다.
+    /// true면 MatchSession이 MPPM 자동 배정보다 multiplayerRole/multiplayerJoinCode를 우선합니다.
+    /// </summary>
+    private bool explicitMultiplayerRole;
 
     /// <summary>
     /// 런/연습 진입 시 사용할 기본 진영입니다. 평소에는 백입니다.
@@ -116,6 +124,46 @@ public class GameCycleManager : MonoBehaviour
         MapManager.Instance?.Init();
     }
 
+    /// <summary>연결 UI의 "방 만들기"에서 호출합니다. 호스트로 멀티플레이 매치를 엽니다.</summary>
+    public void StartMultiplayerAsHost()
+    {
+        StartMultiplayerMatch(MatchRole.Host, string.Empty);
+    }
+
+    /// <summary>연결 UI의 "코드로 참가"에서 호출합니다. 입력받은 join code로 게스트로 접속합니다.</summary>
+    public void StartMultiplayerAsGuest(string joinCode)
+    {
+        StartMultiplayerMatch(MatchRole.Guest, joinCode);
+    }
+
+    private void StartMultiplayerMatch(MatchRole role, string joinCode)
+    {
+        CurrentMode = GameMode.Multiplayer;
+        PlayerColor = DefaultPlayerColor;
+        MatchSetup = null;
+
+        multiplayerRole = role;
+        multiplayerJoinCode = joinCode;
+        explicitMultiplayerRole = true;
+
+        PlayerState.Instance?.InitializeRun();
+
+        if (PrepareMatchSession())
+            return;
+
+        MapManager.Instance?.Init();
+    }
+
+    /// <summary>연결 UI에서 취소했을 때 호출합니다. 세션을 정리하고 진입 상태로 되돌립니다.</summary>
+    public void CancelMultiplayerConnect()
+    {
+        MatchSession.Instance?.EndMatch();
+
+        explicitMultiplayerRole = false;
+        multiplayerJoinCode = string.Empty;
+        CurrentMode = GameMode.Run;
+    }
+
     /// <summary>
     /// 모드에 맞춰 원격 연결을 준비합니다.
     ///
@@ -142,8 +190,9 @@ public class GameCycleManager : MonoBehaviour
         {
             TransportKind = multiplayerTransport,
             LocalColor = PlayerColor,
-            FallbackRole = fallbackRelayRole,
-            FallbackJoinCode = fallbackRelayJoinCode
+            Role = multiplayerRole,
+            JoinCode = multiplayerJoinCode,
+            ExplicitRole = explicitMultiplayerRole
         });
 
         // 루프백은 합의할 대상이 없어 Begin 안에서 이미 Ready까지 갑니다.
@@ -174,6 +223,11 @@ public class GameCycleManager : MonoBehaviour
 
                 // 진영은 세션이 합의 결과로 정해 넣어 줍니다.
                 MapManager.Instance?.Init();
+
+                // MapManager.Awake()가 씬 로드 시점에 이미 임시 맵을 만들어 뒀으므로(초기화 순서상
+                // Init()보다 먼저 돎), 방금 다시 만든 진짜 맵으로 UI를 강제로 다시 짓는다.
+                // MapUI가 핸드셰이크 중에는 노드를 비활성화해 뒀던 것도 여기서 함께 풀린다.
+                MapUI.Instance?.Rebuild();
                 break;
 
             case MatchSessionState.Failed:

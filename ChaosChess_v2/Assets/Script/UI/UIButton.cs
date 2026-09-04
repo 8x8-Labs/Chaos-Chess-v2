@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
@@ -18,6 +19,9 @@ public class UIButton : Button
 
     [SerializeField] private ButtonType buttonType;
     [SerializeField] private PracticeDifficulty practiceDifficulty = PracticeDifficulty.Normal;
+
+    [Tooltip("JoinMultiplayer 전용: 상대 join code를 입력받는 필드입니다.")]
+    [SerializeField] private TMP_InputField joinCodeInput;
 
     private IUIAnimation uIAnimation;
     private SoundManager soundManager;
@@ -118,8 +122,39 @@ public class UIButton : Button
             case ButtonType.PracticeStart:
                 StartPracticeMode();
                 break;
+            case ButtonType.HostMultiplayer:
+                // ChangeCanvas와 마찬가지로 disableCanvas/enableCanvas를 인스펙터에서 지정해야 합니다.
+                GameCycleManager.Instance?.StartMultiplayerAsHost();
+                changeCanvas();
+                break;
+            case ButtonType.JoinMultiplayer:
+                JoinMultiplayerMatch();
+                break;
+            case ButtonType.CopyMultiplayerJoinCode:
+                CopyMultiplayerJoinCode();
+                break;
+            case ButtonType.CancelMultiplayerConnect:
+                // ChangeCanvas와 마찬가지로 disableCanvas/enableCanvas를 인스펙터에서 지정해야 합니다.
+                GameCycleManager.Instance?.CancelMultiplayerConnect();
+                changeCanvas();
+                break;
 
         }
+    }
+
+    private void JoinMultiplayerMatch()
+    {
+        string code = joinCodeInput != null ? joinCodeInput.text.Trim() : string.Empty;
+        if (string.IsNullOrEmpty(code)) return;
+
+        GameCycleManager.Instance?.StartMultiplayerAsGuest(code);
+    }
+
+    private void CopyMultiplayerJoinCode()
+    {
+        string code = MatchSession.Instance?.HostJoinCode;
+        if (!string.IsNullOrEmpty(code))
+            GUIUtility.systemCopyBuffer = code;
     }
 
     private void StartPracticeMode()
@@ -181,4 +216,11 @@ public enum ButtonType
     GoMain,
     Quit,           // 게임 종료
     ContinueRun,    // 저장된 런 이어하기
+
+    // 아래는 멀티플레이 연결 UI 전용입니다. 기존 값들의 순서/번호가 바뀌면 씬에 이미
+    // 저장된 버튼들의 ButtonType이 어긋나므로, 항상 이 목록 맨 뒤에만 추가하세요.
+    HostMultiplayer,            // 호스트로 방 열기 + changePanel
+    JoinMultiplayer,            // joinCodeInput 값으로 게스트 접속
+    CopyMultiplayerJoinCode,    // 발급된 join code를 클립보드로 복사
+    CancelMultiplayerConnect,   // 멀티플레이 연결 취소 + changePanel
 }

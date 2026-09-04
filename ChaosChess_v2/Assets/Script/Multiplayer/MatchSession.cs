@@ -29,11 +29,21 @@ public struct MatchSessionConfig
     /// <summary>이 클라이언트가 맡은 진영입니다.</summary>
     public PieceColor LocalColor;
 
-    /// <summary>에디터 밖(빌드)에서 쓸 역할입니다. 에디터에서는 MPPM 판정이 우선합니다.</summary>
-    public MatchRole FallbackRole;
+    /// <summary>
+    /// 이 클라이언트의 역할입니다. ExplicitRole이 true면 연결 UI가 사람 입력으로 정한 값이고,
+    /// false면 에디터에서는 MPPM 판정이 우선하고(이 값은 그때 무시됩니다) 빌드에서는 이 값이
+    /// 그대로 디버그용 폴백으로 쓰입니다.
+    /// </summary>
+    public MatchRole Role;
 
-    /// <summary>에디터 밖에서 게스트가 쓸 join code입니다.</summary>
-    public string FallbackJoinCode;
+    /// <summary>Guest일 때 접속할 join code입니다. ExplicitRole이 true면 연결 UI가 입력받은 값입니다.</summary>
+    public string JoinCode;
+
+    /// <summary>
+    /// 연결 UI에서 사람이 직접 역할/join code를 정했는지 여부입니다.
+    /// true면 Role/JoinCode가 MPPM 자동 배정보다 우선합니다.
+    /// </summary>
+    public bool ExplicitRole;
 }
 
 /// <summary>
@@ -120,9 +130,15 @@ public sealed class MatchSession : MonoBehaviour
     private bool runInBackgroundOverridden;
     private bool previousRunInBackground;
 
-    /// <summary>이번 인스턴스가 맡은 역할입니다. 에디터에서는 MPPM 판정이 설정값을 덮습니다.</summary>
+    /// <summary>
+    /// 이번 인스턴스가 맡은 역할입니다.
+    /// 연결 UI로 사람이 직접 정했으면(ExplicitRole) 그 값이 최우선이고, 아니면 에디터에서는
+    /// MPPM 판정이, 그마저 없으면 빌드용 폴백이 쓰입니다.
+    /// </summary>
     private MatchRole ResolvedRole =>
-        MppmMatchRole.IsAvailable ? MppmMatchRole.Role : config.FallbackRole;
+        config.ExplicitRole ? config.Role
+        : MppmMatchRole.IsAvailable ? MppmMatchRole.Role
+        : config.Role;
 
     /// <summary>세션 오브젝트를 보장합니다. 없으면 만들어 씬을 넘어 살아남게 합니다.</summary>
     public static MatchSession EnsureInstance()
@@ -177,8 +193,10 @@ public sealed class MatchSession : MonoBehaviour
 
         // 게스트는 호스트가 방을 열어야 join code를 알 수 있습니다.
         // 코드가 나올 때까지 Update에서 기다렸다가 접속합니다.
+        // (연결 UI로 join code를 직접 입력했으면 이미 손에 있으니 기다릴 필요가 없습니다.)
         if (config.TransportKind == MatchTransportKind.Relay &&
             ResolvedRole == MatchRole.Guest &&
+            !config.ExplicitRole &&
             MppmMatchRole.IsAvailable)
         {
             waitingForJoinCode = true;
@@ -618,16 +636,17 @@ public sealed class MatchSession : MonoBehaviour
                           $"{(MppmMatchRole.IsAvailable ? " (MPPM 자동 배정)" : " (설정 값)")}");
 
                 // 지난 판에서 남은 join code를 게스트가 집어 가지 않도록 방을 열기 전에 지웁니다.
-                if (role == MatchRole.Host && MppmMatchRole.IsAvailable)
+                // (연결 UI로 진행 중이면 MPPM 파일 교환 경로를 아예 안 씁니다.)
+                if (role == MatchRole.Host && !config.ExplicitRole && MppmMatchRole.IsAvailable)
                     MppmMatchRole.ClearJoinCode();
 
                 RelayMatchTransport relay = new RelayMatchTransport();
-                relay.Configure(role, config.FallbackJoinCode);
+                relay.Configure(role, config.JoinCode);
 
                 relay.JoinCodeIssued += code =>
                 {
                     Debug.Log($"[Session] 게스트에게 전달할 join code: {code}");
-                    if (MppmMatchRole.IsAvailable)
+                    if (!config.ExplicitRole && MppmMatchRole.IsAvailable)
                         MppmMatchRole.PublishJoinCode(code);
                 };
 
