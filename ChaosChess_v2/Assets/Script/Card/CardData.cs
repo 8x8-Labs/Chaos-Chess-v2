@@ -38,11 +38,20 @@ public abstract class CardData : MonoBehaviour
         return effectors;
     }
 
-    /// <summary>DataSO의 전역 설정을 기반으로 GlobalEffector를 생성합니다. 새 GameObject에 부착됩니다.</summary>
-    protected T CreateGlobalEffector<T>() where T : GlobalEffector
+    /// <summary>
+    /// DataSO의 전역 설정을 기반으로 GlobalEffector를 생성합니다. 새 GameObject에 부착됩니다.
+    /// 감시 대상 진영은 시전자 기준으로 해소해 생성 시점에 고정합니다.
+    /// (지속 중 턴이 바뀌어도 감시 대상이 뒤집히면 안 되므로 관계가 아니라 색으로 확정해 넘깁니다.)
+    /// </summary>
+    /// <param name="args">시전자를 특정할 실행 인자. 생략하면 현재 턴 색을 시전자로 봅니다.</param>
+    protected T CreateGlobalEffector<T>(CardEffectArgs args = null) where T : GlobalEffector
     {
+        PieceColor caster = args != null
+            ? args.ResolveCasterColor()
+            : CardEffectArgs.ResolveDefaultCasterColor();
+
         ApplyType color = DataSO.NeedTargetColor
-            ? (ApplyType)DataSO.GlobalTargetColor
+            ? DataSO.GlobalTargetRelation.ToApplyType(caster)
             : ApplyType.All;
         int duration = DataSO.HasLimit ? DataSO.LimitTurn : -1;
 
@@ -62,6 +71,15 @@ public class CardEffectArgs
     public bool HasCasterColor;             // AI 실행 경로처럼 시전자를 명시적으로 전달하는 경우 true
     public PieceColor CasterColor;          // 카드를 시전한 색상
     public bool SuppressAutomaticTurnEnd;   // AI 실행 경로처럼 카드 후 별도 이동 처리가 있을 때 true
+
+    /// <summary>
+    /// 대상이 이미 전부 정해져 있어 선택 UI를 열 필요가 없으면 true입니다.
+    ///
+    /// 원격 적용 경로처럼 화면에서 고르지 않고 좌표만 받아 실행할 때 켭니다.
+    /// 텔레포트처럼 <b>여러 단계로 대상을 고르는 카드</b>는 이 값을 보고 UI를 건너뛰어야 합니다.
+    /// 그러지 않으면 상대 화면에 선택 UI가 열립니다.
+    /// </summary>
+    public bool TargetsPreselected;
 
     public PieceColor ResolveCasterColor()
     {

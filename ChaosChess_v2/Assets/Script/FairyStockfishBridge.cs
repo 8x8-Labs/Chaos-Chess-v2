@@ -13,6 +13,9 @@ public class FairyStockfishBridge : MonoBehaviour
     private int _analysisRequestSequence = 0;
     private string _currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     private string _currentMoves = "";
+
+    // 이미 초기화를 마친 변형입니다. 같은 변형으로 다시 부르면 엔진을 재기동하지 않습니다.
+    private string _initializedVariant;
     public static FairyStockfishBridge Instance
     {
         get
@@ -62,15 +65,26 @@ public class FairyStockfishBridge : MonoBehaviour
     }
 
     // ── 초기화 ──────────────────────────────────────────
+    /// <summary>
+    /// 엔진을 띄웁니다. 이미 같은 변형으로 살아 있으면 그대로 재사용합니다.
+    ///
+    /// 매치마다 다시 띄우면 이전 프로세스가 정리되지 않고 남을 뿐 아니라, 프로세스 기동과
+    /// readyok 대기가 **메인 스레드를 수 초간 멈춥니다.** 원격 대전에서는 그 사이 Relay
+    /// 드라이버가 돌지 못해 "player timed out due to inactivity"로 연결이 끊깁니다.
+    /// </summary>
     public void InitEngine(string variant = "chess")
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
+        if (_fairyInstance != null && _initializedVariant == variant)
+            return;
+
         try
         {
             AndroidJavaClass javaClass =
                 new AndroidJavaClass("com.example.chessaiv2.FairyStockfish");
             _fairyInstance = javaClass.CallStatic<AndroidJavaObject>("getInstance");
             _fairyInstance.Call("initialize", variant);
+            _initializedVariant = variant;
             UnityEngine.Debug.Log("[Fairy] Android 초기화 성공");
         }
         catch (Exception e)
@@ -78,6 +92,12 @@ public class FairyStockfishBridge : MonoBehaviour
             UnityEngine.Debug.LogError("[Fairy] Android 초기화 실패: " + e.Message);
         }
 #else
+        if (_process != null && !_process.HasExited && _initializedVariant == variant)
+            return;
+
+        // 변형이 바뀌었거나 프로세스가 죽었으면 남은 것을 정리하고 다시 띄웁니다.
+        ShutdownProcess();
+
         try
         {
             string exePath = Path.Combine(
@@ -112,6 +132,7 @@ public class FairyStockfishBridge : MonoBehaviour
             SendCommand("isready");
             WaitForOutput("readyok");
 
+            _initializedVariant = variant;
             UnityEngine.Debug.Log("[Fairy] PC 프로세스 초기화 성공");
         }
         catch (Exception e)
@@ -120,6 +141,42 @@ public class FairyStockfishBridge : MonoBehaviour
         }
 #endif
     }
+
+#if !UNITY_ANDROID || UNITY_EDITOR
+    /// <summary>엔진 프로세스를 정리합니다. 이미 없으면 아무것도 하지 않습니다.</summary>
+    private void ShutdownProcess()
+    {
+        if (_process == null) return;
+
+        try
+        {
+            if (!_process.HasExited)
+            {
+                SendCommand("quit");
+                _process.WaitForExit(1000);
+
+                if (!_process.HasExited)
+                    _process.Kill();
+            }
+
+            _process.Dispose();
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogWarning("[Fairy] 엔진 종료 중 오류: " + e.Message);
+        }
+
+        // 읽기 스레드는 _process가 null이 되면 루프를 빠져나갑니다.
+        _process = null;
+        _input = null;
+        _initializedVariant = null;
+
+        lock (_queueLock)
+        {
+            _outputQueue.Clear();
+        }
+    }
+#endif
 
     // ── ELO 강도 설정 ────────────────────────────────────
     public void SetElo(int elo)
@@ -570,10 +627,16 @@ public class FairyStockfishBridge : MonoBehaviour
         //        UnityEngine.Debug.Log("[UCI →] " + command);
     }
 
+    // 이 시간을 넘게 기다렸으면 알립니다. 메인 스레드에서 불리는 경로가 있어
+    // 여기서 멈춘 만큼 Relay 드라이버도 함께 멈춥니다.
+    private const double SlowOutputWarningMs = 500;
+
     private string WaitForOutput(string keyword, int timeoutMs = 5000)
     {
         string result = "";
-        DateTime timeout = DateTime.Now.AddMilliseconds(timeoutMs);
+        DateTime start = DateTime.Now;
+        DateTime timeout = start.AddMilliseconds(timeoutMs);
+
         while (DateTime.Now < timeout)
         {
             lock (_queueLock)
@@ -584,12 +647,28 @@ public class FairyStockfishBridge : MonoBehaviour
                     // UnityEngine.Debug.Log("[UCI ←] " + line);  // ← 메인 스레드에서 출력
                     result += line + "\n";
                     if (line.Contains(keyword))
+                    {
+                        WarnIfSlow(keyword, start);
                         return result;
+                    }
                 }
             }
             Thread.Sleep(10);
         }
+
+        UnityEngine.Debug.LogWarning(
+            $"[Fairy] '{keyword}'를 {timeoutMs}ms 안에 받지 못했습니다. " +
+            "그 시간만큼 호출한 스레드가 멈춥니다.");
         return result;
+    }
+
+    /// <summary>엔진 응답이 느렸으면 얼마나 기다렸는지 남깁니다.</summary>
+    private static void WarnIfSlow(string keyword, DateTime start)
+    {
+        double elapsed = (DateTime.Now - start).TotalMilliseconds;
+        if (elapsed < SlowOutputWarningMs) return;
+
+        UnityEngine.Debug.LogWarning($"[Fairy] '{keyword}' 대기에 {elapsed:F0}ms 걸렸습니다.");
     }
 
     private string WaitForBestMove(int timeoutMs = 10000)
@@ -698,13 +777,7 @@ public class FairyStockfishBridge : MonoBehaviour
         _fairyInstance?.Call("destroy");
         _fairyInstance?.Dispose();
 #else
-        if (_process != null && !_process.HasExited)
-        {
-            SendCommand("quit");
-            _process.WaitForExit(1000);
-            _process.Kill();
-            _process.Dispose();
-        }
+        ShutdownProcess();
 #endif
     }
 

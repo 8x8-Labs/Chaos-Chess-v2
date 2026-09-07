@@ -32,6 +32,15 @@ public class TeleportCard : CardData, IPieceCard, ITileCard
 
     public void Execute(CardEffectArgs args = null)
     {
+        // 원격 적용에는 선택 UI가 없습니다. 기물과 목표 칸이 한 메시지로 함께 오므로
+        // 단계를 나누지 않고 곧바로 처리합니다.
+        // (여기서 LoadTileSelector를 부르면 상대 화면에 선택 UI가 열립니다.)
+        if (args != null && args.TargetsPreselected)
+        {
+            ExecutePreselected(args);
+            return;
+        }
+
         if (!pieceSelected)
         {
             pawn = args.Targets[0];
@@ -41,6 +50,20 @@ public class TeleportCard : CardData, IPieceCard, ITileCard
         }
         Vector3Int target = args.TargetPos[0];
 
+        pieceSelected = false;
         BoardManager.Instance.ForceTeleport(pawn, target, '\0', true);
+    }
+
+    /// <summary>대상이 이미 정해진 경우(원격 적용) 한 번에 실행합니다.</summary>
+    private void ExecutePreselected(CardEffectArgs args)
+    {
+        if (args.Targets == null || args.Targets.Count == 0 ||
+            args.TargetPos == null || args.TargetPos.Count == 0)
+        {
+            Debug.LogError("[Teleport] 기물과 목표 칸이 모두 필요한데 일부가 비어 있습니다.");
+            return;
+        }
+
+        BoardManager.Instance.ForceTeleport(args.Targets[0], args.TargetPos[0], '\0', true);
     }
 }

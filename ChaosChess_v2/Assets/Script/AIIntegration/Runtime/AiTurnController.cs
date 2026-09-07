@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace ChaosChess.Unity.AIIntegration.Runtime
 {
-    public sealed class AiTurnController : MonoBehaviour
+    public sealed class AiTurnController : global::TurnProvider
     {
         [Header("AI 카드")]
         [SerializeField] private bool aiCardUsageEnabled = true;
@@ -76,7 +76,7 @@ namespace ChaosChess.Unity.AIIntegration.Runtime
             queuedForcedCardId = null;
         }
 
-        public bool TryRequestTurn(
+        public override bool TryRequestTurn(
             global::GameManager gameManager,
             global::BoardManager boardManager,
             Action fallbackMoveRequest)

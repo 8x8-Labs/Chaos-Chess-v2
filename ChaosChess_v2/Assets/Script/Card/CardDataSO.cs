@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.Tilemaps;
 
 public enum TileEffectAnimationMode
@@ -104,9 +105,11 @@ public class CardDataSO : ScriptableObject
     [Header("기물 타입 설정")]
     public PieceType PieceType;
     /// <summary>
-    /// 기물 타입에서의 대상 색깔
+    /// 기물 타입에서의 대상 진영입니다. 시전자 기준 상대 관계로 지정합니다.
+    /// (기존 PieceTargetColor의 White=0/Black=1 값이 Self/Opponent로 그대로 승계됩니다.)
     /// </summary>
-    public PieceColor PieceTargetColor;
+    [FormerlySerializedAs("PieceTargetColor")]
+    public CardTargetRelation PieceTargetRelation;
     [Range(-1, 10)]
     public int PieceLimitTurn;
     public int RequiredPieceCount;
@@ -200,9 +203,11 @@ public class CardDataSO : ScriptableObject
     //전역 타입에 필요한 설정
     public bool NeedTargetColor;
     /// <summary>
-    /// 전역 타입에서의 대상 색깔
+    /// 전역 타입에서의 대상 진영입니다. 시전자 기준 상대 관계로 지정합니다.
+    /// NeedTargetColor가 false면 무시되고 모든 진영을 감시합니다.
     /// </summary>
-    public PieceColor GlobalTargetColor;
+    [FormerlySerializedAs("GlobalTargetColor")]
+    public CardTargetRelation GlobalTargetRelation;
     public bool HasLimit;
     public int LimitTurn;
     [Tooltip("상태 카드에 표시할 문구 타입입니다.")]

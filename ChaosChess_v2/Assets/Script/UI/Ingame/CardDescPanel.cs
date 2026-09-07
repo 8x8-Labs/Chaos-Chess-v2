@@ -82,6 +82,11 @@ public class CardDescPanel : ButtonPanel
             case CardType.Global:
                 cardExecute = () =>
                 {
+                    // 전역 카드는 선택 UI를 거치지 않으므로 여기서 직접 상대에게 알려야 합니다.
+                    // 기물/타일 카드는 PieceSelector/TileSelector가 확정 시점에 알립니다.
+                    // 카드 효과가 턴을 넘길 수도 있으므로 적용 전에 부릅니다.
+                    GameManager.Instance?.NotifyLocalCard(data.DataSO, null);
+
                     CardRandomizerManager.Instance?.ExecuteCard(data.DataSO, () => cardInterface?.Execute());
 
                     FindFirstObjectByType<CardRandomizer>()?.RemoveCard(data.gameObject);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using DG.Tweening;
 
 [System.Serializable]
@@ -131,6 +132,19 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private Transform pieceSpawnTransform;
 
+    [Header("보드 시점")]
+    [Tooltip("타일맵들이 묶인 Grid 오브젝트. 흑 시점일 때 180도 회전시켜 보드를 뒤집습니다. 비워두면 씬에서 자동 탐색합니다.")]
+    [SerializeField] private Transform boardRoot;
+
+    [Tooltip("시점을 뒤집어도 타일 그림 방향을 되돌리지 않을 타일맵입니다. 칸 자체가 대칭이라 보정이 필요 없는 체스판 배경을 넣습니다.")]
+    [SerializeField] private Tilemap[] tileOrientationExcluded;
+
+    /// <summary>
+    /// 흑 시점(보드가 뒤집힌 상태)인지 여부입니다.
+    /// 논리 좌표(FEN/UCI)는 언제나 백 기준이며, 뒤집히는 것은 표시와 입력뿐입니다.
+    /// </summary>
+    public bool IsFlipped { get; private set; }
+
     /// <summary>타일에 이펙트를 적용하기 위한 클래스 </summary>
     [SerializeField] private UITileEffectDrawer tileEffectDrawer;
 
@@ -142,6 +156,14 @@ public class BoardManager : MonoBehaviour
             Instance = this;
         else
             Destroy(gameObject);
+
+        // 인스펙터에 지정하지 않았으면 타일맵들이 묶인 Grid를 찾아 씁니다.
+        if (boardRoot == null)
+        {
+            Grid grid = FindFirstObjectByType<Grid>();
+            if (grid != null)
+                boardRoot = grid.transform;
+        }
 
         enPassantPos = new Vector3Int(-1, -1, -1);
 
@@ -197,6 +219,8 @@ public class BoardManager : MonoBehaviour
 
                 // 생성
                 Piece piece = Instantiate(prefab, pieceSpawnTransform);
+                // 보드가 뒤집혀도 기물 스프라이트는 항상 정방향으로 세웁니다.
+                piece.transform.rotation = Quaternion.identity;
 
                 // 상태 설정
                 piece.Init(pos, isWhite ? PieceColor.White : PieceColor.Black);
@@ -354,9 +378,13 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
+        // 아래 두 경우 모두 기물은 그대로인데 턴만 넘어갑니다.
+        // 조용히 지나가면 양쪽 판이 어긋난 채로 대국이 이어지므로 반드시 드러냅니다.
         Piece piece = GetPiece(from);
-        if (piece != null)
-            MovePiece(piece, to, promotion);
+        if (piece == null)
+            Debug.LogError($"[Board] '{uciMove}'의 출발 칸 {uciMove.Substring(0, 2)}에 기물이 없습니다. 판이 어긋났습니다.");
+        else if (!MovePiece(piece, to, promotion))
+            Debug.LogError($"[Board] '{uciMove}'를 적용하지 못했습니다. {piece.name}이(가) 해당 칸으로 갈 수 없습니다.");
 
         DOVirtual.DelayedCall(Piece.MoveDuration, () => GameManager.Instance.CompleteAutomatedMove());
     }
@@ -528,6 +556,8 @@ public class BoardManager : MonoBehaviour
         if (FENMap.TryGetValue(key, out Piece prefab))
         {
             Piece newPiece = Instantiate(prefab, pieceSpawnTransform);
+            // 보드가 뒤집혀도 기물 스프라이트는 항상 정방향으로 세웁니다.
+            newPiece.transform.rotation = Quaternion.identity;
 
             newPiece.Init(pos, color);
             AddPiece(newPiece, pos);
@@ -625,15 +655,68 @@ public class BoardManager : MonoBehaviour
         return sq;
     }
 
-    ///<summary> Vector3Int 좌표를 월드좌표로 바꿉니다 </summary> 
+    ///<summary>
+    /// Vector3Int 좌표를 월드좌표로 바꿉니다.
+    /// 흑 시점에서는 보드 중심 기준으로 180도 돌린 위치를 돌려줍니다(boardRoot 회전과 같은 결과).
+    ///</summary>
     public Vector3 GridPosToWorldPos(Vector3Int GridPos)
     {
-        return new Vector3
+        Vector3 pos = new Vector3
         (
             (GridPos.x - BoardCenterOffset.x) * CellSize.x,
             (GridPos.y - BoardCenterOffset.y) * CellSize.y,
             0
         );
+
+        return IsFlipped ? new Vector3(-pos.x, -pos.y, 0) : pos;
+    }
+
+    /// <summary>타일 그림 방향 보정에서 제외할 타일맵인지 확인합니다.</summary>
+    private bool IsOrientationExcluded(Tilemap tilemap)
+    {
+        if (tileOrientationExcluded == null) return false;
+
+        foreach (Tilemap excluded in tileOrientationExcluded)
+        {
+            if (excluded == tilemap) return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 플레이어 진영에 맞춰 보드 시점을 설정합니다. 기물을 배치하기 전에 호출해야 합니다.
+    /// 타일맵은 boardRoot를 회전시켜 뒤집으므로 SetTile/WorldToCell 호출부는 논리 좌표를 그대로 씁니다.
+    /// </summary>
+    public void ApplyBoardView(PieceColor playerColor)
+    {
+        IsFlipped = playerColor == PieceColor.Black;
+
+        if (boardRoot != null)
+        {
+            boardRoot.localRotation = Quaternion.Euler(0f, 0f, IsFlipped ? 180f : 0f);
+
+            // Grid를 돌리면 칸 위치와 함께 타일 그림까지 거꾸로 섭니다.
+            // 타일맵마다 같은 각도를 되돌려, 칸 배치만 뒤집고 타일 그림은 정방향을 유지합니다.
+            Matrix4x4 tileOrientation = IsFlipped
+                ? Matrix4x4.Rotate(Quaternion.Euler(0f, 0f, 180f))
+                : Matrix4x4.identity;
+
+            foreach (Tilemap tilemap in boardRoot.GetComponentsInChildren<Tilemap>(true))
+            {
+                tilemap.orientation = Tilemap.Orientation.Custom;
+                tilemap.orientationMatrix = IsOrientationExcluded(tilemap)
+                    ? Matrix4x4.identity
+                    : tileOrientation;
+            }
+        }
+
+        // 이미 배치된 기물이 있으면 새 시점 기준으로 다시 놓습니다.
+        foreach (Piece piece in Pieces)
+        {
+            if (piece == null) continue;
+            piece.Move(piece.Pos, GridPosToWorldPos(piece.Pos), animate: false);
+        }
     }
 
     ///<summary> 현재 Board상태를 받아서 문자열 FEN을 수정합니다 </summary> 

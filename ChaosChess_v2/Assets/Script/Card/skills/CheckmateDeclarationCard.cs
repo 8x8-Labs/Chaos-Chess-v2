@@ -10,12 +10,11 @@ public class CheckmateDeclarationCard : CardData, ICard
 {
     public void Execute(CardEffectArgs args = null)
     {
-        CheckmateDeclarationEffect effect = 
-            CreateGlobalEffector<CheckmateDeclarationEffect>();
-        PieceColor casterColor = args != null
+        CheckmateDeclarationEffect effect =
+            CreateGlobalEffector<CheckmateDeclarationEffect>(args);
+        effect.SetCasterColor(args != null
             ? args.ResolveCasterColor()
-            : CardEffectArgs.ResolveDefaultCasterColor();
-        effect.SetCasterColor(casterColor);
+            : CardEffectArgs.ResolveDefaultCasterColor());
 
         effect.Apply();
     }
@@ -23,6 +22,7 @@ public class CheckmateDeclarationCard : CardData, ICard
 
 public class CheckmateDeclarationEffect : GlobalEffector
 {
+    // 파괴 대상은 시전자의 상대 진영입니다. 지속 중 턴이 바뀌어도 대상이 뒤집히지 않도록 고정합니다.
     private PieceColor casterColor = PieceColor.White;
 
     public void SetCasterColor(PieceColor color)

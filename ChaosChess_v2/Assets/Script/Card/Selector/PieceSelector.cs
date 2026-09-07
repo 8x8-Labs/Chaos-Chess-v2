@@ -11,6 +11,8 @@ public class PieceSelector : Selector<Piece>
     private readonly List<PieceEffector> pieceEffectorBuffer = new();
     private IPieceCard skillCard;
     private IPieceTargetFilter targetFilter;
+    // 대상 진영 판정의 기준이 되는 시전자 색. 선택 중에는 턴이 넘어가지 않으므로 선택 시작 시점에 고정합니다.
+    private PieceColor casterColor;
     private bool executable => isExecute();
 
     public override void DeselectFirstTarget()
@@ -108,7 +110,12 @@ public class PieceSelector : Selector<Piece>
             Targets = selectedTargets.ToList(),
             LimitTurn = cardData.DataSO.PieceLimitTurn,
         };
-        
+
+        // 카드 효과가 턴을 넘길 수도 있으므로 적용 전에 상대에게 알립니다.
+        GameManager.Instance?.NotifyLocalCard(
+            cardData.DataSO,
+            selectedTargets.Select(target => target.Pos).ToList());
+
         // CardRandomizerManager가 없는 환경(카드 이펙트 랩 등)에서는 직접 실행해 효과가 누락되지 않도록 합니다.
         if (CardRandomizerManager.Instance != null)
             CardRandomizerManager.Instance.ExecuteCard(cardData.DataSO, () => skillCard.Execute(args));
@@ -150,6 +157,7 @@ public class PieceSelector : Selector<Piece>
         cardData = data;
         skillCard = cardData.GetComponent<IPieceCard>();
         targetFilter = cardData.GetComponent<IPieceTargetFilter>();
+        casterColor = CardEffectArgs.ResolveDefaultCasterColor();
         selectorUI.DisableButtonState();
         selectedTargets.Clear();
 
@@ -201,7 +209,7 @@ public class PieceSelector : Selector<Piece>
         if ((piece.Type & cardData.DataSO.PieceType) == 0)
             return false;
 
-        if (piece.Color != cardData.DataSO.PieceTargetColor)
+        if (!cardData.DataSO.PieceTargetRelation.Matches(piece.Color, casterColor))
             return false;
 
         return targetFilter == null || targetFilter.CanSelectPiece(piece);

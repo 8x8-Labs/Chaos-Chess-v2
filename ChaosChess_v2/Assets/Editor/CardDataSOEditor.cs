@@ -77,7 +77,7 @@ public class CardDataSOEditor : Editor
         cardTier = serializedObject.FindProperty("CardTier");
 
         pieceType = serializedObject.FindProperty("PieceType");
-        targetColorPiece = serializedObject.FindProperty("PieceTargetColor");
+        targetColorPiece = serializedObject.FindProperty("PieceTargetRelation");
         pieceLimitTurn = serializedObject.FindProperty("PieceLimitTurn");
         requiredPieceCount = serializedObject.FindProperty("RequiredPieceCount");
 
@@ -100,7 +100,7 @@ public class CardDataSOEditor : Editor
         blockedTiles = serializedObject.FindProperty("BlockedTiles");
 
         needTargetColor = serializedObject.FindProperty("NeedTargetColor");
-        targetColor = serializedObject.FindProperty("GlobalTargetColor");
+        targetColor = serializedObject.FindProperty("GlobalTargetRelation");
         hasLimit = serializedObject.FindProperty("HasLimit");
         limitTurn = serializedObject.FindProperty("LimitTurn");
         statusDisplayType = serializedObject.FindProperty("StatusDisplayType");
@@ -277,7 +277,7 @@ public class CardDataSOEditor : Editor
         HelpBox("기물 카드: 특정 기물을 배치하거나 조합하는 카드입니다.", MessageType.None);
         EditorGUILayout.Space(2);
         EditorGUILayout.PropertyField(pieceType, new GUIContent("기물 종류"));
-        EditorGUILayout.PropertyField(targetColorPiece, new GUIContent("대상 색상"));
+        EditorGUILayout.PropertyField(targetColorPiece, new GUIContent("대상 진영"));
         EditorGUILayout.PropertyField(pieceLimitTurn, new GUIContent("효과 유지 턴"));
         if (pieceLimitTurn.intValue == -1)
         {
@@ -488,7 +488,7 @@ public class CardDataSOEditor : Editor
         if (needTargetColor.boolValue)
         {
             EditorGUI.indentLevel++;
-            EditorGUILayout.PropertyField(targetColor, new GUIContent("대상 색상"));
+            EditorGUILayout.PropertyField(targetColor, new GUIContent("대상 진영"));
             EditorGUI.indentLevel--;
         }
 

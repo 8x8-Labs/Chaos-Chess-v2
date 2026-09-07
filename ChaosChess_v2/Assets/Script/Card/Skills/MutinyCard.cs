@@ -24,13 +24,13 @@ public class MutinyCard : CardData, IPieceCard
 
     public void Execute(CardEffectArgs args = null)
     {
+        // 선택 게이트(PieceSelector)가 시전자 기준 관계로 대상을 거르므로 실행도 같은 기준을 써야 합니다.
         PieceColor casterColor = args != null
             ? args.ResolveCasterColor()
             : CardEffectArgs.ResolveDefaultCasterColor();
-        PieceColor targetColor = CardEffectArgs.OpponentOf(casterColor);
 
         List<Queen> queens = BoardManager.Instance.GetPiece<Queen>
-            (targetColor);
+            (CardTargetRelationExtensions.Opposite(casterColor));
 
         if (queens == null || queens.Count == 0)
         {

@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CardName: "\uB370\uC2A4\uD398\uB77C\uB3C4"
   CardImage: {fileID: -1662158825, guid: 4ab84a4b08c40404dbc95506084f3966, type: 3}
-  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 \uC774\uBC88 \uD134\uC5D0 <color=#4499FF>2\uBC88 \uC5F0\uC18D \uD589\uB3D9</color>\uD569\uB2C8\uB2E4. \uB2E8, \uD589\uB3D9 \uD6C4 <color=#FF4444>\uC989\uC2DC \uD30C\uAD34\uB429\uB2C8\uB2E4</color>. (\uD0B9\u00B7\uBCBD \uC81C\uC678)"
+  CardDescription: "\uC120\uD0DD\uD55C \uAE30\uBB3C\uC774 \uC774\uBC88 \uD134\uC5D0
+    <color=#4499FF>2\uBC88 \uC5F0\uC18D \uD589\uB3D9</color>\uD569\uB2C8\uB2E4. \uB2E8,
+    \uD589\uB3D9 \uD6C4 <color=#FF4444>\uC989\uC2DC \uD30C\uAD34\uB429\uB2C8\uB2E4</color>.
+    (\uD0B9\xB7\uBCBD \uC81C\uC678)"
   Type: 0
   CardTier: 4
   AiCardId: desperado
@@ -47,7 +50,7 @@ MonoBehaviour:
     RevertSFX: {fileID: 0}
     SFXVolume: 1
   PieceType: 943
-  PieceTargetColor: 0
+  PieceTargetRelation: 0
   PieceLimitTurn: 1
   RequiredPieceCount: 1
   TileCount: 0
@@ -68,7 +71,7 @@ MonoBehaviour:
   RestrictTiles: 0
   BlockedTiles: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   NeedTargetColor: 0
-  GlobalTargetColor: 0
+  GlobalTargetRelation: 0
   HasLimit: 0
   LimitTurn: 0
   StatusDisplayType: 0

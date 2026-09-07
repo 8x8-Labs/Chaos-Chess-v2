@@ -23,6 +23,7 @@ public class UIButtonEditor : ButtonEditor
     SerializedProperty rewardSceneNameProp;
     SerializedProperty resultSceneNameProp;
     SerializedProperty mainSceneNameProp;
+    SerializedProperty joinCodeInputProp;
 
     //[SerializeField] private bool isStartAnimation = false;
     //[SerializeField] private bool isEndAnimation = false;
@@ -47,6 +48,7 @@ public class UIButtonEditor : ButtonEditor
         rewardSceneNameProp = serializedObject.FindProperty("rewardSceneName");
         resultSceneNameProp = serializedObject.FindProperty("resultSceneName");
         mainSceneNameProp = serializedObject.FindProperty("mainSceneName");
+        joinCodeInputProp = serializedObject.FindProperty("joinCodeInput");
     }
 
     public override void OnInspectorGUI()
@@ -122,6 +124,27 @@ public class UIButtonEditor : ButtonEditor
 
             case ButtonType.Submit:
                 EditorGUILayout.HelpBox("Button 상단의 onClick 이벤트를 사용하세요.", MessageType.None);
+                break;
+
+            case ButtonType.HostMultiplayer:
+                EditorGUILayout.HelpBox("호스트로 멀티플레이 연결을 시작하고, 현재 캔버스를 끄고 새로운 캔버스를 킵니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(disableObjectProp, new GUIContent("Canvas to Disable"));
+                EditorGUILayout.PropertyField(enableObjectProp, new GUIContent("Canvas to Enable"));
+                break;
+
+            case ButtonType.JoinMultiplayer:
+                EditorGUILayout.HelpBox("Join Code Input에 입력된 코드로 게스트 접속을 시작합니다. 화면 전환은 하지 않습니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(joinCodeInputProp, new GUIContent("Join Code Input"));
+                break;
+
+            case ButtonType.CopyMultiplayerJoinCode:
+                EditorGUILayout.HelpBox("발급된 join code를 클립보드로 복사합니다.", MessageType.Info);
+                break;
+
+            case ButtonType.CancelMultiplayerConnect:
+                EditorGUILayout.HelpBox("멀티플레이 연결을 취소하고, 현재 캔버스를 끄고 새로운 캔버스를 킵니다.", MessageType.Info);
+                EditorGUILayout.PropertyField(disableObjectProp, new GUIContent("Canvas to Disable"));
+                EditorGUILayout.PropertyField(enableObjectProp, new GUIContent("Canvas to Enable"));
                 break;
 
                 // 필요한 경우 다른 Case들도 추가 가능

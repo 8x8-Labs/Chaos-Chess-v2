@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ChaosChess.Unity.AIIntegration.Cards;
 using ChaosChess.Unity.AIIntegration.Runtime;
 using UnityEngine;
+using UnityEngine.Serialization;
 using DG.Tweening;
 
 public class GameManager : MonoBehaviour
@@ -23,8 +24,25 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance;
 
-    public PieceColor PlayerColor = PieceColor.White;
-    public PieceColor EnemyColor = PieceColor.Black;
+    [FormerlySerializedAs("PlayerColor")]
+    [SerializeField] private PieceColor playerColor = PieceColor.White;
+
+    /// <summary>
+    /// 플레이어(로컬)가 맡은 진영입니다. 매치 시작 시 GameCycleManager가 주입합니다.
+    /// </summary>
+    public PieceColor PlayerColor => playerColor;
+
+    /// <summary>
+    /// 상대 진영입니다. PlayerColor에서 파생되므로 따로 설정하지 않습니다.
+    /// (예전에는 독립 필드라 둘이 어긋날 수 있었습니다.)
+    /// </summary>
+    public PieceColor EnemyColor => CardTargetRelationExtensions.Opposite(playerColor);
+
+    /// <summary>매치 시작 전에 플레이어 진영을 지정합니다.</summary>
+    public void SetPlayerColor(PieceColor color)
+    {
+        playerColor = color;
+    }
 
     public List<Sprite> BlackSprites = new List<Sprite>();
     public List<Sprite> WhiteSprites = new List<Sprite>();
@@ -34,15 +52,33 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject variantUpgradeVfxPrefab;
 
     [SerializeField] private int curTurn;
-    public bool IsPlayerTurn => (curTurn % 2 == 1);
+    /// <summary>현재 턴 번호입니다. 매치 메시지의 순서를 강제하는 데 씁니다.</summary>
+    public int CurrentTurn => curTurn;
+
+    /// <summary>
+    /// 지금이 플레이어 차례인지 여부입니다. PlayerColor가 백이면 기존의 "홀수 턴" 판정과 동일합니다.
+    /// </summary>
+    public bool IsPlayerTurn => turnColor == PlayerColor;
     public bool IsPlayerInCheck { get; private set; }
     public bool IsCurrentTurnInCheck { get; private set; }
-    public int CurrentTurn => curTurn;
+
+    /// <summary>
+    /// 턴 전환에 딸린 비동기 갱신(합법수 조회 → 이동 가능 위치 반영)이 끝났는지 여부입니다.
+    ///
+    /// false인 동안 기물의 CanMovePos는 아직 이전 턴 기준입니다.
+    /// 이때 원격 착수를 적용하면 합법수 판정이 어긋나 수가 조용히 버려집니다.
+    /// 원격 수신부는 이 값이 true가 될 때까지 적용을 미뤄야 합니다.
+    /// </summary>
+    public bool IsTurnStateReady { get; private set; } = true;
 
     public bool IsGameInput = true;
     /// <summary>false이면 RequestAIMove가 무시됩니다. 카드 이펙트 랩에서 양쪽을 수동으로 두기 위해 사용합니다.</summary>
     public bool AiAutoMoveEnabled = true;
+    /// <summary>이번 턴을 대신 둘 주체입니다. 지금은 AI 카드 컨트롤러이며, 멀티에서는 원격 프로바이더가 들어갑니다.</summary>
+    [SerializeField] private TurnProvider turnProvider;
+    /// <summary>씬에 AI 카드 시스템이 없을 때 런타임에 만들어 줄지 여부입니다.</summary>
     [SerializeField] private bool autoCreateAiCardController = true;
+    /// <summary>자동 생성한 AI 컨트롤러를 담아 둡니다. 턴 디스패치는 turnProvider가 담당합니다.</summary>
     [SerializeField] private AiTurnController aiTurnController;
     public bool IsEndGame { get; private set; } = false;
     public bool IsArenaMode { get; set; } = false;
@@ -99,12 +135,22 @@ public class GameManager : MonoBehaviour
     private int extraPlayerActions = 0;
     private Piece lockedPiece = null;
 
+    // 승격 선택이 끝날 때까지 보류해 둔 로컬 착수입니다.
+    private Vector3Int pendingLocalMoveFrom;
+    private Vector3Int pendingLocalMoveTo;
+    private bool hasPendingLocalMove;
+
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+
+            // 이번 매치의 플레이어 진영을 런 관리자에서 받아옵니다.
+            // GameCycleManager가 없는 환경(카드 이펙트 랩 등)에서는 인스펙터 값을 그대로 씁니다.
+            if (GameCycleManager.Instance != null)
+                playerColor = GameCycleManager.Instance.PlayerColor;
         }
         else
         {
@@ -117,12 +163,10 @@ public class GameManager : MonoBehaviour
         IsEndGame = false;
         CardRandomizerManager.Instance?.ClearActiveCards();
         CardSelectionState.Reset();
+        ClearPendingCard();
         boardUI = FindFirstObjectByType<BoardUI>();
         uiManager = FindFirstObjectByType<UIManager>();
-        aiTurnController = aiTurnController != null
-            ? aiTurnController
-            : FindFirstObjectByType<AiTurnController>();
-        EnsureAiCardController();
+        turnProvider = ResolveTurnProvider();
 
         FinishType = GameResult.None;
 
@@ -143,11 +187,67 @@ public class GameManager : MonoBehaviour
         OnTimeReversalRequired -= HandleTimeReversal;
         OnTimeReversalRequired += HandleTimeReversal;
 
+        // 기물이 배치되기 전에 보드 시점을 먼저 확정합니다.
+        BoardManager.Instance.ApplyBoardView(PlayerColor);
+
         LoadMapManager();
 
         string[] moves = FairyStockfishBridge.Instance.GetLegalMoves();
         EvaluateGameState(moves);
         BoardManager.Instance.UpdatePiecesCanMovePos(moves);
+
+        // 플레이어가 흑이면 백(AI)이 선수입니다.
+        // 이후 턴은 NextTurn 콜백이 이어받지만, 첫 수만은 여기서 요청해야 대국이 시작됩니다.
+        if (!IsPlayerTurn)
+            RequestAIMove();
+    }
+
+    /// <summary>
+    /// 게임 모드에 맞는 턴 프로바이더를 고릅니다.
+    /// 한 씬에 AI용과 원격용이 함께 있어도 모드가 결정하므로, 오브젝트를 켜고 끌 필요가 없습니다.
+    /// </summary>
+    private TurnProvider ResolveTurnProvider()
+    {
+        GameMode mode = GameCycleManager.Instance != null
+            ? GameCycleManager.Instance.CurrentMode
+            : GameMode.Run;
+        bool needRemote = mode == GameMode.Multiplayer;
+
+        TurnProvider resolved = null;
+
+        // 인스펙터로 지정한 프로바이더가 모드와 맞으면 그대로 씁니다.
+        if (turnProvider != null && turnProvider.IsRemote == needRemote)
+        {
+            resolved = turnProvider;
+        }
+        else
+        {
+            foreach (TurnProvider candidate in FindObjectsByType<TurnProvider>(FindObjectsSortMode.None))
+            {
+                if (candidate.IsRemote == needRemote)
+                {
+                    resolved = candidate;
+                    break;
+                }
+            }
+        }
+
+        // 싱글플레이인데 씬에 AI 컨트롤러가 없으면 여기서 만들어 씁니다.
+        // RequestAIMove에서 만들면 이미 씬에 붙어 있는 컨트롤러 위에 하나를 더 얹게 됩니다.
+        if (resolved == null && !needRemote)
+        {
+            EnsureAiCardController();
+            resolved = aiTurnController;
+        }
+
+        Debug.Log($"[TurnProvider] 모드 {mode} " +
+                  $"(GameCycleManager {(GameCycleManager.Instance != null ? "있음" : "없음")}) " +
+                  $"→ 선택: {(resolved != null ? resolved.GetType().Name : "없음")}");
+
+        if (resolved == null && needRemote)
+            Debug.LogError("[Network] 멀티플레이 모드인데 씬에서 RemoteTurnProvider를 찾지 못했습니다.");
+
+        return resolved;
     }
 
     /// <summary>
@@ -156,6 +256,20 @@ public class GameManager : MonoBehaviour
     private void LoadMapManager()
     {
         FairyStockfishBridge.Instance.InitEngine("chaoschess");
+
+        // 원격 대전이면 초기 판을 합의된 값으로 씁니다.
+        // 맵은 클라이언트마다 따로 생성되므로 각자 뽑으면 서로 다른 판에서 두게 됩니다.
+        //
+        // 엘리트 변형은 적용하지 않습니다. 대상이 EnemyColor 기준이라 두 클라이언트가
+        // 서로 반대 진영을 변형시키고, 애초에 엘리트는 런 전용 개념입니다(설계문서 8-1).
+        // ELO도 AI 난이도라 원격 대전에서는 의미가 없습니다.
+        MatchSetup setup = GameCycleManager.Instance?.MatchSetup;
+        if (setup != null)
+        {
+            BoardManager.Instance.LoadFEN(setup.InitialFen);
+            return;
+        }
+
         if (MapManager.Instance != null && MapManager.Instance.curMap != null)
         {
             int elo = MapManager.Instance.curMap.ELO;
@@ -375,6 +489,13 @@ public class GameManager : MonoBehaviour
 
             IsGameInput = true;
 
+            // 승격 문자까지 확정됐으므로 이제 착수를 보냅니다.
+            if (hasPendingLocalMove)
+            {
+                hasPendingLocalMove = false;
+                NotifyLocalMove(pendingLocalMoveFrom, pendingLocalMoveTo, type);
+            }
+
             NextTurn(() => RequestAIMove());
         });
     }
@@ -414,6 +535,11 @@ public class GameManager : MonoBehaviour
     public void NextTurn(Action onComplete = null)
     {
         curTurn += 1;
+
+        // 턴 번호는 지금 올라가지만 기물의 이동 가능 위치는 엔진 응답을 받아야 갱신됩니다.
+        // 그 사이에 원격 착수가 도착하면 옛 목록으로 합법성을 따져 수가 조용히 버려집니다.
+        IsTurnStateReady = false;
+
         BoardManager.Instance.UpdateFEN(); // 디버깅
         string fen = BoardManager.Instance.GetFEN();
         FairyStockfishBridge.Instance.SetPosition(fen);
@@ -442,6 +568,10 @@ public class GameManager : MonoBehaviour
             FairyStockfishBridge.Instance.GetLegalMovesAsync(moves2 =>
             {
                 EvaluateGameState(moves2);
+
+                // 여기까지 와야 이동 가능 위치가 이번 턴 기준으로 확정됩니다.
+                IsTurnStateReady = true;
+
                 onComplete?.Invoke();
             });
         });
@@ -549,6 +679,103 @@ public class GameManager : MonoBehaviour
         OnCardIntervalPauseChanged?.Invoke();
     }
 
+    /// <summary>
+    /// 로컬 착수를 원격에 알립니다. 승격은 문자가 정해진 뒤에 불러야 UCI가 완성됩니다.
+    /// 원격 대전이 아니면 프로바이더가 그대로 무시합니다.
+    /// </summary>
+    private void NotifyLocalMove(Vector3Int from, Vector3Int to, char promotion = '\0')
+    {
+        if (turnProvider == null || BoardManager.Instance == null) return;
+
+        string uci = BoardManager.Instance.GridTOUCI(from) + BoardManager.Instance.GridTOUCI(to);
+        if (promotion != '\0')
+            uci += char.ToLower(promotion);
+
+        turnProvider.SendLocalAction(MatchMessage.CreateMove(CurrentTurn, uci));
+    }
+
+    // 기물 → 타일 두 단계로 대상을 고르는 카드의 1단계 좌표를 잠시 들고 있습니다.
+    private CardDataSO pendingCardSO;
+    private readonly List<string> pendingCardSquares = new List<string>();
+
+    /// <summary>
+    /// 로컬 플레이어가 사용한 카드를 원격에 알립니다.
+    /// 카드 효과가 턴을 넘길 수도 있으므로 효과를 적용하기 전에 불러야 합니다.
+    /// </summary>
+    public void NotifyLocalCard(CardDataSO cardSO, IReadOnlyList<Vector3Int> targets)
+    {
+        if (turnProvider == null || cardSO == null || BoardManager.Instance == null) return;
+
+        if (string.IsNullOrEmpty(cardSO.AiCardId))
+        {
+            Debug.LogWarning($"[Network] '{cardSO.CardName}'에 AiCardId가 없어 상대에게 전달할 수 없습니다.");
+            return;
+        }
+
+        List<string> squares = new List<string>();
+        if (targets != null)
+        {
+            foreach (Vector3Int target in targets)
+                squares.Add(BoardManager.Instance.GridTOUCI(target));
+        }
+
+        if (!TryMergeMultiStageCard(cardSO, squares))
+            return;
+
+        turnProvider.SendLocalAction(
+            MatchMessage.CreateCard(CurrentTurn, cardSO.AiCardId, squares.ToArray()));
+    }
+
+    /// <summary>
+    /// 두 단계로 대상을 고르는 카드(텔레포트)를 한 메시지로 합칩니다.
+    ///
+    /// 이런 카드는 PieceSelector와 TileSelector가 각각 이 함수를 부르므로 그대로 두면 메시지가
+    /// 두 번 갑니다. 받는 쪽은 카드 종류(Piece/Tile) 하나로만 좌표를 해석하므로 두 번째 메시지를
+    /// 잘못 읽고, 무엇보다 대상이 덜 정해진 상태로 Execute가 불려 **상대 화면에 선택 UI가 열립니다.**
+    /// 그래서 1단계는 보류했다가 2단계에서 <b>기물 좌표 뒤에 타일 좌표를 이어 붙여</b> 한 번만 보냅니다.
+    ///
+    /// 단계 구분은 지금 잠금을 쥔 selector로 판단합니다. 취소하고 다시 시작하면 다시 Piece가 되므로
+    /// 보류분이 자연스럽게 덮어써집니다.
+    /// </summary>
+    /// <returns>지금 보내야 하면 true, 다음 단계까지 보류하면 false</returns>
+    private bool TryMergeMultiStageCard(CardDataSO cardSO, List<string> squares)
+    {
+        // 기물 카드인데 타일도 고르게 되어 있으면 두 단계 카드입니다.
+        bool multiStage = cardSO.Type == CardType.Piece && cardSO.TileCount > 0;
+        if (!multiStage)
+        {
+            ClearPendingCard();
+            return true;
+        }
+
+        if (CardSelectionState.CurrentOwner == CardSelectionOwner.Piece)
+        {
+            pendingCardSO = cardSO;
+            pendingCardSquares.Clear();
+            pendingCardSquares.AddRange(squares);
+            return false;
+        }
+
+        // 2단계인데 1단계가 없으면 보낼 수 없습니다. 반쪽짜리를 보내면 상대 보드가 어긋납니다.
+        if (pendingCardSO != cardSO)
+        {
+            Debug.LogError(
+                $"[Network] '{cardSO.CardName}'의 기물 선택 단계가 기록되지 않아 전달하지 못했습니다.");
+            ClearPendingCard();
+            return false;
+        }
+
+        squares.InsertRange(0, pendingCardSquares);
+        ClearPendingCard();
+        return true;
+    }
+
+    private void ClearPendingCard()
+    {
+        pendingCardSO = null;
+        pendingCardSquares.Clear();
+    }
+
     // MoveSelected 안에서 플레이어 수 적용 후:
     private void MoveSelected(Vector3Int target)
     {
@@ -556,6 +783,9 @@ public class GameManager : MonoBehaviour
 
         Piece piece = selectedPiece;
         selectedPiece = null;
+
+        // MovePiece가 위치를 바꾸기 전에 출발 칸을 기록해 둡니다.
+        Vector3Int from = piece.Pos;
 
         if (BoardManager.Instance.MovePiece(piece, target))
         {
@@ -565,7 +795,15 @@ public class GameManager : MonoBehaviour
 
             // 프로모션이면 여기서 멈춤
             if (!IsGameInput)
+            {
+                // 승격 문자가 정해질 때까지 송신을 미룹니다.
+                pendingLocalMoveFrom = from;
+                pendingLocalMoveTo = target;
+                hasPendingLocalMove = true;
                 return;
+            }
+
+            NotifyLocalMove(from, target);
 
             DOVirtual.DelayedCall(Piece.MoveDuration, () =>
             {
@@ -646,7 +884,12 @@ public class GameManager : MonoBehaviour
         if (IsEndGame)
             return;
 
-        if (!AiAutoMoveEnabled)
+        // AiAutoMoveEnabled는 "엔진이 대신 두는 것"을 끄는 스위치입니다(카드 이펙트 랩 전용).
+        // 원격 대전에서는 상대가 사람이라 이 스위치와 무관하게 수신을 기다려야 하므로,
+        // 원격 프로바이더가 붙어 있으면 게이트를 통과시킵니다.
+        // (엔진 착수 자체는 RequestStockfishAIMove에서 같은 플래그로 다시 막힙니다.)
+        bool remoteOpponent = turnProvider != null && turnProvider.IsRemote;
+        if (!AiAutoMoveEnabled && !remoteOpponent)
             return;
 
         if (turnColor != EnemyColor)
@@ -655,10 +898,8 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        EnsureAiCardController();
-
-        if (aiTurnController != null &&
-            aiTurnController.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
+        if (turnProvider != null &&
+            turnProvider.TryRequestTurn(this, BoardManager.Instance, RequestStockfishAIMove))
         {
             return;
         }
@@ -935,16 +1176,9 @@ public class GameManager : MonoBehaviour
 
     public void OnSurrender(PieceColor color)
     {
-        if (color == PlayerColor)
-        {
-            FinishType = GameResult.BlackWin;
-            Debug.Log("플레이어 항복");
-        }
-        else
-        {
-            FinishType = GameResult.WhiteWin;
-            Debug.Log("AI 항복");
-        }
+        // 항복한 진영의 반대편이 승리합니다. 승패는 플레이어가 어느 색이든 색 자체로 결정됩니다.
+        FinishType = color == PieceColor.White ? GameResult.BlackWin : GameResult.WhiteWin;
+        Debug.Log(color == PlayerColor ? "플레이어 항복" : "AI 항복");
         ApplyGameResult();
     }
 
@@ -992,9 +1226,23 @@ public class GameManager : MonoBehaviour
     {
         IsEndGame = true;
 
-        UI.ShowEndGame(FinishType);
+        // FinishType은 실제 색(백/흑) 기준의 절대 결과입니다. UI·보상·전적 집계는
+        // "WhiteWin = 플레이어 승리"로 해석하므로, 플레이어가 흑일 때는 뒤집어 전달해야 합니다.
+        GameResult playerRelativeResult = ToPlayerRelativeResult(FinishType);
+
+        UI.ShowEndGame(playerRelativeResult);
         if (GameCycleManager.Instance != null && !GameCycleManager.Instance.IsPracticeMode)
-            PlayerState.Instance?.EndGame(FinishType);
+            PlayerState.Instance?.EndGame(playerRelativeResult);
+    }
+
+    private GameResult ToPlayerRelativeResult(GameResult absoluteResult)
+    {
+        if (absoluteResult == GameResult.Draw || absoluteResult == GameResult.None)
+            return absoluteResult;
+
+        bool whiteWon = absoluteResult == GameResult.WhiteWin;
+        bool playerWon = whiteWon == (PlayerColor == PieceColor.White);
+        return playerWon ? GameResult.WhiteWin : GameResult.BlackWin;
     }
 
     /// <summary>
